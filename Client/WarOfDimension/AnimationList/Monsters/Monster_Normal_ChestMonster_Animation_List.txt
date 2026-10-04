@@ -1,0 +1,13 @@
+ChestMonster Animation
+
+0 IdleNormal
+1 IdleBattle
+2 Run
+3 WalkForward
+4 WalkLeft
+5 WalkRight
+6 WalkBackward
+7 Attack01
+9 Attack02
+9 GetHit
+10 Death

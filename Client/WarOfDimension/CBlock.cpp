@@ -1,0 +1,118 @@
+#include "stdafx.h"
+#include "CBlock.h"
+
+CBlock::CBlock(const std::string& hash, int version, const std::string& timeStamp, const std::string& prevHash, const std::string& merkleRoot, int validatorID, std::vector<std::string>& transactions)
+{
+	m_hash = hash;
+	m_version = version;
+	m_timeStamp = timeStamp;
+	m_prevHash = prevHash;
+	m_merkleRoot = merkleRoot;
+	m_validatorID = validatorID;
+
+	m_transactions = std::move(transactions);
+}
+
+void CBlock::CreateGenesisBlock()
+{
+	std::time_t t = std::time(nullptr);
+	std::tm time;
+	gmtime_s(&time, &t);
+	char buffer[TIME_SIZE + 5];
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &time);
+	std::puts(buffer);
+
+	m_version = 1;
+	m_timeStamp = std::string(buffer);
+	m_prevHash = "";
+	m_merkleRoot = SHA256::Encrpyt("");
+	m_validatorID = 0;
+	CalculateHash();
+}
+
+bool CBlock::CreateBlock(const std::string& blockData)
+{
+	cout << blockData.size() << endl;
+	if (blockData.size() != BLOCK_SIZE) {
+		return false;
+	}
+
+	m_hash = blockData.substr(0, SHA256::BLOCKSIZE);
+	m_version = std::stoi(blockData.substr(SHA256::BLOCKSIZE, 1));
+	m_timeStamp = blockData.substr(SHA256::BLOCKSIZE + 1, 20);	
+	m_prevHash = blockData.substr(SHA256::BLOCKSIZE + 1 + 20, SHA256::BLOCKSIZE);	
+	m_merkleRoot = blockData.substr(SHA256::BLOCKSIZE + 1 + 20 + SHA256::BLOCKSIZE, SHA256::BLOCKSIZE);	
+	m_validatorID = std::stoi(blockData.substr(SHA256::BLOCKSIZE + 1 + 20 + SHA256::BLOCKSIZE + SHA256::BLOCKSIZE, 4));
+
+	if (!m_transactions.empty())
+		m_transactions.clear();
+
+	for (int i = 0; i < 7; ++i) {
+		std::string tx = blockData.substr(SHA256::BLOCKSIZE + 1 + 20 + SHA256::BLOCKSIZE + SHA256::BLOCKSIZE + 4 + i * SHA256::BLOCKSIZE, SHA256::BLOCKSIZE);
+		m_transactions.push_back(tx);
+	}
+
+	return true;
+}
+
+bool CBlock::CreateBlock(const TransactionData transactionDatas[7], const string& prevHash)
+{
+	std::time_t t = time(nullptr);
+	std::tm time;
+	gmtime_s(&time, &t);
+	char buffer[TIME_SIZE];
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %X", &time);
+
+	m_timeStamp = std::string(buffer);
+	m_version = 1;
+	m_prevHash = prevHash;
+	m_validatorID = LOBBY_PORT;
+	for (int i = 0; i < 7; ++i) {
+		std::string tx = std::string(transactionDatas[i].name, 10) + std::to_string(transactionDatas[i].token) + std::string(transactionDatas[i].time, 20);
+		m_transactions.push_back(SHA256::Encrpyt(tx));
+	}
+	CalculateMerkleRoot();
+	CalculateHash();
+
+	return true;
+}
+
+bool CBlock::CheckBlockValidity(const std::string& prevBlockHash, int validatorID)
+{
+	//Calculate Hash
+	if (m_hash != SHA256::Encrpyt(std::to_string(m_version) + m_timeStamp + m_prevHash + m_merkleRoot + std::to_string(m_validatorID))) {
+		return false;
+	}
+
+	//Check Previous Block
+	if (m_prevHash != prevBlockHash)
+		return false;
+
+	//Check Merkle Root
+	std::string txs;
+	for (const std::string& tx : m_transactions) {
+		txs += tx;
+	}
+	m_merkleRoot = SHA256::Encrpyt(txs);
+
+	//Check Time
+	std::time_t t = time(nullptr);
+	std::tm time;
+	gmtime_s(&time, &t);
+
+	std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::from_time_t(std::mktime(&time));
+	std::istringstream ss(m_timeStamp);
+	std::tm tm;
+	ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+	std::chrono::system_clock::time_point blockTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+
+	if (blockTimePoint > currentTime) {
+		return false;
+	}
+
+	//Check Validator ID
+	if (m_validatorID != validatorID)
+		return false;
+
+	return true;
+}

@@ -1,0 +1,9 @@
+0 Image/GUI/SelectButton.dds
+1 Image/GUI/SelectButton.dds
+2 Image/GUI/SkillSelectBox.dds
+3 Image/GUI/StatSelectBox.dds
+4 Image/GUI/SlotBox.dds
+5 Image/GUI/SlotBox.dds
+6 Image/GUI/SlotBox.dds
+7 Image/GUI/SlotBox.dds
+8 Image/GUI/ReadyButton.dds

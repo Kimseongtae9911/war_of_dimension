@@ -1,0 +1,82 @@
+# SkillNum/ManaConsumption/SkillName
+# ChampionNum/SkillCount/ChampionName
+
+0 12 Archer
+48 40 BackStep
+49 40 Dodge
+50 50 MultipleShot
+51 50 Vault
+52 30 VitalPoint
+53 60 PenetraitingShot
+54 55 StickyArrow
+55 45 HunterEyes
+56 60 WindStep
+57 65 ArrowRain
+58 75 PhoenixArrow
+59 75 StromArrow
+
+1 12 Fighter
+60 30 순보
+61 35 회피기동
+62 40 회전각
+63 50 난격
+64 55 명왕권
+65 50 운기조식
+66 50 점혈찌르기
+67 35 금강불괴
+68 60 신풍각
+69 70 사량발천근
+70 70 장풍
+71 70 승룡각
+
+2 12 Swordman
+72 40 Dodge
+73 40 Run
+74 50 HeavySlash
+75 60 ShieldBash
+76 55 WarCry
+77 35 DefensiveStance
+78 50 Berserk
+79 60 AuraBlade
+80 60 HellBlade
+81 80 JudgementSword
+82 70 ProtectedArea
+83 80 AnkleCut
+
+3 12 Wizard
+84 45 Teleport
+85 40 Blink
+86 40 BodyStrength
+87 45 Enchant
+88 50 EarthImpact
+89 25 MagicMissile
+90 60 EnergyBall
+91 50 MagicEye
+92 65 DarknessRay
+93 80 Reflect
+94 80 BigBang
+95 60 Overload
+
+4 10 Ogre
+96 80 OgreHeavySwing
+97 100 OgreCrunch
+98 100 OgreCharging
+99 140 OgreRoar
+100 150 OgreGluttony
+101 120 OgreEndure
+102 70 OgreRockThrow
+103 60 OgreDimensionPunch
+104 90 OgreButting
+105 160 OgreDimensionCrush
+
+5 10 Programmer
+106 60 ProSCM
+107 80 ProPointer
+108 100 ProPlusStat
+109 140 ProStatMinus
+110 120 ProRelease
+111 120 ProDelete
+112 100 ProReturnZero
+113 120 ProSCL
+114 20 ProWhileTrue
+115 150 ProHelloWorld

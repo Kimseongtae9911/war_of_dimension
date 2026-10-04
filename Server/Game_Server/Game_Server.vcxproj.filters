@@ -1,0 +1,1054 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{9fd31646-6746-48b8-9763-f2cf4dc074a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{4c305c94-e1e9-4d3e-8726-c33d7a38da6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Network">
+      <UniqueIdentifier>{46d99c11-6da2-45d2-a55e-fd9a56a89583}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{cb94c349-4fff-4f8b-a916-f65fca82e051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{0e4901af-dc09-4dc0-b21c-cbab1d7f872c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{7e843d8d-3388-4eae-b447-74784613afa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Packet">
+      <UniqueIdentifier>{d4da3b44-d73f-463a-b955-e80b9ffb6c3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Game">
+      <UniqueIdentifier>{f2b62df2-7bcb-498b-8a25-081b4328c8e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill">
+      <UniqueIdentifier>{35c59e6f-d3b4-4bc4-912e-2530c551672e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler">
+      <UniqueIdentifier>{a2d1a62f-70c1-454f-97f6-0fa7cfa9508b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\Wizard">
+      <UniqueIdentifier>{c8bd6f86-d7fa-4972-ab1a-258536d7e30e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\SwordMan">
+      <UniqueIdentifier>{48c56e88-7dbf-428c-9dd5-a84d94d80df5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\Archer">
+      <UniqueIdentifier>{6a26d088-8c7a-4d88-9cf9-b1a6982d00cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\Fighter">
+      <UniqueIdentifier>{e4c059ed-5761-4ac6-832f-3cefaf61f4da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\Ogre">
+      <UniqueIdentifier>{48aaeedb-2bab-40ae-a617-bac3283c0f8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillHandler\Programmer">
+      <UniqueIdentifier>{fc244542-1732-41ef-af5a-3b7db324ace1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject">
+      <UniqueIdentifier>{094a7fe4-7125-4160-9ff4-19a7e8fd0c00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Item">
+      <UniqueIdentifier>{75adade0-1c06-4d36-b1a4-fc7a4cc10acc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Match">
+      <UniqueIdentifier>{72144754-5f9b-44f9-a6c4-949f5f91b289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{f9030362-cfb6-4417-a54b-7f1af87f6fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Object">
+      <UniqueIdentifier>{94e7df27-fda4-4831-a735-430152065bad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Client">
+      <UniqueIdentifier>{87808748-dfd4-46f0-a581-bc1c81ecb36c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Constants">
+      <UniqueIdentifier>{e8dfd912-aa1f-407d-9e55-1908d930b1af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Constants\ObjectInfos">
+      <UniqueIdentifier>{059ae3a4-3fd9-4b76-b9b1-c46a9bc7d061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Constants\StatInfos">
+      <UniqueIdentifier>{0f10a223-d97b-4135-aca6-eaf1ee6d30e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer">
+      <UniqueIdentifier>{994524f1-955d-46f4-9b60-926c89d5896e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\Wizard">
+      <UniqueIdentifier>{42dc5f08-a4fa-46a3-81d3-dc7a7fbc640e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\Archer">
+      <UniqueIdentifier>{ce536c12-85f3-492c-ac46-c41f82ed9338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\Ogre">
+      <UniqueIdentifier>{492e2276-04a3-4613-9970-96641f4ef9a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\Programmer">
+      <UniqueIdentifier>{952b423d-5e1f-429e-bdad-e6c323047674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\SwordMan">
+      <UniqueIdentifier>{888d19ac-4a05-4c03-aefa-361e622eb242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\Fighter">
+      <UniqueIdentifier>{9a2a7cad-0f1a-46e2-aa1e-ce1f7de4fad1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\Archer">
+      <UniqueIdentifier>{e43cbca4-65fb-46a8-9dd5-107be4a12112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\Fighter">
+      <UniqueIdentifier>{a813c15c-0b88-46cb-bc25-f8c64ae119c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\SwordMan">
+      <UniqueIdentifier>{057faee7-2d9c-4dad-b187-c67711e73058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\Wizard">
+      <UniqueIdentifier>{cdd4710d-accf-4d04-82c7-0313e793d9b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\Ogre">
+      <UniqueIdentifier>{79d6f375-986a-4cd5-b64a-5130beb21d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\SkillObject\Programmer">
+      <UniqueIdentifier>{f03c11fa-fff7-48f0-91ae-ab1a3936583f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pch">
+      <UniqueIdentifier>{0b5f025d-b899-4be6-b9da-7cf9bcca8937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSV">
+      <UniqueIdentifier>{95f3f3bc-6102-46ad-a206-0e1a2061d878}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skill\SkillTimer\SkillTimerDefine">
+      <UniqueIdentifier>{84d896f1-0367-4624-a831-f0dc050b0789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSV\Skill">
+      <UniqueIdentifier>{04eb68b1-9629-4b7f-b964-f3caa5c967bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSV\Npc">
+      <UniqueIdentifier>{de060aa5-1079-4ec6-ae15-0c713055ef75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Random">
+      <UniqueIdentifier>{db4663b4-c8a8-41ae-abe1-fd69002e87b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Time">
+      <UniqueIdentifier>{dfea8f60-259b-4a19-87f2-60a9818ce3a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Npc">
+      <UniqueIdentifier>{82e6644c-ea43-4a20-955b-d0043a97f8a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Npc\Minion">
+      <UniqueIdentifier>{f7c3ea30-0b35-4f18-8276-121c19665969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Npc\Monster">
+      <UniqueIdentifier>{62d5c418-0686-44b8-861b-b408893b7f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Constants\Common">
+      <UniqueIdentifier>{29279f08-13c2-4b5c-9885-b3b6646a136d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Client\Status">
+      <UniqueIdentifier>{921bc459-2b74-4d72-a400-dfb537de0e15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Client\Stat">
+      <UniqueIdentifier>{6b256d8b-8224-40a3-bc37-09124ec5aee3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSV\Item">
+      <UniqueIdentifier>{345da8a8-a401-449c-bdf4-63032775243b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSV\Table">
+      <UniqueIdentifier>{8eb454e7-5699-4574-8ea0-e05264e4ca47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Job">
+      <UniqueIdentifier>{93b8fb17-5347-4a48-b386-995c157d4529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{e0836315-adae-4116-be7b-05da88305f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Match">
+      <UniqueIdentifier>{9bebf611-8adc-4ee3-9791-1e0d20c0f1d6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CServer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPSocket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="SockAddr.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketUtil.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlapEx.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LogUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CPacketMgr.h">
+      <Filter>Manager\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="GameUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameMgr.h">
+      <Filter>Manager\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="CSkill.h">
+      <Filter>Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="CSkillHandlerFactory.h">
+      <Filter>Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardTeleportHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardBlinkHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CSkillHandler.h">
+      <Filter>Skill\SkillHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardBigBangHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardBodyStrengthHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardDarknessRayHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardEarthImpactHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardEnchantHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardEnergyBallHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardMagicEyeHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardMagicMissilHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardOverloadHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardReflectHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManAnkleCutHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManAuraBladeHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManBerserkHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManDefensiveStanceHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManDodgeHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManHeavySlashHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManHellBladeHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManJudgementSwordHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManProtectedAreaHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManRunHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManShieldBashHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManWarCryHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherArrowRainHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherBackStepHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherDodgeHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherHunterEyesHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherPenetraitingShotHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherPhoenixArrowHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherStickyArrowHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherStromArrowHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherVaultHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherMultipleShotHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherVitalPointHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherWindStepHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreButtingHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreChargingHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreCrunchHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreDimensionCrushHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreDimensionPunchHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreEndureHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreGluttonyHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreHeavySwingHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreRoarHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreRockThrowHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="ProDeleteHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProHelloWorldHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProPlusStatHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProPointerHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProReleaseHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProReturnZeroHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProSCLHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProSCMHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProStatMinusHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="ProWhileTrueHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterCounterHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterDashHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterDodgeHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterDragonFistHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterFireBallHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterIndestructibleHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterMeditationHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterPointBloodHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterRisingDragonHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterSpinKickHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterWildAttackHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterWindKickHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherAttackHandler.h">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterAttackHandler.h">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="OgreAttackHandler.h">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="ProAttackHandler.h">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordManAttackHandler.h">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardAttackHandler.h">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CNetworkMgr.h">
+      <Filter>Manager\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="CItem.h">
+      <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="CItemFactory.h">
+      <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="CObjectMgr.h">
+      <Filter>Manager\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="CMatchMgr.h">
+      <Filter>Manager\Match</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="CClient.h">
+      <Filter>Object\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="CPacketSender.h">
+      <Filter>Object\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Stats.h">
+      <Filter>Constants\StatInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcInfos.h">
+      <Filter>Constants\ObjectInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientInfos.h">
+      <Filter>Constants\ObjectInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="CHealthMana.h">
+      <Filter>Object\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="CSkillTimer.h">
+      <Filter>Skill\SkillTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="CArcherTimer.h">
+      <Filter>Skill\SkillTimer\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CFigtherTimer.h">
+      <Filter>Skill\SkillTimer\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="COgreTimer.h">
+      <Filter>Skill\SkillTimer\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="CProTimer.h">
+      <Filter>Skill\SkillTimer\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="CSwordManTimer.h">
+      <Filter>Skill\SkillTimer\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="CWizardTimer.h">
+      <Filter>Skill\SkillTimer\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CArcherAttack.h">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CAuraBlade.h">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="CBigBang.h">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CCharging.h">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="CDimensionCrush.h">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="CEnergyBall.h">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CFireBall.h">
+      <Filter>Object\SkillObject\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="CHelloWorld.h">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="CJudgementSword.h">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="CMagicEye.h">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CMagicMissile.h">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="CMultipleShot.h">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CPenetraitingShot.h">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CPhoenixArrow.h">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CProAttack.h">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="CProtectedArea.h">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClInclude>
+    <ClInclude Include="CReturnZero.h">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClInclude>
+    <ClInclude Include="CRockThrow.h">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClInclude>
+    <ClInclude Include="CStickyArrow.h">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClInclude>
+    <ClInclude Include="CWizardAttack.h">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillCsvMgr.h">
+      <Filter>CSV\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="CsvLoader.h">
+      <Filter>CSV</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillTimerDefine.h">
+      <Filter>Skill\SkillTimer\SkillTimerDefine</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcCsvMgr.h">
+      <Filter>CSV\Npc</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomUtil.h">
+      <Filter>Util\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeUtil.h">
+      <Filter>Util\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="CNpc.h">
+      <Filter>Object\Npc</Filter>
+    </ClInclude>
+    <ClInclude Include="CMinion.h">
+      <Filter>Object\Npc\Minion</Filter>
+    </ClInclude>
+    <ClInclude Include="CMonster.h">
+      <Filter>Object\Npc\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonConstants.h">
+      <Filter>Constants\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CStatus.h">
+      <Filter>Object\Client\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="CStat.h">
+      <Filter>Object\Client\Stat</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemCsvMgr.h">
+      <Filter>CSV\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="tableEnum.h">
+      <Filter>CSV\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="tabledata.h">
+      <Filter>CSV\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobQueue.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="CMatch.h">
+      <Filter>Object\Match</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CServer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="SockAddr.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketUtil.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlapEx.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="LogUtil.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="CPacketMgr.cpp">
+      <Filter>Manager\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="GameUtil.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameMgr.cpp">
+      <Filter>Manager\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="CSkill.cpp">
+      <Filter>Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="CSkillHandlerFactory.cpp">
+      <Filter>Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardTeleportHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardBlinkHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CSkillHandler.cpp">
+      <Filter>Skill\SkillHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardBigBangHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardBodyStrengthHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardDarknessRayHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardEarthImpactHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardEnchantHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardEnergyBallHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardMagicEyeHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardMagicMissilHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardOverloadHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardReflectHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManAnkleCutHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManAuraBladeHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManBerserkHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManDefensiveStanceHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManDodgeHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManHeavySlashHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManHellBladeHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManJudgementSwordHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManProtectedAreaHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManRunHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManShieldBashHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManWarCryHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherArrowRainHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherBackStepHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherDodgeHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherHunterEyesHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherPenetraitingShotHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherPhoenixArrowHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherStickyArrowHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherStromArrowHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherVaultHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherMultipleShotHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherVitalPointHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherWindStepHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreButtingHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreChargingHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreCrunchHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreDimensionCrushHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreDimensionPunchHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreEndureHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreGluttonyHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreHeavySwingHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreRoarHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreRockThrowHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="ProDeleteHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProHelloWorldHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProPlusStatHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProPointerHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProReleaseHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProReturnZeroHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProSCLHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProSCMHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProStatMinusHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProWhileTrueHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterCounterHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterDashHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterDodgeHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterDragonFistHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterFireBallHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterIndestructibleHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterMeditationHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterPointBloodHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterRisingDragonHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterSpinKickHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterWildAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterWindKickHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="OgreAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="ProAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordManAttackHandler.cpp">
+      <Filter>Skill\SkillHandler\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="CNetworkMgr.cpp">
+      <Filter>Manager\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="CItem.cpp">
+      <Filter>Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CItemFactory.cpp">
+      <Filter>Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CObjectMgr.cpp">
+      <Filter>Manager\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="CMatchMgr.cpp">
+      <Filter>Manager\Match</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="CClient.cpp">
+      <Filter>Object\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CPacketSender.cpp">
+      <Filter>Object\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CHealthMana.cpp">
+      <Filter>Object\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CSkillTimer.cpp">
+      <Filter>Skill\SkillTimer</Filter>
+    </ClCompile>
+    <ClCompile Include="CArcherTimer.cpp">
+      <Filter>Skill\SkillTimer\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CFigtherTimer.cpp">
+      <Filter>Skill\SkillTimer\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="COgreTimer.cpp">
+      <Filter>Skill\SkillTimer\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="CProTimer.cpp">
+      <Filter>Skill\SkillTimer\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="CSwordManTimer.cpp">
+      <Filter>Skill\SkillTimer\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="CWizardTimer.cpp">
+      <Filter>Skill\SkillTimer\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CArcherAttack.cpp">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CAuraBlade.cpp">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="CBigBang.cpp">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CCharging.cpp">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="CDimensionCrush.cpp">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="CEnergyBall.cpp">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CFireBall.cpp">
+      <Filter>Object\SkillObject\Fighter</Filter>
+    </ClCompile>
+    <ClCompile Include="CHelloWorld.cpp">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="CJudgementSword.cpp">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="CMagicEye.cpp">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CMagicMissile.cpp">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="CMultipleShot.cpp">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CPenetraitingShot.cpp">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CPhoenixArrow.cpp">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CProAttack.cpp">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="CProtectedArea.cpp">
+      <Filter>Object\SkillObject\SwordMan</Filter>
+    </ClCompile>
+    <ClCompile Include="CReturnZero.cpp">
+      <Filter>Object\SkillObject\Programmer</Filter>
+    </ClCompile>
+    <ClCompile Include="CRockThrow.cpp">
+      <Filter>Object\SkillObject\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="CStickyArrow.cpp">
+      <Filter>Object\SkillObject\Archer</Filter>
+    </ClCompile>
+    <ClCompile Include="CWizardAttack.cpp">
+      <Filter>Object\SkillObject\Wizard</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>pch</Filter>
+    </ClCompile>
+    <ClCompile Include="CsvLoader.cpp">
+      <Filter>CSV</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillCsvMgr.cpp">
+      <Filter>CSV\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="NpcCsvMgr.cpp">
+      <Filter>CSV\Npc</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomUtil.cpp">
+      <Filter>Util\Random</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeUtil.cpp">
+      <Filter>Util\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="CNpc.cpp">
+      <Filter>Object\Npc</Filter>
+    </ClCompile>
+    <ClCompile Include="CMinion.cpp">
+      <Filter>Object\Npc\Minion</Filter>
+    </ClCompile>
+    <ClCompile Include="CMonster.cpp">
+      <Filter>Object\Npc\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="CStatus.cpp">
+      <Filter>Object\Client\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="CStat.cpp">
+      <Filter>Object\Client\Stat</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemCsvMgr.cpp">
+      <Filter>CSV\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="JobQueue.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="CMatch.cpp">
+      <Filter>Object\Match</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

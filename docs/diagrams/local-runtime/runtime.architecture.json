@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "War Of Dimension 로컬 실행 구성",
+    "quality_profile": "showcase",
+    "viewBox": [1060, 600]
+  },
+  "components": [
+    { "id": "client", "type": "frontend", "label": "게임 클라이언트", "sublabel": "DirectX 12 · FMOD", "pos": [100, 110], "size": [210, 84] },
+    { "id": "lobby", "type": "backend", "label": "로비 서버", "sublabel": "접속 · 로비 · 매칭", "pos": [710, 110], "size": [210, 84] },
+    { "id": "game", "type": "backend", "label": "게임 서버", "sublabel": "게임 상태 · NPC · 스킬", "pos": [710, 420], "size": [210, 84] }
+  ],
+  "connections": [
+    { "id": "client-lobby", "from": "client", "to": "lobby", "label": "TCP :8910", "variant": "emphasis" },
+    { "id": "game-lobby", "from": "game", "to": "lobby", "label": "서버 연결 :8910" },
+    { "id": "client-game", "from": "client", "to": "game", "label": "매칭 후 TCP :8911", "fromSide": "bottom", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "현재 개발 모드", "items": ["LOCAL_TEST · 127.0.0.1", "DB 연동 비활성화", "화살표는 TCP 연결 시작 방향"] },
+    { "dot": "emerald", "title": "실행 순서", "items": ["로비 서버 → 게임 서버 → 클라이언트", "각 모듈의 원본 폴더에서 리소스 로딩", "artifacts/bin에 빌드 결과 분리"] }
+  ]
+}

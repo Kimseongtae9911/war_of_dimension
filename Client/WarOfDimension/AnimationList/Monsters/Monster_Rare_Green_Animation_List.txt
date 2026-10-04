@@ -1,0 +1,12 @@
+Green Animation
+
+0 Idle
+1 Walk
+2 Run
+3 Basic Attack
+4 Fireball Shoot
+5 Scream
+6 Tail Attack
+7 Get Hit
+8 Defend
+9 Die

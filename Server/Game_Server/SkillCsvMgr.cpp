@@ -1,0 +1,28 @@
+#include "pch.h"
+#include "SkillCsvMgr.h"
+
+namespace wod_server {
+	std::unique_ptr<SkillCsvMgr> SkillCsvMgr::m_instance;
+
+	bool SkillCsvMgr::Initialize()
+	{
+		return true;
+	}
+
+	bool SkillCsvMgr::Release()
+	{
+		for (auto& [key, skillCsv] : m_skillCsvMap)
+			delete skillCsv;
+
+		return true;
+	}
+
+	void SkillCsvMgr::LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader)
+	{
+		tabledata::SkillInfo skillInfo;
+		for (auto i = 2; i < datas.size(); ++i) {
+			skillInfo = CreateStructFromCSV<tabledata::SkillInfo>(datas[i], csvHeader);
+			m_skillCsvMap.emplace(skillInfo.Type, new SkillCsv(skillInfo));
+		}
+	}
+}

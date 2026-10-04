@@ -1,0 +1,6 @@
+0 Image/GUI/HeroSelectBox.dds
+1 Image/GUI/BossSelectBox.dds
+2 Image/GUI/MatchingBox.dds
+3 Image/GUI/ChatTypeBox.dds
+4 Image/GUI/ChatTypingBox.dds
+5 Image/GUI/ChatBox.dds

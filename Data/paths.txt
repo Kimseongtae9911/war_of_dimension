@@ -1,0 +1,4 @@
+Excel Directory: D:/Desktop/war_of_dimension/Data/Excel
+CSV Directories: ['D:/Desktop/war_of_dimension/Client/WarOfDimension/DataFile/CSV', 'D:/Desktop/war_of_dimension/Server/Game_Server/DataFile/CSV']
+Enum Directories: ['D:/Desktop/war_of_dimension/Client/WarOfDimension/tableEnum.h', 'D:/Desktop/war_of_dimension/Server/Game_Server/tableEnum.h']
+Table Directories: ['D:/Desktop/war_of_dimension/Client/WarOfDimension/tabledata.h', 'D:/Desktop/war_of_dimension/Server/Game_Server/tabledata.h']

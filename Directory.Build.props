@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <WodRepositoryRoot>$(MSBuildThisFileDirectory)</WodRepositoryRoot>
+    <WodCoreProject Condition="'$(MSBuildProjectName)' == 'Game_Server' Or '$(MSBuildProjectName)' == 'Lobby_Server' Or '$(MSBuildProjectName)' == 'WarOfDimension'">true</WodCoreProject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(WodCoreProject)' == 'true'">
+    <WodModuleName Condition="'$(MSBuildProjectName)' == 'Game_Server'">GameServer</WodModuleName>
+    <WodModuleName Condition="'$(MSBuildProjectName)' == 'Lobby_Server'">LobbyServer</WodModuleName>
+    <WodModuleName Condition="'$(MSBuildProjectName)' == 'WarOfDimension'">Client</WodModuleName>
+    <OutDir>$(WodRepositoryRoot)artifacts\bin\$(Configuration)\$(WodModuleName)\</OutDir>
+    <IntDir>$(WodRepositoryRoot)artifacts\obj\$(Configuration)\$(WodModuleName)\</IntDir>
+    <LocalDebuggerWorkingDirectory>$(MSBuildProjectDirectory)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(WodCoreProject)' == 'true'">
+    <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>

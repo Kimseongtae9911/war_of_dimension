@@ -1,0 +1,16 @@
+Ogre Animation
+
+0 Idle
+1 WalkForward
+2 WalkLeft
+3 WalkRight
+4 WalkBack
+5 Attack & Dimension_Punch
+6 Butting
+7 Charging
+8 Crunch
+9 Dimension_Crush
+10 Gluttony&Endure
+11 Heavy_Swing&Rock_Throw
+12 Roar
+13 Death

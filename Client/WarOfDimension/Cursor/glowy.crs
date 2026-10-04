@@ -1,0 +1,45 @@
+﻿[Arrow]
+Path=Glowy Glitch Cursor.cur
+
+[Help]
+Path=Help Scelect.cur
+
+[Wait]
+Path=Busy.cur
+
+[NWPen]
+Path=Handwriting.cur
+
+[SizeWE]
+Path=Horizontal Scelect.cur
+
+[Hand]
+Path=Link Select.cur
+
+[Pin]
+Path=Location Scelect.cur
+
+[SizeNESW]
+Path=Diagonal 2.cur
+
+[SizeAll]
+Path=Move.cur
+
+[Person]
+Path=Person Select.cur
+
+[Crosshair]
+Path=Prescision.cur
+
+[IBeam]
+Path=Text Scelect.cur
+
+[No]
+Path=Unavailible.cur
+
+[SizeNS]
+Path=Vertical Scelect.cur
+
+[AppStarting]
+Path=Working.cur
+

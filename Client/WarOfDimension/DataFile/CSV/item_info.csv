@@ -1,0 +1,13 @@
+#Type,#Value,#Time
+enum_item_type(EItemType),float,uint32_t
+HealHp,200,60000
+HealMp,70,60000
+MaxHp,100,60000
+MaxMp,50,60000
+StrengthIncrease,30,60000
+MagicIncrease,40,60000
+DefenseIncrease,15,60000
+RegistIncrease,10,60000
+SpeedIncrease,0.05,60000
+TenacityIncrease,20,60000
+CriticalIncrease,20,60000

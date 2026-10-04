@@ -1,0 +1,198 @@
+{
+    "ArcherSkills": {
+      "ArcherAttack": {
+        "Name": "Attack",
+        "Type": "Attack",
+        "StrengthRatio": 1.0,
+        "MagicRatio": 0.0,
+        "CastingTime": 300,
+        "PosOffset": 0.7,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 0,
+        "RepeatTime": 0,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "ArrowRain": {
+        "Name": "ArrowRain",
+        "Type": "Attack",
+        "StrengthRatio": 1.8,
+        "MagicRatio": 1.2,
+        "CastingTime": 300,
+        "PosOffset": 7.0,
+        "Distance": 8.0,
+        "DamageCycleTime": 500,
+        "RepeatTime": 6,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "HunterEyes": {
+        "Name": "HunterEyes",
+        "Type": "Buff",
+        "Buffs": [
+          {
+            "Type": "CriticalIncrease",
+            "Value": 20,
+            "BuffTime": 7000,
+            "Distance": 0
+          }
+        ]
+      },
+      "MultipleShot": {
+        "Name": "MultipleShot",
+        "Type": "Attack",
+        "StrengthRatio": 1.1,
+        "MagicRatio": 0.0,
+        "CastingTime": 300,
+        "PosOffset": 0.7,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 0,
+        "RepeatTime": 0,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "PenetratingShot": {
+        "Name": "PenetratingShot",
+        "Type": "Attack",
+        "StrengthRatio": 1.4,
+        "MagicRatio": 1.0,
+        "CastingTime": 1000,
+        "PosOffset": 0.7,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 0,
+        "RepeatTime": 0,
+        "DamageReduction": 0.9,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "PhoenixArrow": {
+        "Name": "PhoenixArrow",
+        "Type": "Attack",
+        "StrengthRatio": 1.8,
+        "MagicRatio": 1.5,
+        "CastingTime": 1600,
+        "PosOffset": 0.7,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 0,
+        "RepeatTime": 0,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "Burn",
+            "Value": 0.3,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "StickyArrow": {
+        "Name": "StickyArrow",
+        "Type": "Attack",
+        "StrengthRatio": 0.5,
+        "MagicRatio": 0.8,
+        "CastingTime": 300,
+        "PosOffset": 0.7,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 0,
+        "RepeatTime": 0,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "Slow",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "StormArrow": {
+        "Name": "StormArrow",
+        "Type": "Attack",
+        "StrengthRatio": 1.3,
+        "MagicRatio": 1.9,
+        "CastingTime": 0,
+        "PosOffset": 3.75,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 500,
+        "RepeatTime": 0,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 0.0
+      },
+      "Vault": {
+        "Name": "Vault",
+        "Type": "Attack",
+        "StrengthRatio": 0.7,
+        "MagicRatio": 0.0,
+        "CastingTime": 200,
+        "PosOffset": 2.0,
+        "SkillRadius": 0.0,
+        "DamageCycleTime": 500,
+        "RepeatTime": 20,
+        "DamageReduction": 0.0,
+        "Debuffs": [ 
+          {
+            "Type": "None",
+            "Value": 0.0,
+            "Duration": 0
+          }
+        ],
+        "Speed": 10.0
+      },
+      "WindStep": {
+        "Name": "WindStep",
+        "Type": "Buff",
+        "Buffs": [
+          {
+            "Type": "SpeedIncrease",
+            "Value": 0.3,
+            "BuffTime": 3000,
+            "Distance": 5.0
+          }
+        ]
+      },
+      "BackStep": {
+        "Name": "BackStep",
+        "Type": "Move",
+        "Speed": 15.0
+      },
+      "Dodge": {
+        "Name": "Dodge",
+        "Type": "Move",
+        "Speed": 15.0
+      }
+    }
+}

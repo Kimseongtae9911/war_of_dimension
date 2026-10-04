@@ -1,0 +1,429 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WarOfDimension.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlapEx.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketUtil.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="UILayer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardAttack.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="MagicMissile.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="CSkillModel.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="BigBang.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="AuraBlade.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="JudgementSword.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherAttack.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EnergyBall.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DarknessRay.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtectedArea.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="FireBall.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="StickyArrow.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="PhoenixArrow.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="PenetraitingShot.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ReturnZero.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SCL.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ProAttack.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="HelloWorld.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="RockThrow.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DimensionCrush.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="MultipleShot.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PeerManager.cpp">
+      <Filter>소스 파일\BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlock.cpp">
+      <Filter>소스 파일\BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlockChain.cpp">
+      <Filter>소스 파일\BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="SHA256.cpp">
+      <Filter>소스 파일\BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlurShader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArcherObject.cpp">
+      <Filter>소스 파일\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>소스 파일\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WarOfDimension.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlapEx.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketUtil.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="UILayer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardAttack.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MagicMissile.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="CSkillModel.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="BigBang.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="AuraBlade.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="JudgementSword.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherAttack.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="NameSpace.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EnergyBall.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DarknessRay.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtectedArea.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="FireBall.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="StickyArrow.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="PhoenixArrow.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="PenetraitingShot.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ReturnZero.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SCL.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ProAttack.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloWorld.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="RockThrow.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DimensionCrush.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MultipleShot.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PeerManager.h">
+      <Filter>헤더 파일\BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlock.h">
+      <Filter>헤더 파일\BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlockChain.h">
+      <Filter>헤더 파일\BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA256.h">
+      <Filter>헤더 파일\BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlurShader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArcherObject.h">
+      <Filter>헤더 파일\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod.h">
+      <Filter>헤더 파일\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod.hpp">
+      <Filter>헤더 파일\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_dsp.h">
+      <Filter>헤더 파일\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_errors.h">
+      <Filter>헤더 파일\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>헤더 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="tableEnum.h">
+      <Filter>TableData</Filter>
+    </ClInclude>
+    <ClInclude Include="tabledata.h">
+      <Filter>TableData</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="WarOfDimension.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{24bedaf7-b6ef-48be-a057-f967751676a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{ca38d327-18c6-4334-8755-0d6269d9166d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{e17caacb-c6e4-427e-9c4c-b550505727bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Network">
+      <UniqueIdentifier>{4df455e9-98c6-4028-aa50-e0e27194dd7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Network">
+      <UniqueIdentifier>{164bcb15-9c21-40c4-89fa-53f4ba604e2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\SkillObject">
+      <UniqueIdentifier>{a31f0a90-126d-428b-b7bb-fb500824f980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\SkillObject">
+      <UniqueIdentifier>{b189402c-f8c2-41b2-b93a-f9d0fed86f44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\BlockChain">
+      <UniqueIdentifier>{2a379ef1-a3af-4e15-8975-abeae988249a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\BlockChain">
+      <UniqueIdentifier>{fc2133a9-da6d-4c40-819b-62c77e91e158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="셰이더 파일">
+      <UniqueIdentifier>{08d3e5ab-5c6d-4c86-b0d4-05d741c9dc74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Sound">
+      <UniqueIdentifier>{09ca6056-a3cb-4601-a43d-a97eb0d6a8df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Sound">
+      <UniqueIdentifier>{87b2f343-0556-48bb-9777-830ac3779acb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Shaders">
+      <UniqueIdentifier>{b3e066d2-47c7-426f-b7e8-da74eff20db2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shaders">
+      <UniqueIdentifier>{9add08e7-8484-4b8e-875c-14b9b6ad7a09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TableData">
+      <UniqueIdentifier>{f1a0c707-0b3b-4736-bf0a-7a28d000714c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WarOfDimension.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Light.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Common.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Standard.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="FowardRender.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Animation.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="DeferredRender.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Blur.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="UI.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Debug.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Billboard.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shadowmap.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Particle.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

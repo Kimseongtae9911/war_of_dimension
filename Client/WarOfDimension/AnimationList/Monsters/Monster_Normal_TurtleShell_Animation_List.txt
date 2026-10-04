@@ -1,0 +1,13 @@
+TurtleShell Animation
+
+0 IdleNormal
+1 IdleBattle
+2 WalkForward
+3 WalkLeft
+4 WalkRight
+5 WalkBackward
+6 RunForward
+7 Attack01
+8 Attack02
+9 GetHit
+10 Death

@@ -1,0 +1,16 @@
+<Project>
+  <ItemDefinitionGroup Condition="'$(WodCoreProject)' == 'true'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(WodRepositoryRoot)Server\Game_Server\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectName)' == 'WarOfDimension'">
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <Target Name="CopyWodFmodRuntime" AfterTargets="Build" Condition="'$(MSBuildProjectName)' == 'WarOfDimension'">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\fmodL.dll" DestinationFolder="$(OutDir)" Condition="'$(Configuration)' == 'Debug'" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\fmod.dll" DestinationFolder="$(OutDir)" Condition="'$(Configuration)' != 'Debug'" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

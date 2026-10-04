@@ -1,0 +1,16 @@
+Minotaur Animation
+
+0 Idle
+1 WalkForward
+2 WalkForward2
+3 WalkBackward
+4 Run
+5 Attack1
+6 Attack2
+7 Attack3
+8 Attack4
+9 Attack5
+10 hit1
+11 hit2
+12 death
+

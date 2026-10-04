@@ -1,0 +1,8 @@
+Golem Animation
+
+0 Idle
+1 Walk
+2 Attack01
+3 Attack02
+4 Get Hit
+5 Die

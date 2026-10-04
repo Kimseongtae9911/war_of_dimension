@@ -1,0 +1,18 @@
+Bear Animation
+
+0 Idle
+1 Idle_Combat
+2 WalkForward
+3 WalkBackward
+4 RunForward
+5 RunBackward
+6 Attack1
+7 Attack2
+8 Attack3
+9 Attack5
+10 Eat
+11 Buff
+12 GetHit
+13 Death
+14 Sleep
+15 Sit

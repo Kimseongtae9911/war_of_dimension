@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{f0157282-10fd-41eb-a7fb-00cfb0684521}</ProjectGuid>
+    <RootNamespace>GameServer</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <Optimization>Disabled</Optimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ArcherArrowRainHandler.h" />
+    <ClInclude Include="ArcherAttackHandler.h" />
+    <ClInclude Include="ArcherBackStepHandler.h" />
+    <ClInclude Include="CMatch.h" />
+    <ClInclude Include="CMinion.h" />
+    <ClInclude Include="CMonster.h" />
+    <ClInclude Include="CommonConstants.h" />
+    <ClInclude Include="CStat.h" />
+    <ClInclude Include="Global.h" />
+    <ClInclude Include="ItemCsvMgr.h" />
+    <ClInclude Include="Job.h" />
+    <ClInclude Include="JobQueue.h" />
+    <ClInclude Include="NpcCsvMgr.h" />
+    <ClInclude Include="RandomUtil.h" />
+    <ClInclude Include="SkillCsvMgr.h" />
+    <ClInclude Include="ArcherDodgeHandler.h" />
+    <ClInclude Include="ArcherHunterEyesHandler.h" />
+    <ClInclude Include="ArcherPenetraitingShotHandler.h" />
+    <ClInclude Include="ArcherPhoenixArrowHandler.h" />
+    <ClInclude Include="ArcherStickyArrowHandler.h" />
+    <ClInclude Include="ArcherStromArrowHandler.h" />
+    <ClInclude Include="ArcherVaultHandler.h" />
+    <ClInclude Include="ArcherMultipleShotHandler.h" />
+    <ClInclude Include="ArcherVitalPointHandler.h" />
+    <ClInclude Include="ArcherWindStepHandler.h" />
+    <ClInclude Include="CArcherAttack.h" />
+    <ClInclude Include="CArcherTimer.h" />
+    <ClInclude Include="CAuraBlade.h" />
+    <ClInclude Include="CBigBang.h" />
+    <ClInclude Include="CCharging.h" />
+    <ClInclude Include="CClient.h" />
+    <ClInclude Include="CDimensionCrush.h" />
+    <ClInclude Include="CEnergyBall.h" />
+    <ClInclude Include="CFigtherTimer.h" />
+    <ClInclude Include="CFireBall.h" />
+    <ClInclude Include="CGameMgr.h" />
+    <ClInclude Include="CHealthMana.h" />
+    <ClInclude Include="CHelloWorld.h" />
+    <ClInclude Include="CItem.h" />
+    <ClInclude Include="CItemFactory.h" />
+    <ClInclude Include="CJudgementSword.h" />
+    <ClInclude Include="ClientInfos.h" />
+    <ClInclude Include="CMatchMgr.h" />
+    <ClInclude Include="CMagicEye.h" />
+    <ClInclude Include="CMagicMissile.h" />
+    <ClInclude Include="CMultipleShot.h" />
+    <ClInclude Include="CNetworkMgr.h" />
+    <ClInclude Include="CNpc.h" />
+    <ClInclude Include="COgreTimer.h" />
+    <ClInclude Include="CPacketMgr.h" />
+    <ClInclude Include="CPacketSender.h" />
+    <ClInclude Include="CPenetraitingShot.h" />
+    <ClInclude Include="CPhoenixArrow.h" />
+    <ClInclude Include="CProAttack.h" />
+    <ClInclude Include="CProtectedArea.h" />
+    <ClInclude Include="CProTimer.h" />
+    <ClInclude Include="CReturnZero.h" />
+    <ClInclude Include="CRockThrow.h" />
+    <ClInclude Include="CSkill.h" />
+    <ClInclude Include="CSkillHandler.h" />
+    <ClInclude Include="CSkillHandlerFactory.h" />
+    <ClInclude Include="CSkillTimer.h" />
+    <ClInclude Include="CStatus.h" />
+    <ClInclude Include="CStickyArrow.h" />
+    <ClInclude Include="CObjectMgr.h" />
+    <ClInclude Include="CsvLoader.h" />
+    <ClInclude Include="CSwordManTimer.h" />
+    <ClInclude Include="CWizardAttack.h" />
+    <ClInclude Include="CWizardTimer.h" />
+    <ClInclude Include="enum.h" />
+    <ClInclude Include="FighterAttackHandler.h" />
+    <ClInclude Include="FighterCounterHandler.h" />
+    <ClInclude Include="FighterDashHandler.h" />
+    <ClInclude Include="FighterDodgeHandler.h" />
+    <ClInclude Include="FighterDragonFistHandler.h" />
+    <ClInclude Include="FighterFireBallHandler.h" />
+    <ClInclude Include="FighterIndestructibleHandler.h" />
+    <ClInclude Include="FighterMeditationHandler.h" />
+    <ClInclude Include="FighterPointBloodHandler.h" />
+    <ClInclude Include="FighterRisingDragonHandler.h" />
+    <ClInclude Include="FighterSpinKickHandler.h" />
+    <ClInclude Include="FighterWildAttackHandler.h" />
+    <ClInclude Include="FighterWindKickHandler.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="CServer.h" />
+    <ClInclude Include="GameUtil.h" />
+    <ClInclude Include="Interface.h" />
+    <ClInclude Include="LogUtil.h" />
+    <ClInclude Include="MathUtil.h" />
+    <ClInclude Include="NpcInfos.h" />
+    <ClInclude Include="OgreAttackHandler.h" />
+    <ClInclude Include="OgreButtingHandler.h" />
+    <ClInclude Include="OgreChargingHandler.h" />
+    <ClInclude Include="OgreCrunchHandler.h" />
+    <ClInclude Include="OgreDimensionCrushHandler.h" />
+    <ClInclude Include="OgreDimensionPunchHandler.h" />
+    <ClInclude Include="OgreEndureHandler.h" />
+    <ClInclude Include="OgreGluttonyHandler.h" />
+    <ClInclude Include="OgreHeavySwingHandler.h" />
+    <ClInclude Include="OgreRoarHandler.h" />
+    <ClInclude Include="OgreRockThrowHandler.h" />
+    <ClInclude Include="OverlapEx.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="ProDeleteHandler.h" />
+    <ClInclude Include="ProAttackHandler.h" />
+    <ClInclude Include="ProHelloWorldHandler.h" />
+    <ClInclude Include="ProPlusStatHandler.h" />
+    <ClInclude Include="ProPointerHandler.h" />
+    <ClInclude Include="ProReleaseHandler.h" />
+    <ClInclude Include="ProReturnZeroHandler.h" />
+    <ClInclude Include="ProSCLHandler.h" />
+    <ClInclude Include="ProSCMHandler.h" />
+    <ClInclude Include="ProStatMinusHandler.h" />
+    <ClInclude Include="protocol.h" />
+    <ClInclude Include="ProWhileTrueHandler.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SkillTimerDefine.h" />
+    <ClInclude Include="SockAddr.h" />
+    <ClInclude Include="SocketUtil.h" />
+    <ClInclude Include="Stats.h" />
+    <ClInclude Include="SwordManAnkleCutHandler.h" />
+    <ClInclude Include="SwordManAttackHandler.h" />
+    <ClInclude Include="SwordManAuraBladeHandler.h" />
+    <ClInclude Include="SwordManBerserkHandler.h" />
+    <ClInclude Include="SwordManDefensiveStanceHandler.h" />
+    <ClInclude Include="SwordManDodgeHandler.h" />
+    <ClInclude Include="SwordManHeavySlashHandler.h" />
+    <ClInclude Include="SwordManHellBladeHandler.h" />
+    <ClInclude Include="SwordManJudgementSwordHandler.h" />
+    <ClInclude Include="SwordManProtectedAreaHandler.h" />
+    <ClInclude Include="SwordManRunHandler.h" />
+    <ClInclude Include="SwordManShieldBashHandler.h" />
+    <ClInclude Include="SwordManWarCryHandler.h" />
+    <ClInclude Include="tabledata.h" />
+    <ClInclude Include="tableEnum.h" />
+    <ClInclude Include="TCPSocket.h" />
+    <ClInclude Include="TimeUtil.h" />
+    <ClInclude Include="WizardAttackHandler.h" />
+    <ClInclude Include="WizardBigBangHandler.h" />
+    <ClInclude Include="WizardBlinkHandler.h" />
+    <ClInclude Include="WizardBodyStrengthHandler.h" />
+    <ClInclude Include="WizardDarknessRayHandler.h" />
+    <ClInclude Include="WizardEarthImpactHandler.h" />
+    <ClInclude Include="WizardEnchantHandler.h" />
+    <ClInclude Include="WizardEnergyBallHandler.h" />
+    <ClInclude Include="WizardMagicEyeHandler.h" />
+    <ClInclude Include="WizardMagicMissilHandler.h" />
+    <ClInclude Include="WizardOverloadHandler.h" />
+    <ClInclude Include="WizardReflectHandler.h" />
+    <ClInclude Include="WizardTeleportHandler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ArcherArrowRainHandler.cpp" />
+    <ClCompile Include="ArcherAttackHandler.cpp" />
+    <ClCompile Include="ArcherBackStepHandler.cpp" />
+    <ClCompile Include="ArcherDodgeHandler.cpp" />
+    <ClCompile Include="ArcherHunterEyesHandler.cpp" />
+    <ClCompile Include="ArcherPenetraitingShotHandler.cpp" />
+    <ClCompile Include="ArcherPhoenixArrowHandler.cpp" />
+    <ClCompile Include="ArcherStickyArrowHandler.cpp" />
+    <ClCompile Include="ArcherStromArrowHandler.cpp" />
+    <ClCompile Include="ArcherVaultHandler.cpp" />
+    <ClCompile Include="ArcherMultipleShotHandler.cpp" />
+    <ClCompile Include="ArcherVitalPointHandler.cpp" />
+    <ClCompile Include="ArcherWindStepHandler.cpp" />
+    <ClCompile Include="CArcherAttack.cpp" />
+    <ClCompile Include="CArcherTimer.cpp" />
+    <ClCompile Include="CAuraBlade.cpp" />
+    <ClCompile Include="CBigBang.cpp" />
+    <ClCompile Include="CCharging.cpp" />
+    <ClCompile Include="CClient.cpp" />
+    <ClCompile Include="CDimensionCrush.cpp" />
+    <ClCompile Include="CEnergyBall.cpp" />
+    <ClCompile Include="CFigtherTimer.cpp" />
+    <ClCompile Include="CFireBall.cpp" />
+    <ClCompile Include="CGameMgr.cpp" />
+    <ClCompile Include="CHealthMana.cpp" />
+    <ClCompile Include="CHelloWorld.cpp" />
+    <ClCompile Include="CItem.cpp" />
+    <ClCompile Include="CItemFactory.cpp" />
+    <ClCompile Include="CJudgementSword.cpp" />
+    <ClCompile Include="CMatch.cpp" />
+    <ClCompile Include="CMatchMgr.cpp" />
+    <ClCompile Include="CMagicEye.cpp" />
+    <ClCompile Include="CMagicMissile.cpp" />
+    <ClCompile Include="CMinion.cpp" />
+    <ClCompile Include="CMonster.cpp" />
+    <ClCompile Include="CMultipleShot.cpp" />
+    <ClCompile Include="CNetworkMgr.cpp" />
+    <ClCompile Include="CNpc.cpp" />
+    <ClCompile Include="COgreTimer.cpp" />
+    <ClCompile Include="CPacketMgr.cpp" />
+    <ClCompile Include="CPacketSender.cpp" />
+    <ClCompile Include="CPenetraitingShot.cpp" />
+    <ClCompile Include="CPhoenixArrow.cpp" />
+    <ClCompile Include="CProAttack.cpp" />
+    <ClCompile Include="CProtectedArea.cpp" />
+    <ClCompile Include="CProTimer.cpp" />
+    <ClCompile Include="CReturnZero.cpp" />
+    <ClCompile Include="CRockThrow.cpp" />
+    <ClCompile Include="CSkill.cpp" />
+    <ClCompile Include="CSkillHandler.cpp" />
+    <ClCompile Include="CSkillHandlerFactory.cpp" />
+    <ClCompile Include="CSkillTimer.cpp" />
+    <ClCompile Include="CStat.cpp" />
+    <ClCompile Include="CStatus.cpp" />
+    <ClCompile Include="CStickyArrow.cpp" />
+    <ClCompile Include="CObjectMgr.cpp" />
+    <ClCompile Include="CsvLoader.cpp" />
+    <ClCompile Include="CSwordManTimer.cpp" />
+    <ClCompile Include="CWizardAttack.cpp" />
+    <ClCompile Include="CWizardTimer.cpp" />
+    <ClCompile Include="FighterAttackHandler.cpp" />
+    <ClCompile Include="FighterCounterHandler.cpp" />
+    <ClCompile Include="FighterDashHandler.cpp" />
+    <ClCompile Include="FighterDodgeHandler.cpp" />
+    <ClCompile Include="FighterDragonFistHandler.cpp" />
+    <ClCompile Include="FighterFireBallHandler.cpp" />
+    <ClCompile Include="FighterIndestructibleHandler.cpp" />
+    <ClCompile Include="FighterMeditationHandler.cpp" />
+    <ClCompile Include="FighterPointBloodHandler.cpp" />
+    <ClCompile Include="FighterRisingDragonHandler.cpp" />
+    <ClCompile Include="FighterSpinKickHandler.cpp" />
+    <ClCompile Include="FighterWildAttackHandler.cpp" />
+    <ClCompile Include="FighterWindKickHandler.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="CServer.cpp" />
+    <ClCompile Include="GameUtil.cpp" />
+    <ClCompile Include="Global.cpp" />
+    <ClCompile Include="ItemCsvMgr.cpp" />
+    <ClCompile Include="Job.cpp" />
+    <ClCompile Include="JobQueue.cpp" />
+    <ClCompile Include="LogUtil.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="NpcCsvMgr.cpp" />
+    <ClCompile Include="OgreAttackHandler.cpp" />
+    <ClCompile Include="OgreButtingHandler.cpp" />
+    <ClCompile Include="OgreChargingHandler.cpp" />
+    <ClCompile Include="OgreCrunchHandler.cpp" />
+    <ClCompile Include="OgreDimensionCrushHandler.cpp" />
+    <ClCompile Include="OgreDimensionPunchHandler.cpp" />
+    <ClCompile Include="OgreEndureHandler.cpp" />
+    <ClCompile Include="OgreGluttonyHandler.cpp" />
+    <ClCompile Include="OgreHeavySwingHandler.cpp" />
+    <ClCompile Include="OgreRoarHandler.cpp" />
+    <ClCompile Include="OgreRockThrowHandler.cpp" />
+    <ClCompile Include="OverlapEx.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ProDeleteHandler.cpp" />
+    <ClCompile Include="ProAttackHandler.cpp" />
+    <ClCompile Include="ProHelloWorldHandler.cpp" />
+    <ClCompile Include="ProPlusStatHandler.cpp" />
+    <ClCompile Include="ProPointerHandler.cpp" />
+    <ClCompile Include="ProReleaseHandler.cpp" />
+    <ClCompile Include="ProReturnZeroHandler.cpp" />
+    <ClCompile Include="ProSCLHandler.cpp" />
+    <ClCompile Include="ProSCMHandler.cpp" />
+    <ClCompile Include="ProStatMinusHandler.cpp" />
+    <ClCompile Include="ProWhileTrueHandler.cpp" />
+    <ClCompile Include="RandomUtil.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="SkillCsvMgr.cpp" />
+    <ClCompile Include="SockAddr.cpp" />
+    <ClCompile Include="SocketUtil.cpp" />
+    <ClCompile Include="SwordManAnkleCutHandler.cpp" />
+    <ClCompile Include="SwordManAttackHandler.cpp" />
+    <ClCompile Include="SwordManAuraBladeHandler.cpp" />
+    <ClCompile Include="SwordManBerserkHandler.cpp" />
+    <ClCompile Include="SwordManDefensiveStanceHandler.cpp" />
+    <ClCompile Include="SwordManDodgeHandler.cpp" />
+    <ClCompile Include="SwordManHeavySlashHandler.cpp" />
+    <ClCompile Include="SwordManHellBladeHandler.cpp" />
+    <ClCompile Include="SwordManJudgementSwordHandler.cpp" />
+    <ClCompile Include="SwordManProtectedAreaHandler.cpp" />
+    <ClCompile Include="SwordManRunHandler.cpp" />
+    <ClCompile Include="SwordManShieldBashHandler.cpp" />
+    <ClCompile Include="SwordManWarCryHandler.cpp" />
+    <ClCompile Include="TCPSocket.cpp" />
+    <ClCompile Include="TimeUtil.cpp" />
+    <ClCompile Include="WizardAttackHandler.cpp" />
+    <ClCompile Include="WizardBigBangHandler.cpp" />
+    <ClCompile Include="WizardBlinkHandler.cpp" />
+    <ClCompile Include="WizardBodyStrengthHandler.cpp" />
+    <ClCompile Include="WizardDarknessRayHandler.cpp" />
+    <ClCompile Include="WizardEarthImpactHandler.cpp" />
+    <ClCompile Include="WizardEnchantHandler.cpp" />
+    <ClCompile Include="WizardEnergyBallHandler.cpp" />
+    <ClCompile Include="WizardMagicEyeHandler.cpp" />
+    <ClCompile Include="WizardMagicMissilHandler.cpp" />
+    <ClCompile Include="WizardOverloadHandler.cpp" />
+    <ClCompile Include="WizardReflectHandler.cpp" />
+    <ClCompile Include="WizardTeleportHandler.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

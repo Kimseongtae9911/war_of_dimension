@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{02b94a48-f764-4f08-9dc5-99c4b1c6e8ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{d2f24319-71b9-4245-a2d4-889e365c744a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{dbedf506-1487-438e-bd14-5b1626c6f397}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{457de479-6cba-4f76-9727-622b20a000dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Match">
+      <UniqueIdentifier>{54f2c2ae-a21c-45e7-93b1-2ca2378658a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Network">
+      <UniqueIdentifier>{2beb4acb-6473-4aad-ae55-9a382c972c42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Packet">
+      <UniqueIdentifier>{f9ae0508-803e-46fb-94d2-b680d6f9c31d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{86966855-f9ef-4966-8ef5-18792ab90ec6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlockChain">
+      <UniqueIdentifier>{c4ce0952-de9e-4196-b9ae-c705a4ac5326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{69eb39fa-838b-4772-a479-eb61d19b9d94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\User">
+      <UniqueIdentifier>{4f2614ae-5f38-439e-8a77-9a45a4b69333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlockChain\P2PNetwork">
+      <UniqueIdentifier>{9a88d3e7-738a-4fae-b3f7-ea9807a48265}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{d5797d00-3b22-45f7-9748-6bf76b061695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Transform">
+      <UniqueIdentifier>{9da6f013-f68e-462e-a4c3-570520a2adca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Dummy">
+      <UniqueIdentifier>{09be39aa-4e23-490b-9e75-f16429b3845a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlockChain\Hash">
+      <UniqueIdentifier>{5531ed75-cf4a-47e7-9bd6-fdd625f613df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Physic">
+      <UniqueIdentifier>{35ee6873-1986-4d5f-8d26-694306f11a2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\ViewList">
+      <UniqueIdentifier>{6fc2f47b-c871-4d73-8a03-44ed13c27121}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Job">
+      <UniqueIdentifier>{231d3976-e54b-40de-b13c-081378c9e323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{22f7a49a-26f7-4c5d-81d0-4df29d02053a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Zone">
+      <UniqueIdentifier>{697f7e5b-c10c-441c-94a5-f87949c8b3da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Zone">
+      <UniqueIdentifier>{8011215e-34c0-4f38-872f-549efe2eff6a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CServer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPSocket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="SockAddr.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlapEx.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketUtil.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="LogUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CMatchMgr.h">
+      <Filter>Manager\Match</Filter>
+    </ClInclude>
+    <ClInclude Include="CNetworkMgr.h">
+      <Filter>Manager\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="CClient.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="GameUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CPacketMgr.h">
+      <Filter>Manager\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="CDataBase.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="CDataBaseThread.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlockChain.h">
+      <Filter>BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="CBlock.h">
+      <Filter>BlockChain</Filter>
+    </ClInclude>
+    <ClInclude Include="CPacketSender.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="CUserMgr.h">
+      <Filter>Manager\User</Filter>
+    </ClInclude>
+    <ClInclude Include="CP2PNetwork.h">
+      <Filter>BlockChain\P2PNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="CTransform.h">
+      <Filter>Client\Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="CDummyClient.h">
+      <Filter>Client\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA256.h">
+      <Filter>BlockChain\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="HashUtil.h">
+      <Filter>BlockChain\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="CPhysic.h">
+      <Filter>Client\Physic</Filter>
+    </ClInclude>
+    <ClInclude Include="CViewList.h">
+      <Filter>Client\ViewList</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobQueue.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Zone.h">
+      <Filter>Zone</Filter>
+    </ClInclude>
+    <ClInclude Include="ZoneManager.h">
+      <Filter>Manager\Zone</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CServer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="SockAddr.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlapEx.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketUtil.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="LogUtil.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CMatchMgr.cpp">
+      <Filter>Manager\Match</Filter>
+    </ClCompile>
+    <ClCompile Include="CNetworkMgr.cpp">
+      <Filter>Manager\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="CClient.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="GameUtil.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CPacketMgr.cpp">
+      <Filter>Manager\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="CDataBase.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="CDataBaseThread.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlockChain.cpp">
+      <Filter>BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="CBlock.cpp">
+      <Filter>BlockChain</Filter>
+    </ClCompile>
+    <ClCompile Include="CPacketSender.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CUserMgr.cpp">
+      <Filter>Manager\User</Filter>
+    </ClCompile>
+    <ClCompile Include="CP2PNetwork.cpp">
+      <Filter>BlockChain\P2PNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="CTransform.cpp">
+      <Filter>Client\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="CDummyClient.cpp">
+      <Filter>Client\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="HashUtil.cpp">
+      <Filter>BlockChain\Hash</Filter>
+    </ClCompile>
+    <ClCompile Include="SHA256.cpp">
+      <Filter>BlockChain\Hash</Filter>
+    </ClCompile>
+    <ClCompile Include="CPhysic.cpp">
+      <Filter>Client\Physic</Filter>
+    </ClCompile>
+    <ClCompile Include="CViewList.cpp">
+      <Filter>Client\ViewList</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="JobQueue.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Zone.cpp">
+      <Filter>Zone</Filter>
+    </ClCompile>
+    <ClCompile Include="ZoneManager.cpp">
+      <Filter>Manager\Zone</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

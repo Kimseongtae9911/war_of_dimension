@@ -1,0 +1,12 @@
+Red Animation
+
+0 Idle01
+1 Idle02
+2 Walk
+3 Run
+4 Basic Attack
+5 Claw Attack
+6 Flame Attack
+7 Sleep
+8 Get Hit
+9 Die

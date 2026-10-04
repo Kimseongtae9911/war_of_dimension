@@ -1,0 +1,7 @@
+Programmer Animation
+
+0 Idle
+1 Attack&Spell
+2 Hello_World!
+3 Switch_case_laser
+4 Death

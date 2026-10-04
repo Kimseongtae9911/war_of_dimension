@@ -1,0 +1,69 @@
+Archer011
+0 Idle
+1 WalkForward
+2 WalkBack
+3 WalkLeft
+4 WalkRight
+5 Death
+6 Attack Any_Shot Any_Arrow
+7 BackStep
+8 Arrow_Rain
+9 Penetrating_Shot_Spell
+10 Storm_Arrow
+11 Vault
+
+Fighter1230
+12 Idle
+13 WalkForward
+14 WalkBack
+15 WalkLeft
+16 WalkRight
+17 Death
+18 Attack
+19 금강불괴
+20 난격
+21 명왕권_Spell
+22 명왕권_Attack
+23 사량발천근
+24 순보
+25 승룡각
+26 신풍각
+27 운기조식
+28 장풍_Spell
+29 점혈찌르기
+30 회전각
+
+Swordman3144
+31 Idle
+32 WalkForward
+33 WalkBack
+34 WalkLeft
+35 WalkRight
+36 Death
+37 Attack Ankle_Cut
+38 Aura_Blade
+39 Berserk
+40 Heavy_Slash
+41 Hell_Blade
+42 Judgment_Sword
+43 Shield_Bash
+44 War_Cry Protected_Area
+
+Wizard4558
+45 Idle
+46 WalkForward
+47 WalkBack
+48 WalkLeft
+49 WalkRight
+50 Death
+51 Attack Magic_Missile
+52 BigBang
+53 Body_Strength Enchant Magic_Eye Overload
+54 Darkness_Ray
+55 Earth_Impact Reflect
+56 Energy_Ball_Cast
+57 Energy_Ball_Shoot
+58 Teleport
+
+PlayerCommon
+59 Dodge
