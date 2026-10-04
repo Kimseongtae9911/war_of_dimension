@@ -13,4 +13,8 @@
 
 ## 개발 기반 변경의 경계
 
+개발 진입점은 로비·게임 서버·클라이언트를 함께 포함하는 `NewWod.slnx`다. 서버 전용 `NewWod.Servers.slnf`도 같은 프로젝트를 사용한다. 공유 실행 프로필과 서버 준비를 기다리는 스크립트의 사용법은 [개발 환경](../development/SETUP.md)에 있다.
+
+파일에서 읽은 동일한 정점·인덱스 geometry는 device별 내용 캐시를 통해 공유한다. 각 프레임의 transform·material은 유지하고 스킨드 메시의 본 연결·가중치·애니메이션 상태는 별도로 소유한다. [메시 공유 구현](MESH_SHARING.md)과 [공유 구조도](../diagrams/mesh-sharing/mesh-sharing.architecture.html)에 소유권과 검증 결과를 기록했다. 이 변경은 TCP 연결 구성을 바꾸지 않아 기존 로컬 실행 구성도는 재생성하지 않았다.
+
 VS toolset·인코딩·빌드 경로·개발 문서 변경은 패킷 형식이나 게임 규칙을 바꾸지 않는다. 게임 객체 생명주기, 패킷 검증, 정상 종료와 큰 클래스 책임 분리는 [리팩토링 검토](../REFACTORING_PLAN.md)의 후속 작업이다.

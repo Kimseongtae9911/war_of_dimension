@@ -5,6 +5,25 @@
 #include "stdafx.h"
 #include "Mesh.h"
 #include "Object.h"
+#include "MeshContent.h"
+#include <tuple>
+#include <stdexcept>
+
+namespace
+{
+	using GeometryKey = std::tuple<std::uintptr_t, std::array<unsigned char, 32>, std::uint64_t>;
+	std::mutex geometryCacheMutex;
+	std::map<GeometryKey, std::weak_ptr<CStandardMesh>> geometryCache;
+	size_t geometryCreated = 0;
+	size_t geometryReused = 0;
+
+	void PruneGeometryCache()
+	{
+		for (auto it = geometryCache.begin(); it != geometryCache.end();)
+			if (it->second.expired()) it = geometryCache.erase(it);
+			else ++it;
+	}
+}
 
 CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
@@ -12,6 +31,8 @@ CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandLis
 
 CMesh::~CMesh()
 {
+	if (m_sharedGeometry) return;
+	CMesh::ReleaseUploadBuffers();
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
 
 	if (m_nSubMeshes > 0)
@@ -51,6 +72,7 @@ CMesh::~CMesh()
 
 void CMesh::ReleaseUploadBuffers()
 {
+	if (m_sharedGeometry) { m_sharedGeometry->ReleaseUploadBuffers(); return; }
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
 	m_pd3dPositionUploadBuffer = NULL;
 
@@ -175,6 +197,7 @@ CStandardMesh::CStandardMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 	m_d3dTextureCoord0BufferView.BufferLocation = 0;
 	m_d3dTextureCoord0BufferView.StrideInBytes = 0;
 	m_d3dTextureCoord0BufferView.SizeInBytes = 0;
+	m_d3dTextureCoord1BufferView = {};
 
 	m_d3dNormalBufferView.BufferLocation = 0;
 	m_d3dNormalBufferView.StrideInBytes = 0;
@@ -191,6 +214,8 @@ CStandardMesh::CStandardMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 
 CStandardMesh::~CStandardMesh()
 {
+	if (m_sharedGeometry) return;
+	CStandardMesh::ReleaseUploadBuffers();
 	if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
 	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
 	if (m_pd3dTangentBuffer) m_pd3dTangentBuffer->Release();
@@ -206,6 +231,7 @@ CStandardMesh::~CStandardMesh()
 
 void CStandardMesh::ReleaseUploadBuffers()
 {
+	if (m_sharedGeometry) { m_sharedGeometry->ReleaseUploadBuffers(); return; }
 	CMesh::ReleaseUploadBuffers();
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
@@ -219,6 +245,71 @@ void CStandardMesh::ReleaseUploadBuffers()
 
 	if (m_pd3dBiTangentUploadBuffer) m_pd3dBiTangentUploadBuffer->Release();
 	m_pd3dBiTangentUploadBuffer = NULL;
+}
+
+std::shared_ptr<CStandardMesh> CStandardMesh::LoadSharedGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, FILE* file, std::string* meshName)
+{
+	const auto record = ReadMeshContentRecord(file);
+	if (meshName) *meshName = record.name;
+	const GeometryKey key{ reinterpret_cast<std::uintptr_t>(device), record.digest, record.contentBytes };
+	std::lock_guard<std::mutex> lock(geometryCacheMutex);
+	if (((geometryCreated + geometryReused) & 255) == 0) PruneGeometryCache();
+	if (auto found = geometryCache.find(key); found != geometryCache.end())
+	{
+		if (auto mesh = found->second.lock()) { ++geometryReused; return mesh; }
+	}
+	if (_fseeki64(file, record.begin, SEEK_SET) != 0) throw std::runtime_error("메시 파일 위치 복원 실패");
+	auto mesh = new CStandardMesh(device, commandList);
+	mesh->AddRef();
+	std::shared_ptr<CStandardMesh> owner(mesh, [](CStandardMesh* resource) { resource->Release(); });
+	mesh->LoadMeshFromFile(device, commandList, file);
+	if (_ftelli64(file) != record.end) throw std::runtime_error("메시 파서와 GPU 로더의 위치가 다릅니다.");
+	geometryCache[key] = owner;
+	++geometryCreated;
+	return owner;
+}
+
+CStandardMesh::CacheStatistics CStandardMesh::GetGeometryCacheStatistics()
+{
+	std::lock_guard<std::mutex> lock(geometryCacheMutex);
+	PruneGeometryCache();
+	return { geometryCreated, geometryReused, geometryCache.size() };
+}
+
+void CStandardMesh::LoadSharedGeometryDataFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, FILE* file)
+{
+	if (m_sharedGeometry || m_pd3dPositionBuffer) throw std::runtime_error("이미 초기화한 geometry는 교체할 수 없습니다.");
+	std::string meshName;
+	m_sharedGeometry = LoadSharedGeometryFromFile(device, commandList, file, &meshName);
+	strcpy_s(m_pstrMeshName, meshName.c_str());
+	const auto& source = *m_sharedGeometry;
+	m_nType |= source.m_nType;
+	m_nVertices = source.m_nVertices;
+	m_xmf3AABBExtents = source.m_xmf3AABBExtents;
+	m_nSubMeshes = source.m_nSubMeshes;
+	m_pxmf3Positions = source.m_pxmf3Positions;
+	m_pd3dPositionBuffer = source.m_pd3dPositionBuffer;
+	m_d3dPositionBufferView = source.m_d3dPositionBufferView;
+	m_pnSubSetIndices = source.m_pnSubSetIndices;
+	m_ppnSubSetIndices = source.m_ppnSubSetIndices;
+	m_ppd3dSubSetIndexBuffers = source.m_ppd3dSubSetIndexBuffers;
+	m_pd3dSubSetIndexBufferViews = source.m_pd3dSubSetIndexBufferViews;
+	m_pxmf4Colors = source.m_pxmf4Colors;
+	m_pxmf3Normals = source.m_pxmf3Normals;
+	m_pxmf3Tangents = source.m_pxmf3Tangents;
+	m_pxmf3BiTangents = source.m_pxmf3BiTangents;
+	m_pxmf2TextureCoords0 = source.m_pxmf2TextureCoords0;
+	m_pxmf2TextureCoords1 = source.m_pxmf2TextureCoords1;
+	m_pd3dTextureCoord0Buffer = source.m_pd3dTextureCoord0Buffer;
+	m_d3dTextureCoord0BufferView = source.m_d3dTextureCoord0BufferView;
+	m_pd3dTextureCoord1Buffer = source.m_pd3dTextureCoord1Buffer;
+	m_d3dTextureCoord1BufferView = source.m_d3dTextureCoord1BufferView;
+	m_pd3dNormalBuffer = source.m_pd3dNormalBuffer;
+	m_d3dNormalBufferView = source.m_d3dNormalBufferView;
+	m_pd3dTangentBuffer = source.m_pd3dTangentBuffer;
+	m_d3dTangentBufferView = source.m_d3dTangentBufferView;
+	m_pd3dBiTangentBuffer = source.m_pd3dBiTangentBuffer;
+	m_d3dBiTangentBufferView = source.m_d3dBiTangentBufferView;
 }
 
 void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
@@ -349,11 +440,11 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 			if (m_nSubMeshes > 0)
 			{
 				m_pnSubSetIndices = new int[m_nSubMeshes];
-				m_ppnSubSetIndices = new UINT*[m_nSubMeshes];
+				m_ppnSubSetIndices = new UINT*[m_nSubMeshes]();
 
-				m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
-				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
-				m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+				m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes]();
+				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes]();
+				m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes]();
 
 				for (int i = 0; i < m_nSubMeshes; i++)
 				{
@@ -399,6 +490,7 @@ CSkinnedMesh::CSkinnedMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *
 
 CSkinnedMesh::~CSkinnedMesh()
 {
+	CSkinnedMesh::ReleaseUploadBuffers();
 	if (m_pxmn4BoneIndices) {
 		delete[] m_pxmn4BoneIndices;
 		m_pxmn4BoneIndices = nullptr;
@@ -418,7 +510,7 @@ CSkinnedMesh::~CSkinnedMesh()
 	//}
 
 	for (char* name : m_ppstrSkinningBoneNames) {
-		delete name;
+		delete[] name;
 	}
 	m_pxmf4x4BindPoseBoneOffsets.clear();
 	
@@ -466,6 +558,14 @@ void CSkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandL
 
 void CSkinnedMesh::ReleaseShaderVariables()
 {
+	if (m_pd3dcbBindPoseBoneOffsets)
+	{
+		m_pd3dcbBindPoseBoneOffsets->Unmap(0, nullptr);
+		m_pd3dcbBindPoseBoneOffsets->Release();
+		m_pd3dcbBindPoseBoneOffsets = nullptr;
+		m_pcbxmf4x4MappedBindPoseBoneOffsets = nullptr;
+	}
+	// SkinningBoneTransforms는 animation controller가 소유한다.
 }
 
 void CSkinnedMesh::ReleaseUploadBuffers()

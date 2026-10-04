@@ -1,0 +1,18 @@
+[
+  {
+    "Name": "Local full stack",
+    "Projects": [
+      { "Path": "Server\\Lobby_Server\\Lobby_Server.vcxproj", "Action": "Start" },
+      { "Path": "Server\\Game_Server\\Game_Server.vcxproj", "Action": "Start" },
+      { "Path": "Client\\WarOfDimension\\WarOfDimension.vcxproj", "Action": "Start" }
+    ]
+  },
+  {
+    "Name": "Client (servers already running)",
+    "Projects": [
+      { "Path": "Server\\Lobby_Server\\Lobby_Server.vcxproj", "Action": "None" },
+      { "Path": "Server\\Game_Server\\Game_Server.vcxproj", "Action": "None" },
+      { "Path": "Client\\WarOfDimension\\WarOfDimension.vcxproj", "Action": "Start" }
+    ]
+  }
+]

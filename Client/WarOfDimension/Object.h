@@ -422,6 +422,7 @@ public:
 	bool							m_bIsRender = true;
 
 	CMesh							*m_pMesh = NULL;
+	std::shared_ptr<CMesh> m_sharedMesh;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
@@ -456,6 +457,7 @@ public:
 	static const char* FrameNames[];
 
 	void SetMesh(CMesh *pMesh);
+	void SetSharedMesh(const std::shared_ptr<CMesh>& mesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
 	void SetRootShader(CShader *pShader);

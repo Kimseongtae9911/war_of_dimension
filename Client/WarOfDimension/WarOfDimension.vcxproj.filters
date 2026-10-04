@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="MeshContent.cpp"><Filter>소스 파일</Filter></ClCompile>
+    <ClCompile Include="MeshSharingTests.cpp"><Filter>소스 파일</Filter></ClCompile>
+    <ClInclude Include="MeshContent.h"><Filter>헤더 파일</Filter></ClInclude>
+    <ClInclude Include="MeshSharingTests.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

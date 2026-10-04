@@ -4,7 +4,12 @@
 
 #pragma once
 
+#include <memory>
+#include <atomic>
+#include <string>
+
 class CGameObject;
+class CStandardMesh;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -109,7 +114,7 @@ public:
 	virtual ~CMesh();
 
 private:
-	int								m_nReferences = 0;
+	std::atomic<int> m_nReferences{ 0 };
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -123,6 +128,8 @@ public:
 
 protected:
 	UINT							m_nType = 0x00;
+	// 스킨드 메시의 가변 상태와 분리한 geometry 소유자. 정적 캐시 객체는 비어 있다.
+	std::shared_ptr<CStandardMesh> m_sharedGeometry;
 
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -220,6 +227,12 @@ protected:
 
 public:
 	void LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile);
+	static std::shared_ptr<CStandardMesh> LoadSharedGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, FILE* file, std::string* meshName = nullptr);
+	void LoadSharedGeometryDataFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, FILE* file);
+	const CStandardMesh* GetGeometryOwner() const { return m_sharedGeometry ? m_sharedGeometry.get() : this; }
+	D3D12_GPU_VIRTUAL_ADDRESS GetPositionBufferAddress() const { return m_d3dPositionBufferView.BufferLocation; }
+	struct CacheStatistics { size_t created; size_t reused; size_t live; };
+	static CacheStatistics GetGeometryCacheStatistics();
 
 	virtual void ReleaseUploadBuffers();
 

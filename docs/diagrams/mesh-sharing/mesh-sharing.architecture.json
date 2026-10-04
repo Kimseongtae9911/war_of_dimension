@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "클라이언트 메시 공유 구조", "quality_profile": "showcase", "viewBox": [1100, 650] },
+  "components": [
+    { "id": "reader", "type": "backend", "label": "모델 프레임 로더", "sublabel": "이름 · transform · material 유지", "pos": [50, 90], "size": [240, 90] },
+    { "id": "cache", "type": "backend", "label": "메시 내용 캐시", "sublabel": "device + SHA-256 · weak_ptr", "pos": [420, 90], "size": [240, 90] },
+    { "id": "geometry", "type": "database", "label": "공유 geometry", "sublabel": "정점 · 인덱스 · GPU 버퍼", "pos": [800, 90], "size": [240, 90] },
+    { "id": "static", "type": "frontend", "label": "정적 프레임 객체", "sublabel": "동일 CStandardMesh 소유", "pos": [420, 440], "size": [240, 90] },
+    { "id": "skinned", "type": "frontend", "label": "스킨드 메시 객체", "sublabel": "본 연결 · 애니메이션 별도", "pos": [800, 440], "size": [240, 90] }
+  ],
+  "connections": [
+    { "id": "identify", "from": "reader", "to": "cache", "label": "이름 제외 내용 해시" },
+    { "id": "intern", "from": "cache", "to": "geometry", "label": "미존재 시 1회 생성" },
+    { "id": "static-own", "from": "static", "to": "cache", "label": "shared_ptr 획득" },
+    { "id": "skin-own", "from": "skinned", "to": "geometry", "label": "geometry만 공유" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "판별 기준", "items": ["프레임·메시 이름과 transform은 키에서 제외", "UV · normal · index · bounds 변경은 별도 리소스"] },
+    { "dot": "emerald", "title": "자원 수명", "items": ["마지막 소유자 해제 시 geometry 해제", "GPU 완료 후 upload buffer 해제 · UI와 파티클은 독립"] }
+  ]
+}

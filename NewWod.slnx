@@ -1,0 +1,19 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Client/">
+    <Project Path="Client/WarOfDimension/WarOfDimension.vcxproj" />
+  </Folder>
+  <Folder Name="/Development/">
+    <File Path="docs/development/SETUP.md" />
+    <File Path="scripts/Build.ps1" />
+    <File Path="scripts/Start-Local.ps1" />
+    <File Path="scripts/Stop-Local.ps1" />
+    <File Path="scripts/Test-MeshSharing.ps1" />
+  </Folder>
+  <Folder Name="/Servers/">
+    <Project Path="Server/Game_Server/Game_Server.vcxproj" />
+    <Project Path="Server/Lobby_Server/Lobby_Server.vcxproj" />
+  </Folder>
+</Solution>

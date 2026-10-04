@@ -199,6 +199,8 @@
     <ClInclude Include="Util.h" />
     <ClInclude Include="WarOfDimension.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshContent.h" />
+    <ClInclude Include="MeshSharingTests.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
@@ -252,6 +254,8 @@
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="WarOfDimension.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshContent.cpp" />
+    <ClCompile Include="MeshSharingTests.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />

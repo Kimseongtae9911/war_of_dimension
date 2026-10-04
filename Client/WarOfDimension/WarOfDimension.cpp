@@ -7,6 +7,7 @@
 
 #include "NetworkManager.h"
 #include "OverlapEx.h"
+#include "MeshSharingTests.h"
 #include <locale>
 
 #define MAX_LOADSTRING 100
@@ -28,6 +29,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+	int argumentCount = 0;
+	auto arguments = CommandLineToArgvW(GetCommandLineW(), &argumentCount);
+	if (arguments && argumentCount >= 2 &&
+		(wcscmp(arguments[1], L"--test-mesh-sharing") == 0 || wcscmp(arguments[1], L"--audit-mesh-assets") == 0))
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const bool audit = wcscmp(arguments[1], L"--audit-mesh-assets") == 0;
+		const std::wstring report = arguments[2];
+		LocalFree(arguments);
+		return audit ? AuditMeshAssets(report.c_str()) : RunMeshSharingTests(report.c_str());
+	}
+	if (arguments) LocalFree(arguments);
 
 	MSG msg;
 	HACCEL hAccelTable;

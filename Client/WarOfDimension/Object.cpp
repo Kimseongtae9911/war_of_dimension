@@ -1168,9 +1168,18 @@ void CGameObject::RemoveChild(CGameObject* pChild)
 
 void CGameObject::SetMesh(CMesh *pMesh)
 {
+	if (pMesh) pMesh->AddRef();
 	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
-	if (m_pMesh) m_pMesh->AddRef();
+	m_sharedMesh.reset();
+}
+
+void CGameObject::SetSharedMesh(const std::shared_ptr<CMesh>& mesh)
+{
+	// 같은 핸들을 다시 지정해도 SetMesh의 reset으로 소유자가 사라지지 않게 한다.
+	const auto owner = mesh;
+	SetMesh(owner.get());
+	m_sharedMesh = owner;
 }
 
 void CGameObject::SetShader(CShader *pShader)
@@ -1812,9 +1821,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
-			CStandardMesh *pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
-			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
-			pGameObject->SetMesh(pMesh);
+			pGameObject->SetSharedMesh(CStandardMesh::LoadSharedGeometryFromFile(pd3dDevice, pd3dCommandList, pInFile));
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
@@ -1825,7 +1832,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			pSkinnedMesh->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
-			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadSharedGeometryDataFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
 		}
