@@ -80,6 +80,7 @@ private:
 	ID3D12Resource** m_ppd3dTextureUploadBuffers = nullptr;
 	// 모델 DDS 슬롯의 raw resource는 이 소유자의 별칭이다. 직접 Release하지 않는다.
 	std::vector<std::shared_ptr<SharedDdsTexture>> m_sharedDds;
+	XMFLOAT4 m_uiUvTransform{1, 1, 0, 0};
 
 	UINT* m_pnResourceTypes = NULL;
 
@@ -117,6 +118,8 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(int index) const { return m_sharepd3dSrvGpuDescriptorHandles[index]; }
 	int GetTextures() { return(m_nTextures); }
 	ID3D12Resource* GetResource(int nIndex) { return(m_ppd3dTextures[nIndex]); }
+	XMFLOAT4 GetUiUvTransform() const { return m_uiUvTransform; }
+	ID3D12Resource* GetUploadResource(int index) const { return m_ppd3dTextureUploadBuffers[index]; }
 	const std::shared_ptr<SharedDdsTexture>& GetSharedDds(int index) const { return m_sharedDds[index]; }
 
 	UINT GetTextureType() { return(m_nTextureType); }

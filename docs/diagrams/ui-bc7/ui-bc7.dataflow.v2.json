@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "UI BC7 사전 로딩과 UV 보존",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1000,
+      480
+    ]
+  },
+  "stages": [
+    {
+      "label": "개발 시 변환"
+    },
+    {
+      "label": "장면 로딩"
+    },
+    {
+      "label": "GPU 상주"
+    },
+    {
+      "label": "UI 표시"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "source",
+      "type": "database",
+      "label": "원본 RGBA UI",
+      "sublabel": "픽셀·atlas 크기 보존",
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "encoded",
+      "type": "database",
+      "label": "BC7 DDS",
+      "sublabel": "wrap 경계 패딩·내용 좌표",
+      "stage": 0,
+      "row": 1
+    },
+    {
+      "id": "preload",
+      "type": "backend",
+      "label": "기존 사전 로딩",
+      "sublabel": "DDS 형식·UV 정보 확인",
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "texture",
+      "type": "database",
+      "label": "BC7 DEFAULT",
+      "sublabel": "압축 블록으로 상주",
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "sample",
+      "type": "frontend",
+      "label": "UI 샘플링",
+      "sublabel": "atlas 계산 후 UV 보정",
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "uv",
+      "type": "backend",
+      "label": "내용 UV 전달",
+      "sublabel": "mesh 상수·독립 UI 상태",
+      "stage": 2,
+      "row": 2,
+      "yOffset": -16
+    }
+  ],
+  "flows": [
+    {
+      "from": "source",
+      "to": "encoded",
+      "label": "오프라인 압축",
+      "labelDy": 24
+    },
+    {
+      "from": "encoded",
+      "to": "preload",
+      "label": "DDS 읽기"
+    },
+    {
+      "from": "preload",
+      "to": "texture",
+      "label": "GPU 복사",
+      "route": "straight"
+    },
+    {
+      "from": "texture",
+      "to": "sample",
+      "label": "하드웨어 해석",
+      "route": "straight"
+    },
+    {
+      "from": "preload",
+      "to": "uv",
+      "label": "내용 좌표"
+    },
+    {
+      "from": "uv",
+      "to": "sample",
+      "label": "scale·offset"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "메모리 범위",
+      "items": [
+        "역할별 UI 20종을 장면 로딩 중 준비",
+        "GPU 압축 상주량과 Private Bytes를 구분"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "표시 보존",
+      "items": [
+        "원본 픽셀과 atlas 배치는 축소하지 않음",
+        "비압축 DDS는 기존 UV를 그대로 사용"
+      ]
+    }
+  ]
+}

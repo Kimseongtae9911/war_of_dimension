@@ -16,4 +16,5 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
 int RunParticleSelectionTests(const wchar_t* reportPath);
 int RunHeroSelectionAudit(CGameFramework& framework, const wchar_t* reportPath);
 int RunMonsterCapture(CGameFramework& framework, const wchar_t* directory);
+int RunUiCapture(CGameFramework& framework, const wchar_t* directory, bool boss);
 void ClientMemoryProfileRecordGpuDiagnostics(ID3D12Device* device, const char* phase);

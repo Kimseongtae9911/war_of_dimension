@@ -67,6 +67,8 @@ cbuffer cbMeshInfo : register(b9)
     float gTextureValue;
     float gTextureUVx; // UVOffset for Skill Icon Texture, Kind 5, 6
     float gTextureUVy; // UVOffset for Skill Icon Texture, Kind 5, 6
+    float3 gUiPadding;
+    float4 gUiUvTransform;
 }
 
 cbuffer cbParticleForwardVector : register(b11)
@@ -369,7 +371,14 @@ static float gfGaussianBlurMask2D[5][5] = {
 };
 
 
-float4 GaussianBlur(float2 texCoord, float blurStrength)
+// atlas/progress의 논리 UV 계산을 유지한 뒤에만 패딩 내용을 매핑한다.
+float2 UiTextureCoordinates(float2 uv, float4 transform)
+{
+    if (all(transform == float4(1, 1, 0, 0))) return uv;
+    return frac(uv) * transform.xy + transform.zw;
+}
+
+float4 GaussianBlur(float2 texCoord, float blurStrength, float4 uvTransform = float4(1, 1, 0, 0))
 {
     const int maxBlurRadius = 10;
     int blurRadius = int(blurStrength * maxBlurRadius);; // Radius of the blur kernel
@@ -389,7 +398,7 @@ float4 GaussianBlur(float2 texCoord, float blurStrength)
 			float2 offset = float2(x, y) * pixelSize;
 			float2 uv = texCoord + offset;
 
-			float4 color = gtxtAlbedoTexture.Sample(gssWrap, uv);
+			float4 color = gtxtAlbedoTexture.Sample(gssWrap, UiTextureCoordinates(uv, uvTransform));
 
 			// Calculate the Gaussian weight based on the distance from the center pixel
 			float distance = length(offset);

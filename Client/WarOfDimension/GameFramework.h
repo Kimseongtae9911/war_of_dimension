@@ -62,6 +62,7 @@ public:
     void ProfileParticleReuseFrames();
 	int AuditHeroSelection(const wchar_t* reportPath);
 	void CaptureMonsters(const wchar_t* directory);
+	void CaptureUiTextures(const wchar_t* directory);
 	void Update();
 
 	void CreateShaderVariables();

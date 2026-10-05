@@ -18,6 +18,9 @@
 | 미니언·몬스터 메모리 공통화 후보 | [현재 공유·텍스처/upload 비용·예상 효과 검토](portfolio/NPC_RESOURCE_SHARING_REVIEW.md) |
 | 모델 사이 DDS 공용 자원 | [구현·GPU 검사·조기 해제/BC7/상수 arena 설명](portfolio/NPC_RESOURCE_SHARING_REVIEW.md#후속-적용-모델-dds-공유), [소유권 구조도](diagrams/dds-sharing/README.md) |
 | NPC 메모리 최적화 적용 결과 | [임시 upload·BC7·상수 arena 및 3회 실측](portfolio/NPC_MEMORY_OPTIMIZATION.md), [9종 전후 스크린샷](portfolio/evidence/npc-memory-20261005/gallery.html), [상수 수명도](diagrams/npc-memory/README.md) |
+| UI BC7 압축·사전 로딩과 UV 보존 | [최종 구현·실측·품질](portfolio/UI_TEXTURE_COMPRESSION.md), [전후 GPU 화면](portfolio/evidence/ui-bc7-20261005/gallery.html), [로딩·UV 흐름도](diagrams/ui-bc7/README.md) |
+| 하늘 큐브맵·UI/dissolve 후속 후보 | [DDS 형식·72MiB 후보·upload 수명·GPU 비용 검토](portfolio/SKYBOX_DISSOLVE_OPTIMIZATION_REVIEW.md), [계산·기존 측정 근거](portfolio/evidence/skybox-dissolve-review-20261006.json) |
+| 기동·Title·음원과 공통 렌더링 후속 최적화 | [장면별 수명·PCM 직접 조사·우선순위](portfolio/STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md) |
 | 코드 개선 후보 | [리팩토링 검토](REFACTORING_PLAN.md) |
 | 파일 정리 근거 | [정리 기록](development/CLEANUP.md) |
 | GitLab에서 로컬로 이전 | [이전 기록](MIGRATION.md) |

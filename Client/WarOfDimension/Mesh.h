@@ -41,7 +41,11 @@ struct VS_CB_MESH_INFO
 	//XMFLOAT2					uv;
 	float uvX;
 	float uvY;
+	float uiPadding[3]{};
+	XMFLOAT4 uiUvTransform{1, 1, 0, 0};
 };
+static_assert(offsetof(VS_CB_MESH_INFO, uiUvTransform) == 32);
+static_assert(sizeof(VS_CB_MESH_INFO) == 48);
 
 class CVertex
 {
@@ -326,6 +330,7 @@ public:
 	int m_nType = -1;
 	float m_fTextureValue = 0.f;
 	XMFLOAT2 m_fTexutreUV = XMFLOAT2();
+	XMFLOAT4 m_uiUvTransform{1, 1, 0, 0};
 
 	ID3D12Resource *m_pd3dcbMesh = NULL;
 	VS_CB_MESH_INFO *m_pcbMappedMesh = NULL;

@@ -1,0 +1,737 @@
+{
+  "schemaVersion": 1,
+  "reviewOnly": true,
+  "reviewedAtUtc": "2026-10-05T15:26:44.887693+00:00",
+  "units": "bytes; MiB = bytes / 1048576",
+  "method": "Current DDS headers/payload and original cube alpha; historical same-EXE UI 3-run checkpoint deltas; no new runtime allocation measurement or compression applied",
+  "current": {
+    "sky": {
+      "format": "B8G8R8A8_UNORM",
+      "width": 2048,
+      "height": 2048,
+      "mipLevels": 1,
+      "faces": 6,
+      "payloadBytes": 100663296,
+      "levels": [
+        {
+          "level": 0,
+          "width": 2048,
+          "height": 2048,
+          "bytesPerFace": 16777216,
+          "bytes": 100663296
+        }
+      ],
+      "path": "SkyBox/Space.dds",
+      "sha256": "0f57f2e81fb36a6da079ad89b9e7c94e8fa95fc2ed2856c36e92098d45c42467",
+      "fileBytes": 100663424,
+      "caps2": 65024,
+      "rawMipCount": 0,
+      "fourcc": "00000000",
+      "opaqueAlphaTexels": 25165824,
+      "totalTexels": 25165824,
+      "allAlphaOpaque": true
+    },
+    "dissolve": {
+      "format": "BC1_UNORM",
+      "width": 1024,
+      "height": 1024,
+      "mipLevels": 11,
+      "faces": 1,
+      "payloadBytes": 699064,
+      "levels": [
+        {
+          "level": 0,
+          "width": 1024,
+          "height": 1024,
+          "bytesPerFace": 524288,
+          "bytes": 524288
+        },
+        {
+          "level": 1,
+          "width": 512,
+          "height": 512,
+          "bytesPerFace": 131072,
+          "bytes": 131072
+        },
+        {
+          "level": 2,
+          "width": 256,
+          "height": 256,
+          "bytesPerFace": 32768,
+          "bytes": 32768
+        },
+        {
+          "level": 3,
+          "width": 128,
+          "height": 128,
+          "bytesPerFace": 8192,
+          "bytes": 8192
+        },
+        {
+          "level": 4,
+          "width": 64,
+          "height": 64,
+          "bytesPerFace": 2048,
+          "bytes": 2048
+        },
+        {
+          "level": 5,
+          "width": 32,
+          "height": 32,
+          "bytesPerFace": 512,
+          "bytes": 512
+        },
+        {
+          "level": 6,
+          "width": 16,
+          "height": 16,
+          "bytesPerFace": 128,
+          "bytes": 128
+        },
+        {
+          "level": 7,
+          "width": 8,
+          "height": 8,
+          "bytesPerFace": 32,
+          "bytes": 32
+        },
+        {
+          "level": 8,
+          "width": 4,
+          "height": 4,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 9,
+          "width": 2,
+          "height": 2,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 10,
+          "width": 1,
+          "height": 1,
+          "bytesPerFace": 8,
+          "bytes": 8
+        }
+      ],
+      "path": "Model/Textures/dissolve.dds",
+      "sha256": "af769dd085324f0dfa4940660344182dd2549d32b32383e7c86f99b306434c03",
+      "fileBytes": 699192,
+      "caps2": 0,
+      "rawMipCount": 11,
+      "fourcc": "44585431"
+    }
+  },
+  "candidates": {
+    "skyBc7SameResolution": {
+      "format": "BC7_UNORM",
+      "width": 2048,
+      "height": 2048,
+      "mipLevels": 1,
+      "faces": 6,
+      "payloadBytes": 25165824,
+      "levels": [
+        {
+          "level": 0,
+          "width": 2048,
+          "height": 2048,
+          "bytesPerFace": 4194304,
+          "bytes": 25165824
+        }
+      ],
+      "savedPayloadBytes": 75497472
+    },
+    "skyBc7FullMips": {
+      "format": "BC7_UNORM",
+      "width": 2048,
+      "height": 2048,
+      "mipLevels": 12,
+      "faces": 6,
+      "payloadBytes": 33554592,
+      "levels": [
+        {
+          "level": 0,
+          "width": 2048,
+          "height": 2048,
+          "bytesPerFace": 4194304,
+          "bytes": 25165824
+        },
+        {
+          "level": 1,
+          "width": 1024,
+          "height": 1024,
+          "bytesPerFace": 1048576,
+          "bytes": 6291456
+        },
+        {
+          "level": 2,
+          "width": 512,
+          "height": 512,
+          "bytesPerFace": 262144,
+          "bytes": 1572864
+        },
+        {
+          "level": 3,
+          "width": 256,
+          "height": 256,
+          "bytesPerFace": 65536,
+          "bytes": 393216
+        },
+        {
+          "level": 4,
+          "width": 128,
+          "height": 128,
+          "bytesPerFace": 16384,
+          "bytes": 98304
+        },
+        {
+          "level": 5,
+          "width": 64,
+          "height": 64,
+          "bytesPerFace": 4096,
+          "bytes": 24576
+        },
+        {
+          "level": 6,
+          "width": 32,
+          "height": 32,
+          "bytesPerFace": 1024,
+          "bytes": 6144
+        },
+        {
+          "level": 7,
+          "width": 16,
+          "height": 16,
+          "bytesPerFace": 256,
+          "bytes": 1536
+        },
+        {
+          "level": 8,
+          "width": 8,
+          "height": 8,
+          "bytesPerFace": 64,
+          "bytes": 384
+        },
+        {
+          "level": 9,
+          "width": 4,
+          "height": 4,
+          "bytesPerFace": 16,
+          "bytes": 96
+        },
+        {
+          "level": 10,
+          "width": 2,
+          "height": 2,
+          "bytesPerFace": 16,
+          "bytes": 96
+        },
+        {
+          "level": 11,
+          "width": 1,
+          "height": 1,
+          "bytesPerFace": 16,
+          "bytes": 96
+        }
+      ],
+      "savedPayloadBytes": 67108704
+    },
+    "skyBc1SameResolution": {
+      "format": "BC1_UNORM",
+      "width": 2048,
+      "height": 2048,
+      "mipLevels": 1,
+      "faces": 6,
+      "payloadBytes": 12582912,
+      "levels": [
+        {
+          "level": 0,
+          "width": 2048,
+          "height": 2048,
+          "bytesPerFace": 2097152,
+          "bytes": 12582912
+        }
+      ],
+      "savedPayloadBytes": 88080384
+    },
+    "skyBc7HalfResolution": {
+      "format": "BC7_UNORM",
+      "width": 1024,
+      "height": 1024,
+      "mipLevels": 1,
+      "faces": 6,
+      "payloadBytes": 6291456,
+      "levels": [
+        {
+          "level": 0,
+          "width": 1024,
+          "height": 1024,
+          "bytesPerFace": 1048576,
+          "bytes": 6291456
+        }
+      ],
+      "savedPayloadBytes": 94371840
+    },
+    "dissolveBc4SameMips": {
+      "format": "BC4_UNORM",
+      "width": 1024,
+      "height": 1024,
+      "mipLevels": 11,
+      "faces": 1,
+      "payloadBytes": 699064,
+      "levels": [
+        {
+          "level": 0,
+          "width": 1024,
+          "height": 1024,
+          "bytesPerFace": 524288,
+          "bytes": 524288
+        },
+        {
+          "level": 1,
+          "width": 512,
+          "height": 512,
+          "bytesPerFace": 131072,
+          "bytes": 131072
+        },
+        {
+          "level": 2,
+          "width": 256,
+          "height": 256,
+          "bytesPerFace": 32768,
+          "bytes": 32768
+        },
+        {
+          "level": 3,
+          "width": 128,
+          "height": 128,
+          "bytesPerFace": 8192,
+          "bytes": 8192
+        },
+        {
+          "level": 4,
+          "width": 64,
+          "height": 64,
+          "bytesPerFace": 2048,
+          "bytes": 2048
+        },
+        {
+          "level": 5,
+          "width": 32,
+          "height": 32,
+          "bytesPerFace": 512,
+          "bytes": 512
+        },
+        {
+          "level": 6,
+          "width": 16,
+          "height": 16,
+          "bytesPerFace": 128,
+          "bytes": 128
+        },
+        {
+          "level": 7,
+          "width": 8,
+          "height": 8,
+          "bytesPerFace": 32,
+          "bytes": 32
+        },
+        {
+          "level": 8,
+          "width": 4,
+          "height": 4,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 9,
+          "width": 2,
+          "height": 2,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 10,
+          "width": 1,
+          "height": 1,
+          "bytesPerFace": 8,
+          "bytes": 8
+        }
+      ],
+      "savedPayloadBytes": 0
+    },
+    "dissolveR8SameMips": {
+      "format": "R8_UNORM",
+      "width": 1024,
+      "height": 1024,
+      "mipLevels": 11,
+      "faces": 1,
+      "payloadBytes": 1398101,
+      "levels": [
+        {
+          "level": 0,
+          "width": 1024,
+          "height": 1024,
+          "bytesPerFace": 1048576,
+          "bytes": 1048576
+        },
+        {
+          "level": 1,
+          "width": 512,
+          "height": 512,
+          "bytesPerFace": 262144,
+          "bytes": 262144
+        },
+        {
+          "level": 2,
+          "width": 256,
+          "height": 256,
+          "bytesPerFace": 65536,
+          "bytes": 65536
+        },
+        {
+          "level": 3,
+          "width": 128,
+          "height": 128,
+          "bytesPerFace": 16384,
+          "bytes": 16384
+        },
+        {
+          "level": 4,
+          "width": 64,
+          "height": 64,
+          "bytesPerFace": 4096,
+          "bytes": 4096
+        },
+        {
+          "level": 5,
+          "width": 32,
+          "height": 32,
+          "bytesPerFace": 1024,
+          "bytes": 1024
+        },
+        {
+          "level": 6,
+          "width": 16,
+          "height": 16,
+          "bytesPerFace": 256,
+          "bytes": 256
+        },
+        {
+          "level": 7,
+          "width": 8,
+          "height": 8,
+          "bytesPerFace": 64,
+          "bytes": 64
+        },
+        {
+          "level": 8,
+          "width": 4,
+          "height": 4,
+          "bytesPerFace": 16,
+          "bytes": 16
+        },
+        {
+          "level": 9,
+          "width": 2,
+          "height": 2,
+          "bytesPerFace": 4,
+          "bytes": 4
+        },
+        {
+          "level": 10,
+          "width": 1,
+          "height": 1,
+          "bytesPerFace": 1,
+          "bytes": 1
+        }
+      ],
+      "savedPayloadBytes": -699037
+    },
+    "dissolveBc1HalfResolution": {
+      "format": "BC1_UNORM",
+      "width": 512,
+      "height": 512,
+      "mipLevels": 10,
+      "faces": 1,
+      "payloadBytes": 174776,
+      "levels": [
+        {
+          "level": 0,
+          "width": 512,
+          "height": 512,
+          "bytesPerFace": 131072,
+          "bytes": 131072
+        },
+        {
+          "level": 1,
+          "width": 256,
+          "height": 256,
+          "bytesPerFace": 32768,
+          "bytes": 32768
+        },
+        {
+          "level": 2,
+          "width": 128,
+          "height": 128,
+          "bytesPerFace": 8192,
+          "bytes": 8192
+        },
+        {
+          "level": 3,
+          "width": 64,
+          "height": 64,
+          "bytesPerFace": 2048,
+          "bytes": 2048
+        },
+        {
+          "level": 4,
+          "width": 32,
+          "height": 32,
+          "bytesPerFace": 512,
+          "bytes": 512
+        },
+        {
+          "level": 5,
+          "width": 16,
+          "height": 16,
+          "bytesPerFace": 128,
+          "bytes": 128
+        },
+        {
+          "level": 6,
+          "width": 8,
+          "height": 8,
+          "bytesPerFace": 32,
+          "bytes": 32
+        },
+        {
+          "level": 7,
+          "width": 4,
+          "height": 4,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 8,
+          "width": 2,
+          "height": 2,
+          "bytesPerFace": 8,
+          "bytes": 8
+        },
+        {
+          "level": 9,
+          "width": 1,
+          "height": 1,
+          "bytesPerFace": 8,
+          "bytes": 8
+        }
+      ],
+      "savedPayloadBytes": 524288
+    }
+  },
+  "existingMeasurement": {
+    "path": "docs/portfolio/evidence/ui-bc7-20261005/measurements.json",
+    "sha256": "b62d5e8bd6749bfcc3936e68c7e53e24fe5a81b5a82937c3e3022db0ba3ec2ab",
+    "measuredAtUtc": {
+      "before": "2026-10-05T14:41:35.2882602Z",
+      "after": "2026-10-05T14:43:11.3382452Z"
+    },
+    "checkpointDeltas": {
+      "before": {
+        "skybox_ready": {
+          "runs": [
+            {
+              "run": 1,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 201723904,
+                "workingSetBytes": 100982784,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            },
+            {
+              "run": 2,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 201723904,
+                "workingSetBytes": 100917248,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            },
+            {
+              "run": 3,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 201723904,
+                "workingSetBytes": 100864000,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            }
+          ],
+          "mediansDeltaBytes": {
+            "privateBytes": 201723904,
+            "workingSetBytes": 100917248,
+            "dxgiLocalUsageBytes": 100667392,
+            "dxgiNonLocalUsageBytes": 100675584
+          }
+        },
+        "ingame_ui_dissolve_ready": {
+          "runs": [
+            {
+              "run": 1,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 311525376,
+                "workingSetBytes": 153530368,
+                "dxgiLocalUsageBytes": 155725824,
+                "dxgiNonLocalUsageBytes": 151674880
+              }
+            },
+            {
+              "run": 2,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 312573952,
+                "workingSetBytes": 153755648,
+                "dxgiLocalUsageBytes": 155725824,
+                "dxgiNonLocalUsageBytes": 151674880
+              }
+            },
+            {
+              "run": 3,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 311934976,
+                "workingSetBytes": 153759744,
+                "dxgiLocalUsageBytes": 155725824,
+                "dxgiNonLocalUsageBytes": 151674880
+              }
+            }
+          ],
+          "mediansDeltaBytes": {
+            "privateBytes": 311934976,
+            "workingSetBytes": 153755648,
+            "dxgiLocalUsageBytes": 155725824,
+            "dxgiNonLocalUsageBytes": 151674880
+          }
+        }
+      },
+      "after": {
+        "skybox_ready": {
+          "runs": [
+            {
+              "run": 1,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 202067968,
+                "workingSetBytes": 101154816,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            },
+            {
+              "run": 2,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 202067968,
+                "workingSetBytes": 100995072,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            },
+            {
+              "run": 3,
+              "precedingPhase": "scene_setup_ready",
+              "deltaBytes": {
+                "privateBytes": 201859072,
+                "workingSetBytes": 100982784,
+                "dxgiLocalUsageBytes": 100667392,
+                "dxgiNonLocalUsageBytes": 100675584
+              }
+            }
+          ],
+          "mediansDeltaBytes": {
+            "privateBytes": 202067968,
+            "workingSetBytes": 100995072,
+            "dxgiLocalUsageBytes": 100667392,
+            "dxgiNonLocalUsageBytes": 100675584
+          }
+        },
+        "ingame_ui_dissolve_ready": {
+          "runs": [
+            {
+              "run": 1,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 93077504,
+                "workingSetBytes": 41054208,
+                "dxgiLocalUsageBytes": 44904448,
+                "dxgiNonLocalUsageBytes": 39276544
+              }
+            },
+            {
+              "run": 2,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 92028928,
+                "workingSetBytes": 41598976,
+                "dxgiLocalUsageBytes": 44904448,
+                "dxgiNonLocalUsageBytes": 39276544
+              }
+            },
+            {
+              "run": 3,
+              "precedingPhase": "local_hero_created",
+              "deltaBytes": {
+                "privateBytes": 92471296,
+                "workingSetBytes": 41271296,
+                "dxgiLocalUsageBytes": 44904448,
+                "dxgiNonLocalUsageBytes": 39276544
+              }
+            }
+          ],
+          "mediansDeltaBytes": {
+            "privateBytes": 92471296,
+            "workingSetBytes": 41271296,
+            "dxgiLocalUsageBytes": 44904448,
+            "dxgiNonLocalUsageBytes": 39276544
+          }
+        }
+      }
+    }
+  },
+  "existingUiActualAllocation": {
+    "player": {
+      "uniqueTextures": 20,
+      "defaultAllocationBytes": 43974656,
+      "uploadAllocationBytes": 38666240
+    },
+    "boss": {
+      "uniqueTextures": 20,
+      "defaultAllocationBytes": 42532864,
+      "uploadAllocationBytes": 37552128
+    }
+  },
+  "sourceSha256": {
+    "Client/WarOfDimension/GameFramework.cpp": "f047e1be598ad4deed04e2a3c0179bb8c6a4b34f688476c2be49d8a7c7eadf82",
+    "Client/WarOfDimension/Object.cpp": "4f47875971dca6da9d059aec3e5586de4cde54d661a987833f152dccba560082",
+    "Client/WarOfDimension/Object.h": "13d20c6a925093b5d57510e2133ad5d6c4c6ffd77ca0f533f0b85a3c25cdcda4",
+    "Client/WarOfDimension/Scene.cpp": "74897f28dd0074c01f434e10a33f93a089b40380dde017919455486e7f900e99",
+    "Client/WarOfDimension/Shader.cpp": "f684332625d8b32d68da7a194f7c15b70c949c22ec8dae383a4114a154e93680",
+    "Client/WarOfDimension/Shader.h": "d9c2b39cb9e25973c44a821cf5f4c8666a359152d0bbd1b41ed8ec34242ad53f",
+    "Client/WarOfDimension/Common.hlsl": "4450f8afd78156962ce771d745181ea6c6b74f49796b2c462d9f102ee26bfca1",
+    "Client/WarOfDimension/UI.hlsl": "7f9a188728dfb12af2d03826ae53be8ffde5aab7330d4a9251d61590700d7198",
+    "Client/WarOfDimension/Skybox.hlsl": "579eecafaaec576f8c3b6a020bba1267a642ef8ca6fc5a66d11ca2269098079a",
+    "Client/WarOfDimension/DeferredRender.hlsl": "18a14b00cda8e1234344c19b3bbe092dcd11155b8c9cc0410051e288ccd55efe",
+    "Client/WarOfDimension/SharedDdsTexture.cpp": "e9ecfc2735b64ca7571a8434119d99e814db0d47ca18b64d8000ecb69f645e73",
+    "Client/WarOfDimension/stdafx.cpp": "6b2c3fac9d285fcffc3d2a735d67797bd1cfc3c5ac55df6ab190135b40937263",
+    "scripts/Measure-SkyboxDissolve.py": "4bd0a931078656b454950763577123c2b0efe31ea80c71a8858bec72271583bc"
+  }
+}

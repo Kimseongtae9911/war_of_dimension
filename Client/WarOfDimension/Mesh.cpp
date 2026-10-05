@@ -845,6 +845,7 @@ void CTexturedRectMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 		::memcpy(&m_pcbMappedMesh->value, &m_fTextureValue, sizeof(float));
 		::memcpy(&m_pcbMappedMesh->uvX, &m_fTexutreUV.x, sizeof(float));
 		::memcpy(&m_pcbMappedMesh->uvY, &m_fTexutreUV.y, sizeof(float));
+		m_pcbMappedMesh->uiUvTransform = m_uiUvTransform;
 		/*if (m_fTexutreUV.x > 0.f && m_fTexutreUV.y > 0.f)
 			cout << "My Type is " << m_nType << ", " << m_fTexutreUV.x << ", " << m_fTexutreUV.y << endl;*/
 		D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbMesh->GetGPUVirtualAddress();

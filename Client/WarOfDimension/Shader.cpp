@@ -278,9 +278,9 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 CTexture* CShader::LoadTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* filePath)
 {
-	CTexture* texture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	auto texture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 	texture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, filePath, RESOURCE_TEXTURE2D, 0);
-	return texture;
+	return texture.release();
 }
 
 CTexturedRectMesh* CShader::CreateTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height)

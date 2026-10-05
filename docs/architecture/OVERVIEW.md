@@ -13,6 +13,8 @@
 
 ## 개발 기반 변경의 경계
 
+인게임 UI DDS는 BC7 압축 상태로 기존 장면 로딩 단계에서 사전 준비한다. 원본 픽셀/atlas를 유지하는 wrap 경계 패딩과 DDS 내용 영역 정보→texture→mesh 상수→atlas 계산 후 UV 보정을 추가했다. 새로운 지연/비동기 로딩이나 공용 UI geometry 캐시는 사용하지 않는다. [UI 구현·실측](../portfolio/UI_TEXTURE_COMPRESSION.md), [로딩·UV 흐름도](../diagrams/ui-bc7/README.md)를 참조한다.
+
 장면의 별도 NPC·타인·스킬 컨테이너도 초기 GPU copy fence 완료 후 임시 upload를 반환한다. NPC 32bpp DDS 24장은 같은 해상도·단일 mip의 BC7으로 저장하며 기존 R8 Metallic 1장은 유지한다. 미니언·일반 몬스터의 객체 CB는 2프레임 `ObjectConstantArena`의 256byte draw 영역을 사용한다. 용량이 모자라면 64KiB 페이지를 추가하고 제출 fence 이후 재사용·종료 해제한다. 개별 draw 값과 skinning pose를 유지한다. [최종 구현·실측·화면](../portfolio/NPC_MEMORY_OPTIMIZATION.md), [객체 상수 수명도](../diagrams/npc-memory/README.md)를 참조한다.
 
 모델 material의 DDS는 device·정규 파일 경로·용도별로 읽기 전용 GPU texture와 upload를 공유한다. 각 material의 root parameter/handle 저장은 독립이고 같은 Scene 힙의 SRV는 재사용한다. weak cache는 수명을 연장하지 않으며 GPU 완료 후 upload 및 마지막 소유자 종료 시 전체 자원을 해제한다. [적용과 검증](../portfolio/NPC_RESOURCE_SHARING_REVIEW.md#후속-적용-모델-dds-공유), [DDS 소유권 구조도](../diagrams/dds-sharing/README.md)를 참조한다.

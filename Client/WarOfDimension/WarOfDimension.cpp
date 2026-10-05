@@ -36,6 +36,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	int argumentCount = 0;
 	auto arguments = CommandLineToArgvW(GetCommandLineW(), &argumentCount);
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--capture-ui") == 0)
+	{
+		if (argumentCount != 4 || (wcscmp(arguments[3], L"player") && wcscmp(arguments[3], L"boss")))
+		{ LocalFree(arguments); return 2; }
+		const std::wstring directory = arguments[2];
+		const bool boss = wcscmp(arguments[3], L"boss") == 0; LocalFree(arguments);
+		return RunUiCapture(gGameFramework, directory.c_str(), boss);
+	}
 	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-object-constants") == 0)
 	{
 		if (argumentCount != 3) { LocalFree(arguments); return 2; }

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "C:\\GitFolder\\NewWod\\docs\\diagrams\\ui-bc7\\ui-bc7.dataflow.v2.json",
+  "output": "C:\\GitFolder\\NewWod\\docs\\diagrams\\ui-bc7\\ui-bc7.dataflow.html",
+  "specification": {
+    "sha256": "1edcd65ca3021632d5b99b912135450aaac0b73a30ed256bbb2b7de0691c8ca1",
+    "bytes": 2698
+  },
+  "artifact": {
+    "sha256": "64dda424407e18654c636f5c19696cec76cfcbcd8a269780a1739f27f4fa9fdb",
+    "bytes": 707289
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

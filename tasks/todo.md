@@ -315,10 +315,82 @@ Release 메시 12범주·실제 모델 3종 audit, 영웅 행렬 1,576,969개 �
 
 - [x] 작업 범위·원격 main·최신 소스/실행 파일/에셋/스크린샷 해시·측정 근거 검토
 - [x] 한글 커밋 메시지·정확한 staged snapshot 미리보기 준비, SLNX 기존 수정 제외
-- [ ] 공통 commit 스킬의 미리보기 승인 후 커밋 및 GitHub main push
+- [x] 공통 commit 스킬의 미리보기 승인 후 커밋 및 GitHub main push
 
 사용자가 완료 작업의 커밋·push와 메모리 현황 표를 요청했다. 20~23번의 메모리 비율 분석·NPC 후보 검토·DDS 공유·임시 upload 회수·BC7·객체 arena·전후 화면/문서/검증을 함께 준비한다. 저장소는 C:/GitFolder/NewWod, 브랜치는 main이며 fetch 후 HEAD와 origin/main은 38bb9ee76645b9f7e6cea16cab37d4613c4bb005로 일치했다. 최신 소스/EXE/25 DDS/36 PNG 해시·집계와 151개 문서 링크 검사를 통과했고 직전 Debug/Release 빌드·native GPU·회귀·로컬 실행 결과를 확인했다. 기존 경고와 전체 네트워크 전투 미검증 범위는 유지한다. NewWod.slnx는 제외·보존하고, 실행 로그/바이너리/생성 DB/임시 검사는 Git에 포함하지 않는다. 메시지와 staged fingerprint를 제시한 뒤 승인받아 커밋·push한다.
 
 Stage 검토에서 원본 R8 Metallic의 새 LFS 속성에 맞게 해당 파일만 --renormalize했다. 실제 DDS bytes/SHA는 06e84337b5412950b78efa4950466958376a75615d60e507fe3b7a0b0cac7110으로 그대로이고 Git index만 LFS pointer로 전환한다. 압축 24장과 원본 유지 1장 모두 staged LFS pointer·내용 해시/크기를 검증한다. 공개 측정 JSON/CSV 재생성·현재 소스/바이너리/에셋/PNG와 추가 소스 해시 PASS, staged 공백 검사 PASS. 기존 실행 검증 이후 기능 변경은 없으므로 게임 테스트를 반복하지 않는다.
 
 NPC 수명도 v2 JSON은 검증/전달된 원본이 CRLF인 반면 Git의 기본 정규화가 LF로 바꾸는 것을 확인했다. 해당 JSON 하나에 -text를 지정해 frozen bytes와 receipt SHA-256을 그대로 stage한다. 원본 JSON/HTML은 수정하지 않았으며 두 DDS/NPC 구조도의 staged bytes가 전달 당시 SHA와 일치하는지 검사한다.
+
+완료: 사용자 승인 후 076d2692cb843f6263425f66d108983e3bf7e3f9를 생성하고 GitHub main에 push했다. LFS 25개 업로드 및 ls-remote의 동일 commit을 확인했다. 기존 NewWod.slnx 변경은 제외·보존했다.
+
+## 25. 기동·Title·렌더링·음원 메모리 구간 설명
+
+- [x] 최신 공개 측정 3회의 초기화 checkpoint를 다시 집계하고 실제 생성 코드와 대조
+- [x] Title 화면 자원과 공통 렌더링·음원·shadow map의 측정 범위를 구분
+
+기존 632.22MiB 항목은 scene_setup_ready까지의 누적 Private Bytes다. 3회 평균 순증가를 나누면 framework 준비까지 121.3385MiB, Title/렌더링/UI 생성 127.4922MiB, FMOD 초기화·지정 Sound 디렉터리 로딩 125.8451MiB, 후속 BGM 재생/GPU 제출·정리/shadow map/장면 전환 준비 257.5456MiB다. 각 자원의 최종 보유량을 직접 계측한 값으로 해석하지 않는다. Title 화면은 배경 및 SignIn/SignUp DDS와 UI 객체를 생성하며 비용은 두 번째 구간에 포함된다. 마지막 구간의 주요 생성 자원은 8192×8192·32bit shadow map(논리 texel 256MiB)이며 Title 이미지 단독 비용으로 부르지 않는다. GameFramework.cpp, Scene.cpp, Shader.cpp, UILayer.cpp, SoundManager.cpp, ShadowMap.cpp/h와 measurements.json을 대조했다. 실행 코드 변경이 없어 빌드·게임 재실행은 반복하지 않았다.
+
+## 26. 장면별 자원·음원 및 공통 렌더링 최적화 후보 검토
+
+- [x] Title 종료 시 객체·재질·텍스처·GPU 복사 버퍼의 참조/해제 경로 확인
+- [x] FMOD 장면별·선택 스킬별 로딩과 BGM streaming 가능성, 파일/호출 범위 조사
+- [x] shadow map·G-buffer·skybox·인게임 UI의 비용과 후보 우선순위 문서화
+- [x] 코드·측정 근거·문서 링크·에이전트 색인 검증 및 기존 구조도 대조
+
+검토 결과: Title UI 3개와 player/camera는 장면 전환의 반환 경로가 있으며 DDS payload 합계 4.207703MiB다. 기동 632.22MiB 전체를 Title 잔존량으로 해석하지 않는다. 음원은 전환 시 Stop_All만 호출해 상주한다. 포함된 FMOD 2.00.01을 NOSOUND로 조사하여 142개 생성 성공, PCM 122.86MiB 중 BGM 86.48MiB, 비인게임 BGM 75.44MiB를 확인했다. BGM 4곡 stream 생성 성공, 인게임 BGM 재생 전 FMOD 증가 126.18KiB, 독립 조사 종료 FMOD 0byte. 실제 재생·루프 안정성은 미검증이다. 중복 Jump.wav의 emplace 실패 시 반환 누락 경로도 확인했다.
+
+UI shader/dissolve의 임시 upload 조기 순회 누락 및 UI ReleaseUploadBuffers의 빈 부모 호출을 확인했다. skybox payload 96→24MiB BC7 후보, 승패 UI 각각 25.43MiB·Speed 41.66MiB·Blood 8.06MiB, shadow map 256→64MiB/4096 후보, 위치 RT 31.64→15.82MiB 형식 후보와 화질 검증 조건을 기록했다. GPU/PCM payload·allocator·Private Bytes를 합산하지 않는다. scripts/Measure-StartupResources.py와 공개 JSON, STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md 및 문서 인덱스를 추가했다. 현재 구현은 변경하지 않으며 UI upload→BGM→skybox/UI→shadow/G-buffer 순서로 제안한다.
+
+검증: 234개 compilation source/에이전트 환경·Serena GameFramework 36/Shader 208/SoundManager 14 심볼·Archify doctor PASS. 공개 근거의 DLL/142 음원/9 DDS/14 source SHA, 그룹/PCM 합계와 스크립트 구문·문서 상대 링크·Git 공백 검사를 확인했다. 기존 DDS/arena 구조도와 범위를 대조했고 구현 구조가 그대로라 frozen JSON/HTML을 재생성하지 않았다. 게임 빌드/전투를 반복하지 않았고 실제 Title 전환 live 자원·audio playback·압축/렌더링 품질은 미검증이다. 원본 저장소·SLNX 기존 변경을 보존하며 이번 검토는 커밋·push하지 않았다.
+
+## 27. Shadow map 유지와 위치 RT/UI 동적 로딩 부작용 설명
+
+- [x] 사용자 지시로 shadow map 8192 해상도 유지, 후보 문서 갱신
+- [x] 현재 world position의 조명·shadow 소비 경로와 FP16 간격 계산 확인
+- [x] UI 이벤트/생성 경로와 즉시 효과·결과 UI의 동적 로딩 적합성 구분
+
+Shader의 world position 저장→DeferredLighting/shadow transform 경로와 Microsoft의 half 형식을 대조했다. FP16의 좌표 구간별 간격/최근접 오차를 계산하고, 8192 shadow를 유지해도 위치 정밀도 변경이 그림자/조명에 영향을 줄 수 있음을 기록했다. 서버 충돌/실제 transform과 구분하며 위치 RT는 미적용이다. 승패 UI는 필요한 한 장의 비동기 준비 후보, Speed/Blood는 최초 스킬/피격에 즉시 필요하므로 사전 준비 권장이다. 파일 I/O·GPU upload/fence·게시 단계와 cold/warm cache/최대 frame time 검증을 구분했다. 정확한 UI 동적 로딩 시간은 미측정이며 수치를 추정 성과로 제시하지 않는다. 문서/지시만 갱신, 실행 코드·구조도가 그대로라 게임 빌드·rendering 검증·Archify 재생성을 반복하지 않았다.
+## 28. 위치 G-buffer 유지와 UI BC7 사전 로딩 절감량 계산
+
+- [x] 사용자 지시로 6번 위치 RT 형식 변경도 제외하고 5번 shadow map 유지와 함께 문서 반영
+- [x] INGAME UI DDS의 실제 역할별 생성 범위·헤더·payload 및 BC7 패딩 포함 예상량 계산
+- [x] BC7 압축 상태의 GPU 상주·샘플링과 사전 로딩, 손실 압축·UV·실측 한계 문서화
+
+현재 INGAME UI 고유 DDS 21개 중 역할별 20개가 생성되며 모두 32bit RGBA 계열 단일 mip이다. BC7 payload는 ceil(width/4)×ceil(height/4)×16으로 계산했고 4배수 패딩·UV/atlas 보존이 필요하다. 대형 UI 네 장 100.57→25.17MiB(75.40MiB 절감), 플레이어 20종 142.29→35.62MiB(106.67MiB 절감), 보스 20종 138.02→34.55MiB(103.47MiB 절감) 예상이다. 네 장은 20종의 부분집합이며 합산하지 않는다. 모든 대상의 BC7 화질 채택을 가정한 DDS/texel payload 계산으로 GPU actual allocation·전체 Private Bytes 절감과 구분한다. 압축 DDS를 그대로 업로드해 GPU에서 압축 블록으로 상주하고 샘플링 시 하드웨어가 해석하는 경로를 기존 helper/loader와 Microsoft 설명으로 확인했다. 사전 로딩은 첫 표시의 파일 로딩을 피하며 실제 로딩 시간은 미측정이다.
+
+근거 JSON의 21 DDS/Shader SHA·헤더·byte 계산·역할별 합계, 문서 링크·공백 검사를 완료했다. 구현/에셋·구조 흐름 변경 없이 문서와 계산 근거만 추가해 빌드·게임·Archify 재생성은 반복하지 않았다. BC7 변환·화질·메모리 실측은 미적용이며 원본 저장소·기존 SLNX를 보존했다. 커밋·push하지 않았다.
+
+## 29. UI BC7 압축과 사전 로딩 적용
+
+- [x] 원본 DDS·코드·실행 파일 보존과 동일 fixture 전 메모리 측정
+- [x] 픽셀·wrap 경계·atlas를 보존한 BC7 변환 및 패딩 UV 전달
+- [x] 실제 UI GPU 렌더링 전후 비교·역할별 allocation·실패/수명 검사
+- [x] Debug/Release 빌드·로컬 실행·후 메모리 실측·품질 및 포트폴리오/Archify 기록
+
+사용자가 UI 압축 후 사전 로딩 적용을 요청했다. 그림자 8192와 위치 FP32는 유지한다. 결과 UI를 포함한 기존 생성 시점은 유지하며 다른 음원/skybox/upload 회수 후보는 이번 범위에 포함하지 않는다. 기존 SLNX 수정 및 앞선 검토 자료를 보존하고 원본 저장소는 수정하지 않는다. 커밋·push는 별도 요청 전까지 진행하지 않는다.
+
+적용 결과: 고유 21개 RGBA32 UI DDS를 단일 mip BC7_UNORM으로 변환했다. 원본 내용 픽셀을 보존하고 비4배수 11개에 1px wrap gutter 및 4배수 패딩을 추가했다. DDS reserved1의 UIB7/v1 내용 영역을 기존 파일 bytes에서 검사하여 CTexture/독립 UI mesh 상수로 전달한다. atlas/progress 계산 후 frac(uv)×scale+offset, Speed blur의 각 샘플에도 적용하며 일반 DDS/blur는 identity를 유지한다. 기존 장면 사전 생성/사용 시점은 그대로다. DDS load/내용 계약/upload 실패의 자원은 RAII로 반환한다. 8192 shadow와 FP32 위치 RT는 실제 resource 검사·원본 source hash 대조로 유지 확인했다. UI upload 조기 회수·음원·skybox 등 다른 제안은 미적용이다.
+
+실측: 같은 Release EXE e8c0949a0c22a9cb0824bc770592b7dd31329891051f1fb4b0bb891d54c3f462로 원본 에셋 3회→BC7 에셋 3회를 순차 실행했다. Private 중앙값 1,964.52→1,756.43MiB(208.09MiB/10.59% 감소), WS 897.17→790.44MiB, DXGI LOCAL 1,190.40625→1,084.71875MiB. 파티클 19쌍/재사용 30회·직업/스킬/외형 fixture는 같다. payload 플레이어 142.29→35.68MiB·보스 138.02→34.61MiB, 실제 DEFAULT 각각 147.625→41.9375MiB·143.4375→40.5625MiB, 남은 UPLOAD 각각 143.4375→36.875MiB·139.125→35.8125MiB다. 예상 대비 wrap gutter 비용을 구분하고 지표를 합산하지 않는다.
+
+검증: Debug/Release Client 빌드 및 두 역할 실제 UI 16화면·20 texture·9개 내용 계약 오류 거부·copy 참조/UV 보존·GPU 완료 후 OnDestroy의 DEFAULT/UPLOAD 40개 잔여 참조 0 PASS. 역할별 전후 GPU PNG 64개와 전체 스킬 칸/아이템/게이지 5단계/Speed 4프레임/밝고 어두운 alpha 화면을 보존했다. 원본 픽셀/atlas 동일 배치·내용 영역 보존을 검사하고 실제 화면 및 국소 최대 오차를 직접 비교했다. DDS 최소 채널 PSNR 37.08dB, 화면 foreground 최소 41.34dB/최대 오차87(255단계)을 기록하며 무손실 품질로 주장하지 않는다.
+
+기존 경고: Debug 초기화 ID1328 플레이어1511/보스1435, 추가 비교 grid 이후78/50이며 종료 진단에 같은 누적 경고가 남는다. 오류/removedReason 0. DDS 회귀 기존1328 경고16개씩과 Shader.cpp 기존 C4267은 유지한다. Release 메시12범주/실제3모델·DDS Debug/Release 회귀·일반 로컬 연결/클라 창 기동 PASS. 에이전트235 source·Serena capture9심볼 및 Archify 최종v2 showcase9/9·4해상도 containment·1440light/2048dark 직접 점검 PASS. 첫 구조도 overflow 후보는 로컬 artifacts에 보존하고 현재 후보를 새 v2로 전달했다. 갤러리32선택/64개1920×1080 원본 이미지·링크·페이지 오류0·가로 overflow0 PASS. 공개 JSON/CSV/변환·근거 스크립트 및 포트폴리오/인덱스/개발/구조 문서를 갱신했다.
+
+반복 매치 재진입·장시간 네트워크 전투·모든 해상도/DPI·모든 Twinkle 시각·실제 OOM·운영 DB/블록체인은 미검증이다. 정상 종료 검사도 해당 UI 자원 범위이며 전체 누수0으로 보고하지 않는다. 원본 저장소 및 기존 SLNX SHA f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562를 보존했다. 커밋·push하지 않았다.
+
+## 30. UI 압축 작업 커밋 준비와 하늘·dissolve 후속 검토
+
+- [x] 완료한 UI 압축·앞선 후보 검토 자료의 diff·LFS·근거 해시를 확인하고 커밋 미리보기 준비
+- [x] Space 큐브맵 6면·mip·채널과 dissolve의 실제 형식·사용 채널·기존 측정 구간 확인
+- [x] 추가 절감 후보·수명·화질/효과 부작용·검증 조건을 별도 포트폴리오 근거로 기록
+
+사용자가 현재 작업 커밋·push와 후속 검토를 요청했다. 원본 저장소와 기존 NewWod.slnx 변경은 제외·보존한다. 실행 코드·에셋은 추가 변경하지 않고 검토 자료를 작성한다. 공통 commit 스킬은 준비된 메시지·staged snapshot의 미리보기 승인 후 커밋을 요구하므로, 승인 전에는 커밋·push하지 않는다. HEAD/origin/main은 fetch 후 076d2692cb843f6263425f66d108983e3bf7e3f9로 일치했다.
+
+검토: Space.dds는 BGRA32 2048×2048 6면/단일 mip 96MiB·전체 alpha255. 같은 해상도 BC7 단일 mip 24MiB로 payload 72MiB 절감 후보이며 6면 경계/반짝임·밝기 판정/회전 레이어를 비교해야 한다. 하늘 upload는 현재 fence 후 이미 반환한다. dissolve.dds는 BC1 1024×1024 11 mip, payload 699,064byte(0.666679MiB)로 기존에 압축됐다. BC4는 절감0, R8는 약0.666654MiB 증가, 512 BC1은0.5MiB 절감으로 우선순위가 낮다. dissolve는 공통 t26 한 장·객체 상태 상수이며 UI shader 소비자가 아니다. ingame_ui_dissolve_ready는 UI 생성과 dissolve 합친 구간으로, 기존 각3회 Private 순증가 중앙값297.48→88.19MiB·LOCAL148.5117→42.8242MiB를 확인했다. 개별 DDS 크기로 해석하지 않는다.
+
+UI upload 실제 잔존 플레이어36.8750/보스35.8125MiB와 dissolve staging의 fence 후 반환 후보를 기록했다. dissolve 개별 upload allocation은 새로 계측하지 않았으며 Private 절감으로 단정하지 않는다. dissolve 일반 draw sample 생략·Speed 225 sample blur는 GPU 시간 후보로 구분한다. SharedDdsTexture cube 지원·weak cache와 순차 Scene 반환을 확인했고 상주 cache는 최종 메모리 절감이 아니다. 새 검토 문서·독립 근거 JSON/읽기 전용 스크립트와 인덱스를 추가했다.
+
+검증: 에이전트235 source PASS, Serena Framework36/Object195심볼 PASS. DDS6면/mip payload·전체 alpha·후보 byte 계산·기존6실행 구간 대조 PASS. 현재 UI23소스/21DDS/64PNG/동일Release EXE/역할별native GPU·수명 결과 및 frozen JSON/HTML 해시 PASS, 새 검토 근거13소스/2DDS 해시·Python구문·109문서링크·Git공백 PASS. 직전 Debug/Release UI빌드·실제렌더링/종료·DDS/메시/로컬실행 결과를 유지하며 새 기능 변경이 없어 반복하지 않았다. 기존 C4267·GPU1328 경고와 전체 네트워크 전투 미검증 범위는 유지한다. 현재 구조/흐름 변경이 없어 기존 Archify 수명도 대조만 수행했고 재생성하지 않았다. 원본·SLNX 보존. 커밋·push는 미리보기 승인 대기다.

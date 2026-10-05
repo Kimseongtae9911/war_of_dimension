@@ -1,0 +1,1177 @@
+{
+  "schemaVersion": 1,
+  "kind": "startup_resource_review",
+  "reviewOnly": true,
+  "measuredAtUtc": "2026-10-05T13:16:20.449165+00:00",
+  "method": "FMOD 2.00.01, NOSOUND, no playback, each sample independently loaded/released; PCM payload and FMOD allocator deltas are not process Private Bytes",
+  "sourceSha256": {
+    "Client/WarOfDimension/GameFramework.cpp": "f047e1be598ad4deed04e2a3c0179bb8c6a4b34f688476c2be49d8a7c7eadf82",
+    "Client/WarOfDimension/GameFramework.h": "920303673842176596a1cbdf651d5e92c3c90deb03930ce98c75763009ec1654",
+    "Client/WarOfDimension/Scene.cpp": "74897f28dd0074c01f434e10a33f93a089b40380dde017919455486e7f900e99",
+    "Client/WarOfDimension/Shader.cpp": "3fa7e5a261b03dde02adae66c13ef36b8558f52621d51cac822ce41a6d0fa32c",
+    "Client/WarOfDimension/Shader.h": "409437f06c9ea6ec80f614d6f14d8a11cafe284b0310e6fe291948b193072bc4",
+    "Client/WarOfDimension/Object.cpp": "ca2fda79fb6018cdd23c37c51479002944234211d539170fc1b21abc93ab83d9",
+    "Client/WarOfDimension/Object.h": "be485839395307e6754a8916e8def4252931646ea6067e1fed43667b04a0b389",
+    "Client/WarOfDimension/SoundManager.cpp": "a98ecaefb7bc4a3ca8d4cebb777bdbd6914422ba0b34308fec4bea586db74884",
+    "Client/WarOfDimension/SoundManager.h": "cef21a68deb1b48eb38523eaaf9d859fb0ff26a29d670f34f7df4a86724679c7",
+    "Client/WarOfDimension/fmod_common.h": "78e9c9d7e97c67df148d150f3d76f0268125bb5c4553ad0846f670a371069ef5",
+    "Client/WarOfDimension/ShadowMap.cpp": "60a327d1e9d7cb83d7f44af8558c5c13f234f16335c3c2be7d771454cd90fe17",
+    "Client/WarOfDimension/ShadowMap.h": "8b27538ae6bd40041b63475a6aa45d82f569fd6f91a9a844f41bf8ae940cfe50",
+    "Client/WarOfDimension/DeferredRender.hlsl": "18a14b00cda8e1234344c19b3bbe092dcd11155b8c9cc0410051e288ccd55efe",
+    "Client/WarOfDimension/CBlurShader.cpp": "97dcb345b1e8ca1063ed98a7a5531a45fa46feea93c66651436213876f35ddc1"
+  },
+  "fmodVersionHex": "0x20001",
+  "dllSha256": "938a6841212f2d0b57073a581cca5d6457a4c4fd702623c398d19f91357e2a3d",
+  "audio": [
+    {
+      "path": "Sound/Archer/Archer_ArrowRain.mp3",
+      "sha256": "45c932e178a4a75b2d614ea0ed0a8c26456c7cd7a6fc189ed2d3bceeaefd7244",
+      "fileBytes": 112557,
+      "pcmBytes": 801792,
+      "sampleFmodDeltaBytes": 827128
+    },
+    {
+      "path": "Sound/Archer/Archer_Attack.wav",
+      "sha256": "cccbed23fec60298bef901ee18e6b3d09e550eb3ecba621d1a633593b12f390c",
+      "fileBytes": 31042,
+      "pcmBytes": 30912,
+      "sampleFmodDeltaBytes": 32312
+    },
+    {
+      "path": "Sound/Archer/Archer_BackStep.wav",
+      "sha256": "dbd77bcdf05acb64d75c1a18c109d656c28fa6f57a2def601b503425ff21b4db",
+      "fileBytes": 29424,
+      "pcmBytes": 29380,
+      "sampleFmodDeltaBytes": 30828
+    },
+    {
+      "path": "Sound/Archer/Archer_Die.wav",
+      "sha256": "35e7bec03d5b471c0eb9bcdbe6965e9c9119946b3128e441ab8c5dd12810e1b8",
+      "fileBytes": 91512,
+      "pcmBytes": 91388,
+      "sampleFmodDeltaBytes": 92788
+    },
+    {
+      "path": "Sound/Archer/Archer_Dodge.wav",
+      "sha256": "01b4288727ffce09e5a8a1558aa0faf8a015ca9299ccef864bcad9d79f597e06",
+      "fileBytes": 96660,
+      "pcmBytes": 96512,
+      "sampleFmodDeltaBytes": 97912
+    },
+    {
+      "path": "Sound/Archer/Archer_HunterEyes.flac",
+      "sha256": "312a9f81d3eb1906aba1de68dcb302b469f33a10427a5658f52d6a07f90b9f5d",
+      "fileBytes": 248879,
+      "pcmBytes": 614060,
+      "sampleFmodDeltaBytes": 648393
+    },
+    {
+      "path": "Sound/Archer/Archer_MultipleShot.wav",
+      "sha256": "68e8332552bb820eec23451893cca3e7afeff09ec331f80fc9a99c2fb8dfc96a",
+      "fileBytes": 37634,
+      "pcmBytes": 37504,
+      "sampleFmodDeltaBytes": 38904
+    },
+    {
+      "path": "Sound/Archer/Archer_PenetraitingShot.wav",
+      "sha256": "72568c874553d6bcb8085ebeec0cc06fe880549c749eed25bd95f38e4a7139be",
+      "fileBytes": 93800,
+      "pcmBytes": 93656,
+      "sampleFmodDeltaBytes": 95056
+    },
+    {
+      "path": "Sound/Archer/Archer_PhoenixArrow1.wav",
+      "sha256": "2e436f2007ff406454265430713f0ace6b2faf34057930def36fbfc3a02d6069",
+      "fileBytes": 139886,
+      "pcmBytes": 139772,
+      "sampleFmodDeltaBytes": 141172
+    },
+    {
+      "path": "Sound/Archer/Archer_PhoenixArrow2.wav",
+      "sha256": "64ca7d835dab16fa7b6fcc7dce9d6f33ea489496bc042e1c3b1227ddee5482fa",
+      "fileBytes": 313422,
+      "pcmBytes": 313344,
+      "sampleFmodDeltaBytes": 314792
+    },
+    {
+      "path": "Sound/Archer/Archer_PhonixArrow.wav",
+      "sha256": "64ca7d835dab16fa7b6fcc7dce9d6f33ea489496bc042e1c3b1227ddee5482fa",
+      "fileBytes": 313422,
+      "pcmBytes": 313344,
+      "sampleFmodDeltaBytes": 314792
+    },
+    {
+      "path": "Sound/Archer/Archer_StickyArrow.wav",
+      "sha256": "076ca24e83fdd02a73174f6dd8eee645b3cdd1fe36b81d266f049a7d0b119e80",
+      "fileBytes": 52994,
+      "pcmBytes": 52864,
+      "sampleFmodDeltaBytes": 54264
+    },
+    {
+      "path": "Sound/Archer/Archer_StormArrow.wav",
+      "sha256": "7072b44fb356cb0ea0ce3e659d2468152c8c81f730fed83ff30aaff71468782c",
+      "fileBytes": 26882,
+      "pcmBytes": 26752,
+      "sampleFmodDeltaBytes": 28152
+    },
+    {
+      "path": "Sound/Archer/Archer_StormArrow1.wav",
+      "sha256": "af58b778d0a1d61c9b89175bb9c7fcd3086104740e0893d78566e3ed72667c04",
+      "fileBytes": 30698,
+      "pcmBytes": 30592,
+      "sampleFmodDeltaBytes": 31992
+    },
+    {
+      "path": "Sound/Archer/Archer_Vault.ogg",
+      "sha256": "246690f6df01d5a9dcf67fa43476102db77737c4f5d3d2347e24c9ad3b092ac9",
+      "fileBytes": 22882,
+      "pcmBytes": 65210,
+      "sampleFmodDeltaBytes": 230774
+    },
+    {
+      "path": "Sound/Archer/Archer_VitalPoint.wav",
+      "sha256": "c140d9065aa9771b0f9f3233fcbd418d85703c976f62a3dfb58180d9e651f880",
+      "fileBytes": 889124,
+      "pcmBytes": 886908,
+      "sampleFmodDeltaBytes": 888404
+    },
+    {
+      "path": "Sound/Archer/Archer_WindStep.wav",
+      "sha256": "dd882ad8219b7ec469a4007fb34d953bc23c66ce03f9b65a3313c375f5374c73",
+      "fileBytes": 147500,
+      "pcmBytes": 147456,
+      "sampleFmodDeltaBytes": 148856
+    },
+    {
+      "path": "Sound/BGM/IngameBGM.mp3",
+      "sha256": "bc9642b232882d695457592d399bbff3cd65ff619fea3fbac843826564f9e154",
+      "fileBytes": 1571492,
+      "pcmBytes": 11570688,
+      "sampleFmodDeltaBytes": 11596385,
+      "streamFmodDeltaBytes": 129210
+    },
+    {
+      "path": "Sound/BGM/LobbyBGM.wav",
+      "sha256": "71d160beac59177684d8786013c040d1bc148d5536af5839b49bd70f386da089",
+      "fileBytes": 11376868,
+      "pcmBytes": 11376716,
+      "sampleFmodDeltaBytes": 11378164,
+      "streamFmodDeltaBytes": 104993
+    },
+    {
+      "path": "Sound/BGM/ReadyBGM.ogg",
+      "sha256": "b9f9d9c99b52b69f7b78aec4ecce8af627eda7beaf8c3743cef0b0b939f89d5f",
+      "fileBytes": 3997699,
+      "pcmBytes": 29030400,
+      "sampleFmodDeltaBytes": 29202590,
+      "streamFmodDeltaBytes": 265971
+    },
+    {
+      "path": "Sound/BGM/TitleBGM.ogg",
+      "sha256": "71c3e1472e20865d77cef42faa98e29a21b568788bb75fc846fa8d398e84a204",
+      "fileBytes": 8881201,
+      "pcmBytes": 38699008,
+      "sampleFmodDeltaBytes": 38876675,
+      "streamFmodDeltaBytes": 281212
+    },
+    {
+      "path": "Sound/Button/mouseClick.wav",
+      "sha256": "9a0596cd945a718cebd25fbecab3345ff0a5bb8d25ced52f1edf84e4b80d0c9c",
+      "fileBytes": 13318,
+      "pcmBytes": 12064,
+      "sampleFmodDeltaBytes": 13464
+    },
+    {
+      "path": "Sound/Button/mouseHover.wav",
+      "sha256": "f027e1928852ba7db04afde48e9de562f14e8a8bae46976d361d1e04fd7d7660",
+      "fileBytes": 22452,
+      "pcmBytes": 21184,
+      "sampleFmodDeltaBytes": 22584
+    },
+    {
+      "path": "Sound/Effect/AuctionBuy.wav",
+      "sha256": "30137089a84e6801122d22a2c7faf598de9126e13fd4010b616462194134285a",
+      "fileBytes": 106476,
+      "pcmBytes": 106432,
+      "sampleFmodDeltaBytes": 107832
+    },
+    {
+      "path": "Sound/Effect/AuctionBuyFail.wav",
+      "sha256": "2c17fbddc4fbc947052c2887384563fd57e0e5c4a31245ff78f1ded739774030",
+      "fileBytes": 104848,
+      "pcmBytes": 103680,
+      "sampleFmodDeltaBytes": 105080
+    },
+    {
+      "path": "Sound/Effect/BuyFail.wav",
+      "sha256": "c72a5496d510e7d64c83aeae5bf35fc1a87151022267f4fcb709bccd3d67dc4f",
+      "fileBytes": 55042,
+      "pcmBytes": 54912,
+      "sampleFmodDeltaBytes": 56312
+    },
+    {
+      "path": "Sound/Effect/ChannelChange.wav",
+      "sha256": "41dd3683d933d43d82b4cd5a5240f26456b459dd300084c048c3ffad2f34032b",
+      "fileBytes": 94508,
+      "pcmBytes": 94464,
+      "sampleFmodDeltaBytes": 95864
+    },
+    {
+      "path": "Sound/Effect/ChannelChangeFail.wav",
+      "sha256": "db13bfecba78728a1b33bdcccab64b636509f296e5f430e270fc89e380820c2a",
+      "fileBytes": 51628,
+      "pcmBytes": 51584,
+      "sampleFmodDeltaBytes": 52984
+    },
+    {
+      "path": "Sound/Effect/GameOverOgre.wav",
+      "sha256": "cadce68bb9cacbe3175edb59d69ea2c145795a7a7c6cbf7507a421aac07d79a0",
+      "fileBytes": 219828,
+      "pcmBytes": 219784,
+      "sampleFmodDeltaBytes": 221184
+    },
+    {
+      "path": "Sound/Effect/GameOverProgrammer.wav",
+      "sha256": "35e7bec03d5b471c0eb9bcdbe6965e9c9119946b3128e441ab8c5dd12810e1b8",
+      "fileBytes": 91512,
+      "pcmBytes": 91388,
+      "sampleFmodDeltaBytes": 92788
+    },
+    {
+      "path": "Sound/Effect/Jump.wav",
+      "sha256": "ef9015413f05a88cd9ea415385618b890914743abe0dc0dbe24ffc591a9afdc7",
+      "fileBytes": 127362,
+      "pcmBytes": 127232,
+      "sampleFmodDeltaBytes": 128632
+    },
+    {
+      "path": "Sound/Effect/LobbyShopRandom.wav",
+      "sha256": "df748c7f3bdd0fbb76479656d3764504fe053adb2fee1f6371c661c9fdb74fd9",
+      "fileBytes": 270414,
+      "pcmBytes": 270336,
+      "sampleFmodDeltaBytes": 271784
+    },
+    {
+      "path": "Sound/Effect/MagneticFenceDeactive.wav",
+      "sha256": "fa3941716458e3a2a2c0aa97cab4d44301226190c2d5c0dea48266d50c5aafa1",
+      "fileBytes": 158452,
+      "pcmBytes": 157184,
+      "sampleFmodDeltaBytes": 158584
+    },
+    {
+      "path": "Sound/Effect/ShopBuy.wav",
+      "sha256": "02b42d3a3bf01f18b4a75114f6d1993aa5718c1c8b1d83b2115a33b52a0ca3d0",
+      "fileBytes": 29828,
+      "pcmBytes": 29248,
+      "sampleFmodDeltaBytes": 30648
+    },
+    {
+      "path": "Sound/Effect/ShopOpen.wav",
+      "sha256": "94952265d7aab4087e840b4875463e56116f63658581a99305dcfed3c0d1e67a",
+      "fileBytes": 48820,
+      "pcmBytes": 47552,
+      "sampleFmodDeltaBytes": 48952
+    },
+    {
+      "path": "Sound/Effect/SkillRemove.wav",
+      "sha256": "ad51c361872c89f557945ee820a327695a5fe42cde529c9130786d6f4b2bea21",
+      "fileBytes": 11906,
+      "pcmBytes": 11776,
+      "sampleFmodDeltaBytes": 13176
+    },
+    {
+      "path": "Sound/Effect/SkillSelect.wav",
+      "sha256": "9a0596cd945a718cebd25fbecab3345ff0a5bb8d25ced52f1edf84e4b80d0c9c",
+      "fileBytes": 13318,
+      "pcmBytes": 12064,
+      "sampleFmodDeltaBytes": 13464
+    },
+    {
+      "path": "Sound/Effect/Teleport.wav",
+      "sha256": "1b86602d536f1b64884f503b2556f32fe3b4842d8c186da3eb7c903aaba46dd3",
+      "fileBytes": 169512,
+      "pcmBytes": 168320,
+      "sampleFmodDeltaBytes": 169720
+    },
+    {
+      "path": "Sound/Effect/TeleportActive.wav",
+      "sha256": "7c130c7a1cf7f6e31324821557d89f0b4b898c270c7c0ad4384af5c2c64e8565",
+      "fileBytes": 272508,
+      "pcmBytes": 272384,
+      "sampleFmodDeltaBytes": 273784
+    },
+    {
+      "path": "Sound/Effect/TowerActive.wav",
+      "sha256": "576a76827ac47f33c3a0787b24c1757bf3d2ead6cc10c462d5334ce8381de5db",
+      "fileBytes": 315498,
+      "pcmBytes": 315384,
+      "sampleFmodDeltaBytes": 316832
+    },
+    {
+      "path": "Sound/Effect/UseItem.wav",
+      "sha256": "4209a239c4e75bfd71e5907aca665bcfedf080245264171220ba4635ad1a4927",
+      "fileBytes": 16214,
+      "pcmBytes": 14936,
+      "sampleFmodDeltaBytes": 16336
+    },
+    {
+      "path": "Sound/Fighter/Fight_Counter.wav",
+      "sha256": "b45fc70409af2f5b76170e228244829bc42b152bceec001a6a315a8710f7b526",
+      "fileBytes": 268220,
+      "pcmBytes": 268176,
+      "sampleFmodDeltaBytes": 269624
+    },
+    {
+      "path": "Sound/Fighter/Fight_CounterAttack.wav",
+      "sha256": "c9accb093361113b7cbfd4fcb6e32520fc546338a5bd29748de7bad1bed2a6e6",
+      "fileBytes": 1131500,
+      "pcmBytes": 1131456,
+      "sampleFmodDeltaBytes": 1132904
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Attack.wav",
+      "sha256": "148bf63212ea2d573486f223ccad723a30e0a100d3730e03f577a3234948e447",
+      "fileBytes": 25346,
+      "pcmBytes": 25216,
+      "sampleFmodDeltaBytes": 26616
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Dash.wav",
+      "sha256": "e80dc597b0282a2541503642c159da80679053c3bf4d827d9650bfb60b96c6ed",
+      "fileBytes": 20538,
+      "pcmBytes": 19346,
+      "sampleFmodDeltaBytes": 20746
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Die.wav",
+      "sha256": "a79a13518a0a8548e464d84979ce6ce2939df0ab765d98545e9e3b92467dbf2e",
+      "fileBytes": 147314,
+      "pcmBytes": 147200,
+      "sampleFmodDeltaBytes": 148600
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Dodge.wav",
+      "sha256": "6622bcb6893821248a274622a7ef3e53450fb4e16225c33445b7ccc93f5f6cea",
+      "fileBytes": 19930,
+      "pcmBytes": 18738,
+      "sampleFmodDeltaBytes": 20138
+    },
+    {
+      "path": "Sound/Fighter/Fighter_DragonFist.wav",
+      "sha256": "e40ced93e109294fabad0e2d765771817ce16e9df1041dc87fa25e4269048667",
+      "fileBytes": 519552,
+      "pcmBytes": 519508,
+      "sampleFmodDeltaBytes": 520956
+    },
+    {
+      "path": "Sound/Fighter/Fighter_FireBall.wav",
+      "sha256": "25cfdcae560f261de8a85fc82c2602929376ceb551e50f34198537f1cfcf1ec5",
+      "fileBytes": 110450,
+      "pcmBytes": 110336,
+      "sampleFmodDeltaBytes": 111736
+    },
+    {
+      "path": "Sound/Fighter/Fighter_indestructible.wav",
+      "sha256": "b513e434ba6170b347037539da9270fe8a2cef1ad97bbdc7769f7ad0314d25ec",
+      "fileBytes": 165448,
+      "pcmBytes": 165192,
+      "sampleFmodDeltaBytes": 168040
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Meditation.wav",
+      "sha256": "7372283f75ab62f95e1dec5871616904772b2afbc94d402e26d4b487715792b7",
+      "fileBytes": 502384,
+      "pcmBytes": 502340,
+      "sampleFmodDeltaBytes": 503788
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Meditation2.wav",
+      "sha256": "37535fb27ab602b4f6b999545b385b70d7b09bc3dffe1f965b27eceb1e33304d",
+      "fileBytes": 728232,
+      "pcmBytes": 664917,
+      "sampleFmodDeltaBytes": 666341
+    },
+    {
+      "path": "Sound/Fighter/Fighter_PointBlood.wav",
+      "sha256": "05a475504915175ed151494352214527f506bad537df7de1007b5104607ca6b4",
+      "fileBytes": 142934,
+      "pcmBytes": 142890,
+      "sampleFmodDeltaBytes": 144314
+    },
+    {
+      "path": "Sound/Fighter/Fighter_Rising Dragon.wav",
+      "sha256": "cd3ed1c4c87ac9d959708c7d0a3a318828fa70ee354bdd713f0bd95b068f6eea",
+      "fileBytes": 264776,
+      "pcmBytes": 264646,
+      "sampleFmodDeltaBytes": 266046
+    },
+    {
+      "path": "Sound/Fighter/Fighter_SpinKick.wav",
+      "sha256": "301de30f3813c7f89195d4d0db6060524f95302a1ff295361baec8b107761a07",
+      "fileBytes": 99936,
+      "pcmBytes": 99836,
+      "sampleFmodDeltaBytes": 101236
+    },
+    {
+      "path": "Sound/Fighter/Fighter_WildAttack.wav",
+      "sha256": "948045c7fc0de81907e8209ee8e2b4a6217ffe57e954f8cb32d95dd4291bd485",
+      "fileBytes": 36546,
+      "pcmBytes": 36416,
+      "sampleFmodDeltaBytes": 37816
+    },
+    {
+      "path": "Sound/Fighter/Fighter_WindKick.wav",
+      "sha256": "01347647128685ad372e3a96727a9a29165a73e4e36cf6dac83acf2f0b1c79c9",
+      "fileBytes": 122924,
+      "pcmBytes": 122880,
+      "sampleFmodDeltaBytes": 124328
+    },
+    {
+      "path": "Sound/Footstep01.wav",
+      "sha256": "98d822a85787bf2ba073d8889ef4bf88dc4bd521f6105c357ceeb3aec5e69986",
+      "fileBytes": 49372,
+      "pcmBytes": 47992,
+      "sampleFmodDeltaBytes": 49392
+    },
+    {
+      "path": "Sound/Footstep02.wav",
+      "sha256": "a1ea7ca04b0753467c3e5563c6ff46540a31d77f81bffad2a2b12c345fd43883",
+      "fileBytes": 51060,
+      "pcmBytes": 49672,
+      "sampleFmodDeltaBytes": 51072
+    },
+    {
+      "path": "Sound/Footstep03.wav",
+      "sha256": "426179ec94aa76c03b25defa920b8a8967eab61f2862708939f4f1956b72b716",
+      "fileBytes": 54208,
+      "pcmBytes": 52808,
+      "sampleFmodDeltaBytes": 54208
+    },
+    {
+      "path": "Sound/Footstep04.wav",
+      "sha256": "c2355e96249a131c60e4dbd4a005da3d0e2e5440a7a7d9b48df403dd85ba5618",
+      "fileBytes": 39646,
+      "pcmBytes": 38304,
+      "sampleFmodDeltaBytes": 39704
+    },
+    {
+      "path": "Sound/Jump.wav",
+      "sha256": "f5e03d6c9acebb02811238c7332680a22e8a96fbfe1bb8d2a461be8444548cf6",
+      "fileBytes": 22370,
+      "pcmBytes": 22326,
+      "sampleFmodDeltaBytes": 23726
+    },
+    {
+      "path": "Sound/Land.wav",
+      "sha256": "aba3c5dc831f85853d0546a8f6065d63825640ae568b39520c289270cabaed1a",
+      "fileBytes": 45462,
+      "pcmBytes": 45418,
+      "sampleFmodDeltaBytes": 46818
+    },
+    {
+      "path": "Sound/Npc/AuctionNpc.mp3",
+      "sha256": "3e0861945d3ef044214a9c0960e90dda117c56895bd0fcf7d3c44cfe93cf9ce7",
+      "fileBytes": 42381,
+      "pcmBytes": 170496,
+      "sampleFmodDeltaBytes": 193044
+    },
+    {
+      "path": "Sound/Npc/BearAttack.wav",
+      "sha256": "db0cacfa48f1c246fc622a5eb3706b809623a3e222a73e48951a65d8e28f5a42",
+      "fileBytes": 73388,
+      "pcmBytes": 73344,
+      "sampleFmodDeltaBytes": 74744
+    },
+    {
+      "path": "Sound/Npc/BearDeath.wav",
+      "sha256": "cf57bb3a7f5dd3b0234bacb40cd54b4c74ac0a96ede3cbffb56a28ca8a60d540",
+      "fileBytes": 78012,
+      "pcmBytes": 77968,
+      "sampleFmodDeltaBytes": 79368
+    },
+    {
+      "path": "Sound/Npc/BeholderAttack.wav",
+      "sha256": "f13dd9a37514c004a1c343277e30e600d3905e0ed4f294c9e4b1f676eb0dea1c",
+      "fileBytes": 26226,
+      "pcmBytes": 26096,
+      "sampleFmodDeltaBytes": 27496
+    },
+    {
+      "path": "Sound/Npc/BeholderDeath.wav",
+      "sha256": "c66551460b6e7b5331c713cbb6f3d04e14bccf12d5660a434cac8e86072dee4a",
+      "fileBytes": 65546,
+      "pcmBytes": 65416,
+      "sampleFmodDeltaBytes": 66816
+    },
+    {
+      "path": "Sound/Npc/BlockChainNpc.wav",
+      "sha256": "9dfceb212e1fda377705142492aaac13ebee530c88eeb0c507c33a331876de7a",
+      "fileBytes": 145964,
+      "pcmBytes": 145920,
+      "sampleFmodDeltaBytes": 147320
+    },
+    {
+      "path": "Sound/Npc/ChestAttack.wav",
+      "sha256": "feec95cf3cfc56dd2921dc1d0e5d5dd2d62d477387f21abba700bfa854d7c8d2",
+      "fileBytes": 36174,
+      "pcmBytes": 36044,
+      "sampleFmodDeltaBytes": 37444
+    },
+    {
+      "path": "Sound/Npc/ChestDeath.wav",
+      "sha256": "5c46a8efb8303a4e0e61c8171d4c4786d8adc625cec0fa96970c04b153c3611b",
+      "fileBytes": 32584,
+      "pcmBytes": 32540,
+      "sampleFmodDeltaBytes": 33940
+    },
+    {
+      "path": "Sound/Npc/CustomizeNpc.wav",
+      "sha256": "56419162b299605e1b8d5cc7c04c7d839e26ce0b808cec96c452ba91fa9d6c3a",
+      "fileBytes": 93484,
+      "pcmBytes": 93440,
+      "sampleFmodDeltaBytes": 94840
+    },
+    {
+      "path": "Sound/Npc/GolemAttack.wav",
+      "sha256": "c898f92f235559a6dc6b44277b898c326ea6b7beffe38ebe4ad1ffdb5a564bb6",
+      "fileBytes": 61308,
+      "pcmBytes": 61184,
+      "sampleFmodDeltaBytes": 62584
+    },
+    {
+      "path": "Sound/Npc/GolemDeath.wav",
+      "sha256": "ea8cfef4367ef582a13b10c9b243be563b00216d525a3468ff0ce66ed7902672",
+      "fileBytes": 73644,
+      "pcmBytes": 73600,
+      "sampleFmodDeltaBytes": 75000
+    },
+    {
+      "path": "Sound/Npc/GreenAttack.wav",
+      "sha256": "6c2bc2b1cb9bf541bf37be1d88614e842257919e59eda4d9eb90d349a36b4f5e",
+      "fileBytes": 78892,
+      "pcmBytes": 78848,
+      "sampleFmodDeltaBytes": 80248
+    },
+    {
+      "path": "Sound/Npc/GreenDeath.wav",
+      "sha256": "d66524bca2f56cf06ede7ad14bc89817b11e2c263020c759a5f8cdf62ed816a4",
+      "fileBytes": 162696,
+      "pcmBytes": 162652,
+      "sampleFmodDeltaBytes": 164052
+    },
+    {
+      "path": "Sound/Npc/MinionAttack.wav",
+      "sha256": "cf889c6cc95f3dc1a0c19aa9fb65b0bc5ae4f1645acd2140dbe67a5233a5c322",
+      "fileBytes": 30678,
+      "pcmBytes": 30548,
+      "sampleFmodDeltaBytes": 31948
+    },
+    {
+      "path": "Sound/Npc/MinionDeath.wav",
+      "sha256": "c66551460b6e7b5331c713cbb6f3d04e14bccf12d5660a434cac8e86072dee4a",
+      "fileBytes": 65546,
+      "pcmBytes": 65416,
+      "sampleFmodDeltaBytes": 66816
+    },
+    {
+      "path": "Sound/Npc/MinotaurAttack.wav",
+      "sha256": "ddf8c3619beeca4b4753a65a21d3348cc7610d1486afcfa3ac2c7551f62391f5",
+      "fileBytes": 49364,
+      "pcmBytes": 49320,
+      "sampleFmodDeltaBytes": 50720
+    },
+    {
+      "path": "Sound/Npc/MinotaurDeath.wav",
+      "sha256": "832ba65f4b958b26238f3ad149de61d96bda12c98dde4da8ca3cad5ffa66a5c5",
+      "fileBytes": 79992,
+      "pcmBytes": 79868,
+      "sampleFmodDeltaBytes": 81268
+    },
+    {
+      "path": "Sound/Npc/RedAttack.wav",
+      "sha256": "4175fa86af6946494a5c147d6e9a965caf1b280d4889c4e33ed76f7482294b90",
+      "fileBytes": 60408,
+      "pcmBytes": 60284,
+      "sampleFmodDeltaBytes": 61684
+    },
+    {
+      "path": "Sound/Npc/RedDeath.wav",
+      "sha256": "c6894e289ef047383958cd60782bb9d10b6dc37c5a5306bd588eb38a240177c4",
+      "fileBytes": 222332,
+      "pcmBytes": 222208,
+      "sampleFmodDeltaBytes": 223608
+    },
+    {
+      "path": "Sound/Npc/ShopNpc.mp3",
+      "sha256": "36fbc580df946720a9e1e9bbbdfff625b0d4f75f3fce9faeb9490a3e80682b77",
+      "fileBytes": 19053,
+      "pcmBytes": 77184,
+      "sampleFmodDeltaBytes": 99732
+    },
+    {
+      "path": "Sound/OgreWalk.wav",
+      "sha256": "4c6cc48f964991fa5e6942323e8591e835d10dd4a61d9e807e96512568c3aa25",
+      "fileBytes": 85386,
+      "pcmBytes": 85256,
+      "sampleFmodDeltaBytes": 86656
+    },
+    {
+      "path": "Sound/Orge/Ogre_HeavySwing.wav",
+      "sha256": "433f9277e036d72bbc7e0e2fc494a1a39ac2d14763e341a04d1a1439d2799d0a",
+      "fileBytes": 51708,
+      "pcmBytes": 51584,
+      "sampleFmodDeltaBytes": 52984
+    },
+    {
+      "path": "Sound/Orge/Ogre_RockThrow.wav",
+      "sha256": "433f9277e036d72bbc7e0e2fc494a1a39ac2d14763e341a04d1a1439d2799d0a",
+      "fileBytes": 51708,
+      "pcmBytes": 51584,
+      "sampleFmodDeltaBytes": 52984
+    },
+    {
+      "path": "Sound/Orge/Orge_Attack.wav",
+      "sha256": "049385b177a5231b0cd03a81f11b9121a8dccd181e792daabaad9de3a78ca0a0",
+      "fileBytes": 82306,
+      "pcmBytes": 82176,
+      "sampleFmodDeltaBytes": 83576
+    },
+    {
+      "path": "Sound/Orge/Orge_Butting.wav",
+      "sha256": "219e86dedeba5b689f4c565c38b3764f515acc2948eecebe5346f6133e3dd9b3",
+      "fileBytes": 92180,
+      "pcmBytes": 92136,
+      "sampleFmodDeltaBytes": 93536
+    },
+    {
+      "path": "Sound/Orge/Orge_Charging.wav",
+      "sha256": "c39aeed7e494863827913f1ab3ce103686522803e670049322f16819ba520d54",
+      "fileBytes": 103200,
+      "pcmBytes": 497664,
+      "sampleFmodDeltaBytes": 522368
+    },
+    {
+      "path": "Sound/Orge/Orge_Crunch.wav",
+      "sha256": "8c26f9ef14a0b4972d13ab3a6896c11507ff3c5a879780368d57680328d654db",
+      "fileBytes": 188928,
+      "pcmBytes": 1138176,
+      "sampleFmodDeltaBytes": 1162880
+    },
+    {
+      "path": "Sound/Orge/Orge_DimensionCrush.wav",
+      "sha256": "a67eac092affecef01de984b97043e16cafdac90f32c8ccae70e1d2475519dc9",
+      "fileBytes": 2582148,
+      "pcmBytes": 2582104,
+      "sampleFmodDeltaBytes": 2583552
+    },
+    {
+      "path": "Sound/Orge/Orge_DimensionPunch.wav",
+      "sha256": "c6d43707e0657e0f1e2fb6f7ea53e6adc360efbdf497f86a9a2fd48a13f31d4e",
+      "fileBytes": 180480,
+      "pcmBytes": 1087488,
+      "sampleFmodDeltaBytes": 1112192
+    },
+    {
+      "path": "Sound/Orge/Orge_Endure.wav",
+      "sha256": "22cb0e569aa14f6b75732ce1f95a31770b78f153f541e23c99d744bde30a03ad",
+      "fileBytes": 1089502,
+      "pcmBytes": 1089458,
+      "sampleFmodDeltaBytes": 1090858
+    },
+    {
+      "path": "Sound/Orge/Orge_Gluttony.wav",
+      "sha256": "727ef309ff7a8c732ca8245aacb77b2fc101e33f5f770879a92b48d11a15e8ba",
+      "fileBytes": 218880,
+      "pcmBytes": 1052928,
+      "sampleFmodDeltaBytes": 1077632
+    },
+    {
+      "path": "Sound/Orge/Orge_Roar.wav",
+      "sha256": "5589f57f9ee2ad6a235a547c1715e3c90987e2af82ffb6a97f65d0dd2975b96a",
+      "fileBytes": 62693,
+      "pcmBytes": 175104,
+      "sampleFmodDeltaBytes": 197456
+    },
+    {
+      "path": "Sound/Orge/Orge_RockThrowArrive.wav",
+      "sha256": "cc92d264b1b02dd6831e76268d384c8a17a2af82850ddc152d21d50633cd6ae7",
+      "fileBytes": 74400,
+      "pcmBytes": 359424,
+      "sampleFmodDeltaBytes": 384128
+    },
+    {
+      "path": "Sound/Programmer/Programmer_Delete.wav",
+      "sha256": "fce9462ff3022460c56a081673ef963e6e6d41dc81ce7eefd4f2820cd0974386",
+      "fileBytes": 48172,
+      "pcmBytes": 48128,
+      "sampleFmodDeltaBytes": 49528
+    },
+    {
+      "path": "Sound/Programmer/Programmer_HelloWorld.wav",
+      "sha256": "8c2882f2a2ffca017b401d25d6c70a30d147f5bb52b0f1ca113a7abb177a4ac5",
+      "fileBytes": 177292,
+      "pcmBytes": 176124,
+      "sampleFmodDeltaBytes": 177524
+    },
+    {
+      "path": "Sound/Programmer/Programmer_MinusStats.wav",
+      "sha256": "c3a771c1272c199652f2a2f9e128cc41357a08dffaecdbdeb3d6f0cb3f7c2751",
+      "fileBytes": 146562,
+      "pcmBytes": 146432,
+      "sampleFmodDeltaBytes": 147832
+    },
+    {
+      "path": "Sound/Programmer/Programmer_PlusStat.mp3",
+      "sha256": "c8b3733f0cdbbcb21c2b45675d956a3043330fa5576f559d995921de867b046b",
+      "fileBytes": 12164,
+      "pcmBytes": 138240,
+      "sampleFmodDeltaBytes": 163140
+    },
+    {
+      "path": "Sound/Programmer/Programmer_Pointer.wav",
+      "sha256": "fd3d76e9fa899fdac7042d30a01f1461b4b9cfd36e4b4a82bc72409b026e43b0",
+      "fileBytes": 105074,
+      "pcmBytes": 104960,
+      "sampleFmodDeltaBytes": 106360
+    },
+    {
+      "path": "Sound/Programmer/Programmer_Release.wav",
+      "sha256": "589ea1b78e3d50d045785ca9df06bffc9e93d1792e7edfd4fba94d6adb5954dc",
+      "fileBytes": 282404,
+      "pcmBytes": 282360,
+      "sampleFmodDeltaBytes": 283808
+    },
+    {
+      "path": "Sound/Programmer/Programmer_Return0.wav",
+      "sha256": "243ec008c19ebf75f704a9d66400fabfca8699664dfdc9d7c73bf9089cf96b92",
+      "fileBytes": 155736,
+      "pcmBytes": 154568,
+      "sampleFmodDeltaBytes": 155968
+    },
+    {
+      "path": "Sound/Programmer/Programmer_SwitchCaseLaser.wav",
+      "sha256": "d28d45872fa45c90fdc26211106fbb2912ce125c25454a657504ec84d8510362",
+      "fileBytes": 739662,
+      "pcmBytes": 739584,
+      "sampleFmodDeltaBytes": 741032
+    },
+    {
+      "path": "Sound/Programmer/Programmer_SwitchCaseMove.wav",
+      "sha256": "367cb7cb8bd0a7813875ea74279f658e6ddab7d258139781d660f5a3b705ec35",
+      "fileBytes": 166514,
+      "pcmBytes": 166400,
+      "sampleFmodDeltaBytes": 167800
+    },
+    {
+      "path": "Sound/Programmer/Programmer_WhileTrue.wav",
+      "sha256": "3eff0344164475bd8c9ba5b6354317c3e0a71d0690b75a65d3e0f502dba1174e",
+      "fileBytes": 9528126,
+      "pcmBytes": 9515796,
+      "sampleFmodDeltaBytes": 9517292
+    },
+    {
+      "path": "Sound/Structure/NexusDestroy.wav",
+      "sha256": "90f5a29527fe918c955ad7971fa0dc4d9a15550e072945cf7ab8bf3024e1321d",
+      "fileBytes": 191428,
+      "pcmBytes": 191384,
+      "sampleFmodDeltaBytes": 192784
+    },
+    {
+      "path": "Sound/Structure/TowerAttack.wav",
+      "sha256": "faec58e344a328991039c0ad37b3fc868c12a4faf764adf149422281091d345b",
+      "fileBytes": 68062,
+      "pcmBytes": 67932,
+      "sampleFmodDeltaBytes": 69332
+    },
+    {
+      "path": "Sound/Structure/TowerDestroy.wav",
+      "sha256": "5b00473859d49653983df96d8792d38e52273228a3fd990736d44f92abee1a2b",
+      "fileBytes": 117804,
+      "pcmBytes": 117760,
+      "sampleFmodDeltaBytes": 119160
+    },
+    {
+      "path": "Sound/Swordman/Swordman_AnkleCut.wav",
+      "sha256": "62b66fb60522bacea689b67a2c9901b3086398cd966ecc24537778b3938248ec",
+      "fileBytes": 70818,
+      "pcmBytes": 70774,
+      "sampleFmodDeltaBytes": 72174
+    },
+    {
+      "path": "Sound/Swordman/Swordman_Attack.wav",
+      "sha256": "17dd02f5bdd94d50ad7a96604c40f0ff24c2574f744dd3803189f10b6623e580",
+      "fileBytes": 50988,
+      "pcmBytes": 50944,
+      "sampleFmodDeltaBytes": 52344
+    },
+    {
+      "path": "Sound/Swordman/Swordman_AuraBlade.wav",
+      "sha256": "f7bee32dbc6d640358b0e1b362b7028da04398084bba364b435a249fff26d434",
+      "fileBytes": 138384,
+      "pcmBytes": 137216,
+      "sampleFmodDeltaBytes": 138616
+    },
+    {
+      "path": "Sound/Swordman/Swordman_Berserk.wav",
+      "sha256": "529b5016389f74bfdf0ecc6ae46a34a347545df8143f8ea866b951af2475cd56",
+      "fileBytes": 132492,
+      "pcmBytes": 131324,
+      "sampleFmodDeltaBytes": 132724
+    },
+    {
+      "path": "Sound/Swordman/Swordman_DefensiveStance.wav",
+      "sha256": "91372517fb7a9b9ac6ab70e51ba73656e32173559e10d6dfc097167e84dc3959",
+      "fileBytes": 85326,
+      "pcmBytes": 85248,
+      "sampleFmodDeltaBytes": 86696
+    },
+    {
+      "path": "Sound/Swordman/Swordman_Die.wav",
+      "sha256": "b87fc42c635e2a17b71c28dfed4bcd4b2f8fb7aea549a791acae2f3eee82f3eb",
+      "fileBytes": 189042,
+      "pcmBytes": 188928,
+      "sampleFmodDeltaBytes": 190328
+    },
+    {
+      "path": "Sound/Swordman/Swordman_Dodge.wav",
+      "sha256": "6985253fbc0d4f6793fa1fd08100fb0ba39b23654a7261ce0c29db5960431cc7",
+      "fileBytes": 63636,
+      "pcmBytes": 63488,
+      "sampleFmodDeltaBytes": 64888
+    },
+    {
+      "path": "Sound/Swordman/Swordman_HeavySlash.wav",
+      "sha256": "afd29a060539f2d055c6bf2c29dc083fc48837799d2e243b1d98fb534391f918",
+      "fileBytes": 15242,
+      "pcmBytes": 15112,
+      "sampleFmodDeltaBytes": 16512
+    },
+    {
+      "path": "Sound/Swordman/Swordman_HellBlade.wav",
+      "sha256": "2041c260b6072eada39d66e9cce7b2f2defbb3b8e85f615311957419ef19618c",
+      "fileBytes": 797926,
+      "pcmBytes": 796672,
+      "sampleFmodDeltaBytes": 798120
+    },
+    {
+      "path": "Sound/Swordman/Swordman_JudgementSword01.wav",
+      "sha256": "6790e2a37800b46096ef3c7b0f10db02bacd077e62c537273dcde5b4f2da362d",
+      "fileBytes": 68768,
+      "pcmBytes": 68724,
+      "sampleFmodDeltaBytes": 70124
+    },
+    {
+      "path": "Sound/Swordman/Swordman_JudgementSword02.wav",
+      "sha256": "22d4fbc81f1f28c511d0a05a61129fb582d407b7117fab26cc3fc15bc15f749c",
+      "fileBytes": 135976,
+      "pcmBytes": 135932,
+      "sampleFmodDeltaBytes": 137332
+    },
+    {
+      "path": "Sound/Swordman/Swordman_ProtectedArea.wav",
+      "sha256": "fd3d76e9fa899fdac7042d30a01f1461b4b9cfd36e4b4a82bc72409b026e43b0",
+      "fileBytes": 105074,
+      "pcmBytes": 104960,
+      "sampleFmodDeltaBytes": 106360
+    },
+    {
+      "path": "Sound/Swordman/Swordman_Run.wav",
+      "sha256": "589ea1b78e3d50d045785ca9df06bffc9e93d1792e7edfd4fba94d6adb5954dc",
+      "fileBytes": 282404,
+      "pcmBytes": 282360,
+      "sampleFmodDeltaBytes": 283808
+    },
+    {
+      "path": "Sound/Swordman/Swordman_ShieldBash.wav",
+      "sha256": "e0c8dda120518346a317241a19a216dfe2a6b4185ca934af93e72b54ad301f7f",
+      "fileBytes": 69804,
+      "pcmBytes": 69760,
+      "sampleFmodDeltaBytes": 71160
+    },
+    {
+      "path": "Sound/Swordman/Swordman_WarCry.wav",
+      "sha256": "afbb3d414083c32013e9753aa8e6dcccc23158e4006cb5092ef70c9a7c2a1abd",
+      "fileBytes": 203578,
+      "pcmBytes": 203500,
+      "sampleFmodDeltaBytes": 204900
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_BigBang01.wav",
+      "sha256": "5cb459bc454afae2cf1992f9aa7f8369b3f495fc2b9a2ae51aba0c9e8bf19b74",
+      "fileBytes": 36318,
+      "pcmBytes": 35056,
+      "sampleFmodDeltaBytes": 36456
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_BigBang02.wav",
+      "sha256": "12e016f24d881a1b15dbda21073fd2bf2b1650297e2ce17f004ce594385f7d6b",
+      "fileBytes": 285328,
+      "pcmBytes": 284160,
+      "sampleFmodDeltaBytes": 285560
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Blink.wav",
+      "sha256": "367cb7cb8bd0a7813875ea74279f658e6ddab7d258139781d660f5a3b705ec35",
+      "fileBytes": 166514,
+      "pcmBytes": 166400,
+      "sampleFmodDeltaBytes": 167800
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_BodyStrength.wav",
+      "sha256": "589ea1b78e3d50d045785ca9df06bffc9e93d1792e7edfd4fba94d6adb5954dc",
+      "fileBytes": 282404,
+      "pcmBytes": 282360,
+      "sampleFmodDeltaBytes": 283808
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_DarknessRay.wav",
+      "sha256": "d28d45872fa45c90fdc26211106fbb2912ce125c25454a657504ec84d8510362",
+      "fileBytes": 739662,
+      "pcmBytes": 739584,
+      "sampleFmodDeltaBytes": 741032
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Die.wav",
+      "sha256": "1b53568cb27975dfd185c79a5425e1c3bf1cd860488ed9ca564ec4967c2855ab",
+      "fileBytes": 122412,
+      "pcmBytes": 122368,
+      "sampleFmodDeltaBytes": 123768
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_EarthImpact.wav",
+      "sha256": "0bd949ed5454cb1298d1b9a8f3da5862dca07a09bedc2f67ce593496f4bc3eab",
+      "fileBytes": 172176,
+      "pcmBytes": 171008,
+      "sampleFmodDeltaBytes": 172408
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Enchant_Fire.wav",
+      "sha256": "282d08dc593858932e68c59f71f655ea393a51be0435022c329e4b0716ebab8d",
+      "fileBytes": 103156,
+      "pcmBytes": 101884,
+      "sampleFmodDeltaBytes": 103284
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Enchant_Ice.wav",
+      "sha256": "37b785d0f1305ec757268d82e5f88c5f242a0fad76eb9e8b2475d45e12b45605",
+      "fileBytes": 121830,
+      "pcmBytes": 120576,
+      "sampleFmodDeltaBytes": 121976
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Enchant_Lightning.wav",
+      "sha256": "16956ec30389fb614f13d3bd1a9cc4f63e0cbbd158ab96436bb425406806bc0e",
+      "fileBytes": 116052,
+      "pcmBytes": 114780,
+      "sampleFmodDeltaBytes": 116180
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Enchant_Poison.wav",
+      "sha256": "b6ba7ddd86c793098ed8eca8c97322bfa56538233bea13ed79b6adf7ed3f5dfb",
+      "fileBytes": 134870,
+      "pcmBytes": 134756,
+      "sampleFmodDeltaBytes": 136156
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_EnergyBall01.wav",
+      "sha256": "0482d17d9ebce08be30ae9a87a0fa3020ed3af1f3a801bbf15de59d1f17df747",
+      "fileBytes": 109200,
+      "pcmBytes": 108032,
+      "sampleFmodDeltaBytes": 109432
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_EnergyBall02.wav",
+      "sha256": "bbe910c7b482a9537004443722c6d5b83a340ccf923d4e358cef1d5514160a06",
+      "fileBytes": 241908,
+      "pcmBytes": 240640,
+      "sampleFmodDeltaBytes": 242040
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_MagicEye.wav",
+      "sha256": "265a324635f247b383c587047fb165184938e8058f0b71c5a923b7696a840f4c",
+      "fileBytes": 90674,
+      "pcmBytes": 89436,
+      "sampleFmodDeltaBytes": 90836
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_MagicMissile.wav",
+      "sha256": "1cd1080c06ea9f576a9dc11fbdc74fab2b6c4d324c2d768df307f56f10571a9b",
+      "fileBytes": 133746,
+      "pcmBytes": 133632,
+      "sampleFmodDeltaBytes": 135032
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Overload.wav",
+      "sha256": "529b5016389f74bfdf0ecc6ae46a34a347545df8143f8ea866b951af2475cd56",
+      "fileBytes": 132492,
+      "pcmBytes": 131324,
+      "sampleFmodDeltaBytes": 132724
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Reflect.wav",
+      "sha256": "80fa3e497a1f879922dcbbda44fb922cb3d33b2fd15fc6b55f9517e3085dc787",
+      "fileBytes": 217124,
+      "pcmBytes": 217080,
+      "sampleFmodDeltaBytes": 218528
+    },
+    {
+      "path": "Sound/Wizzard/Wizzard_Teleport.wav",
+      "sha256": "fb5994dd376676dbe87582e2a345b483a1fe7de52aa62b8e686e2fd3efde09a7",
+      "fileBytes": 229412,
+      "pcmBytes": 229368,
+      "sampleFmodDeltaBytes": 230816
+    }
+  ],
+  "groups": {
+    "Archer": {
+      "count": 17,
+      "pcmBytes": 3771446
+    },
+    "BGM": {
+      "count": 4,
+      "pcmBytes": 90676812
+    },
+    "Button": {
+      "count": 2,
+      "pcmBytes": 33248
+    },
+    "Effect": {
+      "count": 18,
+      "pcmBytes": 2148660
+    },
+    "Fighter": {
+      "count": 16,
+      "pcmBytes": 4239093
+    },
+    "Sound": {
+      "count": 7,
+      "pcmBytes": 341776
+    },
+    "Npc": {
+      "count": 20,
+      "pcmBytes": 1682376
+    },
+    "Orge": {
+      "count": 12,
+      "pcmBytes": 8259826
+    },
+    "Programmer": {
+      "count": 10,
+      "pcmBytes": 11472592
+    },
+    "Structure": {
+      "count": 3,
+      "pcmBytes": 377076
+    },
+    "Swordman": {
+      "count": 15,
+      "pcmBytes": 2404942
+    },
+    "Wizzard": {
+      "count": 18,
+      "pcmBytes": 3422444
+    }
+  },
+  "textures": [
+    {
+      "path": "Image/Title/WOD_Background_Title_Ver4.dds",
+      "width": 1024,
+      "height": 1024,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 4194304,
+      "sha256": "b0f78f22a5108195af60678656306ef239e53724ffb84654fbeb8d9893d6dae6"
+    },
+    {
+      "path": "Image/GUI/Button_SignIn.dds",
+      "width": 328,
+      "height": 83,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 108896,
+      "sha256": "5dc4e6dcb38942a31a0e6804a8619ae31306c9cb04a5226ca2552424b8c28f39"
+    },
+    {
+      "path": "Image/GUI/Button_SignUp.dds",
+      "width": 328,
+      "height": 83,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 108896,
+      "sha256": "6a39249c8c07b4e8a5d11c0e0c6620b21d160b099038fff9e29aa4475dce01f0"
+    },
+    {
+      "path": "SkyBox/Space.dds",
+      "width": 2048,
+      "height": 2048,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 65024,
+      "fourccHex": "00000000",
+      "payloadBytes": 100663296,
+      "sha256": "0f57f2e81fb36a6da079ad89b9e7c94e8fa95fc2ed2856c36e92098d45c42467"
+    },
+    {
+      "path": "Image/GUI/Clear/Victory.dds",
+      "width": 3000,
+      "height": 2222,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 26664000,
+      "sha256": "19d2c4673b5def01dc7d75a6e7b9e0f52d1b4e830f9a66f9fcc5be8221a55c8c"
+    },
+    {
+      "path": "Image/GUI/Clear/Defeat.dds",
+      "width": 3000,
+      "height": 2222,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 26664000,
+      "sha256": "218fbc7036e069ec64e401bb5ff82b61ed598db77cc9e6935f24fa3f700c0c85"
+    },
+    {
+      "path": "Image/GUI/Blood.dds",
+      "width": 1688,
+      "height": 1251,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 8446752,
+      "sha256": "ce9a15213140f49994ce9e97eef5c20fbeed9f1d5b10b9b09709bb87d9e2d1cf"
+    },
+    {
+      "path": "Image/GUI/Speed.dds",
+      "width": 7680,
+      "height": 1422,
+      "mips": 0,
+      "rgbBitCount": 32,
+      "caps2": 0,
+      "fourccHex": "00000000",
+      "payloadBytes": 43683840,
+      "sha256": "c82bf960954d9440cb966ff79268e41082cb68c8e65e299363392971c2f90058"
+    },
+    {
+      "path": "Model/Textures/dissolve.dds",
+      "width": 1024,
+      "height": 1024,
+      "mips": 11,
+      "rgbBitCount": 0,
+      "caps2": 0,
+      "fourccHex": "44585431",
+      "payloadBytes": 699064,
+      "sha256": "af769dd085324f0dfa4940660344182dd2549d32b32383e7c86f99b306434c03"
+    }
+  ],
+  "fmodBytesAfterSystemRelease": 0
+}

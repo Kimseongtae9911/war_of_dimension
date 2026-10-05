@@ -264,6 +264,7 @@
     <ClCompile Include="MeshSharingTests.cpp" />
     <ClCompile Include="ClientMemoryProfile.cpp" />
     <ClCompile Include="MonsterCapture.cpp" />
+    <ClCompile Include="UiTextureCapture.cpp" />
     <ClCompile Include="ObjectConstantArena.cpp" />
     <ClCompile Include="ObjectConstantArenaTests.cpp" />
     <ClCompile Include="ModelPartSelection.cpp" />

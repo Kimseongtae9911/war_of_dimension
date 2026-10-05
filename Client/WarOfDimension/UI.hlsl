@@ -1,5 +1,10 @@
 #include "Common.hlsl"
 
+float4 SampleUiTexture(float2 uv)
+{
+    return gtxtAlbedoTexture.Sample(gssWrap, UiTextureCoordinates(uv, gUiUvTransform));
+}
+
 VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
@@ -23,7 +28,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	
 	float2 newUV = WaveDistortion(input.uv, 10.0, 0.1, time);*/
 
-    float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+    float4 cColor = SampleUiTexture(input.uv);
 	
     switch (gTextureKind)
     {
@@ -41,25 +46,25 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
             cColor.a = ((input.uv.x * -1.0) <= gTextureValue) ? cColor.a : 0.f;
             break;
         case 5:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 12.0 + gTextureUVx, input.uv.y / 4.0 + gTextureUVy));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 12.0 + gTextureUVx, input.uv.y / 4.0 + gTextureUVy));
             cColor.a = gTextureValue;
             break;
         case 6:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 10.0 + gTextureUVx, input.uv.y / 2.0 + gTextureUVy));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 10.0 + gTextureUVx, input.uv.y / 2.0 + gTextureUVy));
             cColor.a = gTextureValue;
             break;
         case 7:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 6.0f + gTextureUVx, input.uv.y));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 6.0f + gTextureUVx, input.uv.y));
             break;
         case 8:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 11.0f + gTextureUVx, input.uv.y));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 11.0f + gTextureUVx, input.uv.y));
             break;
         case 10:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 7.0 + gTextureUVx, input.uv.y / 3.0 + gTextureUVy));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 7.0 + gTextureUVx, input.uv.y / 3.0 + gTextureUVy));
             cColor.rgb *= gTextureValue;
             break;
         case 11:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 38.0 + gTextureUVx, input.uv.y / 40.0 + gTextureUVy));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 38.0 + gTextureUVx, input.uv.y / 40.0 + gTextureUVy));
             cColor.rgb *= gTextureValue;
             break;
         case 12:
@@ -74,7 +79,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
                 break;
             }
         case 13:
-            cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 3.0 + gTextureUVx, input.uv.y / 4.0 + gTextureUVy));
+            cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 3.0 + gTextureUVx, input.uv.y / 4.0 + gTextureUVy));
             cColor.rgb *= gTextureValue;
             break;
         case 14:
@@ -84,8 +89,8 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
             }
             break;
         case 15:
-        //cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 4.0 + gTextureUVx, input.uv.y));
-            cColor = GaussianBlur(float2((1.0f - input.uv.x * -1.0f) / 4.0 + gTextureUVx, input.uv.y), 0.7f);
+        //cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 4.0 + gTextureUVx, input.uv.y));
+            cColor = GaussianBlur(float2((1.0f - input.uv.x * -1.0f) / 4.0 + gTextureUVx, input.uv.y), 0.7f, gUiUvTransform);
             cColor.rgb *= 0.7;
             cColor.a -= 0.5f;
             break;
@@ -108,7 +113,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
             break;
         case 18:
         {
-                cColor = gtxtAlbedoTexture.Sample(gssWrap, float2((1.0f - input.uv.x * -1.0f) / 12.0 + gTextureUVx, input.uv.y / 6.0 + gTextureUVy));
+                cColor = SampleUiTexture(float2((1.0f - input.uv.x * -1.0f) / 12.0 + gTextureUVx, input.uv.y / 6.0 + gTextureUVy));
                 cColor.rgb *= gTextureValue;
             }
             break;

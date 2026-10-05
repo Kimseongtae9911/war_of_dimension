@@ -6,6 +6,8 @@ NPC 객체 상수 arena 검사는 `./scripts/Test-ObjectConstants.ps1 -Configura
 
 파티클 공용 풀 검사는 `./scripts/Test-ParticleBufferPool.ps1 -Configuration Debug`와 `Release`로 실행한다. 실제 GPU에서 종류 간 재사용·fence 대기·용량 확장·상태 복사·종료 해제를 검사한다. 전체 종류의 동일 재생 비교는 `Measure-ClientMemory.ps1 -Scenario ParticleReuse`이며 [재현과 검증 범위](../portfolio/PARTICLE_BUFFER_POOL.md)를 따른다.
 
+UI 압축 검사는 `./scripts/Capture-UiTextures.ps1 -Configuration Release -Role player -OutputDirectory artifacts/logs/ui-recheck/player`로 수행한다. `-Role boss`와 Debug도 지원하며 역할별 UI 20종의 실제 할당량·내용 영역 실패 경로·16개 GPU 화면·정상 종료 DEFAULT/UPLOAD 40개 반환을 검사한다. [UI 구현·실측·품질](../portfolio/UI_TEXTURE_COMPRESSION.md)을 참조한다.
+
 ## 사전 조건
 
 - Windows와 PowerShell 7.

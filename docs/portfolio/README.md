@@ -4,6 +4,9 @@
 
 | 주제 | 현재 기록 | 상태 |
 |---|---|---|
+| 하늘·UI/dissolve 후속 최적화 | [검토·우선순위](SKYBOX_DISSOLVE_OPTIMIZATION_REVIEW.md), [DDS/구간 측정 근거](evidence/skybox-dissolve-review-20261006.json) | 미적용 검토. 하늘 BC7 96→24MiB payload 후보, UI upload 36.88/35.81MiB 조기 회수 후보. dissolve는 기존 BC1 0.67MiB, R8는 증가·BC4는 절감 0 |
+| UI BC7 압축과 사전 로딩 | [구현·실측·품질](UI_TEXTURE_COMPRESSION.md), [전후 32쌍 GPU 화면](evidence/ui-bc7-20261005/gallery.html), [로딩·UV 흐름](../diagrams/ui-bc7/README.md) | 구현 완료. 동일 EXE 각 3회 Private 중앙값 1,964.52→1,756.43MiB, 플레이어 UI DEFAULT 147.6250→41.9375MiB. 21 DDS 압축·픽셀/atlas 보존·종료 해제 검사 |
+| 장면별 자원·음원과 공통 렌더링 후보 | [검토·우선순위](STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md), [PCM/DDS 조사](evidence/startup-resource-review-20261005.json) | 적용 전 검토 보존, UI 구현은 위 문서 참조. Title DDS 4.21MiB·전환 해제 경로, 음원 142개 PCM 122.86MiB, BGM streaming 생성 확인. Shadow map·위치 RT 유지 확정. [UI BC7 예상량](evidence/ui-bc7-estimate-20261005.json): 플레이어 142.29→35.62MiB, 적용 전 예상 |
 | 미니언·몬스터 자원 공통화 | [검토·DDS 공유](NPC_RESOURCE_SHARING_REVIEW.md), [실측·최종 구현](NPC_MEMORY_OPTIMIZATION.md), [전후 화면](evidence/npc-memory-20261005/gallery.html), [상수 수명도](../diagrams/npc-memory/README.md) | 임시 upload 회수·DDS 공유·BC7·객체 arena 적용. 각 3회 Private 중앙값 2,656.35→1,964.46MiB, 고유 NPC texture 441.25→113.3125MiB, 객체 CB 50.5→0.5MiB. 9종 실제 셰이더 비교·GPU 수명 검증 |
 | 클라이언트 메시 공유와 인게임 진입 메모리 | [분석 및 결과](CLIENT_MEMORY_OPTIMIZATION.md), [수치 근거](evidence/client-memory-20261005.json), [CSV](evidence/client-memory-20261005.csv), [맵 자원 분석](evidence/ingame-map-resources-20261005.json) | 구현 완료, 이전 로딩 경로 재현 A/B 3회씩 측정·맵 로딩 구성 분석 완료 |
 | 솔루션 통합·VS2026·SLNX | [개발 환경](../development/SETUP.md), [마이그레이션](../development/VS2026.md), [작업 기록 6~7](../../tasks/todo.md) | 구현·빌드 완료, VS GUI 실행 프로필은 미검증 |

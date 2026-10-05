@@ -53,6 +53,7 @@ CTexture::CTexture(const CTexture& rhs) : m_nTextureType{ rhs.m_nTextureType }, 
 m_nReferences{0}
 {
 	m_sharedDds = rhs.m_sharedDds;
+	m_uiUvTransform = rhs.m_uiUvTransform;
 	if (m_nTextures > 0)
 	{
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
@@ -174,7 +175,7 @@ void CTexture::ReleaseUploadBuffers()
 void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pszFileName, UINT nResourceType, UINT nIndex)
 {
 	m_pnResourceTypes[nIndex] = nResourceType;
-	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ/*D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE*/);
+	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ, nIndex == 0 ? &m_uiUvTransform : nullptr);
 }
 
 void CTexture::LoadSharedTextureFromDDSFile(ID3D12Device* device, ID3D12GraphicsCommandList* commands, const wchar_t* path, UINT resourceType, UINT index)
@@ -3420,6 +3421,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pTextureRectMesh->SetType(type);
 	pTextureRectMesh->SetValue(val);
 	pTextureRectMesh->SetUV(uvOffset);
+	pTextureRectMesh->m_uiUvTransform = texture->GetUiUvTransform();
 	pTextureRectMesh->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pTextureMaterial->SetTexture(texture);
 	SetMesh(pTextureRectMesh);

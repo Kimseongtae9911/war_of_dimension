@@ -92,3 +92,27 @@ Client/WarOfDimension/Model/Textures/t_minotaur1_axe_MetallicSmoothness.dds filt
 Client/WarOfDimension/Model/Textures/MSPBR.dds filter=lfs diff=lfs merge=lfs -text
 # 검증 receipt가 참조하는 frozen JSON bytes와 SHA-256을 그대로 보존한다.
 docs/diagrams/npc-memory/npc-memory.lifecycle.v2.json -text whitespace=cr-at-eol
+Client/WarOfDimension/Image/Boss_SkillSet.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Clear/Victory.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Item_Set.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Red_Circle.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Tower.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Blood.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Clear/Defeat.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Hp_Mana_bars_1_back.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Hp_Mana_bars_2_back.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Blue_Circle.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/PlayerInfo_Bar.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Shop/Exit.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Speed.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Teleport.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Shop/Purchase_Long.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Minimap_Cartoon.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Nexus.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Minimap/Unique_Icon.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Shop/Purchase_Short.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/GUI/Shop/Shop.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Image/Player_SKillSet.dds filter=lfs diff=lfs merge=lfs -text
+docs/diagrams/ui-bc7/ui-bc7.dataflow.v2.json -text whitespace=cr-at-eol
+docs/diagrams/ui-bc7/ui-bc7.dataflow.html -text whitespace=cr-at-eol
+docs/portfolio/evidence/ui-bc7-20261005/**/*.png filter=lfs diff=lfs merge=lfs -text

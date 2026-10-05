@@ -247,6 +247,7 @@ struct VS_VB_BILLBOARD_INSTANCE
 //// UI Texture Render
 class CTextureShader : public CStandardShader
 {
+    friend class CGameFramework; // 실제 UI 생성·표시 경로의 GPU 캡처/할당량 검사
 public:
 	CTextureShader();
 	virtual ~CTextureShader();

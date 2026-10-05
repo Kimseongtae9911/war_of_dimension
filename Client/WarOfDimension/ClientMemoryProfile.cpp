@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <stdexcept>
 #pragma comment(lib, "psapi.lib")
+void CheckUiCaptureRelease();
 
 namespace
 {
@@ -24,6 +25,7 @@ namespace
     } particleAllocations;
     std::filesystem::path outputPath;
     std::filesystem::path captureDirectory;
+    bool captureUi = false, captureBossUi = false;
     struct Sample
     {
         std::string phase;
@@ -189,7 +191,7 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
         ClientMemoryProfileSnapshot(nullptr, "process_start");
         auto network = NetworkManager::GetInstance();
         network->Initialize("");
-        network->SetId(0);
+        network->SetId(captureBossUi ? 3 : 0);
         if (heroMeasurement)
         {
             network->SeedTestIngameAppearances();
@@ -210,7 +212,7 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
                     network->StoreReadySkill(player, slot, skills[player][slot]);
             measurementLoadout = network->GetIngameSkillLoadout();
         }
-        SceneManager::GetInstance()->SetOrder(ORDER::PLAYER1);
+        SceneManager::GetInstance()->SetOrder(captureBossUi ? ORDER::BOSS : ORDER::PLAYER1);
         const auto instance = GetModuleHandle(nullptr);
         ghAppInstance = instance;
         RECT rectangle{0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT};
@@ -227,10 +229,14 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
             framework.ProfileParticleReuseFrames();
         }
         framework.ProfileMemorySnapshot("ingame_ready");
-        if (!captureDirectory.empty()) framework.CaptureMonsters(captureDirectory.c_str());
+        if (!captureDirectory.empty()) {
+            if (captureUi) framework.CaptureUiTextures(captureDirectory.c_str());
+            else framework.CaptureMonsters(captureDirectory.c_str());
+        }
         if (particleMeasurement) { framework.ProfileReleaseParticles(); particleReleaseChecked = true; }
         if (!captureDirectory.empty()) {
             framework.OnDestroy();
+            if (captureUi) CheckUiCaptureRelease();
             std::ofstream lifetime(captureDirectory / "lifetime.json");
             lifetime << "{\"objectConstantPagesAfterOnDestroy\":" << ObjectConstantArena::LivePages() << "}\n";
             if (ObjectConstantArena::LivePages()) throw std::runtime_error("NPC arena 페이지 종료 해제 누락");
@@ -256,6 +262,14 @@ int RunMonsterCapture(CGameFramework& framework, const wchar_t* directory)
     std::filesystem::create_directories(captureDirectory);
     const auto report = captureDirectory / "memory.json";
     return RunClientMemoryProfile(framework, report.c_str(), false, true, false, true, false, false);
+}
+int RunUiCapture(CGameFramework& framework, const wchar_t* directory, bool boss)
+{
+    captureUi = true; captureBossUi = boss;
+    captureDirectory = directory;
+    std::filesystem::create_directories(captureDirectory);
+    const auto report = captureDirectory / "memory.json";
+    return RunClientMemoryProfile(framework, report.c_str(), false, true, false, true, false, true);
 }
 void ClientMemoryProfileRecordGpuDiagnostics(ID3D12Device* device, const char* phase)
 {
