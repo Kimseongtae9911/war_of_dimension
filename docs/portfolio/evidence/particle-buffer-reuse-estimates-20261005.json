@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-05",
+  "kind": "conditional_particle_buffer_reuse_estimate_not_implemented_or_runtime_measured",
+  "referenceMeasurement": "particle-selected-skills-20261005.json",
+  "referenceStaticReview": "particle-pool-capacity-review-20261005.json",
+  "baseline": {
+    "particleBufferPairs": 72,
+    "skillPairs": 45,
+    "slotPairs": 8,
+    "environmentPairs": 19,
+    "capacityPerPair": 300000,
+    "particleStrideBytes": 32,
+    "buffersPerPair": 2,
+    "measuredDefaultAllocationBytesPerPair": 19267584,
+    "measuredTotalDefaultAllocationBytes": 1387266048
+  },
+  "implementationChanged": false,
+  "measuredAfterChange": false,
+  "assumptions": [
+    "Only 45 skill pairs are targeted; 27 slot/environment pairs unchanged.",
+    "Retained pairs include active effects, visual tails, warm spares and GPU fence-pending retirement; not average live effects.",
+    "All pairs retain current 300000 particle capacity and reference GPU allocation sizing.",
+    "For cross-type reuse, layout compatibility, effect state reset, resource states and GPU completion must be enforced.",
+    "No additional allocation granularity, allocator slack, grow/migrate overlap or new metadata included; actual redesigned allocation must be measured.",
+    "Savings describe large DEFAULT resource allocations, not direct prediction of process Private commit, Working Set or DXGI LOCAL.",
+    "No runtime concurrency data exists to choose one row as expected real result."
+  ],
+  "scenarios": [
+    {
+      "retainedSkillBufferPairs": 9,
+      "reservedParticleCapacityPerPair": 300000,
+      "unmodifiedSlotAndEnvironmentPairs": 27,
+      "skillDefaultAllocationBytes": 173408256,
+      "estimatedTotalDefaultAllocationBytes": 693633024,
+      "estimatedSavingBytes": 693633024,
+      "estimatedTotalDefaultAllocationMiB": 661.5,
+      "estimatedSavingMiB": 661.5,
+      "estimatedSavingPercentOfBaselineLargeBuffers": 50.0
+    },
+    {
+      "retainedSkillBufferPairs": 18,
+      "reservedParticleCapacityPerPair": 300000,
+      "unmodifiedSlotAndEnvironmentPairs": 27,
+      "skillDefaultAllocationBytes": 346816512,
+      "estimatedTotalDefaultAllocationBytes": 867041280,
+      "estimatedSavingBytes": 520224768,
+      "estimatedTotalDefaultAllocationMiB": 826.875,
+      "estimatedSavingMiB": 496.125,
+      "estimatedSavingPercentOfBaselineLargeBuffers": 37.5
+    },
+    {
+      "retainedSkillBufferPairs": 27,
+      "reservedParticleCapacityPerPair": 300000,
+      "unmodifiedSlotAndEnvironmentPairs": 27,
+      "skillDefaultAllocationBytes": 520224768,
+      "estimatedTotalDefaultAllocationBytes": 1040449536,
+      "estimatedSavingBytes": 346816512,
+      "estimatedTotalDefaultAllocationMiB": 992.25,
+      "estimatedSavingMiB": 330.75,
+      "estimatedSavingPercentOfBaselineLargeBuffers": 25.0
+    },
+    {
+      "retainedSkillBufferPairs": 45,
+      "reservedParticleCapacityPerPair": 300000,
+      "unmodifiedSlotAndEnvironmentPairs": 27,
+      "skillDefaultAllocationBytes": 867041280,
+      "estimatedTotalDefaultAllocationBytes": 1387266048,
+      "estimatedSavingBytes": 0,
+      "estimatedTotalDefaultAllocationMiB": 1323.0,
+      "estimatedSavingMiB": 0.0,
+      "estimatedSavingPercentOfBaselineLargeBuffers": 0.0
+    }
+  ],
+  "sourceSha256": {
+    "Client/WarOfDimension/Mesh.cpp": "50cc2d60f0807244c6f114fb8ac0cb9cb8dfea9f12edfb1e98c6c5ce3612eb00",
+    "Client/WarOfDimension/Mesh.h": "ddfc2d99a622acf0dede0e5f894b7035a7f545fc6a64386eba832100ae5d018a",
+    "Client/WarOfDimension/Object.cpp": "093acff92a82405e0a4ac0aa71351d0630b4c108fefa5afff2428dbf550d6755",
+    "Client/WarOfDimension/Scene.cpp": "ed465ac17bc7b35cc591f1123e30c8a3f8a301b589e9400462ea76bffbeea543"
+  },
+  "officialReferences": {
+    "streamOutputStatistics": "https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_query_data_so_statistics",
+    "fenceResourceManagement": "https://learn.microsoft.com/en-us/windows/win32/direct3d12/fence-based-resource-management",
+    "explicitResourceManagement": "https://learn.microsoft.com/en-us/windows/win32/direct3d12/porting-from-direct3d-11-to-direct3d-12"
+  }
+}

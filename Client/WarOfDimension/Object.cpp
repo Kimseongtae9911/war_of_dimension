@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
@@ -3480,14 +3480,13 @@ void CUIObject::SetScreenPosition(XMFLOAT2 xmf2Position)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CTexture* Texture, CTexture* RandowmValueTexture, CTexture* RandowmValueSphereTexture, CShader* pShader, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType) : CGameObject(1)
+CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CTexture* Texture, CTexture* RandowmValueTexture, CTexture* RandowmValueSphereTexture, CShader* pShader, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType, std::shared_ptr<ParticleBufferPool> pool, bool eager) : CGameObject(1)
 {
-	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles, nType);
+	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles, nType, std::move(pool), eager);
 	SetMesh(pMesh);
 	
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(Texture);
-	Texture->AddRef();
 
 	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
 	m_pRandowmValueTexture = RandowmValueTexture;
@@ -3496,7 +3495,6 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pRandowmValueOnSphereTexture->AddRef();
 
 	
-	pShader->AddRef();
 
 	pMaterial->SetShader(pShader);
 	SetMaterial(0, pMaterial);
@@ -3559,6 +3557,7 @@ void CParticleObject::ReleaseShaderVariables()
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+    if (!reinterpret_cast<CParticleMesh*>(m_pMesh)->PrepareBuffers(pd3dCommandList)) return;
 	OnPrepareRender();
 
 	if (m_ppMaterials[0])

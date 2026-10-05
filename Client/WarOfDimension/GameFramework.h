@@ -58,6 +58,8 @@ public:
 
 	void ChangeScene(SCENEKIND nSceneKind);
 	void ProfileMemorySnapshot(const char* phase);
+	void ProfileReleaseParticles();
+    void ProfileParticleReuseFrames();
 	int AuditHeroSelection(const wchar_t* reportPath);
 	void Update();
 

@@ -1,0 +1,309 @@
+{
+  "date": "2026-10-05",
+  "kind": "static_packet_id_and_pool_capacity_review_not_runtime_peak_measurement",
+  "implementationChanged": false,
+  "runtimePeakMeasured": false,
+  "sourceSha256": {
+    "Server/Game_Server/CGameMgr.cpp": "28c1f9666e3bd3f4082e12429513131829b04658a3e9575cca63902c22058d90",
+    "Server/Game_Server/CGameMgr.h": "687bb07584934ccba909a80c7857d48db2113ca9418b6cdd6b11479aa5e7e7cc",
+    "Server/Game_Server/CArcherTimer.cpp": "3f8d5755e5c1d8a926c245356a7b43d90ef5161e2bff992e270ba1d23a23f30f",
+    "Server/Game_Server/CWizardTimer.cpp": "44b9098f7277db4f81be8249f67eda5053dea1c2e1eb0cd12da502415ba210bd",
+    "Server/Game_Server/CProTimer.cpp": "bc61378ab78bebd633aebd4ee79ca406f88df4097a4fae118a720899b889cdbf",
+    "Server/Game_Server/CBigBang.cpp": "dcfaf17d28b9d6945613c04aac37caf7f8f521e39f136e2e3ef3ba4b8d3183b2",
+    "Server/Game_Server/protocol.h": "8b163ad6aa08ac8b3441bf30af5674acc4ce485d341553d520e07e2adbf507fe",
+    "Client/WarOfDimension/Scene.cpp": "ed465ac17bc7b35cc591f1123e30c8a3f8a301b589e9400462ea76bffbeea543",
+    "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+    "Client/WarOfDimension/NameSpace.h": "426ec42784167229bc7d74f342566c9a563b3d0956d39e47035f39dbfdeca159"
+  },
+  "particleTypeCount": 20,
+  "serverPooledTypeCount": 14,
+  "currentFiveSlotObjectsAcrossAllTypes": 100,
+  "indexAddressSpaceSlotsAcrossAllTypes": 83,
+  "warning": "83 slots preserve current wire indexing, including ArrowRain/DarknessRay zero-ID collision; not a validated correct multiplayer sizing recommendation. No runtime peak measured.",
+  "types": [
+    {
+      "skillType": "ARCHER_ATTACK",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 591,
+      "allocatorMethod": "ArcherAttack",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "ARCHER_PENETRAITING_SHOT",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 648,
+      "allocatorMethod": "PenetraitingShot",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "ARCHER_STICKY_ARROW",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 610,
+      "allocatorMethod": "StickyArrow",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "ARCHER_PHOENIX_ARROW",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 629,
+      "allocatorMethod": "PhoenixArrow",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "ARCHER_STROM_ARROW",
+      "idSource": "caster_match_id",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        2
+      ],
+      "indexAddressSpaceSlots": 3,
+      "source": "Server/Game_Server/CArcherTimer.cpp",
+      "line": 180,
+      "multipleCasterZeroIdCollision": false
+    },
+    {
+      "skillType": "ARCHER_ARROW_RAIN",
+      "idSource": "constant_zero",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        0
+      ],
+      "indexAddressSpaceSlots": 1,
+      "source": "Server/Game_Server/CArcherTimer.cpp",
+      "line": 225,
+      "multipleCasterZeroIdCollision": true
+    },
+    {
+      "skillType": "FIGHTER_FIREBALL",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 706,
+      "allocatorMethod": "FireBall",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "SWORDMAN_AURA_BLADE",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 524,
+      "allocatorMethod": "AuraBlade",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "SWORDMAN_JUDGEMENT_SWORD",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 543,
+      "allocatorMethod": "JudgeMentSword",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "WIZARD_ATTACK",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 417,
+      "allocatorMethod": "WizardAttack",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "WIZARD_MAGIC_MISSILE",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 436,
+      "allocatorMethod": "MagicMissle",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "WIZARD_ENERGY_BALL",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 486,
+      "allocatorMethod": "EnergyBall",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "WIZARD_DARKNESS_RAY",
+      "idSource": "constant_zero",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        0
+      ],
+      "indexAddressSpaceSlots": 1,
+      "source": "Server/Game_Server/CWizardTimer.cpp",
+      "line": 134,
+      "multipleCasterZeroIdCollision": true
+    },
+    {
+      "skillType": "WIZARD_BIGBANG",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 505,
+      "allocatorMethod": "BigBang",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "WIZARD_BIGBANG_CONTINUE",
+      "idSource": "caster_match_id",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        2
+      ],
+      "indexAddressSpaceSlots": 3,
+      "source": "Server/Game_Server/CBigBang.cpp",
+      "line": 37,
+      "multipleCasterZeroIdCollision": false
+    },
+    {
+      "skillType": "OGRE_DIMENSION_CRUSH",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 746,
+      "allocatorMethod": "DimensionCrush",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "PRO_ATTACK",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 786,
+      "allocatorMethod": "ProAttack",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "PRO_RETURN_ZERO",
+      "idSource": "first_inactive_server_pool_slot",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        4
+      ],
+      "indexAddressSpaceSlots": 5,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 805,
+      "allocatorMethod": "ReturnZero",
+      "exhaustionReturnsZero": true
+    },
+    {
+      "skillType": "PRO_SCL",
+      "idSource": "constant_zero_single_boss",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        0
+      ],
+      "indexAddressSpaceSlots": 1,
+      "source": "Server/Game_Server/CProTimer.cpp",
+      "line": 133,
+      "multipleCasterZeroIdCollision": false
+    },
+    {
+      "skillType": "TOWERATTACK",
+      "idSource": "tower_projectile_pool_path_num",
+      "currentPreallocatedParticleObjects": 5,
+      "currentWireIdRange": [
+        0,
+        3
+      ],
+      "indexAddressSpaceSlots": 4,
+      "source": "Server/Game_Server/CGameMgr.cpp",
+      "line": 397,
+      "multipleCasterZeroIdCollision": false
+    }
+  ],
+  "currentMeasurementFixtureTowerOnlyCandidate": {
+    "reference": "particle-selected-skills-20261005.json",
+    "measuredBeforeObjects": 72,
+    "estimatedAfterObjects": 71,
+    "removedObjects": 1,
+    "estimatedDefaultHeapAllocationSavingBytes": 19267584,
+    "estimatedDefaultHeapAllocationSavingMiB": 18.375,
+    "measuredAfterChange": false
+  },
+  "recommendation": "Keep server wire ID address space; allocate independent mutable particle GPU buffers on first use through synchronized rendering resource creation; add runtime high-water telemetry before reducing server pool capacity."
+}

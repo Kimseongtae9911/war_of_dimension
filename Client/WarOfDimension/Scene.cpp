@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // File: CScene.cpp
 //-----------------------------------------------------------------------------
 
@@ -11,6 +11,7 @@
 #include "CSkillModel.h"
 #include "SoundManager.h"
 #include "ClientMemoryProfile.h"
+#include "ParticleSelection.h"
 #include "Util.h"
 
 namespace PARTICLE_SKILLSETTING
@@ -338,6 +339,14 @@ void CScene::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	}
 
 
+    if (m_particleBufferPool) m_particleBufferPool->BeginFrame();
+    // 모든 종류의 비활성 블록을 먼저 반환하여 이후 종류도 같은 프레임에서 재사용한다.
+    for (auto& entry : m_ParticleObjects)
+        for (auto& group : entry.second)
+            for (auto effect : group) if (effect && !effect->GetShow()) effect->ReleaseInactiveBuffers();
+    for (auto& entry : m_SkillTypeParticle)
+        for (auto effect : entry.second) if (effect && !effect->GetShow()) effect->ReleaseInactiveBuffers();
+
 	for (auto p : m_ParticleObjects)
 	{
 		for (int i = 0; i < p.second.size(); ++i)
@@ -372,6 +381,8 @@ void CScene::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 void CScene::OnPostRenderParticle()
 {
+    // 공용 풀의 단조 증가 fence로 출력 통계 readback 완료를 직접 보장한다.
+    if (m_particleBufferPool) m_particleBufferPool->WaitForIdle();
 
 	for (auto p : m_ParticleObjects)
 	{
@@ -1545,6 +1556,7 @@ CIngameScene::~CIngameScene()
 
 void CIngameScene::ReleaseObjects()
 {
+    if (m_particleBufferPool) m_particleBufferPool->WaitForIdle();
 	CScene::ReleaseObjects();
 
 	if (m_minions) {
@@ -1586,6 +1598,12 @@ void CIngameScene::ReleaseObjects()
 	}
 	m_skillObjects.clear();
 
+	ReleaseParticles();
+}
+
+void CIngameScene::ReleaseParticles()
+{
+    if (m_particleBufferPool) m_particleBufferPool->WaitForIdle();
 	for (auto& pair : m_ParticleObjects)
 	{
 		for (auto& vector : pair.second)
@@ -1644,6 +1662,7 @@ void CIngameScene::ReleaseObjects()
 		}
 	}
 	SceneManager::GetInstance()->m_ParticleInfo.clear();
+    m_particleBufferPool.reset(); // 메시 반환 후 확장분/유휴분 전체를 해제한다.
 }
 
 void CIngameScene::BuildOtherClient(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CLoadedModelInfo* pModel)
@@ -1860,6 +1879,9 @@ void CIngameScene::BuildDefaultLightsAndMaterials()
 void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	auto profile = [pd3dDevice](const char* phase) { ClientMemoryProfileSnapshot(pd3dDevice, phase); };
+	NetworkManager::GetInstance()->FreezeIngameSkills();
+	const auto loadout = NetworkManager::GetInstance()->GetIngameSkillLoadout();
+	const ParticleSelection particleSelection(loadout);
 #ifdef Test
 	cout << "Ingame Initialize Start" << endl;
 #endif // TEST
@@ -2040,12 +2062,13 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	for (int i = 0; i < m_iParticleTextureNum; ++i)
 	{
 		m_pParticleTexture[i] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_pParticleTexture[i]->AddRef(); // 씬 소유권. material 참조와 독립적으로 해제한다.
 		m_pParticleTexture[i]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, ParticleTextureAddress[i], RESOURCE_TEXTURE2D, 0);
 		CreateShaderResourceViews(pd3dDevice, m_pParticleTexture[i], 0, 21);
 	}
 
 	profile("particle_textures_ready");
-	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
+	XMFLOAT4 pxmf4RandomValues[1024];
 	for (int i = 0; i < 1024; i++) { pxmf4RandomValues[i].x = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].y = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].z = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].w = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; }
 
 	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
@@ -2058,6 +2081,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	CreateShaderResourceViews(pd3dDevice, pRandowmValueTexture, 0, 22);
 	CreateShaderResourceViews(pd3dDevice, pRandowmValueOnSphereTexture, 0, 23);
 
+	m_particleBufferPool = std::make_shared<ParticleBufferPool>(pd3dDevice);
 	CParticleShader* pShader = new CParticleShader();
 	pShader->CreateParticleShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -2069,6 +2093,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	{
 		for (int i = 0; i < static_cast<int>(SKILL_TYPE::TYPE_COUNT); ++i)
 		{
+			if (!ClientMemoryProfileFullParticlePool() && !particleSelection.Includes(static_cast<SKILL_TYPE>(i))) continue;
 			int numParticle = PARTICLE_SKILLSETTING::NumParticle(static_cast<SKILL_TYPE>(i));
 			for (int k = 0; k < numParticle; ++k)
 			{
@@ -2076,7 +2101,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 				int pszFileName = PARTICLE_SKILLSETTING::TextureAddress(static_cast<SKILL_TYPE>(i), k);
 				if (pszFileName != PARTICLE_ADDRESS::ADDRESS_COUNT && Type != PARTICLE_TYPE::NONE && numParticle != 0)
 				{
-					CParticleObject* newParticle = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[pszFileName], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, Type);
+					CParticleObject* newParticle = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[pszFileName], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, Type, m_particleBufferPool, ClientMemoryProfileDedicatedParticleBuffers());
 					newParticle->SettingDetail(static_cast<SKILL_TYPE>(i), k);
 					m_SkillTypeParticle[static_cast<SKILL_TYPE>(i)].push_back(newParticle);
 				}
@@ -2095,18 +2120,18 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	{
 		for (int j = 0; j < 4; ++j)
 		{
-			numParticle = PARTICLE_SKILLSETTING::NumParticle(NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j]);
+			numParticle = PARTICLE_SKILLSETTING::NumParticle(loadout.skills[i][j]);
 			for (int k = 0; k < numParticle; ++k)
 			{
-				Type = PARTICLE_SKILLSETTING::Type(NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j], k);
-				pszFileName = PARTICLE_SKILLSETTING::TextureAddress(NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j], k);
+				Type = PARTICLE_SKILLSETTING::Type(loadout.skills[i][j], k);
+				pszFileName = PARTICLE_SKILLSETTING::TextureAddress(loadout.skills[i][j], k);
 
 				if (pszFileName != PARTICLE_ADDRESS::ADDRESS_COUNT && Type != PARTICLE_TYPE::NONE && numParticle != 0)
 				{
-					pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[pszFileName], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, Type);
+					pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[pszFileName], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, Type, m_particleBufferPool, ClientMemoryProfileDedicatedParticleBuffers());
 					pInfo = new ParticleInfo();
 					//Particle detail setting
-					pObj->SettingDetail(static_cast<PARTICLE_SITUATION>(i), NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j]);
+					pObj->SettingDetail(static_cast<PARTICLE_SITUATION>(i), loadout.skills[i][j]);
 					//
 					m_ParticleObjects[static_cast<PARTICLE_SITUATION>(i)][j + 1].push_back(pObj);
 					SceneManager::GetInstance()->m_ParticleInfo[static_cast<PARTICLE_SITUATION>(i)][j + 1].push_back(pInfo);
@@ -2120,7 +2145,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//jump particle
 	for (int i = 0; i < 6; ++i)
 	{
-		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::SPRITEJUMP], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::JUMPEFEECT);
+		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::SPRITEJUMP], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::JUMPEFEECT, m_particleBufferPool, ClientMemoryProfileDedicatedParticleBuffers());
 		//Particle detail setting
 		XMFLOAT3 JUMP_START_POS[6] = { XMFLOAT3(-7.46f, 0.f, -79.55f), XMFLOAT3(-40.3f, 0.f, -48.82f), XMFLOAT3(-66.6f, 0.f, -9.7f), XMFLOAT3(-113.7f, 0.f, -52.6f), XMFLOAT3(-79.69f, 0.f, -80.74f), XMFLOAT3(-46.88f, 0.f, -118.05f) };
 		pInfo = new ParticleInfo();
@@ -2138,7 +2163,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//jump particle
 	for (int i = 0; i < MONSTER_NUM; ++i)
 	{
-		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::COIN], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::COINBOMB);
+		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::COIN], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::COINBOMB, m_particleBufferPool, ClientMemoryProfileDedicatedParticleBuffers());
 		//Particle detail setting
 		pInfo = new ParticleInfo();
 		pObj->SettingDetail(PARTICLE_SITUATION::COINBYDEATH, i);
@@ -2150,7 +2175,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//Fence particle
 	for (int i = 0; i < 4; ++i)
 	{
-		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::ROUND], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::FENCE);
+		pObj = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pParticleTexture[PARTICLE_ADDRESS::ROUND], pRandowmValueTexture, pRandowmValueOnSphereTexture, pShader, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), MAX_PARTICLES, PARTICLE_TYPE::FENCE, m_particleBufferPool, ClientMemoryProfileDedicatedParticleBuffers());
 		//Particle detail setting
 		XMFLOAT3 FENCE_START_POS[4] = { XMFLOAT3(-129.95f, 3.71f, -80.5f), XMFLOAT3(-108.3f, 3.71f, -88.f), XMFLOAT3(-86.6f, 3.71f, -108.f), XMFLOAT3(-76.9f, 3.71f, -135.9f)};
 		XMFLOAT3 FENCE_START_DIR[4] = { XMFLOAT3(0.02f, 0.f, 0.99f), XMFLOAT3(0.46f, 0.f, 0.88f), XMFLOAT3(0.84f, 0.f, 0.53f), XMFLOAT3(0.98f, 0.f, 0.15f)};
@@ -2315,13 +2340,14 @@ void CIngameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	//Tower Object Render
 	for (int i = 0; i < PATH_NUM; ++i) {
 		if (m_towerAttacks[i]) {
-			if (m_SkillTypeParticle[SKILL_TYPE::TOWERATTACK].size())
+			const auto towerParticles = m_SkillTypeParticle.find(SKILL_TYPE::TOWERATTACK);
+			if (towerParticles != m_SkillTypeParticle.end() && static_cast<size_t>(i) < towerParticles->second.size())
 			{
-				m_SkillTypeParticle[SKILL_TYPE::TOWERATTACK][i]->SetShow(reinterpret_cast<CTowerAttack*>(m_towerAttacks[i])->GetShow());
-				if (m_SkillTypeParticle[SKILL_TYPE::TOWERATTACK][i]->GetShow())
+				towerParticles->second[i]->SetShow(reinterpret_cast<CTowerAttack*>(m_towerAttacks[i])->GetShow());
+				if (towerParticles->second[i]->GetShow())
 				{
-					m_SkillTypeParticle[SKILL_TYPE::TOWERATTACK][i]->SetPosition(m_towerAttacks[i]->GetPosition());
-					m_SkillTypeParticle[SKILL_TYPE::TOWERATTACK][i]->SetForwardVector(m_towerAttacks[i]->GetLook());
+					towerParticles->second[i]->SetPosition(m_towerAttacks[i]->GetPosition());
+					towerParticles->second[i]->SetForwardVector(m_towerAttacks[i]->GetLook());
 				}
 			}
 
@@ -2335,13 +2361,14 @@ void CIngameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	for (auto& skills : m_skillObjects) {
 		for (int i = 0; i < skills.second.size(); ++i) {
 			//Particle Update
-			if (m_SkillTypeParticle[skills.first].size())
+			const auto skillParticles = m_SkillTypeParticle.find(skills.first);
+			if (skillParticles != m_SkillTypeParticle.end() && static_cast<size_t>(i) < skillParticles->second.size())
 			{
-				m_SkillTypeParticle[skills.first][i]->SetShow(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].show);
-				if (m_SkillTypeParticle[skills.first][i]->GetShow())
+				skillParticles->second[i]->SetShow(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].show);
+				if (skillParticles->second[i]->GetShow())
 				{
-					m_SkillTypeParticle[skills.first][i]->SetPosition(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].pos);
-					m_SkillTypeParticle[skills.first][i]->SetForwardVector(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].look);
+					skillParticles->second[i]->SetPosition(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].pos);
+					skillParticles->second[i]->SetForwardVector(NetworkManager::GetInstance()->skillObjectInfos[skills.first][i].look);
 				}
 			}
 

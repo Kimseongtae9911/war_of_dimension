@@ -308,6 +308,7 @@ namespace wod_server {
         for (int i = 0; i < MAX_PLAYER; ++i) {
             std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[i]);
 
+            const int bossJob = client->GetPlayerJob() >= MAX_JOB ? client->GetPlayerJob() - MAX_JOB : client->GetPlayerJob();
             for (int j = 1; j < MAX_SKILL + 1; ++j) {               
                 if (client->GetSkillNum(j) == 0) {
                     if (j == MAX_SKILL) { //Ultimate
@@ -315,11 +316,11 @@ namespace wod_server {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + client->GetPlayerJob() * BOSS_SKILL_NUM + BOSS_SKILL_NUM - 1);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM);
                             }
-                            client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + client->GetPlayerJob() * BOSS_SKILL_NUM + BOSS_SKILL_NUM - 1);
+                            client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM);
 
-                            client->SetSkillNum(j, bossSkill + client->GetPlayerJob() * BOSS_SKILL_NUM + BOSS_SKILL_NUM - 1 - (21 - 96 - 1));
+                            client->SetSkillNum(j, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM - 1 - (21 - 96 - 1));
                         }
                         else {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
@@ -334,7 +335,7 @@ namespace wod_server {
                     }
                     else {
                         if (i == 3) {
-                            int skill = bossSkill + client->GetPlayerJob() * BOSS_SKILL_NUM;
+                            int skill = bossSkill + bossJob * BOSS_SKILL_NUM;
                             for (int k = 1; k < MAX_SKILL + 1; ++k) {
                                 if (client->GetSkillNum(k) == skill) {
                                     skill++;
@@ -344,9 +345,9 @@ namespace wod_server {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill + 1);
                             }
-                            client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill);
+                            client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill + 1);
                             client->SetSkillNum(j, skill - (21 - 96 - 1));
                         }
                         else {

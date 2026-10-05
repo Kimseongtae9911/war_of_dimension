@@ -1,0 +1,4455 @@
+{
+  "schemaVersion": 1,
+  "kind": "same_binary_full_vs_selected_skill_particle_stage_comparison",
+  "referenceCommit": "ee60ac1687a83b6830ee573c618b7f7ac4d82b4d",
+  "scope": "phase_net_growth_attribution_not_retained_heap_ownership",
+  "runsPerMode": 3,
+  "modes": {
+    "full": {
+      "schemaVersion": 1,
+      "kind": "phase_net_growth_attribution_not_retained_heap_ownership",
+      "measuredAtKst": "2026-10-05T14:29:42.677799+09:00",
+      "configuration": "Release",
+      "sourceBaseCommit": "ee60ac1687a83b6830ee573c618b7f7ac4d82b4d",
+      "instrumentedWorkingTree": true,
+      "executableSha256": "b955f4289cf5caec4969decf374e3d7c82d7cd16ab460f8c7bd1e8829a0b96a0",
+      "measurementSourcesSha256": {
+        "Client/WarOfDimension/ClientMemoryProfile.cpp": "e7e00945b519be4a04b1f8cf362a46bef6017c190903c4e0995dd7a0aa7211db",
+        "Client/WarOfDimension/ClientMemoryProfile.h": "05c441e895c3824ac4513709881e686ef29a20a6e906227acfede7b71ff2c68a",
+        "Client/WarOfDimension/Scene.cpp": "ed465ac17bc7b35cc591f1123e30c8a3f8a301b589e9400462ea76bffbeea543",
+        "Client/WarOfDimension/Mesh.cpp": "50cc2d60f0807244c6f114fb8ac0cb9cb8dfea9f12edfb1e98c6c5ce3612eb00",
+        "Client/WarOfDimension/GameFramework.cpp": "90ddddd4b57880071d277fd0f10c5b17f323680d9656126dc91b236225c81af1",
+        "Client/WarOfDimension/Object.cpp": "093acff92a82405e0a4ac0aa71351d0630b4c108fefa5afff2428dbf550d6755",
+        "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+        "Client/WarOfDimension/WarOfDimension.cpp": "9a4a6dbce023ef816a9f111fd8b5d11b0c0c85feed4a19e8a9e5626d0fa4f8dd",
+        "scripts/Measure-ClientMemory.ps1": "e0965b3019f7f57f745fe3badd7cfad6e6bc0eb2bbac5ba1d6a28972f0220c3c",
+        "Client/WarOfDimension/ModelPartSelection.cpp": "24ce473073de73b3bd08acf9cddaf977ee10109f5c167c07a431a094809fa5a8",
+        "Client/WarOfDimension/ModelPartSelection.h": "66eb83c0d1f453bed68cf9a6e8fedbfd11cdb83a9c1ef06e6e4c672153af676a",
+        "Client/WarOfDimension/NetworkManager.h": "767e881e1b886695c3a22db3b0c8d4fe4e790d03fa9e944e71ec53ffd9cd93f3",
+        "Client/WarOfDimension/Player.cpp": "a1db50869f8db73e14227d2e50e20cf02f46d7cbbb76d9b6611d3994b470fe46",
+        "Client/WarOfDimension/GameFramework.h": "5b0e8c66e713dcc829c3b776ca206e0cc03456f9f6d6a31d5f468aa153ef9894",
+        "Client/WarOfDimension/HeroSelectionTests.cpp": "73e6eff0e0dc0bae8498fd90267a451cce17aa4df9f5cc25fbf2ac0138370166",
+        "Client/WarOfDimension/ParticleSelection.cpp": "342756068c0b444ccee55f6bd102d635c97b703dd5e8bf2f8bfd5ca775afbe9f",
+        "Client/WarOfDimension/ParticleSelection.h": "88d8d1d1966d2189eb75c497c7ee59f0dedec8b5468113dc7ee4a850ed5fb491",
+        "Client/WarOfDimension/ParticleSelectionTests.cpp": "e969478b1fbc2f259725f19154f726addba221cceb8e368a8a5d38ef13ed0fd0",
+        "Client/WarOfDimension/Scene.h": "6264944460461d3867b25e048003c4bf6ecf17f497e784248d235f59ebe7a51d",
+        "Server/Game_Server/CMatch.cpp": "70f946cbef1cba24f46ca6f4e74674028f4dc726332fdf0b75dfaea51fb7af84",
+        "Server/Game_Server/CGameMgr.cpp": "28c1f9666e3bd3f4082e12429513131829b04658a3e9575cca63902c22058d90",
+        "Server/Lobby_Server/Job.h": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b",
+        "Server/Lobby_Server/JobQueue.h": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4",
+        "Server/Lobby_Server/Zone.h": "0237c230c4b655f6f205191a99e00509c9ed72f551ebd0b1954c94427038702f"
+      },
+      "scenario": "fresh_process_title_to_ingame_fixed_skills_ogre",
+      "adapter": "NVIDIA GeForce RTX 4070 SUPER",
+      "runs": [
+        {
+          "run": 1,
+          "entry": {
+            "privateBytes": 5098786816,
+            "workingSetBytes": 1354801152,
+            "dxgiLocalUsageBytes": 3731349504,
+            "dxgiNonLocalUsageBytes": 769695744
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 662413312,
+              "workingSetBytes": 222150656,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201719808,
+              "workingSetBytes": 100777984,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 187150336,
+              "workingSetBytes": 150003712,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 997601280,
+              "workingSetBytes": 513875968,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 30822400,
+              "workingSetBytes": 16556032,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14008320,
+              "workingSetBytes": 7606272,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 2465984512,
+              "workingSetBytes": 7479296,
+              "dxgiLocalUsageBytes": 2448023552,
+              "dxgiNonLocalUsageBytes": 3129344
+            },
+            "heroes": {
+              "privateBytes": 225521664,
+              "workingSetBytes": 181719040,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 313040896,
+              "workingSetBytes": 154099712,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 524288,
+              "workingSetBytes": 532480,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -154787840
+            }
+          },
+          "particleGroups": {
+            "skillPool": 100,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 127,
+            "particleLargeBufferPayloadBytes": 2438400000,
+            "particleLargeBufferAllocationBytes": 2446983168,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2428928,
+              "workingSetBytes": 9936896,
+              "peakWorkingSetBytes": 9936896,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 126746624,
+              "workingSetBytes": 76189696,
+              "peakWorkingSetBytes": 76189696,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 260538368,
+              "workingSetBytes": 86188032,
+              "peakWorkingSetBytes": 117837824,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 392359936,
+              "workingSetBytes": 221204480,
+              "peakWorkingSetBytes": 221204480,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 662413312,
+              "workingSetBytes": 222113792,
+              "peakWorkingSetBytes": 228864000,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 662413312,
+              "workingSetBytes": 222146560,
+              "peakWorkingSetBytes": 228864000,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 662413312,
+              "workingSetBytes": 222150656,
+              "peakWorkingSetBytes": 228864000,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 864133120,
+              "workingSetBytes": 322928640,
+              "peakWorkingSetBytes": 423489536,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1051283456,
+              "workingSetBytes": 472932352,
+              "peakWorkingSetBytes": 472932352,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1081454592,
+              "workingSetBytes": 489361408,
+              "peakWorkingSetBytes": 489836544,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1960304640,
+              "workingSetBytes": 939753472,
+              "peakWorkingSetBytes": 976961536,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2048884736,
+              "workingSetBytes": 986808320,
+              "peakWorkingSetBytes": 997580800,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2059223040,
+              "workingSetBytes": 991485952,
+              "peakWorkingSetBytes": 997580800,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2076921856,
+              "workingSetBytes": 1000603648,
+              "peakWorkingSetBytes": 1001275392,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2079707136,
+              "workingSetBytes": 1003364352,
+              "peakWorkingSetBytes": 1003364352,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2092826624,
+              "workingSetBytes": 1010159616,
+              "peakWorkingSetBytes": 1010159616,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2093715456,
+              "workingSetBytes": 1010970624,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 4033413120,
+              "workingSetBytes": 1016692736,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 3017326592,
+              "dxgiNonLocalUsageBytes": 715808768,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 100,
+              "particleLargeBufferPayloadBytes": 1920000000,
+              "particleLargeBufferAllocationBytes": 1926758400,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 4188389376,
+              "workingSetBytes": 1017163776,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 3171532800,
+              "dxgiNonLocalUsageBytes": 716005376,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 108,
+              "particleLargeBufferPayloadBytes": 2073600000,
+              "particleLargeBufferAllocationBytes": 2080899072,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 4559691776,
+              "workingSetBytes": 1018437632,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716472320,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 4559699968,
+              "workingSetBytes": 1018449920,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 4559699968,
+              "workingSetBytes": 1018449920,
+              "peakWorkingSetBytes": 1045049344,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 4690014208,
+              "workingSetBytes": 1123942400,
+              "peakWorkingSetBytes": 1123942400,
+              "dxgiLocalUsageBytes": 3558141952,
+              "dxgiNonLocalUsageBytes": 750641152,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 4785221632,
+              "workingSetBytes": 1200168960,
+              "peakWorkingSetBytes": 1200168960,
+              "dxgiLocalUsageBytes": 3575623680,
+              "dxgiNonLocalUsageBytes": 772808704,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 5098262528,
+              "workingSetBytes": 1354268672,
+              "peakWorkingSetBytes": 1379459072,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 924483584,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 5098786816,
+              "workingSetBytes": 1354797056,
+              "peakWorkingSetBytes": 1379459072,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 925007872,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 5098786816,
+              "workingSetBytes": 1354801152,
+              "peakWorkingSetBytes": 1379459072,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 769695744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        },
+        {
+          "run": 2,
+          "entry": {
+            "privateBytes": 5088768000,
+            "workingSetBytes": 1354608640,
+            "dxgiLocalUsageBytes": 3731349504,
+            "dxgiNonLocalUsageBytes": 769302528
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 661725184,
+              "workingSetBytes": 222101504,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201723904,
+              "workingSetBytes": 100913152,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 186208256,
+              "workingSetBytes": 149733376,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 995012608,
+              "workingSetBytes": 513822720,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 28491776,
+              "workingSetBytes": 16584704,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14213120,
+              "workingSetBytes": 7708672,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 2461163520,
+              "workingSetBytes": 8044544,
+              "dxgiLocalUsageBytes": 2448023552,
+              "dxgiNonLocalUsageBytes": 3129344
+            },
+            "heroes": {
+              "privateBytes": 226332672,
+              "workingSetBytes": 180973568,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 313765888,
+              "workingSetBytes": 154587136,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 131072,
+              "workingSetBytes": 139264,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -155181056
+            }
+          },
+          "particleGroups": {
+            "skillPool": 100,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 127,
+            "particleLargeBufferPayloadBytes": 2438400000,
+            "particleLargeBufferAllocationBytes": 2446983168,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2424832,
+              "workingSetBytes": 9936896,
+              "peakWorkingSetBytes": 9936896,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 126300160,
+              "workingSetBytes": 76079104,
+              "peakWorkingSetBytes": 76079104,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 259813376,
+              "workingSetBytes": 86110208,
+              "peakWorkingSetBytes": 117739520,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 391639040,
+              "workingSetBytes": 221118464,
+              "peakWorkingSetBytes": 221118464,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 661725184,
+              "workingSetBytes": 222064640,
+              "peakWorkingSetBytes": 228814848,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 661725184,
+              "workingSetBytes": 222097408,
+              "peakWorkingSetBytes": 228814848,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 661725184,
+              "workingSetBytes": 222101504,
+              "peakWorkingSetBytes": 228814848,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 863449088,
+              "workingSetBytes": 323014656,
+              "peakWorkingSetBytes": 423440384,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1049657344,
+              "workingSetBytes": 472748032,
+              "peakWorkingSetBytes": 472748032,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1079443456,
+              "workingSetBytes": 489148416,
+              "peakWorkingSetBytes": 489627648,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1956900864,
+              "workingSetBytes": 939896832,
+              "peakWorkingSetBytes": 976760832,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2044669952,
+              "workingSetBytes": 986570752,
+              "peakWorkingSetBytes": 997326848,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2053632000,
+              "workingSetBytes": 991256576,
+              "peakWorkingSetBytes": 997326848,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2070380544,
+              "workingSetBytes": 1000378368,
+              "peakWorkingSetBytes": 1001054208,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2073161728,
+              "workingSetBytes": 1003155456,
+              "peakWorkingSetBytes": 1003155456,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2086289408,
+              "workingSetBytes": 1009958912,
+              "peakWorkingSetBytes": 1009958912,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2087374848,
+              "workingSetBytes": 1010864128,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 4025028608,
+              "workingSetBytes": 1016852480,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 3017326592,
+              "dxgiNonLocalUsageBytes": 715808768,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 100,
+              "particleLargeBufferPayloadBytes": 1920000000,
+              "particleLargeBufferAllocationBytes": 1926758400,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 4180283392,
+              "workingSetBytes": 1017597952,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 3171532800,
+              "dxgiNonLocalUsageBytes": 716005376,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 108,
+              "particleLargeBufferPayloadBytes": 2073600000,
+              "particleLargeBufferAllocationBytes": 2080899072,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 4548530176,
+              "workingSetBytes": 1018896384,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716472320,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 4548538368,
+              "workingSetBytes": 1018908672,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 4548538368,
+              "workingSetBytes": 1018908672,
+              "peakWorkingSetBytes": 1044828160,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 4679950336,
+              "workingSetBytes": 1123725312,
+              "peakWorkingSetBytes": 1123725312,
+              "dxgiLocalUsageBytes": 3558141952,
+              "dxgiNonLocalUsageBytes": 750641152,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 4774871040,
+              "workingSetBytes": 1199882240,
+              "peakWorkingSetBytes": 1199882240,
+              "dxgiLocalUsageBytes": 3575623680,
+              "dxgiNonLocalUsageBytes": 772808704,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 5088636928,
+              "workingSetBytes": 1354469376,
+              "peakWorkingSetBytes": 1379385344,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 924483584,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 5088768000,
+              "workingSetBytes": 1354604544,
+              "peakWorkingSetBytes": 1379385344,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 924614656,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 5088768000,
+              "workingSetBytes": 1354608640,
+              "peakWorkingSetBytes": 1379385344,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 769302528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        },
+        {
+          "run": 3,
+          "entry": {
+            "privateBytes": 5092114432,
+            "workingSetBytes": 1355329536,
+            "dxgiLocalUsageBytes": 3731349504,
+            "dxgiNonLocalUsageBytes": 769695744
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 662659072,
+              "workingSetBytes": 222179328,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201777152,
+              "workingSetBytes": 100986880,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 187424768,
+              "workingSetBytes": 149716992,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 995385344,
+              "workingSetBytes": 514105344,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 28553216,
+              "workingSetBytes": 16568320,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14311424,
+              "workingSetBytes": 7655424,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 2460348416,
+              "workingSetBytes": 7405568,
+              "dxgiLocalUsageBytes": 2448023552,
+              "dxgiNonLocalUsageBytes": 3129344
+            },
+            "heroes": {
+              "privateBytes": 227151872,
+              "workingSetBytes": 180989952,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 313978880,
+              "workingSetBytes": 155185152,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 524288,
+              "workingSetBytes": 536576,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -154787840
+            }
+          },
+          "particleGroups": {
+            "skillPool": 100,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 127,
+            "particleLargeBufferPayloadBytes": 2438400000,
+            "particleLargeBufferAllocationBytes": 2446983168,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2461696,
+              "workingSetBytes": 9957376,
+              "peakWorkingSetBytes": 9957376,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 126894080,
+              "workingSetBytes": 76148736,
+              "peakWorkingSetBytes": 76148736,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 260726784,
+              "workingSetBytes": 86245376,
+              "peakWorkingSetBytes": 117878784,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 392642560,
+              "workingSetBytes": 221224960,
+              "peakWorkingSetBytes": 221224960,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 662659072,
+              "workingSetBytes": 222142464,
+              "peakWorkingSetBytes": 228880384,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 662659072,
+              "workingSetBytes": 222175232,
+              "peakWorkingSetBytes": 228880384,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 662659072,
+              "workingSetBytes": 222179328,
+              "peakWorkingSetBytes": 228880384,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 864436224,
+              "workingSetBytes": 323166208,
+              "peakWorkingSetBytes": 423518208,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1051860992,
+              "workingSetBytes": 472883200,
+              "peakWorkingSetBytes": 472883200,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1082048512,
+              "workingSetBytes": 489545728,
+              "peakWorkingSetBytes": 489955328,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1959727104,
+              "workingSetBytes": 940359680,
+              "peakWorkingSetBytes": 977350656,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2047246336,
+              "workingSetBytes": 986988544,
+              "peakWorkingSetBytes": 997797888,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2056204288,
+              "workingSetBytes": 991670272,
+              "peakWorkingSetBytes": 997797888,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2073018368,
+              "workingSetBytes": 1000792064,
+              "peakWorkingSetBytes": 1001467904,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2075799552,
+              "workingSetBytes": 1003556864,
+              "peakWorkingSetBytes": 1003556864,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2088927232,
+              "workingSetBytes": 1010356224,
+              "peakWorkingSetBytes": 1010356224,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2090110976,
+              "workingSetBytes": 1011212288,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 4027224064,
+              "workingSetBytes": 1016881152,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 3017326592,
+              "dxgiNonLocalUsageBytes": 715808768,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 100,
+              "particleLargeBufferPayloadBytes": 1920000000,
+              "particleLargeBufferAllocationBytes": 1926758400,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 4182200320,
+              "workingSetBytes": 1017344000,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 3171532800,
+              "dxgiNonLocalUsageBytes": 716005376,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 108,
+              "particleLargeBufferPayloadBytes": 2073600000,
+              "particleLargeBufferAllocationBytes": 2080899072,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 4550451200,
+              "workingSetBytes": 1018609664,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716472320,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 4550459392,
+              "workingSetBytes": 1018617856,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 4550459392,
+              "workingSetBytes": 1018617856,
+              "peakWorkingSetBytes": 1045274624,
+              "dxgiLocalUsageBytes": 3537772544,
+              "dxgiNonLocalUsageBytes": 716480512,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 4681302016,
+              "workingSetBytes": 1124114432,
+              "peakWorkingSetBytes": 1124114432,
+              "dxgiLocalUsageBytes": 3558141952,
+              "dxgiNonLocalUsageBytes": 750641152,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 4777611264,
+              "workingSetBytes": 1199607808,
+              "peakWorkingSetBytes": 1199607808,
+              "dxgiLocalUsageBytes": 3575623680,
+              "dxgiNonLocalUsageBytes": 772808704,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 5091590144,
+              "workingSetBytes": 1354792960,
+              "peakWorkingSetBytes": 1379713024,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 924483584,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 5092114432,
+              "workingSetBytes": 1355325440,
+              "peakWorkingSetBytes": 1379713024,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 925007872,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 5092114432,
+              "workingSetBytes": 1355329536,
+              "peakWorkingSetBytes": 1379713024,
+              "dxgiLocalUsageBytes": 3731349504,
+              "dxgiNonLocalUsageBytes": 769695744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 127,
+              "particleLargeBufferPayloadBytes": 2438400000,
+              "particleLargeBufferAllocationBytes": 2446983168,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        }
+      ],
+      "totals": {
+        "privateBytes": {
+          "meanBytes": 5093223082.666667,
+          "medianBytes": 5092114432,
+          "minBytes": 5088768000,
+          "maxBytes": 5098786816
+        },
+        "workingSetBytes": {
+          "meanBytes": 1354913109.3333333,
+          "medianBytes": 1354801152,
+          "minBytes": 1354608640,
+          "maxBytes": 1355329536
+        },
+        "dxgiLocalUsageBytes": {
+          "meanBytes": 3731349504,
+          "medianBytes": 3731349504,
+          "minBytes": 3731349504,
+          "maxBytes": 3731349504
+        },
+        "dxgiNonLocalUsageBytes": {
+          "meanBytes": 769564672,
+          "medianBytes": 769695744,
+          "minBytes": 769302528,
+          "maxBytes": 769695744
+        }
+      },
+      "stages": [
+        {
+          "key": "startup",
+          "label": "기동·Title·공통 자원",
+          "begin": null,
+          "end": "scene_setup_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 662265856,
+              "medianBytes": 662413312,
+              "minBytes": 661725184,
+              "maxBytes": 662659072
+            },
+            "workingSetBytes": {
+              "meanBytes": 222143829.33333334,
+              "medianBytes": 222150656,
+              "minBytes": 222101504,
+              "maxBytes": 222179328
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 459952128,
+              "medianBytes": 459952128,
+              "minBytes": 459952128,
+              "maxBytes": 459952128
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 30633984,
+              "medianBytes": 30633984,
+              "minBytes": 30633984,
+              "maxBytes": 30633984
+            }
+          },
+          "privateCommitSharePercent": 13.002883346182756
+        },
+        {
+          "key": "skybox",
+          "label": "하늘 cubemap",
+          "begin": "scene_setup_ready",
+          "end": "skybox_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 201740288,
+              "medianBytes": 201723904,
+              "minBytes": 201719808,
+              "maxBytes": 201777152
+            },
+            "workingSetBytes": {
+              "meanBytes": 100892672,
+              "medianBytes": 100913152,
+              "minBytes": 100777984,
+              "maxBytes": 100986880
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 100667392,
+              "medianBytes": 100667392,
+              "minBytes": 100667392,
+              "maxBytes": 100667392
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 100675584,
+              "medianBytes": 100675584,
+              "minBytes": 100675584,
+              "maxBytes": 100675584
+            }
+          },
+          "privateCommitSharePercent": 3.9609552679238726
+        },
+        {
+          "key": "map",
+          "label": "맵 전체",
+          "begin": "skybox_ready",
+          "end": "map_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 186927786.66666666,
+              "medianBytes": 187150336,
+              "minBytes": 186208256,
+              "maxBytes": 187424768
+            },
+            "workingSetBytes": {
+              "meanBytes": 149818026.66666666,
+              "medianBytes": 149733376,
+              "minBytes": 149716992,
+              "maxBytes": 150003712
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 35438592,
+              "medianBytes": 35438592,
+              "minBytes": 35438592,
+              "maxBytes": 35438592
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 82472960,
+              "medianBytes": 82472960,
+              "minBytes": 82472960,
+              "maxBytes": 82472960
+            }
+          },
+          "privateCommitSharePercent": 3.670127611390557
+        },
+        {
+          "key": "enemies",
+          "label": "미니언·몬스터·보스",
+          "begin": "map_ready",
+          "end": "boss_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 995999744,
+              "medianBytes": 995385344,
+              "minBytes": 995012608,
+              "maxBytes": 997601280
+            },
+            "workingSetBytes": {
+              "meanBytes": 513934677.3333333,
+              "medianBytes": 513875968,
+              "minBytes": 513822720,
+              "maxBytes": 514105344
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 476028928,
+              "medianBytes": 476028928,
+              "minBytes": 476028928,
+              "maxBytes": 476028928
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 480649216,
+              "medianBytes": 480649216,
+              "minBytes": 480649216,
+              "maxBytes": 480649216
+            }
+          },
+          "privateCommitSharePercent": 19.555392093262146
+        },
+        {
+          "key": "skills",
+          "label": "스킬 모델·객체·billboard",
+          "begin": "boss_ready",
+          "end": "skill_objects_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 29289130.666666668,
+              "medianBytes": 28553216,
+              "minBytes": 28491776,
+              "maxBytes": 30822400
+            },
+            "workingSetBytes": {
+              "meanBytes": 16569685.333333334,
+              "medianBytes": 16568320,
+              "minBytes": 16556032,
+              "maxBytes": 16584704
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 11370496,
+              "medianBytes": 11370496,
+              "minBytes": 11370496,
+              "maxBytes": 11370496
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 12996608,
+              "medianBytes": 12996608,
+              "minBytes": 12996608,
+              "maxBytes": 12996608
+            }
+          },
+          "privateCommitSharePercent": 0.5750608247721148
+        },
+        {
+          "key": "particle_setup",
+          "label": "파티클 텍스처·공통 설정",
+          "begin": "skill_objects_ready",
+          "end": "particle_shared_setup_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 14177621.333333334,
+              "medianBytes": 14213120,
+              "minBytes": 14008320,
+              "maxBytes": 14311424
+            },
+            "workingSetBytes": {
+              "meanBytes": 7656789.333333333,
+              "medianBytes": 7655424,
+              "minBytes": 7606272,
+              "maxBytes": 7708672
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 6291456,
+              "medianBytes": 6291456,
+              "minBytes": 6291456,
+              "maxBytes": 6291456
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 5922816,
+              "medianBytes": 5922816,
+              "minBytes": 5922816,
+              "maxBytes": 5922816
+            }
+          },
+          "privateCommitSharePercent": 0.2783624652449021
+        },
+        {
+          "key": "particles",
+          "label": "파티클 객체·대형 버퍼",
+          "begin": "particle_shared_setup_ready",
+          "end": "ingame_scene_objects",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 2462498816,
+              "medianBytes": 2461163520,
+              "minBytes": 2460348416,
+              "maxBytes": 2465984512
+            },
+            "workingSetBytes": {
+              "meanBytes": 7643136,
+              "medianBytes": 7479296,
+              "minBytes": 7405568,
+              "maxBytes": 8044544
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 2448023552,
+              "medianBytes": 2448023552,
+              "minBytes": 2448023552,
+              "maxBytes": 2448023552
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 3129344,
+              "medianBytes": 3129344,
+              "minBytes": 3129344,
+              "maxBytes": 3129344
+            }
+          },
+          "privateCommitSharePercent": 48.3485363988947
+        },
+        {
+          "key": "heroes",
+          "label": "영웅 모델 2회·컨트롤러 4개",
+          "begin": "ingame_scene_objects",
+          "end": "local_hero_created",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 226335402.66666666,
+              "medianBytes": 226332672,
+              "minBytes": 225521664,
+              "maxBytes": 227151872
+            },
+            "workingSetBytes": {
+              "meanBytes": 181227520,
+              "medianBytes": 180989952,
+              "minBytes": 180973568,
+              "maxBytes": 181719040
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 37851136,
+              "medianBytes": 37851136,
+              "minBytes": 37851136,
+              "maxBytes": 37851136
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 56328192,
+              "medianBytes": 56328192,
+              "minBytes": 56328192,
+              "maxBytes": 56328192
+            }
+          },
+          "privateCommitSharePercent": 4.443854097750689
+        },
+        {
+          "key": "ingame_ui",
+          "label": "인게임 UI·dissolve",
+          "begin": "local_hero_created",
+          "end": "ingame_ui_dissolve_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 313595221.3333333,
+              "medianBytes": 313765888,
+              "minBytes": 313040896,
+              "maxBytes": 313978880
+            },
+            "workingSetBytes": {
+              "meanBytes": 154624000,
+              "medianBytes": 154587136,
+              "minBytes": 154099712,
+              "maxBytes": 155185152
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 155725824,
+              "medianBytes": 155725824,
+              "minBytes": 155725824,
+              "maxBytes": 155725824
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 151674880,
+              "medianBytes": 151674880,
+              "minBytes": 151674880,
+              "maxBytes": 151674880
+            }
+          },
+          "privateCommitSharePercent": 6.1571075180383374
+        },
+        {
+          "key": "submission",
+          "label": "GPU 제출·대기·upload 해제",
+          "begin": "ingame_ui_dissolve_ready",
+          "end": "ingame_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 393216,
+              "medianBytes": 524288,
+              "minBytes": 131072,
+              "maxBytes": 524288
+            },
+            "workingSetBytes": {
+              "meanBytes": 402773.3333333333,
+              "medianBytes": 532480,
+              "minBytes": 139264,
+              "maxBytes": 536576
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 0,
+              "medianBytes": 0,
+              "minBytes": 0,
+              "maxBytes": 0
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": -154918912,
+              "medianBytes": -154787840,
+              "minBytes": -155181056,
+              "maxBytes": -154787840
+            }
+          },
+          "privateCommitSharePercent": 0.007720376539920243
+        }
+      ],
+      "particleGroups": {
+        "skillPool": 100,
+        "selectedSkills": 8,
+        "environment": 19
+      },
+      "particleAllocations": {
+        "particleCreatedCount": 127,
+        "particleLargeBufferPayloadBytes": 2438400000,
+        "particleLargeBufferAllocationBytes": 2446983168,
+        "particleCapacity": 300000,
+        "particleVertexStride": 32
+      },
+      "loadout": {
+        "jobs": [
+          0,
+          1,
+          2,
+          4
+        ],
+        "skills": [
+          [
+            48,
+            53,
+            54,
+            58
+          ],
+          [
+            60,
+            65,
+            69,
+            70
+          ],
+          [
+            72,
+            79,
+            81,
+            82
+          ],
+          [
+            24,
+            27,
+            29,
+            30
+          ]
+        ]
+      },
+      "particleReleaseChecked": true,
+      "heroModels": {
+        "loads": 2,
+        "skinnedMeshes": 91,
+        "animatedFrames": 227,
+        "animationMatrixBytes": 100926016
+      }
+    },
+    "selected": {
+      "schemaVersion": 1,
+      "kind": "phase_net_growth_attribution_not_retained_heap_ownership",
+      "measuredAtKst": "2026-10-05T14:29:42.677799+09:00",
+      "configuration": "Release",
+      "sourceBaseCommit": "ee60ac1687a83b6830ee573c618b7f7ac4d82b4d",
+      "instrumentedWorkingTree": true,
+      "executableSha256": "b955f4289cf5caec4969decf374e3d7c82d7cd16ab460f8c7bd1e8829a0b96a0",
+      "measurementSourcesSha256": {
+        "Client/WarOfDimension/ClientMemoryProfile.cpp": "e7e00945b519be4a04b1f8cf362a46bef6017c190903c4e0995dd7a0aa7211db",
+        "Client/WarOfDimension/ClientMemoryProfile.h": "05c441e895c3824ac4513709881e686ef29a20a6e906227acfede7b71ff2c68a",
+        "Client/WarOfDimension/Scene.cpp": "ed465ac17bc7b35cc591f1123e30c8a3f8a301b589e9400462ea76bffbeea543",
+        "Client/WarOfDimension/Mesh.cpp": "50cc2d60f0807244c6f114fb8ac0cb9cb8dfea9f12edfb1e98c6c5ce3612eb00",
+        "Client/WarOfDimension/GameFramework.cpp": "90ddddd4b57880071d277fd0f10c5b17f323680d9656126dc91b236225c81af1",
+        "Client/WarOfDimension/Object.cpp": "093acff92a82405e0a4ac0aa71351d0630b4c108fefa5afff2428dbf550d6755",
+        "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+        "Client/WarOfDimension/WarOfDimension.cpp": "9a4a6dbce023ef816a9f111fd8b5d11b0c0c85feed4a19e8a9e5626d0fa4f8dd",
+        "scripts/Measure-ClientMemory.ps1": "e0965b3019f7f57f745fe3badd7cfad6e6bc0eb2bbac5ba1d6a28972f0220c3c",
+        "Client/WarOfDimension/ModelPartSelection.cpp": "24ce473073de73b3bd08acf9cddaf977ee10109f5c167c07a431a094809fa5a8",
+        "Client/WarOfDimension/ModelPartSelection.h": "66eb83c0d1f453bed68cf9a6e8fedbfd11cdb83a9c1ef06e6e4c672153af676a",
+        "Client/WarOfDimension/NetworkManager.h": "767e881e1b886695c3a22db3b0c8d4fe4e790d03fa9e944e71ec53ffd9cd93f3",
+        "Client/WarOfDimension/Player.cpp": "a1db50869f8db73e14227d2e50e20cf02f46d7cbbb76d9b6611d3994b470fe46",
+        "Client/WarOfDimension/GameFramework.h": "5b0e8c66e713dcc829c3b776ca206e0cc03456f9f6d6a31d5f468aa153ef9894",
+        "Client/WarOfDimension/HeroSelectionTests.cpp": "73e6eff0e0dc0bae8498fd90267a451cce17aa4df9f5cc25fbf2ac0138370166",
+        "Client/WarOfDimension/ParticleSelection.cpp": "342756068c0b444ccee55f6bd102d635c97b703dd5e8bf2f8bfd5ca775afbe9f",
+        "Client/WarOfDimension/ParticleSelection.h": "88d8d1d1966d2189eb75c497c7ee59f0dedec8b5468113dc7ee4a850ed5fb491",
+        "Client/WarOfDimension/ParticleSelectionTests.cpp": "e969478b1fbc2f259725f19154f726addba221cceb8e368a8a5d38ef13ed0fd0",
+        "Client/WarOfDimension/Scene.h": "6264944460461d3867b25e048003c4bf6ecf17f497e784248d235f59ebe7a51d",
+        "Server/Game_Server/CMatch.cpp": "70f946cbef1cba24f46ca6f4e74674028f4dc726332fdf0b75dfaea51fb7af84",
+        "Server/Game_Server/CGameMgr.cpp": "28c1f9666e3bd3f4082e12429513131829b04658a3e9575cca63902c22058d90",
+        "Server/Lobby_Server/Job.h": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b",
+        "Server/Lobby_Server/JobQueue.h": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4",
+        "Server/Lobby_Server/Zone.h": "0237c230c4b655f6f205191a99e00509c9ed72f551ebd0b1954c94427038702f"
+      },
+      "scenario": "fresh_process_title_to_ingame_fixed_skills_ogre",
+      "adapter": "NVIDIA GeForce RTX 4070 SUPER",
+      "runs": [
+        {
+          "run": 1,
+          "entry": {
+            "privateBytes": 4025212928,
+            "workingSetBytes": 1349632000,
+            "dxgiLocalUsageBytes": 2671181824,
+            "dxgiNonLocalUsageBytes": 768344064
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 663359488,
+              "workingSetBytes": 222040064,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201723904,
+              "workingSetBytes": 100798464,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 187498496,
+              "workingSetBytes": 149876736,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 996294656,
+              "workingSetBytes": 513822720,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 28553216,
+              "workingSetBytes": 16556032,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14401536,
+              "workingSetBytes": 7933952,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 1394831360,
+              "workingSetBytes": 4120576,
+              "dxgiLocalUsageBytes": 1387855872,
+              "dxgiNonLocalUsageBytes": 1777664
+            },
+            "heroes": {
+              "privateBytes": 225300480,
+              "workingSetBytes": 180183040,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 312721408,
+              "workingSetBytes": 153747456,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 528384,
+              "workingSetBytes": 552960,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -154787840
+            }
+          },
+          "particleGroups": {
+            "skillPool": 45,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 72,
+            "particleLargeBufferPayloadBytes": 1382400000,
+            "particleLargeBufferAllocationBytes": 1387266048,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2445312,
+              "workingSetBytes": 9953280,
+              "peakWorkingSetBytes": 9953280,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 127356928,
+              "workingSetBytes": 76263424,
+              "peakWorkingSetBytes": 76263424,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 261287936,
+              "workingSetBytes": 86151168,
+              "peakWorkingSetBytes": 117796864,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 393310208,
+              "workingSetBytes": 221081600,
+              "peakWorkingSetBytes": 221081600,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 663359488,
+              "workingSetBytes": 222003200,
+              "peakWorkingSetBytes": 228753408,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 663359488,
+              "workingSetBytes": 222035968,
+              "peakWorkingSetBytes": 228753408,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 663359488,
+              "workingSetBytes": 222040064,
+              "peakWorkingSetBytes": 228753408,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 865083392,
+              "workingSetBytes": 322838528,
+              "peakWorkingSetBytes": 423378944,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1052581888,
+              "workingSetBytes": 472715264,
+              "peakWorkingSetBytes": 472715264,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1083809792,
+              "workingSetBytes": 489271296,
+              "peakWorkingSetBytes": 489607168,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1961111552,
+              "workingSetBytes": 939892736,
+              "peakWorkingSetBytes": 976896000,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2048876544,
+              "workingSetBytes": 986537984,
+              "peakWorkingSetBytes": 997339136,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2057838592,
+              "workingSetBytes": 991219712,
+              "peakWorkingSetBytes": 997339136,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2074652672,
+              "workingSetBytes": 1000337408,
+              "peakWorkingSetBytes": 1001009152,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2077429760,
+              "workingSetBytes": 1003094016,
+              "peakWorkingSetBytes": 1003094016,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2090561536,
+              "workingSetBytes": 1009889280,
+              "peakWorkingSetBytes": 1009889280,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2091831296,
+              "workingSetBytes": 1011027968,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 2963693568,
+              "workingSetBytes": 1013669888,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 1957158912,
+              "dxgiNonLocalUsageBytes": 714457088,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 45,
+              "particleLargeBufferPayloadBytes": 864000000,
+              "particleLargeBufferAllocationBytes": 867041280,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 3118673920,
+              "workingSetBytes": 1014132736,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 2111365120,
+              "dxgiNonLocalUsageBytes": 714653696,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 53,
+              "particleLargeBufferPayloadBytes": 1017600000,
+              "particleLargeBufferAllocationBytes": 1021181952,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 3486654464,
+              "workingSetBytes": 1015140352,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715120640,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 3486662656,
+              "workingSetBytes": 1015148544,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 3486662656,
+              "workingSetBytes": 1015148544,
+              "peakWorkingSetBytes": 1044836352,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 3617042432,
+              "workingSetBytes": 1120030720,
+              "peakWorkingSetBytes": 1120030720,
+              "dxgiLocalUsageBytes": 2497974272,
+              "dxgiNonLocalUsageBytes": 749289472,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 3711963136,
+              "workingSetBytes": 1195331584,
+              "peakWorkingSetBytes": 1195331584,
+              "dxgiLocalUsageBytes": 2515456000,
+              "dxgiNonLocalUsageBytes": 771457024,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 4024684544,
+              "workingSetBytes": 1349079040,
+              "peakWorkingSetBytes": 1374269440,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923131904,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 4025212928,
+              "workingSetBytes": 1349623808,
+              "peakWorkingSetBytes": 1374269440,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923656192,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 4025212928,
+              "workingSetBytes": 1349632000,
+              "peakWorkingSetBytes": 1374269440,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 768344064,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        },
+        {
+          "run": 2,
+          "entry": {
+            "privateBytes": 4026933248,
+            "workingSetBytes": 1350291456,
+            "dxgiLocalUsageBytes": 2671181824,
+            "dxgiNonLocalUsageBytes": 767950848
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 661168128,
+              "workingSetBytes": 221941760,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201998336,
+              "workingSetBytes": 101089280,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 186261504,
+              "workingSetBytes": 149397504,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 996667392,
+              "workingSetBytes": 514187264,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 30547968,
+              "workingSetBytes": 16363520,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14446592,
+              "workingSetBytes": 8093696,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 1397121024,
+              "workingSetBytes": 3805184,
+              "dxgiLocalUsageBytes": 1387855872,
+              "dxgiNonLocalUsageBytes": 1777664
+            },
+            "heroes": {
+              "privateBytes": 225865728,
+              "workingSetBytes": 181202944,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 312725504,
+              "workingSetBytes": 154062848,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 131072,
+              "workingSetBytes": 147456,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -155181056
+            }
+          },
+          "particleGroups": {
+            "skillPool": 45,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 72,
+            "particleLargeBufferPayloadBytes": 1382400000,
+            "particleLargeBufferAllocationBytes": 1387266048,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2437120,
+              "workingSetBytes": 9940992,
+              "peakWorkingSetBytes": 9940992,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 126287872,
+              "workingSetBytes": 76165120,
+              "peakWorkingSetBytes": 76165120,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 259215360,
+              "workingSetBytes": 86183936,
+              "peakWorkingSetBytes": 117776384,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 391147520,
+              "workingSetBytes": 220999680,
+              "peakWorkingSetBytes": 220999680,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 661168128,
+              "workingSetBytes": 221904896,
+              "peakWorkingSetBytes": 228655104,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 661168128,
+              "workingSetBytes": 221937664,
+              "peakWorkingSetBytes": 228655104,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 661168128,
+              "workingSetBytes": 221941760,
+              "peakWorkingSetBytes": 228655104,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 863166464,
+              "workingSetBytes": 323031040,
+              "peakWorkingSetBytes": 423280640,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1049427968,
+              "workingSetBytes": 472428544,
+              "peakWorkingSetBytes": 472428544,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1080590336,
+              "workingSetBytes": 488902656,
+              "peakWorkingSetBytes": 489373696,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1958129664,
+              "workingSetBytes": 939749376,
+              "peakWorkingSetBytes": 976564224,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2046095360,
+              "workingSetBytes": 986615808,
+              "peakWorkingSetBytes": 997183488,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2056155136,
+              "workingSetBytes": 991043584,
+              "peakWorkingSetBytes": 997183488,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2073858048,
+              "workingSetBytes": 1000202240,
+              "peakWorkingSetBytes": 1000882176,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2076643328,
+              "workingSetBytes": 1002979328,
+              "peakWorkingSetBytes": 1002979328,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2089779200,
+              "workingSetBytes": 1009790976,
+              "peakWorkingSetBytes": 1009790976,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2091089920,
+              "workingSetBytes": 1011073024,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 2964967424,
+              "workingSetBytes": 1013137408,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 1957158912,
+              "dxgiNonLocalUsageBytes": 714457088,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 45,
+              "particleLargeBufferPayloadBytes": 864000000,
+              "particleLargeBufferAllocationBytes": 867041280,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 3119947776,
+              "workingSetBytes": 1013600256,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 2111365120,
+              "dxgiNonLocalUsageBytes": 714653696,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 53,
+              "particleLargeBufferPayloadBytes": 1017600000,
+              "particleLargeBufferAllocationBytes": 1021181952,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 3488202752,
+              "workingSetBytes": 1014870016,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715120640,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 3488210944,
+              "workingSetBytes": 1014878208,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 3488210944,
+              "workingSetBytes": 1014878208,
+              "peakWorkingSetBytes": 1044668416,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 3619123200,
+              "workingSetBytes": 1120178176,
+              "peakWorkingSetBytes": 1120178176,
+              "dxgiLocalUsageBytes": 2497974272,
+              "dxgiNonLocalUsageBytes": 749289472,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 3714076672,
+              "workingSetBytes": 1196081152,
+              "peakWorkingSetBytes": 1196081152,
+              "dxgiLocalUsageBytes": 2515456000,
+              "dxgiNonLocalUsageBytes": 771457024,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 4026802176,
+              "workingSetBytes": 1350144000,
+              "peakWorkingSetBytes": 1375330304,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923131904,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 4026933248,
+              "workingSetBytes": 1350287360,
+              "peakWorkingSetBytes": 1375330304,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923262976,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 4026933248,
+              "workingSetBytes": 1350291456,
+              "peakWorkingSetBytes": 1375330304,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 767950848,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        },
+        {
+          "run": 3,
+          "entry": {
+            "privateBytes": 4018806784,
+            "workingSetBytes": 1350561792,
+            "dxgiLocalUsageBytes": 2671181824,
+            "dxgiNonLocalUsageBytes": 768344064
+          },
+          "stages": {
+            "startup": {
+              "privateBytes": 661188608,
+              "workingSetBytes": 222138368,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984
+            },
+            "skybox": {
+              "privateBytes": 201732096,
+              "workingSetBytes": 100753408,
+              "dxgiLocalUsageBytes": 100667392,
+              "dxgiNonLocalUsageBytes": 100675584
+            },
+            "map": {
+              "privateBytes": 185012224,
+              "workingSetBytes": 149803008,
+              "dxgiLocalUsageBytes": 35438592,
+              "dxgiNonLocalUsageBytes": 82472960
+            },
+            "enemies": {
+              "privateBytes": 995393536,
+              "workingSetBytes": 514064384,
+              "dxgiLocalUsageBytes": 476028928,
+              "dxgiNonLocalUsageBytes": 480649216
+            },
+            "skills": {
+              "privateBytes": 28753920,
+              "workingSetBytes": 16785408,
+              "dxgiLocalUsageBytes": 11370496,
+              "dxgiNonLocalUsageBytes": 12996608
+            },
+            "particle_setup": {
+              "privateBytes": 14553088,
+              "workingSetBytes": 7811072,
+              "dxgiLocalUsageBytes": 6291456,
+              "dxgiNonLocalUsageBytes": 5922816
+            },
+            "particles": {
+              "privateBytes": 1394552832,
+              "workingSetBytes": 4120576,
+              "dxgiLocalUsageBytes": 1387855872,
+              "dxgiNonLocalUsageBytes": 1777664
+            },
+            "heroes": {
+              "privateBytes": 224645120,
+              "workingSetBytes": 180764672,
+              "dxgiLocalUsageBytes": 37851136,
+              "dxgiNonLocalUsageBytes": 56328192
+            },
+            "ingame_ui": {
+              "privateBytes": 312451072,
+              "workingSetBytes": 153763840,
+              "dxgiLocalUsageBytes": 155725824,
+              "dxgiNonLocalUsageBytes": 151674880
+            },
+            "submission": {
+              "privateBytes": 524288,
+              "workingSetBytes": 557056,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": -154787840
+            }
+          },
+          "particleGroups": {
+            "skillPool": 45,
+            "selectedSkills": 8,
+            "environment": 19
+          },
+          "particleAllocations": {
+            "particleCreatedCount": 72,
+            "particleLargeBufferPayloadBytes": 1382400000,
+            "particleLargeBufferAllocationBytes": 1387266048,
+            "particleCapacity": 300000,
+            "particleVertexStride": 32
+          },
+          "checkpoints": {
+            "process_start": {
+              "phase": "process_start",
+              "privateBytes": 2441216,
+              "workingSetBytes": 9940992,
+              "peakWorkingSetBytes": 9940992,
+              "dxgiLocalUsageBytes": 0,
+              "dxgiNonLocalUsageBytes": 0,
+              "dxgiLocalBudgetBytes": 0,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_framework_ready": {
+              "phase": "startup_framework_ready",
+              "privateBytes": 126152704,
+              "workingSetBytes": 76165120,
+              "peakWorkingSetBytes": 76165120,
+              "dxgiLocalUsageBytes": 71520256,
+              "dxgiNonLocalUsageBytes": 25731072,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_render_ui_ready": {
+              "phase": "startup_render_ui_ready",
+              "privateBytes": 259063808,
+              "workingSetBytes": 86192128,
+              "peakWorkingSetBytes": 117841920,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "startup_sounds_ready": {
+              "phase": "startup_sounds_ready",
+              "privateBytes": 391139328,
+              "workingSetBytes": 221188096,
+              "peakWorkingSetBytes": 221188096,
+              "dxgiLocalUsageBytes": 195985408,
+              "dxgiNonLocalUsageBytes": 30248960,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "title_ready": {
+              "phase": "title_ready",
+              "privateBytes": 661188608,
+              "workingSetBytes": 222101504,
+              "peakWorkingSetBytes": 228843520,
+              "dxgiLocalUsageBytes": 464420864,
+              "dxgiNonLocalUsageBytes": 30683136,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "ingame_build_begin": {
+              "phase": "ingame_build_begin",
+              "privateBytes": 661188608,
+              "workingSetBytes": 222134272,
+              "peakWorkingSetBytes": 228843520,
+              "dxgiLocalUsageBytes": 459886592,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "scene_setup_ready": {
+              "phase": "scene_setup_ready",
+              "privateBytes": 661188608,
+              "workingSetBytes": 222138368,
+              "peakWorkingSetBytes": 228843520,
+              "dxgiLocalUsageBytes": 459952128,
+              "dxgiNonLocalUsageBytes": 30633984,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skybox_ready": {
+              "phase": "skybox_ready",
+              "privateBytes": 862920704,
+              "workingSetBytes": 322891776,
+              "peakWorkingSetBytes": 423481344,
+              "dxgiLocalUsageBytes": 560619520,
+              "dxgiNonLocalUsageBytes": 131309568,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "map_ready": {
+              "phase": "map_ready",
+              "privateBytes": 1047932928,
+              "workingSetBytes": 472694784,
+              "peakWorkingSetBytes": 472694784,
+              "dxgiLocalUsageBytes": 596058112,
+              "dxgiNonLocalUsageBytes": 213782528,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "minions_ready": {
+              "phase": "minions_ready",
+              "privateBytes": 1078120448,
+              "workingSetBytes": 489238528,
+              "peakWorkingSetBytes": 489578496,
+              "dxgiLocalUsageBytes": 608964608,
+              "dxgiNonLocalUsageBytes": 228179968,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "monsters_ready": {
+              "phase": "monsters_ready",
+              "privateBytes": 1955618816,
+              "workingSetBytes": 939868160,
+              "peakWorkingSetBytes": 976834560,
+              "dxgiLocalUsageBytes": 1031659520,
+              "dxgiNonLocalUsageBytes": 653844480,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "boss_ready": {
+              "phase": "boss_ready",
+              "privateBytes": 2043326464,
+              "workingSetBytes": 986759168,
+              "peakWorkingSetBytes": 997322752,
+              "dxgiLocalUsageBytes": 1072087040,
+              "dxgiNonLocalUsageBytes": 694431744,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_models_ready": {
+              "phase": "skill_models_ready",
+              "privateBytes": 2052009984,
+              "workingSetBytes": 991145984,
+              "peakWorkingSetBytes": 997322752,
+              "dxgiLocalUsageBytes": 1076396032,
+              "dxgiNonLocalUsageBytes": 698789888,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "billboard_ready": {
+              "phase": "billboard_ready",
+              "privateBytes": 2069852160,
+              "workingSetBytes": 1001328640,
+              "peakWorkingSetBytes": 1002000384,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 705748992,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "skill_objects_ready": {
+              "phase": "skill_objects_ready",
+              "privateBytes": 2072080384,
+              "workingSetBytes": 1003544576,
+              "peakWorkingSetBytes": 1003544576,
+              "dxgiLocalUsageBytes": 1083457536,
+              "dxgiNonLocalUsageBytes": 707428352,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_textures_ready": {
+              "phase": "particle_textures_ready",
+              "privateBytes": 2085212160,
+              "workingSetBytes": 1010339840,
+              "peakWorkingSetBytes": 1010339840,
+              "dxgiLocalUsageBytes": 1089552384,
+              "dxgiNonLocalUsageBytes": 713330688,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_shared_setup_ready": {
+              "phase": "particle_shared_setup_ready",
+              "privateBytes": 2086633472,
+              "workingSetBytes": 1011355648,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 1089748992,
+              "dxgiNonLocalUsageBytes": 713351168,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 0,
+              "particleLargeBufferPayloadBytes": 0,
+              "particleLargeBufferAllocationBytes": 0,
+              "particleCapacity": 0,
+              "particleVertexStride": 0
+            },
+            "particle_skill_pool_ready": {
+              "phase": "particle_skill_pool_ready",
+              "privateBytes": 2958221312,
+              "workingSetBytes": 1014001664,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 1957158912,
+              "dxgiNonLocalUsageBytes": 714457088,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 45,
+              "particleLargeBufferPayloadBytes": 864000000,
+              "particleLargeBufferAllocationBytes": 867041280,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_selected_skills_ready": {
+              "phase": "particle_selected_skills_ready",
+              "privateBytes": 3113476096,
+              "workingSetBytes": 1014730752,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 2111365120,
+              "dxgiNonLocalUsageBytes": 714653696,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 53,
+              "particleLargeBufferPayloadBytes": 1017600000,
+              "particleLargeBufferAllocationBytes": 1021181952,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "particle_environment_ready": {
+              "phase": "particle_environment_ready",
+              "privateBytes": 3481178112,
+              "workingSetBytes": 1015468032,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715120640,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_constants_ready": {
+              "phase": "scene_constants_ready",
+              "privateBytes": 3481186304,
+              "workingSetBytes": 1015476224,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_scene_objects": {
+              "phase": "ingame_scene_objects",
+              "privateBytes": 3481186304,
+              "workingSetBytes": 1015476224,
+              "peakWorkingSetBytes": 1045229568,
+              "dxgiLocalUsageBytes": 2477604864,
+              "dxgiNonLocalUsageBytes": 715128832,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "hero_other_controllers": {
+              "phase": "hero_other_controllers",
+              "privateBytes": 3610505216,
+              "workingSetBytes": 1120018432,
+              "peakWorkingSetBytes": 1120018432,
+              "dxgiLocalUsageBytes": 2497974272,
+              "dxgiNonLocalUsageBytes": 749289472,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "local_hero_created": {
+              "phase": "local_hero_created",
+              "privateBytes": 3705831424,
+              "workingSetBytes": 1196240896,
+              "peakWorkingSetBytes": 1196240896,
+              "dxgiLocalUsageBytes": 2515456000,
+              "dxgiNonLocalUsageBytes": 771457024,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ui_dissolve_ready": {
+              "phase": "ingame_ui_dissolve_ready",
+              "privateBytes": 4018282496,
+              "workingSetBytes": 1350004736,
+              "peakWorkingSetBytes": 1375191040,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923131904,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "scene_gpu_complete_uploads_retained": {
+              "phase": "scene_gpu_complete_uploads_retained",
+              "privateBytes": 4018806784,
+              "workingSetBytes": 1350549504,
+              "peakWorkingSetBytes": 1375191040,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 923656192,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            },
+            "ingame_ready": {
+              "phase": "ingame_ready",
+              "privateBytes": 4018806784,
+              "workingSetBytes": 1350561792,
+              "peakWorkingSetBytes": 1375191040,
+              "dxgiLocalUsageBytes": 2671181824,
+              "dxgiNonLocalUsageBytes": 768344064,
+              "dxgiLocalBudgetBytes": 11774459904,
+              "particleCreatedCount": 72,
+              "particleLargeBufferPayloadBytes": 1382400000,
+              "particleLargeBufferAllocationBytes": 1387266048,
+              "particleCapacity": 300000,
+              "particleVertexStride": 32
+            }
+          }
+        }
+      ],
+      "totals": {
+        "privateBytes": {
+          "meanBytes": 4023650986.6666665,
+          "medianBytes": 4025212928,
+          "minBytes": 4018806784,
+          "maxBytes": 4026933248
+        },
+        "workingSetBytes": {
+          "meanBytes": 1350161749.3333333,
+          "medianBytes": 1350291456,
+          "minBytes": 1349632000,
+          "maxBytes": 1350561792
+        },
+        "dxgiLocalUsageBytes": {
+          "meanBytes": 2671181824,
+          "medianBytes": 2671181824,
+          "minBytes": 2671181824,
+          "maxBytes": 2671181824
+        },
+        "dxgiNonLocalUsageBytes": {
+          "meanBytes": 768212992,
+          "medianBytes": 768344064,
+          "minBytes": 767950848,
+          "maxBytes": 768344064
+        }
+      },
+      "stages": [
+        {
+          "key": "startup",
+          "label": "기동·Title·공통 자원",
+          "begin": null,
+          "end": "scene_setup_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 661905408,
+              "medianBytes": 661188608,
+              "minBytes": 661168128,
+              "maxBytes": 663359488
+            },
+            "workingSetBytes": {
+              "meanBytes": 222040064,
+              "medianBytes": 222040064,
+              "minBytes": 221941760,
+              "maxBytes": 222138368
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 459952128,
+              "medianBytes": 459952128,
+              "minBytes": 459952128,
+              "maxBytes": 459952128
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 30633984,
+              "medianBytes": 30633984,
+              "minBytes": 30633984,
+              "maxBytes": 30633984
+            }
+          },
+          "privateCommitSharePercent": 16.450368339435563
+        },
+        {
+          "key": "skybox",
+          "label": "하늘 cubemap",
+          "begin": "scene_setup_ready",
+          "end": "skybox_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 201818112,
+              "medianBytes": 201732096,
+              "minBytes": 201723904,
+              "maxBytes": 201998336
+            },
+            "workingSetBytes": {
+              "meanBytes": 100880384,
+              "medianBytes": 100798464,
+              "minBytes": 100753408,
+              "maxBytes": 101089280
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 100667392,
+              "medianBytes": 100667392,
+              "minBytes": 100667392,
+              "maxBytes": 100667392
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 100675584,
+              "medianBytes": 100675584,
+              "minBytes": 100675584,
+              "maxBytes": 100675584
+            }
+          },
+          "privateCommitSharePercent": 5.015795670866404
+        },
+        {
+          "key": "map",
+          "label": "맵 전체",
+          "begin": "skybox_ready",
+          "end": "map_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 186257408,
+              "medianBytes": 186261504,
+              "minBytes": 185012224,
+              "maxBytes": 187498496
+            },
+            "workingSetBytes": {
+              "meanBytes": 149692416,
+              "medianBytes": 149803008,
+              "minBytes": 149397504,
+              "maxBytes": 149876736
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 35438592,
+              "medianBytes": 35438592,
+              "minBytes": 35438592,
+              "maxBytes": 35438592
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 82472960,
+              "medianBytes": 82472960,
+              "minBytes": 82472960,
+              "maxBytes": 82472960
+            }
+          },
+          "privateCommitSharePercent": 4.629064713048141
+        },
+        {
+          "key": "enemies",
+          "label": "미니언·몬스터·보스",
+          "begin": "map_ready",
+          "end": "boss_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 996118528,
+              "medianBytes": 996294656,
+              "minBytes": 995393536,
+              "maxBytes": 996667392
+            },
+            "workingSetBytes": {
+              "meanBytes": 514024789.3333333,
+              "medianBytes": 514064384,
+              "minBytes": 513822720,
+              "maxBytes": 514187264
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 476028928,
+              "medianBytes": 476028928,
+              "minBytes": 476028928,
+              "maxBytes": 476028928
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 480649216,
+              "medianBytes": 480649216,
+              "minBytes": 480649216,
+              "maxBytes": 480649216
+            }
+          },
+          "privateCommitSharePercent": 24.756583791707527
+        },
+        {
+          "key": "skills",
+          "label": "스킬 모델·객체·billboard",
+          "begin": "boss_ready",
+          "end": "skill_objects_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 29285034.666666668,
+              "medianBytes": 28753920,
+              "minBytes": 28553216,
+              "maxBytes": 30547968
+            },
+            "workingSetBytes": {
+              "meanBytes": 16568320,
+              "medianBytes": 16556032,
+              "minBytes": 16363520,
+              "maxBytes": 16785408
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 11370496,
+              "medianBytes": 11370496,
+              "minBytes": 11370496,
+              "maxBytes": 11370496
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 12996608,
+              "medianBytes": 12996608,
+              "minBytes": 12996608,
+              "maxBytes": 12996608
+            }
+          },
+          "privateCommitSharePercent": 0.7278224369784969
+        },
+        {
+          "key": "particle_setup",
+          "label": "파티클 텍스처·공통 설정",
+          "begin": "skill_objects_ready",
+          "end": "particle_shared_setup_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 14467072,
+              "medianBytes": 14446592,
+              "minBytes": 14401536,
+              "maxBytes": 14553088
+            },
+            "workingSetBytes": {
+              "meanBytes": 7946240,
+              "medianBytes": 7933952,
+              "minBytes": 7811072,
+              "maxBytes": 8093696
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 6291456,
+              "medianBytes": 6291456,
+              "minBytes": 6291456,
+              "maxBytes": 6291456
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 5922816,
+              "medianBytes": 5922816,
+              "minBytes": 5922816,
+              "maxBytes": 5922816
+            }
+          },
+          "privateCommitSharePercent": 0.35955086681076753
+        },
+        {
+          "key": "particles",
+          "label": "파티클 객체·대형 버퍼",
+          "begin": "particle_shared_setup_ready",
+          "end": "ingame_scene_objects",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 1395501738.6666667,
+              "medianBytes": 1394831360,
+              "minBytes": 1394552832,
+              "maxBytes": 1397121024
+            },
+            "workingSetBytes": {
+              "meanBytes": 4015445.3333333335,
+              "medianBytes": 4120576,
+              "minBytes": 3805184,
+              "maxBytes": 4120576
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 1387855872,
+              "medianBytes": 1387855872,
+              "minBytes": 1387855872,
+              "maxBytes": 1387855872
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 1777664,
+              "medianBytes": 1777664,
+              "minBytes": 1777664,
+              "maxBytes": 1777664
+            }
+          },
+          "privateCommitSharePercent": 34.6824747795223
+        },
+        {
+          "key": "heroes",
+          "label": "영웅 모델 2회·컨트롤러 4개",
+          "begin": "ingame_scene_objects",
+          "end": "local_hero_created",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 225270442.66666666,
+              "medianBytes": 225300480,
+              "minBytes": 224645120,
+              "maxBytes": 225865728
+            },
+            "workingSetBytes": {
+              "meanBytes": 180716885.33333334,
+              "medianBytes": 180764672,
+              "minBytes": 180183040,
+              "maxBytes": 181202944
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 37851136,
+              "medianBytes": 37851136,
+              "minBytes": 37851136,
+              "maxBytes": 37851136
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 56328192,
+              "medianBytes": 56328192,
+              "minBytes": 56328192,
+              "maxBytes": 56328192
+            }
+          },
+          "privateCommitSharePercent": 5.598657622471589
+        },
+        {
+          "key": "ingame_ui",
+          "label": "인게임 UI·dissolve",
+          "begin": "local_hero_created",
+          "end": "ingame_ui_dissolve_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 312632661.3333333,
+              "medianBytes": 312721408,
+              "minBytes": 312451072,
+              "maxBytes": 312725504
+            },
+            "workingSetBytes": {
+              "meanBytes": 153858048,
+              "medianBytes": 153763840,
+              "minBytes": 153747456,
+              "maxBytes": 154062848
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 155725824,
+              "medianBytes": 155725824,
+              "minBytes": 155725824,
+              "maxBytes": 155725824
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": 151674880,
+              "medianBytes": 151674880,
+              "minBytes": 151674880,
+              "maxBytes": 151674880
+            }
+          },
+          "privateCommitSharePercent": 7.76987522946987
+        },
+        {
+          "key": "submission",
+          "label": "GPU 제출·대기·upload 해제",
+          "begin": "ingame_ui_dissolve_ready",
+          "end": "ingame_ready",
+          "metrics": {
+            "privateBytes": {
+              "meanBytes": 394581.3333333333,
+              "medianBytes": 524288,
+              "minBytes": 131072,
+              "maxBytes": 528384
+            },
+            "workingSetBytes": {
+              "meanBytes": 419157.3333333333,
+              "medianBytes": 552960,
+              "minBytes": 147456,
+              "maxBytes": 557056
+            },
+            "dxgiLocalUsageBytes": {
+              "meanBytes": 0,
+              "medianBytes": 0,
+              "minBytes": 0,
+              "maxBytes": 0
+            },
+            "dxgiNonLocalUsageBytes": {
+              "meanBytes": -154918912,
+              "medianBytes": -154787840,
+              "minBytes": -155181056,
+              "maxBytes": -154787840
+            }
+          },
+          "privateCommitSharePercent": 0.00980654968934615
+        }
+      ],
+      "particleGroups": {
+        "skillPool": 45,
+        "selectedSkills": 8,
+        "environment": 19
+      },
+      "particleAllocations": {
+        "particleCreatedCount": 72,
+        "particleLargeBufferPayloadBytes": 1382400000,
+        "particleLargeBufferAllocationBytes": 1387266048,
+        "particleCapacity": 300000,
+        "particleVertexStride": 32
+      },
+      "loadout": {
+        "jobs": [
+          0,
+          1,
+          2,
+          4
+        ],
+        "skills": [
+          [
+            48,
+            53,
+            54,
+            58
+          ],
+          [
+            60,
+            65,
+            69,
+            70
+          ],
+          [
+            72,
+            79,
+            81,
+            82
+          ],
+          [
+            24,
+            27,
+            29,
+            30
+          ]
+        ]
+      },
+      "particleReleaseChecked": true,
+      "heroModels": {
+        "loads": 2,
+        "skinnedMeshes": 91,
+        "animatedFrames": 227,
+        "animationMatrixBytes": 100926016
+      }
+    }
+  },
+  "stages": [
+    {
+      "key": "startup",
+      "label": "기동·Title·공통 자원",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 662265856,
+            "medianBytes": 662413312,
+            "minBytes": 661725184,
+            "maxBytes": 662659072
+          },
+          "after": {
+            "meanBytes": 661905408,
+            "medianBytes": 661188608,
+            "minBytes": 661168128,
+            "maxBytes": 663359488
+          },
+          "savedMeanBytes": 360448,
+          "savedPercent": 0.05442648095691649
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 222143829.33333334,
+            "medianBytes": 222150656,
+            "minBytes": 222101504,
+            "maxBytes": 222179328
+          },
+          "after": {
+            "meanBytes": 222040064,
+            "medianBytes": 222040064,
+            "minBytes": 221941760,
+            "maxBytes": 222138368
+          },
+          "savedMeanBytes": 103765.33333334327,
+          "savedPercent": 0.04671087810305113
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 459952128,
+            "medianBytes": 459952128,
+            "minBytes": 459952128,
+            "maxBytes": 459952128
+          },
+          "after": {
+            "meanBytes": 459952128,
+            "medianBytes": 459952128,
+            "minBytes": 459952128,
+            "maxBytes": 459952128
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 30633984,
+            "medianBytes": 30633984,
+            "minBytes": 30633984,
+            "maxBytes": 30633984
+          },
+          "after": {
+            "meanBytes": 30633984,
+            "medianBytes": 30633984,
+            "minBytes": 30633984,
+            "maxBytes": 30633984
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "skybox",
+      "label": "하늘 cubemap",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 201740288,
+            "medianBytes": 201723904,
+            "minBytes": 201719808,
+            "maxBytes": 201777152
+          },
+          "after": {
+            "meanBytes": 201818112,
+            "medianBytes": 201732096,
+            "minBytes": 201723904,
+            "maxBytes": 201998336
+          },
+          "savedMeanBytes": -77824,
+          "savedPercent": -0.03857633037581467
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 100892672,
+            "medianBytes": 100913152,
+            "minBytes": 100777984,
+            "maxBytes": 100986880
+          },
+          "after": {
+            "meanBytes": 100880384,
+            "medianBytes": 100798464,
+            "minBytes": 100753408,
+            "maxBytes": 101089280
+          },
+          "savedMeanBytes": 12288,
+          "savedPercent": 0.012179278986683988
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 100667392,
+            "medianBytes": 100667392,
+            "minBytes": 100667392,
+            "maxBytes": 100667392
+          },
+          "after": {
+            "meanBytes": 100667392,
+            "medianBytes": 100667392,
+            "minBytes": 100667392,
+            "maxBytes": 100667392
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 100675584,
+            "medianBytes": 100675584,
+            "minBytes": 100675584,
+            "maxBytes": 100675584
+          },
+          "after": {
+            "meanBytes": 100675584,
+            "medianBytes": 100675584,
+            "minBytes": 100675584,
+            "maxBytes": 100675584
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "map",
+      "label": "맵 전체",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 186927786.66666666,
+            "medianBytes": 187150336,
+            "minBytes": 186208256,
+            "maxBytes": 187424768
+          },
+          "after": {
+            "meanBytes": 186257408,
+            "medianBytes": 186261504,
+            "minBytes": 185012224,
+            "maxBytes": 187498496
+          },
+          "savedMeanBytes": 670378.6666666567,
+          "savedPercent": 0.35862975677451814
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 149818026.66666666,
+            "medianBytes": 149733376,
+            "minBytes": 149716992,
+            "maxBytes": 150003712
+          },
+          "after": {
+            "meanBytes": 149692416,
+            "medianBytes": 149803008,
+            "minBytes": 149397504,
+            "maxBytes": 149876736
+          },
+          "savedMeanBytes": 125610.66666665673,
+          "savedPercent": 0.08384215802423468
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 35438592,
+            "medianBytes": 35438592,
+            "minBytes": 35438592,
+            "maxBytes": 35438592
+          },
+          "after": {
+            "meanBytes": 35438592,
+            "medianBytes": 35438592,
+            "minBytes": 35438592,
+            "maxBytes": 35438592
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 82472960,
+            "medianBytes": 82472960,
+            "minBytes": 82472960,
+            "maxBytes": 82472960
+          },
+          "after": {
+            "meanBytes": 82472960,
+            "medianBytes": 82472960,
+            "minBytes": 82472960,
+            "maxBytes": 82472960
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "enemies",
+      "label": "미니언·몬스터·보스",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 995999744,
+            "medianBytes": 995385344,
+            "minBytes": 995012608,
+            "maxBytes": 997601280
+          },
+          "after": {
+            "meanBytes": 996118528,
+            "medianBytes": 996294656,
+            "minBytes": 995393536,
+            "maxBytes": 996667392
+          },
+          "savedMeanBytes": -118784,
+          "savedPercent": -0.011926107483015577
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 513934677.3333333,
+            "medianBytes": 513875968,
+            "minBytes": 513822720,
+            "maxBytes": 514105344
+          },
+          "after": {
+            "meanBytes": 514024789.3333333,
+            "medianBytes": 514064384,
+            "minBytes": 513822720,
+            "maxBytes": 514187264
+          },
+          "savedMeanBytes": -90112.0,
+          "savedPercent": -0.017533745819131443
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 476028928,
+            "medianBytes": 476028928,
+            "minBytes": 476028928,
+            "maxBytes": 476028928
+          },
+          "after": {
+            "meanBytes": 476028928,
+            "medianBytes": 476028928,
+            "minBytes": 476028928,
+            "maxBytes": 476028928
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 480649216,
+            "medianBytes": 480649216,
+            "minBytes": 480649216,
+            "maxBytes": 480649216
+          },
+          "after": {
+            "meanBytes": 480649216,
+            "medianBytes": 480649216,
+            "minBytes": 480649216,
+            "maxBytes": 480649216
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "skills",
+      "label": "스킬 모델·객체·billboard",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 29289130.666666668,
+            "medianBytes": 28553216,
+            "minBytes": 28491776,
+            "maxBytes": 30822400
+          },
+          "after": {
+            "meanBytes": 29285034.666666668,
+            "medianBytes": 28753920,
+            "minBytes": 28553216,
+            "maxBytes": 30547968
+          },
+          "savedMeanBytes": 4096.0,
+          "savedPercent": 0.013984710050344955
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 16569685.333333334,
+            "medianBytes": 16568320,
+            "minBytes": 16556032,
+            "maxBytes": 16584704
+          },
+          "after": {
+            "meanBytes": 16568320,
+            "medianBytes": 16556032,
+            "minBytes": 16363520,
+            "maxBytes": 16785408
+          },
+          "savedMeanBytes": 1365.3333333339542,
+          "savedPercent": 0.008239947264341255
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 11370496,
+            "medianBytes": 11370496,
+            "minBytes": 11370496,
+            "maxBytes": 11370496
+          },
+          "after": {
+            "meanBytes": 11370496,
+            "medianBytes": 11370496,
+            "minBytes": 11370496,
+            "maxBytes": 11370496
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 12996608,
+            "medianBytes": 12996608,
+            "minBytes": 12996608,
+            "maxBytes": 12996608
+          },
+          "after": {
+            "meanBytes": 12996608,
+            "medianBytes": 12996608,
+            "minBytes": 12996608,
+            "maxBytes": 12996608
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "particle_setup",
+      "label": "파티클 텍스처·공통 설정",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 14177621.333333334,
+            "medianBytes": 14213120,
+            "minBytes": 14008320,
+            "maxBytes": 14311424
+          },
+          "after": {
+            "meanBytes": 14467072,
+            "medianBytes": 14446592,
+            "minBytes": 14401536,
+            "maxBytes": 14553088
+          },
+          "savedMeanBytes": -289450.66666666605,
+          "savedPercent": -2.0416024653312745
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 7656789.333333333,
+            "medianBytes": 7655424,
+            "minBytes": 7606272,
+            "maxBytes": 7708672
+          },
+          "after": {
+            "meanBytes": 7946240,
+            "medianBytes": 7933952,
+            "minBytes": 7811072,
+            "maxBytes": 8093696
+          },
+          "savedMeanBytes": -289450.666666667,
+          "savedPercent": -3.780313837375183
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 6291456,
+            "medianBytes": 6291456,
+            "minBytes": 6291456,
+            "maxBytes": 6291456
+          },
+          "after": {
+            "meanBytes": 6291456,
+            "medianBytes": 6291456,
+            "minBytes": 6291456,
+            "maxBytes": 6291456
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 5922816,
+            "medianBytes": 5922816,
+            "minBytes": 5922816,
+            "maxBytes": 5922816
+          },
+          "after": {
+            "meanBytes": 5922816,
+            "medianBytes": 5922816,
+            "minBytes": 5922816,
+            "maxBytes": 5922816
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "particles",
+      "label": "파티클 객체·대형 버퍼",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 2462498816,
+            "medianBytes": 2461163520,
+            "minBytes": 2460348416,
+            "maxBytes": 2465984512
+          },
+          "after": {
+            "meanBytes": 1395501738.6666667,
+            "medianBytes": 1394831360,
+            "minBytes": 1394552832,
+            "maxBytes": 1397121024
+          },
+          "savedMeanBytes": 1066997077.3333333,
+          "savedPercent": 43.32985138512787
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 7643136,
+            "medianBytes": 7479296,
+            "minBytes": 7405568,
+            "maxBytes": 8044544
+          },
+          "after": {
+            "meanBytes": 4015445.3333333335,
+            "medianBytes": 4120576,
+            "minBytes": 3805184,
+            "maxBytes": 4120576
+          },
+          "savedMeanBytes": 3627690.6666666665,
+          "savedPercent": 47.46337977849232
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 2448023552,
+            "medianBytes": 2448023552,
+            "minBytes": 2448023552,
+            "maxBytes": 2448023552
+          },
+          "after": {
+            "meanBytes": 1387855872,
+            "medianBytes": 1387855872,
+            "minBytes": 1387855872,
+            "maxBytes": 1387855872
+          },
+          "savedMeanBytes": 1060167680,
+          "savedPercent": 43.30708661417323
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 3129344,
+            "medianBytes": 3129344,
+            "minBytes": 3129344,
+            "maxBytes": 3129344
+          },
+          "after": {
+            "meanBytes": 1777664,
+            "medianBytes": 1777664,
+            "minBytes": 1777664,
+            "maxBytes": 1777664
+          },
+          "savedMeanBytes": 1351680,
+          "savedPercent": 43.19371727748691
+        }
+      }
+    },
+    {
+      "key": "heroes",
+      "label": "영웅 모델 2회·컨트롤러 4개",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 226335402.66666666,
+            "medianBytes": 226332672,
+            "minBytes": 225521664,
+            "maxBytes": 227151872
+          },
+          "after": {
+            "meanBytes": 225270442.66666666,
+            "medianBytes": 225300480,
+            "minBytes": 224645120,
+            "maxBytes": 225865728
+          },
+          "savedMeanBytes": 1064960.0,
+          "savedPercent": 0.4705229440258667
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 181227520,
+            "medianBytes": 180989952,
+            "minBytes": 180973568,
+            "maxBytes": 181719040
+          },
+          "after": {
+            "meanBytes": 180716885.33333334,
+            "medianBytes": 180764672,
+            "minBytes": 180183040,
+            "maxBytes": 181202944
+          },
+          "savedMeanBytes": 510634.66666665673,
+          "savedPercent": 0.2817644178249842
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 37851136,
+            "medianBytes": 37851136,
+            "minBytes": 37851136,
+            "maxBytes": 37851136
+          },
+          "after": {
+            "meanBytes": 37851136,
+            "medianBytes": 37851136,
+            "minBytes": 37851136,
+            "maxBytes": 37851136
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 56328192,
+            "medianBytes": 56328192,
+            "minBytes": 56328192,
+            "maxBytes": 56328192
+          },
+          "after": {
+            "meanBytes": 56328192,
+            "medianBytes": 56328192,
+            "minBytes": 56328192,
+            "maxBytes": 56328192
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "ingame_ui",
+      "label": "인게임 UI·dissolve",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 313595221.3333333,
+            "medianBytes": 313765888,
+            "minBytes": 313040896,
+            "maxBytes": 313978880
+          },
+          "after": {
+            "meanBytes": 312632661.3333333,
+            "medianBytes": 312721408,
+            "minBytes": 312451072,
+            "maxBytes": 312725504
+          },
+          "savedMeanBytes": 962560.0,
+          "savedPercent": 0.3069434527437697
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 154624000,
+            "medianBytes": 154587136,
+            "minBytes": 154099712,
+            "maxBytes": 155185152
+          },
+          "after": {
+            "meanBytes": 153858048,
+            "medianBytes": 153763840,
+            "minBytes": 153747456,
+            "maxBytes": 154062848
+          },
+          "savedMeanBytes": 765952,
+          "savedPercent": 0.495364238410596
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 155725824,
+            "medianBytes": 155725824,
+            "minBytes": 155725824,
+            "maxBytes": 155725824
+          },
+          "after": {
+            "meanBytes": 155725824,
+            "medianBytes": 155725824,
+            "minBytes": 155725824,
+            "maxBytes": 155725824
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": 151674880,
+            "medianBytes": 151674880,
+            "minBytes": 151674880,
+            "maxBytes": 151674880
+          },
+          "after": {
+            "meanBytes": 151674880,
+            "medianBytes": 151674880,
+            "minBytes": 151674880,
+            "maxBytes": 151674880
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": 0.0
+        }
+      }
+    },
+    {
+      "key": "submission",
+      "label": "GPU 제출·대기·upload 해제",
+      "metrics": {
+        "privateBytes": {
+          "before": {
+            "meanBytes": 393216,
+            "medianBytes": 524288,
+            "minBytes": 131072,
+            "maxBytes": 524288
+          },
+          "after": {
+            "meanBytes": 394581.3333333333,
+            "medianBytes": 524288,
+            "minBytes": 131072,
+            "maxBytes": 528384
+          },
+          "savedMeanBytes": -1365.333333333314,
+          "savedPercent": -0.3472222222222173
+        },
+        "workingSetBytes": {
+          "before": {
+            "meanBytes": 402773.3333333333,
+            "medianBytes": 532480,
+            "minBytes": 139264,
+            "maxBytes": 536576
+          },
+          "after": {
+            "meanBytes": 419157.3333333333,
+            "medianBytes": 552960,
+            "minBytes": 147456,
+            "maxBytes": 557056
+          },
+          "savedMeanBytes": -16384.0,
+          "savedPercent": -4.067796610169492
+        },
+        "dxgiLocalUsageBytes": {
+          "before": {
+            "meanBytes": 0,
+            "medianBytes": 0,
+            "minBytes": 0,
+            "maxBytes": 0
+          },
+          "after": {
+            "meanBytes": 0,
+            "medianBytes": 0,
+            "minBytes": 0,
+            "maxBytes": 0
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": null
+        },
+        "dxgiNonLocalUsageBytes": {
+          "before": {
+            "meanBytes": -154918912,
+            "medianBytes": -154787840,
+            "minBytes": -155181056,
+            "maxBytes": -154787840
+          },
+          "after": {
+            "meanBytes": -154918912,
+            "medianBytes": -154787840,
+            "minBytes": -155181056,
+            "maxBytes": -154787840
+          },
+          "savedMeanBytes": 0,
+          "savedPercent": null
+        }
+      }
+    }
+  ],
+  "totals": {
+    "privateBytes": {
+      "before": {
+        "meanBytes": 5093223082.666667,
+        "medianBytes": 5092114432,
+        "minBytes": 5088768000,
+        "maxBytes": 5098786816
+      },
+      "after": {
+        "meanBytes": 4023650986.6666665,
+        "medianBytes": 4025212928,
+        "minBytes": 4018806784,
+        "maxBytes": 4026933248
+      },
+      "savedMeanBytes": 1069572096.0000005,
+      "savedPercent": 20.999906712116818
+    },
+    "workingSetBytes": {
+      "before": {
+        "meanBytes": 1354913109.3333333,
+        "medianBytes": 1354801152,
+        "minBytes": 1354608640,
+        "maxBytes": 1355329536
+      },
+      "after": {
+        "meanBytes": 1350161749.3333333,
+        "medianBytes": 1350291456,
+        "minBytes": 1349632000,
+        "maxBytes": 1350561792
+      },
+      "savedMeanBytes": 4751360.0,
+      "savedPercent": 0.3506763619947439
+    },
+    "dxgiLocalUsageBytes": {
+      "before": {
+        "meanBytes": 3731349504,
+        "medianBytes": 3731349504,
+        "minBytes": 3731349504,
+        "maxBytes": 3731349504
+      },
+      "after": {
+        "meanBytes": 2671181824,
+        "medianBytes": 2671181824,
+        "minBytes": 2671181824,
+        "maxBytes": 2671181824
+      },
+      "savedMeanBytes": 1060167680,
+      "savedPercent": 28.41244645840606
+    },
+    "dxgiNonLocalUsageBytes": {
+      "before": {
+        "meanBytes": 769564672,
+        "medianBytes": 769695744,
+        "minBytes": 769302528,
+        "maxBytes": 769695744
+      },
+      "after": {
+        "meanBytes": 768212992,
+        "medianBytes": 768344064,
+        "minBytes": 767950848,
+        "maxBytes": 768344064
+      },
+      "savedMeanBytes": 1351680,
+      "savedPercent": 0.17564215837600197
+    }
+  }
+}

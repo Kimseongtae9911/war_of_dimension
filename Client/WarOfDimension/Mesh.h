@@ -1,8 +1,9 @@
-﻿//------------------------------------------------------- ----------------------
+//------------------------------------------------------- ----------------------
 // File: Mesh.h
 //-----------------------------------------------------------------------------
 
 #pragma once
+#include "ParticleBufferPool.h"
 
 #include <memory>
 #include <atomic>
@@ -345,12 +346,12 @@ private:
 
 #define MAX_PARTICLES				300000
 
-//#define _WITH_QUERY_DATA_SO_STATISTICS
+#define _WITH_QUERY_DATA_SO_STATISTICS
 
 class CParticleMesh : public CMesh
 {
 public:
-	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType);
+	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType, std::shared_ptr<ParticleBufferPool> pool, bool eager = false);
 	virtual ~CParticleMesh();
 
 	bool								m_bStart = true;
@@ -380,4 +381,16 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 
 	void ParticlePostRender(int nPipelineState);
+    bool PrepareBuffers(ID3D12GraphicsCommandList* commands);
+    void ReleaseInactiveBuffers();
+    UINT LiveParticleCount() const { return static_cast<UINT>(m_nVertices); }
+    UINT64 OverflowCount() const { return m_overflowCount; }
+private:
+    void AttachBlock(ParticleBufferPool::Block* block, ID3D12GraphicsCommandList* commands);
+    void ReturnBlock();
+    std::shared_ptr<ParticleBufferPool> m_bufferPool;
+    ParticleBufferPool::Block* m_bufferBlock = nullptr;
+    UINT m_requestedCapacity = 0;
+    UINT64 m_overflowCount = 0;
+    bool m_eagerBuffers = false, m_rendered = false;
 };

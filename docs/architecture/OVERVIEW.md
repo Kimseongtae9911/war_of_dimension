@@ -20,3 +20,5 @@
 VS toolset·인코딩·빌드 경로·개발 문서 변경은 패킷 형식이나 게임 규칙을 바꾸지 않는다. 게임 객체 생명주기, 패킷 검증, 정상 종료와 큰 클래스 책임 분리는 [리팩토링 검토](../REFACTORING_PLAN.md)의 후속 작업이다.
 
 인게임에서는 확정된 외형의 선택 파츠만 생성하고, 각 keyframe에서 선택한 외형 파츠와 공통 본·부모 프레임의 변환 행렬만 보관한다. 모든 61개 애니메이션과 keyframe은 유지하며 선택 스킬별 clip 로딩은 미적용이다. 전체 프레임 계층·본 링크·base geometry 공유를 유지하며 로비/READY 편집 및 외형 미수신은 전체 모델을 사용한다. [선택 파츠 구현·실측](../portfolio/HERO_SELECTED_PARTS.md)과 [변경 흐름](../diagrams/hero-selection/README.md)에 근거를 기록한다. 실제 진입 검증 중 발견한 로비 Job 실행 누락과 Title의 서버 응답 전 장면 전환도 복구했으며 wire format은 유지했다.
+
+파티클 효과 객체는 네 참가자의 확정 스킬 합집합과 기본 공격·타워·후속 효과에 필요한 종류만 생성한다. 선택 슬롯과 환경 효과도 유지한다. 모든 효과의 두 대형 GPU 버퍼는 장면 공용 풀에서 최초 표시 시 임대하며, 활성 효과는 독립 블록을 사용한다. 비활성 블록은 GPU fence 완료 후 종류 간 재사용하고 부족하면 풀을 확장한다. 개별 입자 용량도 포화 통계를 통해 확장하며 게임 종료·장면 전환 시 풀 전체를 해제한다. 서버 선택 전송 순서와 미완료 정보의 전체 종류 fallback은 유지한다. [선택 흐름](../diagrams/particle-selection/README.md), [공용 풀 수명](../diagrams/particle-buffer-pool/README.md), [구현·실측·한계](../portfolio/PARTICLE_BUFFER_POOL.md)를 참조한다.

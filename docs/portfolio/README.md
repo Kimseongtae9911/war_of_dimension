@@ -11,5 +11,8 @@
 | 메시 공유 전후의 항목별 비용 | [동일 조건의 구간별 비교](CLIENT_MEMORY_BREAKDOWN.md#후속-실측-메시-공유-전에는-각각-얼마였나), [전후 근거](evidence/client-memory-stage-comparison-20261005.json), [CSV](evidence/client-memory-stage-comparison-20261005.csv) | 동일 바이너리의 이전 경로 재현/현재 경로 각 3회 교대 측정, 마지막 해제 구간까지 합계 검증 |
 | 불필요 파일 정리·GitLab 이전 | [정리 근거](../development/CLEANUP.md), [이전 기록](../MIGRATION.md) | 완료 |
 | 확정 외형으로 영웅 선택 파츠 로딩 | [용어·구현·실측·검증 및 실제 인게임 화면](HERO_SELECTED_PARTS.md), [구조도](../diagrams/hero-selection/README.md) | 선택 외형과 공통 본·부모의 변환 행렬만 보관, 모든 clip/keyframe 유지. 전체/선택 각 3회 측정·행렬 1,576,969개 일치·Debug/Release 검증, Private commit 904.36MiB 감소 |
+| 선택 스킬의 파티클 버퍼 생성 | [선택 범위·실측·검증](PARTICLE_SELECTED_SKILLS.md), [5개 풀 필요성 검토](PARTICLE_POOL_CAPACITY_REVIEW.md), [구조도](../diagrams/particle-selection/README.md) | 네 참가자의 선택 합집합·기본 공격·후속·타워 효과 유지. 고정 조합의 총 객체 127→72, 대형 GPU allocation 1,010.625MiB 감소. Debug/Release 네 클라이언트 전송 순서 검사 완료. 공용 풀 재사용은 후속 구현 문서 참조 |
 
 현재 첫 번째 상세 사례는 메모리 최적화다. 후속 작업에서도 같은 형식으로 문서를 추가하고 이 인덱스를 갱신한다. 과거 수치 근거를 덮어쓰지 않고 새로운 측정 시나리오나 개선 단계별로 날짜가 다른 근거 파일을 추가한다.
+
+후속 구현: [전체 파티클 공용 GPU 풀](PARTICLE_BUFFER_POOL.md). 스킬·슬롯·환경 효과의 버퍼 재사용·부족 시 확장·GPU 완료 후 반환과 종료 해제를 적용했다. 실제 Shader의 고정 재생 각 3회에서 72→19쌍, 대형 GPU allocation 973.875MiB 감소를 확인했다. 실제 전투 최대치와 구분한다.

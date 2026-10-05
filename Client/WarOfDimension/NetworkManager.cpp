@@ -341,7 +341,11 @@ void NetworkManager::Reset()
         m_appearanceReceived.fill(false);
         m_frozenAppearances.reset();
     }
-    readySceneInfo->Initialize();
+    {
+        std::lock_guard lock(m_skillSelectionMutex);
+        m_frozenSkills.reset();
+        readySceneInfo->Initialize();
+    }
     channelNum = 0;
     gameSceneInfo->Initialize();
     for (int i = 0; i < MAX_MINION; ++i) {
@@ -449,6 +453,41 @@ void NetworkManager::SeedTestIngameAppearances()
         1, 0, 1, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1 };
 #endif
     for (int slot = 0; slot < 3; ++slot) StoreIngameAppearance(slot, appearance);
+}
+
+void NetworkManager::StoreReadySkill(int player, int slot, int skill)
+{
+    if (player < 0 || player >= INGAME_PLAYER || slot < 0 || slot >= MAX_SKILL ||
+        skill < 0 || (player < 3 ? skill > 95 : skill > 40)) return;
+    std::lock_guard lock(m_skillSelectionMutex);
+    if (!m_frozenSkills) readySceneInfo->selectSkills[player][slot] = skill;
+}
+
+void NetworkManager::StoreReadyJob(int player, int job)
+{
+    if (player < 0 || player >= INGAME_PLAYER || job < 0 || job > 5) return;
+    std::lock_guard lock(m_skillSelectionMutex);
+    if (!m_frozenSkills) readySceneInfo->playerJobs[player] = job;
+}
+
+void NetworkManager::FreezeIngameSkills()
+{
+    std::lock_guard lock(m_skillSelectionMutex);
+    if (m_frozenSkills) return;
+    IngameSkillLoadout loadout{readySceneInfo->playerJobs, readySceneInfo->selectSkills};
+    if (IsCompleteSkillLoadout(loadout)) m_frozenSkills = loadout;
+}
+
+std::optional<IngameSkillLoadout> NetworkManager::GetFrozenIngameSkills() const
+{
+    std::lock_guard lock(m_skillSelectionMutex);
+    return m_frozenSkills;
+}
+
+IngameSkillLoadout NetworkManager::GetIngameSkillLoadout() const
+{
+    std::lock_guard lock(m_skillSelectionMutex);
+    return m_frozenSkills ? *m_frozenSkills : IngameSkillLoadout{readySceneInfo->playerJobs, readySceneInfo->selectSkills};
 }
 
 void NetworkManager::SendPacket(BASE_PACKET* packet) const
@@ -973,7 +1012,7 @@ void NetworkManager::SkillSelectPacket(int id, BASE_PACKET* packet)
 {
     SC_SKILL_SELECT_PACKET* p = reinterpret_cast<SC_SKILL_SELECT_PACKET*>(packet);
 
-    readySceneInfo->selectSkills[p->id][p->storage] = p->skill;
+    StoreReadySkill(p->id, p->storage, p->skill);
 }
 
 void NetworkManager::GameTimePacket(int id, BASE_PACKET* packet)
@@ -1004,12 +1043,13 @@ void NetworkManager::JobSelectPacket(int id, BASE_PACKET* packet)
 {
     SC_JOB_SELECT_PACKET* p = reinterpret_cast<SC_JOB_SELECT_PACKET*>(packet);
 
-    readySceneInfo->playerJobs[p->id] = p->job;
+    StoreReadyJob(p->id, p->job);
 }
 
 void NetworkManager::GameStartPacket(int id, BASE_PACKET* packet)
 {
     FreezeIngameAppearances();
+    FreezeIngameSkills();
     otherClientsInfo[m_id].show = false;
     playerScene = SCENEKIND::INGAME;
     ListChating.clear();

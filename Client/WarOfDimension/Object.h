@@ -856,7 +856,7 @@ struct PARTICLE_INFO
 class CParticleObject : public CGameObject
 {
 public:
-	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CTexture* Texture, CTexture* RandowmValueTexture, CTexture* RandowmValueSphereTexture,CShader* pShader, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles ,UINT nType = 0);
+	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CTexture* Texture, CTexture* RandowmValueTexture, CTexture* RandowmValueSphereTexture,CShader* pShader, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType, std::shared_ptr<ParticleBufferPool> pool, bool eager = false);
 	virtual ~CParticleObject();
 
 	CTexture* m_pRandowmValueTexture = NULL;
@@ -869,6 +869,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPostRender();
 
+	void ReleaseInactiveBuffers() { reinterpret_cast<CParticleMesh*>(m_pMesh)->ReleaseInactiveBuffers(); }
 	bool GetShow() {return m_bShow;}
 	bool GetUpdateRotate() {return m_bUpdateRotate;}
 	bool GetUpdatePosition() {return m_bUpdatePosition;}

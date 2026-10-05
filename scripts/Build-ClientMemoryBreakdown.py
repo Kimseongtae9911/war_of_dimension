@@ -98,20 +98,35 @@ def summarize(summary, historical, mode='shared'):
     return result
 
 
-def compare(summary, hero=False):
+def compare(summary, hero=False, particles=False):
     scenarios = {(item['data']['scenario'], item['data']['adapter']) for item in summary['results']}
     if len(scenarios) != 1:
         raise ValueError('Different scenarios or adapters in comparison')
-    expected = {'full': 'full_hero_parts', 'selected': 'selected_hero_parts'} if hero else {
+    expected = {'full': 'full_skill_particle_pool', 'selected': 'selected_skill_particle_pool'} if particles else {'full': 'full_hero_parts', 'selected': 'selected_hero_parts'} if hero else {
         'legacy': 'reconstructed_pre_sharing_geometry_path', 'shared': 'current_shared_geometry_path'}
     before_mode, after_mode = list(expected)
     if any(item['mode'] not in expected or item['data']['baselineKind'] != expected[item['mode']]
            for item in summary['results']):
         raise ValueError('Unexpected geometry baseline')
     modes = {mode: summarize(summary, None, mode) for mode in expected}
-    if any(modes[before_mode][key] != modes[after_mode][key] for key in ('particleGroups', 'particleAllocations')):
+    if not particles and any(modes[before_mode][key] != modes[after_mode][key] for key in ('particleGroups', 'particleAllocations')):
         raise ValueError('Particle scenario differs between geometry modes')
-    if hero:
+    if particles:
+        if next(iter(scenarios))[0] != 'fresh_process_title_to_ingame_fixed_skills_ogre':
+            raise ValueError('Unexpected particle measurement scenario')
+        fixture = {'jobs': [0, 1, 2, 4], 'skills': [[48, 53, 54, 58], [60, 65, 69, 70], [72, 79, 81, 82], [24, 27, 29, 30]]}
+        if any(item['data'].get('loadout') != fixture or not item['data'].get('particleReleaseChecked') for item in summary['results']):
+            raise ValueError('Different skill fixture or incomplete particle release audit')
+        for mode, pool in [('full', 100), ('selected', 45)]:
+            modes[mode]['loadout'] = fixture
+            modes[mode]['particleReleaseChecked'] = True
+            group = modes[mode]['particleGroups']
+            if group != {'skillPool': pool, 'selectedSkills': 8, 'environment': 19}:
+                raise ValueError('Unexpected particle pool/slot/environment counts')
+        if any(modes['full']['particleAllocations'][key] != modes['selected']['particleAllocations'][key]
+               for key in ('particleCapacity', 'particleVertexStride')):
+            raise ValueError('Particle capacity or stride changed')
+    if hero or particles:
         for mode in expected:
             model_counts = [item['data']['heroModels'] for item in summary['results'] if item['mode'] == mode]
             if any(count != model_counts[0] for count in model_counts) or model_counts[0]['loads'] != 2:
@@ -133,8 +148,8 @@ def compare(summary, hero=False):
             raise ValueError('Different stage definitions')
         stages.append({'key': before['key'], 'label': before['label'],
                        'metrics': differences(before['metrics'], after['metrics'])})
-    return {'schemaVersion': 1, 'kind': 'same_binary_full_vs_selected_hero_parts_stage_comparison' if hero else 'same_binary_pre_sharing_geometry_reconstruction_stage_comparison',
-            'referenceCommit': summary['sourceCommit'] if hero else 'ed3428e9e092bbb7f83f8d13f0094aa04b7a3361',
+    return {'schemaVersion': 1, 'kind': 'same_binary_full_vs_selected_skill_particle_stage_comparison' if particles else 'same_binary_full_vs_selected_hero_parts_stage_comparison' if hero else 'same_binary_pre_sharing_geometry_reconstruction_stage_comparison',
+            'referenceCommit': summary['sourceCommit'] if (hero or particles) else 'ed3428e9e092bbb7f83f8d13f0094aa04b7a3361',
             'scope': 'phase_net_growth_attribution_not_retained_heap_ownership',
             'runsPerMode': summary['runsPerMode'], 'modes': modes, 'stages': stages,
             'totals': differences(modes[before_mode]['totals'], modes[after_mode]['totals'])}
@@ -153,7 +168,8 @@ def comparison_charts(evidence, destination):
     stages = sorted(evidence['stages'], key=lambda row: row['metrics']['privateBytes']['before']['meanBytes'], reverse=True)
     fig, axes = plt.subplots(1, 3, figsize=(17, 9), sharey=True, layout='constrained')
     hero = 'hero_parts' in evidence['kind']
-    before_label, after_label = ('전체 파츠', '확정 선택 파츠') if hero else ('공유 전 경로 재현', '메시 공유 후')
+    particles = 'skill_particle' in evidence['kind']
+    before_label, after_label = ('전체 스킬 풀', '선택 스킬 풀') if particles else ('전체 파츠', '확정 선택 파츠') if hero else ('공유 전 경로 재현', '메시 공유 후')
     for ax, metric, title in zip(axes, METRICS[:3], ['Private commit', 'Working Set', 'DXGI LOCAL']):
         all_values = []
         for side, offset, color, label in [('before', -.19, '#a67958', before_label),
@@ -173,11 +189,11 @@ def comparison_charts(evidence, destination):
         ax.set_axisbelow(True)
     axes[0].invert_yaxis()
     axes[0].legend(loc='lower right', fontsize=9)
-    fig.suptitle(('영웅 선택 파츠 로딩 전후' if hero else '메시 공유 전후') + '의 구간별 메모리 · 동일 바이너리 각 3회 평균', fontsize=15)
-    fig.supxlabel(('메시 공유는 양쪽에서 활성 / 남녀·서로 다른 외형의 동일 fixture' if hero else '과거 실행 파일 자체 측정이 아닌 이전 geometry 경로 재현') + ' / 최종 소유권 분석이 아니며 지표를 합산하지 않음', fontsize=10)
+    fig.suptitle(('선택 스킬 파티클 풀 생성 전후' if particles else '영웅 선택 파츠 로딩 전후' if hero else '메시 공유 전후') + '의 구간별 메모리 · 동일 바이너리 각 3회 평균', fontsize=15)
+    fig.supxlabel(('메시 공유·선택 외형은 양쪽 활성 / 네 참가자의 동일 스킬 fixture' if particles else '메시 공유는 양쪽에서 활성 / 남녀·서로 다른 외형의 동일 fixture' if hero else '과거 실행 파일 자체 측정이 아닌 이전 geometry 경로 재현') + ' / 최종 소유권 분석이 아니며 지표를 합산하지 않음', fontsize=10)
     destination.mkdir(parents=True, exist_ok=True)
     for extension in ('png', 'svg'):
-        path = destination / f'{"hero-selected-parts-memory" if hero else "client-memory-stage-comparison"}.{extension}'
+        path = destination / f'{"particle-selected-skills-memory" if particles else "hero-selected-parts-memory" if hero else "client-memory-stage-comparison"}.{extension}'
         fig.savefig(path, dpi=170)
         if extension == 'svg':
             path.write_text('\n'.join(line.rstrip() for line in path.read_text(encoding='utf-8').splitlines()) + '\n', encoding='utf-8')
@@ -228,15 +244,16 @@ def main():
     parser.add_argument('--charts', action='store_true')
     parser.add_argument('--compare', action='store_true', help='Compare legacy/shared runs from the same summary')
     parser.add_argument('--compare-hero', action='store_true', help='Compare full/selected hero parts from the same summary')
+    parser.add_argument('--compare-particles', action='store_true', help='Compare full/selected skill particle pools')
     args = parser.parse_args()
     source = json.loads(args.summary.read_text(encoding='utf-8-sig'))
     old = json.loads(args.historical_summary.read_text(encoding='utf-8-sig')) if args.historical_summary else None
-    if args.compare and args.compare_hero:
-        parser.error('Choose either --compare or --compare-hero')
-    if (args.compare or args.compare_hero) and old:
+    if sum((args.compare, args.compare_hero, args.compare_particles)) > 1:
+        parser.error('Choose one comparison mode')
+    if (args.compare or args.compare_hero or args.compare_particles) and old:
         parser.error('--compare uses one same-binary summary; omit --historical-summary')
-    if args.compare or args.compare_hero:
-        evidence = compare(source, hero=args.compare_hero)
+    if args.compare or args.compare_hero or args.compare_particles:
+        evidence = compare(source, hero=args.compare_hero, particles=args.compare_particles)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         with args.output.with_suffix('.csv').open('w', encoding='utf-8-sig', newline='') as stream:

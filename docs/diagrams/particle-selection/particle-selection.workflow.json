@@ -1,0 +1,174 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "선택 효과 구성과 공용 파티클 풀",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "게임 화면"
+        },
+        "backend": {
+          "label": "선택·처리 로직"
+        },
+        "messagebus": {
+          "label": "패킷 전송"
+        },
+        "database": {
+          "label": "GPU 자원"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "server",
+      "label": "서버의 선택 확정"
+    },
+    {
+      "id": "load",
+      "label": "클라이언트 진입"
+    },
+    {
+      "id": "gpu",
+      "label": "효과와 GPU 자원"
+    }
+  ],
+  "mainPath": [
+    "choices",
+    "start",
+    "snapshot",
+    "requirements",
+    "buffers",
+    "effects"
+  ],
+  "nodes": [
+    {
+      "id": "choices",
+      "lane": "server",
+      "col": 0,
+      "type": "backend",
+      "label": "선택 결과 전송",
+      "sublabel": "자동 선택도 먼저 확정",
+      "width": 168
+    },
+    {
+      "id": "start",
+      "lane": "server",
+      "col": 1,
+      "type": "messagebus",
+      "label": "게임 시작 전송",
+      "sublabel": "기존 TCP 패킷 유지",
+      "width": 168
+    },
+    {
+      "id": "snapshot",
+      "lane": "load",
+      "col": 2,
+      "type": "backend",
+      "label": "진입 선택 고정",
+      "sublabel": "네 참가자 · 각 네 슬롯",
+      "width": 168
+    },
+    {
+      "id": "requirements",
+      "lane": "load",
+      "col": 3,
+      "type": "backend",
+      "label": "필요 효과 판별",
+      "sublabel": "기본 공격 · 후속 효과",
+      "width": 168
+    },
+    {
+      "id": "buffers",
+      "lane": "gpu",
+      "col": 4,
+      "type": "database",
+      "label": "선택 효과 객체",
+      "sublabel": "GPU 버퍼는 첫 사용 임대",
+      "width": 168
+    },
+    {
+      "id": "effects",
+      "lane": "gpu",
+      "col": 5,
+      "type": "frontend",
+      "label": "인게임 효과",
+      "sublabel": "동시 재생 · 환경 유지",
+      "width": 168
+    },
+    {
+      "id": "fallback",
+      "lane": "load",
+      "col": 1,
+      "type": "backend",
+      "label": "기존 전체 풀",
+      "sublabel": "선택 정보 미완료",
+      "width": 168
+    }
+  ],
+  "edges": [
+    {
+      "id": "ordered",
+      "from": "choices",
+      "to": "start"
+    },
+    {
+      "id": "freeze",
+      "from": "start",
+      "to": "snapshot",
+      "label": "진입"
+    },
+    {
+      "id": "resolve",
+      "from": "snapshot",
+      "to": "requirements"
+    },
+    {
+      "id": "allocate",
+      "from": "requirements",
+      "to": "buffers",
+      "label": "필요 종류만"
+    },
+    {
+      "id": "play",
+      "from": "buffers",
+      "to": "effects"
+    },
+    {
+      "id": "incomplete",
+      "from": "snapshot",
+      "to": "fallback",
+      "label": "미완료",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "선택 범위",
+      "items": [
+        "자신과 다른 참가자의 스킬 합집합",
+        "기본 공격 · BigBang 후속 · 타워 포함"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "자원 소유권",
+      "items": [
+        "활성 효과는 공용 풀의 독립 블록 임대",
+        "비활성 블록은 GPU 완료 후 재사용"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "유지 범위",
+      "items": [
+        "점프 · 코인 · 장벽과 선택 슬롯 효과",
+        "geometry 공유 · 영웅 외형 최적화 유지"
+      ]
+    }
+  ]
+}

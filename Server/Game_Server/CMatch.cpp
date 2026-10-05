@@ -198,12 +198,13 @@ namespace wod_server {
 		// 게임시작
 		if (IsAllReady() || m_readyTime <= 0.f)
 		{
+			// 선택 결과를 같은 TCP 연결에서 먼저 전송해야 클라이언트가 필요한 효과만 생성할 수 있다.
+			CGameMgr::GetInstance()->SkillAutoSelect(matchNum);
+
 			for (const auto id : m_clientid)
 				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendGameStartPacket();
 
 			m_sceneType = ESceneType::LoadingScene;
-
-			CGameMgr::GetInstance()->SkillAutoSelect(matchNum);
 
 			//Initialize Client Position
 			for (int i = 0; i < MAX_PLAYER; ++i)

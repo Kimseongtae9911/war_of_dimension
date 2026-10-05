@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "same_binary_all_category_particle_pool_synthetic_replay",
+  "measuredAtUtc": "2026-10-05T06:50:41.9720940Z",
+  "runsPerMode": 3,
+  "executableSha256": "ced83cfa0ae04e77b58bffae130da6e716398f573ee06976f8a9123c8c557fac",
+  "measurementSourcesSha256": {
+    "Client/WarOfDimension/ClientMemoryProfile.cpp": "b9504cc3eb68bc8136241b3cca0758153bf8c24dd61e0cc290587fba6b7d6a01",
+    "Client/WarOfDimension/ClientMemoryProfile.h": "87d095438502f334ba27a01e14c82c97eedfd6ad25c0b3135c6e7c15173e219e",
+    "Client/WarOfDimension/ParticleBufferPool.cpp": "9a013c9946f1a8c7c8e821f7ac4b00690c57161ec1a90dadbd4f34e8d56b784f",
+    "Client/WarOfDimension/ParticleBufferPool.h": "d3bf99356bcd265ab6d013c1394310509504a798d521a4c951779811767d8311",
+    "Client/WarOfDimension/Mesh.h": "ce8152113f408b67cac3d71b2a863c3accf5efcfac433b413e28ad56658b3c64",
+    "Client/WarOfDimension/Object.h": "fdc9a038085b70698fe6f713cd0b23274caf3d5bac0077bf2541871d09e3e15f",
+    "Client/WarOfDimension/Scene.h": "5546602d5fbdefd57a5f9875907b51abe95f14f38027a03ff891ca2e9813f087",
+    "Client/WarOfDimension/Scene.cpp": "b7706857dc1b2129ff5e4bbec703cd13e89e195dddc5d74b9a3fdd56650a69e1",
+    "Client/WarOfDimension/Mesh.cpp": "5dcb04c19b8e95f055ad2f798bf253d701d67120b39eddd28dafd113bdc2332b",
+    "Client/WarOfDimension/GameFramework.cpp": "c3d0dfec1b3936496ea0aa5edf86a398f7719b04d85e744eb25129256760c120",
+    "Client/WarOfDimension/Object.cpp": "393dcb7c7567a0960e7b04d0a8e819193ffee348d11a039a0049f5533f2df3e2",
+    "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+    "Client/WarOfDimension/WarOfDimension.cpp": "66d31628ec77174430e478355f1c6591d95b61be465c56027f9ef5d90bcf41f2",
+    "scripts/Measure-ClientMemory.ps1": "a4568afca36c2fc91b294699498485183b930f5e9e56b69e7441a99dbcda4ba9",
+    "Client/WarOfDimension/ModelPartSelection.cpp": "24ce473073de73b3bd08acf9cddaf977ee10109f5c167c07a431a094809fa5a8",
+    "Client/WarOfDimension/ModelPartSelection.h": "66eb83c0d1f453bed68cf9a6e8fedbfd11cdb83a9c1ef06e6e4c672153af676a",
+    "Client/WarOfDimension/NetworkManager.h": "767e881e1b886695c3a22db3b0c8d4fe4e790d03fa9e944e71ec53ffd9cd93f3",
+    "Client/WarOfDimension/Player.cpp": "a1db50869f8db73e14227d2e50e20cf02f46d7cbbb76d9b6611d3994b470fe46",
+    "Client/WarOfDimension/GameFramework.h": "4dc8f0224ef3aae6ec2bf0f9cc837d7631160dffe187506ce322ce1ecde9bfae",
+    "Client/WarOfDimension/HeroSelectionTests.cpp": "73e6eff0e0dc0bae8498fd90267a451cce17aa4df9f5cc25fbf2ac0138370166",
+    "Client/WarOfDimension/ParticleSelection.cpp": "342756068c0b444ccee55f6bd102d635c97b703dd5e8bf2f8bfd5ca775afbe9f",
+    "Client/WarOfDimension/ParticleSelection.h": "88d8d1d1966d2189eb75c497c7ee59f0dedec8b5468113dc7ee4a850ed5fb491",
+    "Client/WarOfDimension/ParticleSelectionTests.cpp": "e969478b1fbc2f259725f19154f726addba221cceb8e368a8a5d38ef13ed0fd0",
+    "Server/Game_Server/CMatch.cpp": "70f946cbef1cba24f46ca6f4e74674028f4dc726332fdf0b75dfaea51fb7af84",
+    "Server/Game_Server/CGameMgr.cpp": "28c1f9666e3bd3f4082e12429513131829b04658a3e9575cca63902c22058d90",
+    "Server/Lobby_Server/Job.h": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b",
+    "Server/Lobby_Server/JobQueue.h": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4",
+    "Server/Lobby_Server/Zone.h": "0237c230c4b655f6f205191a99e00509c9ed72f551ebd0b1954c94427038702f"
+  },
+  "logicalEffectObjects": 72,
+  "dedicatedPairs": 72,
+  "pooledPairs": 19,
+  "pooledFinalLeasedPairs": 18,
+  "pooledReuseCount": 30,
+  "activeEffectTrace": [
+    4,
+    19,
+    8,
+    0,
+    18
+  ],
+  "framesPerTraceStep": 2,
+  "loadout": {
+    "jobs": [
+      0,
+      1,
+      2,
+      4
+    ],
+    "skills": [
+      [
+        48,
+        53,
+        54,
+        58
+      ],
+      [
+        60,
+        65,
+        69,
+        70
+      ],
+      [
+        72,
+        79,
+        81,
+        82
+      ],
+      [
+        24,
+        27,
+        29,
+        30
+      ]
+    ]
+  },
+  "heroModels": {
+    "loads": 2,
+    "skinnedMeshes": 91,
+    "animatedFrames": 227,
+    "animationMatrixBytes": 100926016
+  },
+  "adapter": "NVIDIA GeForce RTX 4070 SUPER",
+  "particleReleaseCheckedEveryRun": true,
+  "runtimePeakMeasured": false,
+  "scope": "fixed_synthetic_effect_replay_not_full_gameplay_peak_or_retained_heap_attribution",
+  "metrics": {
+    "privateBytes": {
+      "dedicatedMeanBytes": 4025120085.3333335,
+      "pooledMeanBytes": 2913325056,
+      "savingBytes": 1111795029.3333335,
+      "savingPercent": 27.62141267249327
+    },
+    "workingSetBytes": {
+      "dedicatedMeanBytes": 1352398165.3333333,
+      "pooledMeanBytes": 1352333994.6666667,
+      "savingBytes": 64170.66666650772,
+      "savingPercent": 0.00474495369125935
+    },
+    "dxgiLocalUsageBytes": {
+      "dedicatedMeanBytes": 2672001024,
+      "pooledMeanBytes": 1650819072,
+      "savingBytes": 1021181952,
+      "savingPercent": 38.217872778779295
+    },
+    "particleLargeBufferPayloadBytes": {
+      "dedicatedMeanBytes": 1382400000,
+      "pooledMeanBytes": 364800000,
+      "savingBytes": 1017600000,
+      "savingPercent": 73.61111111111111
+    },
+    "particleLargeBufferAllocationBytes": {
+      "dedicatedMeanBytes": 1387266048,
+      "pooledMeanBytes": 366084096,
+      "savingBytes": 1021181952,
+      "savingPercent": 73.61111111111111
+    }
+  }
+}

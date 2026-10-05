@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Object.h"
 #include "CSkillModel.h"
 #include "WizardAttack.h"
@@ -24,6 +24,7 @@
 #include "MultipleShot.h"
 #include <mutex>
 #include <optional>
+#include "ParticleSelection.h"
 
 class OverlapEx;
 class CGameObject;
@@ -228,6 +229,11 @@ public:
 	std::optional<std::array<ModelCustomize, 3>> GetFrozenIngameAppearances() const;
 	std::optional<ModelCustomize> GetFrozenIngameAppearance(int slot) const;
 	void SeedTestIngameAppearances();
+	void StoreReadySkill(int player, int slot, int skill);
+	void StoreReadyJob(int player, int job);
+	void FreezeIngameSkills();
+	std::optional<IngameSkillLoadout> GetFrozenIngameSkills() const;
+	IngameSkillLoadout GetIngameSkillLoadout() const;
 
 public:
 	SCENEKIND playerScene = SCENEKIND::NONE;
@@ -337,6 +343,8 @@ private:
 private:
 	SOCKET m_socket;
 	mutable std::mutex m_appearanceMutex;
+	mutable std::mutex m_skillSelectionMutex;
+	std::optional<IngameSkillLoadout> m_frozenSkills;
 	std::array<bool, 3> m_appearanceReceived{};
 	std::optional<std::array<ModelCustomize, 3>> m_frozenAppearances;
 	HANDLE m_iocp;

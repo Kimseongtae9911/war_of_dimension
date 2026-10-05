@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // File: CGameFramework.cpp
 //-----------------------------------------------------------------------------
 
@@ -525,7 +525,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			for (int i = 0; i < NetworkManager::GetInstance()->readySceneInfo->selectSkills.size(); ++i) {
 				for (int j = 0; j < NetworkManager::GetInstance()->readySceneInfo->selectSkills[i].size(); ++j) {
 					if (i == 3) {
-						NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j] = BOSS_SKILL / 2;
+						NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j] = BOSS_SKILL / 2 + 1;
 
 					}
 					else {
@@ -578,7 +578,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			for (int i = 0; i < NetworkManager::GetInstance()->readySceneInfo->selectSkills.size(); ++i) {
 				for (int j = 0; j < NetworkManager::GetInstance()->readySceneInfo->selectSkills[i].size(); ++j) {
 					if (i == 3) {
-						NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j] = BOSS_SKILL / 2;
+						NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j] = BOSS_SKILL / 2 + 1;
 					}
 					else {
 						NetworkManager::GetInstance()->readySceneInfo->selectSkills[i][j] = PLAYER_SKILL / 4;
@@ -651,7 +651,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 void CGameFramework::ProfileMemorySnapshot(const char* phase)
 {
-	ClientMemoryProfileSnapshot(m_pd3dDevice, phase);
+	ClientMemoryProfileSnapshot(m_pd3dDevice, phase, m_pScene ? m_pScene->m_particleBufferPool.get() : nullptr);
 }
 
 void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
@@ -801,6 +801,7 @@ void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 		case SCENEKIND::INGAME:
 		{
 			NetworkManager::GetInstance()->FreezeIngameAppearances();
+			NetworkManager::GetInstance()->FreezeIngameSkills();
 			const auto appearances = NetworkManager::GetInstance()->GetFrozenIngameAppearances();
 			std::optional<ModelPartSelection> selection;
 			if (appearances && !ClientMemoryProfileFullHeroParts()) selection.emplace(*appearances);
@@ -867,6 +868,7 @@ void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 		}
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+        if (m_pScene) m_pScene->SubmitParticleFrame(m_pd3dCommandQueue);
 
 		WaitForGpuComplete();
 		ProfileMemorySnapshot("scene_gpu_complete_uploads_retained");
@@ -1329,6 +1331,7 @@ bool CGameFramework::CheckUIPopUp()
 
 void CGameFramework::OnDestroy()
 {
+    if (m_pd3dCommandQueue && m_pd3dFence) WaitForGpuComplete();
     ReleaseObjects();
 	SoundManager::GetInstance()->Release();
 
@@ -1533,6 +1536,7 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ChangeSceneReleaseObject()
 {
+    if (m_pd3dCommandQueue && m_pd3dFence) WaitForGpuComplete();
 	if (m_pPlayer) {
 		if (!m_pPlayer->Release())
 			m_pPlayer = nullptr;
@@ -2008,6 +2012,7 @@ void CGameFramework::FrameAdvance()
 
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+        if (m_pScene) m_pScene->SubmitParticleFrame(m_pd3dCommandQueue);
 
 		WaitForGpuComplete();
 
@@ -2144,4 +2149,94 @@ void CGameFramework::Resize(int width, int height)
 {
 
 
+}
+
+void CGameFramework::ProfileReleaseParticles()
+{
+    WaitForGpuComplete();
+    auto scene = dynamic_cast<CIngameScene*>(m_pScene);
+    if (!scene) throw std::runtime_error("particle lifecycle audit requires ingame");
+    scene->ReleaseParticles();
+    scene->ReleaseParticles(); // 중복 해제와 비어 있는 풀도 안전해야 한다.
+    if (scene->m_particleBufferPool || ParticleBufferPool::LivePairs() != 0 || !scene->m_SkillTypeParticle.empty() || !scene->m_ParticleObjects.empty() || scene->m_pParticleTexture || !SceneManager::GetInstance()->m_ParticleInfo.empty())
+        throw std::runtime_error("particle release audit failed");
+}
+
+void CGameFramework::ProfileParticleReuseFrames()
+{
+    if (!ClientMemoryProfileActive() || !m_pScene || !m_pScene->m_particleBufferPool)
+        throw std::runtime_error("파티클 재사용 검사는 전용 인게임 계측에서만 실행 가능");
+    std::vector<CParticleObject*> skills, slots, environment;
+    std::map<CParticleObject*, ParticleInfo*> info;
+    for (auto& entry : m_pScene->m_SkillTypeParticle)
+        for (auto effect : entry.second) skills.push_back(effect);
+    for (auto& entry : m_pScene->m_ParticleObjects)
+        for (size_t group = 0; group < entry.second.size(); ++group)
+            for (size_t i = 0; i < entry.second[group].size(); ++i)
+            {
+                auto effect = entry.second[group][i];
+                info[effect] = SceneManager::GetInstance()->m_ParticleInfo[entry.first][group][i];
+                const bool isEnvironment = entry.first == PARTICLE_SITUATION::JUMP ||
+                    entry.first == PARTICLE_SITUATION::COINBYDEATH || entry.first == PARTICLE_SITUATION::FENCEEFFECT;
+                (isEnvironment ? environment : slots).push_back(effect);
+            }
+    if (skills.size() != 45 || slots.size() != 8 || environment.size() != 19)
+        throw std::runtime_error("파티클 재사용 fixture 구성 불일치");
+    Microsoft::WRL::ComPtr<ID3D12InfoQueue> diagnostics;
+    m_pd3dDevice->QueryInterface(IID_PPV_ARGS(&diagnostics));
+    const UINT64 diagnosticStart = diagnostics ? diagnostics->GetNumStoredMessages() : 0;
+    auto renderBatch = [&](const std::vector<CParticleObject*>& visible, const char* phase)
+    {
+        for (auto effect : skills) effect->SetShow(false);
+        for (auto& entry : info) entry.second->show = false;
+        for (auto effect : visible)
+        {
+            effect->SetShow(true);
+            if (auto found = info.find(effect); found != info.end()) found->second->show = true;
+        }
+        // 고정된 시각 입력을 두 프레임 실행한다. 실제 게임 최대 동시 사용량으로 해석하지 않는다.
+        for (int frame = 0; frame < 2; ++frame)
+        {
+            if (FAILED(m_pd3dCommandAllocator->Reset()) || FAILED(m_pd3dCommandList->Reset(m_pd3dCommandAllocator, nullptr)))
+                throw std::runtime_error("파티클 계측 command list 초기화 실패");
+            auto rtv = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+            rtv.ptr += SIZE_T(m_nSwapChainBufferIndex) * ::gnRtvDescriptorIncrementSize;
+            auto dsv = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+            SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pd3dCommandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+            const float clear[]{0,0,0,1}; m_pd3dCommandList->ClearRenderTargetView(rtv, clear, 0, nullptr);
+            m_pd3dCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1, 0, 0, nullptr);
+            m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+            UpdateShaderVariables();
+            m_pTime->fCurrentTime = 1.0f; m_pTime->fElapsedTime = 1.0f / 60.0f;
+            m_pScene->m_fElapsedTime = 1.0f / 60.0f;
+            m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
+            SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+            if (FAILED(m_pd3dCommandList->Close())) throw std::runtime_error("파티클 계측 command list 종료 실패");
+            ID3D12CommandList* lists[]{m_pd3dCommandList}; m_pd3dCommandQueue->ExecuteCommandLists(1, lists);
+            m_pScene->SubmitParticleFrame(m_pd3dCommandQueue);
+            WaitForGpuComplete(); m_pScene->OnPostRenderParticle();
+        }
+        ProfileMemorySnapshot(phase);
+    };
+    renderBatch(std::vector<CParticleObject*>(skills.begin(), skills.begin() + 4), "reuse_four_skills");
+    renderBatch(environment, "reuse_all_environment");
+    renderBatch(slots, "reuse_all_slots");
+    renderBatch({}, "reuse_all_idle");
+    std::vector<CParticleObject*> mixed(skills.begin(), skills.begin() + 9);
+    mixed.insert(mixed.end(), slots.begin(), slots.begin() + 4);
+    mixed.insert(mixed.end(), environment.begin(), environment.begin() + 5);
+    renderBatch(mixed, "reuse_mixed_eighteen");
+    const auto stats = m_pScene->m_particleBufferPool->GetStatistics();
+    if (!ClientMemoryProfileDedicatedParticleBuffers() &&
+        (stats.allocatedPairs != 19 || stats.leasedPairs != 18 || stats.reuseCount < 1 || stats.allocationFailures))
+        throw std::runtime_error("파티클 전체 종류 재사용/확장 검사 실패");
+    if (diagnostics)
+        for (UINT64 i = diagnosticStart; i < diagnostics->GetNumStoredMessages(); ++i)
+        {
+            SIZE_T size = 0; diagnostics->GetMessage(i, nullptr, &size);
+            std::vector<char> bytes(size); auto message = reinterpret_cast<D3D12_MESSAGE*>(bytes.data());
+            diagnostics->GetMessage(i, message, &size);
+            if (message->Severity <= D3D12_MESSAGE_SEVERITY_ERROR) throw std::runtime_error(message->pDescription);
+        }
 }

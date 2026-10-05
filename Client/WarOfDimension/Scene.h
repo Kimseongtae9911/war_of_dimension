@@ -65,6 +65,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool bIsAnimate = true);
 	virtual void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPostRenderParticle();
+    std::shared_ptr<ParticleBufferPool> m_particleBufferPool;
+    void SubmitParticleFrame(ID3D12CommandQueue* queue) { if (m_particleBufferPool) m_particleBufferPool->SubmitFrame(queue); }
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bIsAnimate = true);
 	virtual void OnMTPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -227,6 +229,7 @@ public:
 	virtual ~CIngameScene();
 
 	virtual void ReleaseObjects();
+	void ReleaseParticles();
 
 	void BuildOtherClient(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CLoadedModelInfo* pModel) override;
 

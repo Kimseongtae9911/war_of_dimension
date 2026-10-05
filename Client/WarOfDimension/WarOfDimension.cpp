@@ -1,4 +1,4 @@
-﻿// WarOfDimension.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
+// WarOfDimension.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
 #include "stdafx.h"
@@ -10,6 +10,8 @@
 #include "MeshSharingTests.h"
 #include "ClientMemoryProfile.h"
 #include <locale>
+
+int RunParticleBufferPoolTests(const wchar_t* reportPath);
 
 #define MAX_LOADSTRING 100
 
@@ -32,6 +34,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	int argumentCount = 0;
 	auto arguments = CommandLineToArgvW(GetCommandLineW(), &argumentCount);
+    if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-particle-buffer-pool") == 0)
+    {
+        if (argumentCount != 3) { LocalFree(arguments); return 2; }
+        const std::wstring report = arguments[2]; LocalFree(arguments);
+        return RunParticleBufferPoolTests(report.c_str());
+    }
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-particle-selection") == 0)
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2]; LocalFree(arguments);
+		return RunParticleSelectionTests(report.c_str());
+	}
+    if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--profile-particle-reuse") == 0)
+    {
+        if (argumentCount != 4 || (wcscmp(arguments[3], L"dedicated") != 0 && wcscmp(arguments[3], L"pooled") != 0))
+        { LocalFree(arguments); return 2; }
+        const std::wstring report = arguments[2];
+        const bool dedicated = wcscmp(arguments[3], L"dedicated") == 0; LocalFree(arguments);
+        return RunClientMemoryProfile(gGameFramework, report.c_str(), false, true, false, true, false, true, dedicated);
+    }
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--profile-particle-memory") == 0)
+	{
+		if (argumentCount != 4 || (wcscmp(arguments[3], L"full") != 0 && wcscmp(arguments[3], L"selected") != 0))
+		{ LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2];
+		const bool full = wcscmp(arguments[3], L"full") == 0; LocalFree(arguments);
+		return RunClientMemoryProfile(gGameFramework, report.c_str(), false, true, false, true, full);
+	}
 	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-hero-selection") == 0)
 	{
 		if (argumentCount != 3) { LocalFree(arguments); return 2; }

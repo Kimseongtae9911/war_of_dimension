@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
@@ -1206,17 +1206,16 @@ void CBoundingBoxTexturedMesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XM
 /// </summary>
 
 
-CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType) : CMesh(pd3dDevice, pd3dCommandList)
+CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, UINT nType, std::shared_ptr<ParticleBufferPool> pool, bool eager) : CMesh(pd3dDevice, pd3dCommandList), m_bufferPool(std::move(pool)), m_eagerBuffers(eager)
 {
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nType);
 	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
-	ClientMemoryProfileRecordParticle(pd3dDevice, m_pd3dStreamOutputBuffer, m_pd3dDrawBuffer, nMaxParticles, m_nStride);
+
 }
 
 CParticleMesh::~CParticleMesh()
 {
-	if (m_pd3dStreamOutputBuffer) m_pd3dStreamOutputBuffer->Release();
-	if (m_pd3dDrawBuffer) m_pd3dDrawBuffer->Release();
+	ReturnBlock();
 	if (m_pd3dDefaultBufferFilledSize) m_pd3dDefaultBufferFilledSize->Release();
 	if (m_pd3dUploadBufferFilledSize) m_pd3dUploadBufferFilledSize->Release();
 
@@ -1234,7 +1233,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_nStride = sizeof(CParticleVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
-	CParticleVertex pVertices[1];
+	CParticleVertex pVertices[1]{};
 
 	//pVertices[0].m_xmf3Position = xmf3Position;
 	pVertices[0].m_xmf3Position = XMFLOAT3(0,0,0);
@@ -1251,10 +1250,14 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles)
 {
-	m_nMaxParticles = nMaxParticles;
-
-	m_pd3dStreamOutputBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
-	m_pd3dDrawBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+    m_nMaxParticles = m_requestedCapacity = nMaxParticles;
+    if (!m_bufferPool) throw std::invalid_argument("파티클 공용 풀 없음");
+    if (m_eagerBuffers)
+    {
+        auto block = m_bufferPool->Acquire(nMaxParticles, m_nStride);
+        if (!block) throw std::runtime_error("기준선 파티클 버퍼 생성 실패");
+        AttachBlock(block, pd3dCommandList);
+    }
 
 	UINT64 nBufferFilledSize = 0;
 	m_pd3dDefaultBufferFilledSize = ::CreateBufferResource(pd3dDevice, pd3dCommandList, &nBufferFilledSize, sizeof(UINT64), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
@@ -1366,31 +1369,89 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 
 void CParticleMesh::ParticlePostRender(int nPipelineState)
 {
-	if (nPipelineState == 0)
-	{
-#ifdef _WITH_QUERY_DATA_SO_STATISTICS
-		D3D12_RANGE d3dReadRange = { 0, 0 };
-		UINT8* pBufferDataBegin = NULL;
-		m_pd3dSOQueryBuffer->Map(0, &d3dReadRange, (void**)&m_pd3dSOQueryDataStatistics);
-		if (m_pd3dSOQueryDataStatistics) m_nVertices = (UINT)m_pd3dSOQueryDataStatistics->NumPrimitivesWritten;
-		m_pd3dSOQueryBuffer->Unmap(0, NULL);
-#else
-		UINT64* pnReadBackBufferFilledSize = NULL;
-		m_pd3dReadBackBufferFilledSize->Map(0, NULL, (void**)&pnReadBackBufferFilledSize);
-		if (pnReadBackBufferFilledSize)
-			m_nVertices = UINT(*pnReadBackBufferFilledSize) / m_nStride;
-		else
-			cout << "pnReadBackBufferFilledSize is null" << endl;
-		m_pd3dReadBackBufferFilledSize->Unmap(0, NULL);
-#endif
+    if (nPipelineState != 0 || !m_rendered || !m_bufferBlock) return;
+    m_rendered = false;
+    D3D12_QUERY_DATA_SO_STATISTICS* statistics = nullptr;
+    D3D12_RANGE readRange{0, sizeof(D3D12_QUERY_DATA_SO_STATISTICS)};
+    if (FAILED(m_pd3dSOQueryBuffer->Map(0, &readRange, reinterpret_cast<void**>(&statistics))))
+        throw std::runtime_error("파티클 출력 통계 읽기 실패");
+    const auto written = statistics->NumPrimitivesWritten;
+    const auto needed = statistics->PrimitivesStorageNeeded;
+    D3D12_RANGE noWrite{0, 0};
+    m_pd3dSOQueryBuffer->Unmap(0, &noWrite);
+    m_nVertices = static_cast<UINT>((std::min)(written, UINT64(m_nMaxParticles)));
+    if (needed > m_nMaxParticles || written >= m_nMaxParticles)
+    {
+        if (needed > written) ++m_overflowCount;
+        const UINT64 limit = UINT_MAX / m_nStride;
+        m_requestedCapacity = static_cast<UINT>((std::min)(limit,
+            (std::max)(UINT64(m_nMaxParticles) * 2, needed)));
+    }
+    // 포화 시 전체 효과를 다시 시작하지 않고 보존된 입자로 다음 프레임에 확장한다.
+    if (m_nVertices == 0) m_bStart = true;
+}
 
-		//::gnCurrentParticles = m_nVertices;
-#ifdef _WITH_DEBUG_STREAM_OUTPUT_VERTICES
-		TCHAR pstrDebug[256] = { 0 };
-		//cout << m_nVertices << endl;
-		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
-		OutputDebugString(pstrDebug);
-#endif
-		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) m_bStart = true;
-	}
+void CParticleMesh::AttachBlock(ParticleBufferPool::Block* block, ID3D12GraphicsCommandList* commands)
+{
+    m_bufferBlock = block;
+    m_pd3dStreamOutputBuffer = block->streamOutput.Get();
+    m_pd3dDrawBuffer = block->draw.Get();
+    m_nMaxParticles = block->capacity;
+    if (!block->initialized)
+    {
+        SynchronizeResourceTransition(commands, m_pd3dStreamOutputBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_STREAM_OUT);
+        SynchronizeResourceTransition(commands, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        block->initialized = true;
+    }
+}
+
+void CParticleMesh::ReturnBlock()
+{
+    if (!m_bufferBlock) return;
+    if (m_bufferBlock->streamOutput.Get() != m_pd3dStreamOutputBuffer)
+        std::swap(m_bufferBlock->streamOutput, m_bufferBlock->draw);
+    m_bufferPool->Return(m_bufferBlock);
+    m_bufferBlock = nullptr;
+    m_pd3dStreamOutputBuffer = m_pd3dDrawBuffer = nullptr;
+}
+
+void CParticleMesh::ReleaseInactiveBuffers()
+{
+    if (m_eagerBuffers) return;
+    ReturnBlock();
+    m_bStart = true; m_rendered = false; m_nVertices = 1;
+}
+
+bool CParticleMesh::PrepareBuffers(ID3D12GraphicsCommandList* commands)
+{
+    if (!m_bufferBlock)
+    {
+        auto block = m_bufferPool->Acquire(m_requestedCapacity, m_nStride);
+        if (!block) return false;
+        AttachBlock(block, commands);
+        m_bStart = true; m_nVertices = 1;
+    }
+    else if (m_requestedCapacity > m_nMaxParticles)
+    {
+        auto next = m_bufferPool->Acquire(m_requestedCapacity, m_nStride);
+        if (next)
+        {
+            auto previous = m_bufferBlock;
+            auto previousDraw = m_pd3dDrawBuffer;
+            m_bufferPool->Touch(previous); // 복사 입력도 이번 제출 완료까지 반환 대기한다.
+            ReturnBlock();
+            AttachBlock(next, commands);
+            if (!m_bStart && m_nVertices)
+            {
+                SynchronizeResourceTransition(commands, previousDraw, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_SOURCE);
+                SynchronizeResourceTransition(commands, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+                commands->CopyBufferRegion(m_pd3dDrawBuffer, 0, previousDraw, 0, UINT64(m_nVertices) * m_nStride);
+                SynchronizeResourceTransition(commands, previousDraw, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+                SynchronizeResourceTransition(commands, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+            }
+        }
+    }
+    m_bufferPool->Touch(m_bufferBlock);
+    m_rendered = true;
+    return true;
 }

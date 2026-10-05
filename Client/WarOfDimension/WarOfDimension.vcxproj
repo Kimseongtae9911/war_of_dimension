@@ -202,6 +202,8 @@
     <ClInclude Include="MeshContent.h" />
     <ClInclude Include="MeshSharingTests.h" />
     <ClInclude Include="ClientMemoryProfile.h" />
+    <ClInclude Include="ParticleSelection.h" />
+    <ClInclude Include="ParticleBufferPool.h" />
     <ClInclude Include="ModelPartSelection.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
@@ -260,6 +262,10 @@
     <ClCompile Include="MeshSharingTests.cpp" />
     <ClCompile Include="ClientMemoryProfile.cpp" />
     <ClCompile Include="ModelPartSelection.cpp" />
+    <ClCompile Include="ParticleSelection.cpp" />
+    <ClCompile Include="ParticleBufferPool.cpp" />
+    <ClCompile Include="ParticleBufferPoolTests.cpp" />
+    <ClCompile Include="ParticleSelectionTests.cpp" />
     <ClCompile Include="HeroSelectionTests.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />

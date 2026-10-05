@@ -1,0 +1,32 @@
+{
+  "Debug": {
+    "ok": true,
+    "adapter": "WARP",
+    "cycles": 2,
+    "pendingFenceIsolation": true,
+    "crossEffectStateIsolation": true,
+    "growthPreservedState": true,
+    "reusedSeedReset": true,
+    "peakPairs": 3,
+    "grownCapacity": 12,
+    "reuseCount": 1,
+    "livePairsAfterExit": 0,
+    "gpuErrors": 0,
+    "gpuWarnings": 12
+  },
+  "Release": {
+    "ok": true,
+    "adapter": "WARP",
+    "cycles": 2,
+    "pendingFenceIsolation": true,
+    "crossEffectStateIsolation": true,
+    "growthPreservedState": true,
+    "reusedSeedReset": true,
+    "peakPairs": 3,
+    "grownCapacity": 12,
+    "reuseCount": 1,
+    "livePairsAfterExit": 0,
+    "gpuErrors": 0,
+    "gpuWarnings": 12
+  }
+}

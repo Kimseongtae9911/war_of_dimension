@@ -1,5 +1,7 @@
 # 로컬 개발 환경
 
+파티클 공용 풀 검사는 `./scripts/Test-ParticleBufferPool.ps1 -Configuration Debug`와 `Release`로 실행한다. 실제 GPU에서 종류 간 재사용·fence 대기·용량 확장·상태 복사·종료 해제를 검사한다. 전체 종류의 동일 재생 비교는 `Measure-ClientMemory.ps1 -Scenario ParticleReuse`이며 [재현과 검증 범위](../portfolio/PARTICLE_BUFFER_POOL.md)를 따른다.
+
 ## 사전 조건
 
 - Windows와 PowerShell 7.
@@ -103,6 +105,10 @@ finally { ./scripts/Stop-Local.ps1 }
 ```
 
 ## 로컬 모드와 리소스
+
+선택 스킬 파티클은 `Test-ParticleSelection.ps1 -Configuration Debug|Release`로 의존 종류·fallback·스냅샷을 검사한다. 두 구성은 먼저 빌드한다. `Measure-ClientMemory.ps1 -Scenario ParticleSkills -Runs 3 -OutputDirectory artifacts/logs/particle-selected-skills-new`는 동일 외형·스킬 fixture에서 전체/선택 풀을 비교하고 실제 GPU 생성·제출 이후의 해제도 검사한다. 다른 GPU 검증과 동시에 실행하지 않는다. `Build-ClientMemoryBreakdown.py --compare-particles`로 JSON/CSV를 생성한다. 기존 Geometry/HeroParts 측정은 전체 파티클 종류 풀을 유지해 이전 근거와 구분한다.
+
+새 로컬 서버에서 `Test-ParticleSelectionNetwork.py --boss-job 4|5 --output <결과.json>`를 실행하면 네 TCP 참가자의 로비 매칭, 수동·자동 선택, 분할 READY header와 게임 시작 전 16개 스킬 수신을 검사한다. 각 보스·구성은 새 서버로 실행하고 Python 종료 코드 0을 확인한다. 명령·실측·한계는 [선택 스킬 파티클 문서](../portfolio/PARTICLE_SELECTED_SKILLS.md)를 참조한다.
 
 원본 `protocol.h`의 `LOCAL_TEST`가 켜져 있고 `WITH_DATABASE`는 꺼져 있다. 루프백 주소와 로비 8910, 게임 8911 포트를 사용한다. DB 없는 기존 개발 모드를 재현한다. 실제 ODBC DSN과 저장 프로시저, DB 인증·거래 동작은 검증하지 않았다.
 
