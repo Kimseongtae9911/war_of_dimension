@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "kind": "npc_resource_sharing_static_review_with_existing_phase_measurements",
+  "implemented": false,
+  "executableSha256": "ced83cfa0ae04e77b58bffae130da6e716398f573ee06976f8a9123c8c557fac",
+  "phaseEvidence": "particle-buffer-pool-runs-20261005.json",
+  "phaseEvidenceSha256": "44e9561d77611ad41da7e4b58ff8cbd976ea14edacd8be5df0102e0fb6e29a17",
+  "sourceHashes": {
+    "Client/WarOfDimension/Scene.cpp": "b7706857dc1b2129ff5e4bbec703cd13e89e195dddc5d74b9a3fdd56650a69e1",
+    "Client/WarOfDimension/Object.cpp": "393dcb7c7567a0960e7b04d0a8e819193ffee348d11a039a0049f5533f2df3e2",
+    "Client/WarOfDimension/Object.h": "fdc9a038085b70698fe6f713cd0b23274caf3d5bac0077bf2541871d09e3e15f",
+    "Client/WarOfDimension/Mesh.cpp": "5dcb04c19b8e95f055ad2f798bf253d701d67120b39eddd28dafd113bdc2332b",
+    "Client/WarOfDimension/Mesh.h": "ce8152113f408b67cac3d71b2a863c3accf5efcfac433b413e28ad56658b3c64",
+    "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+    "Client/WarOfDimension/Shader.cpp": "3fa7e5a261b03dde02adae66c13ef36b8558f52621d51cac822ce41a6d0fa32c",
+    "Client/WarOfDimension/stdafx.cpp": "3002b788a2c67e9c048d28d522a74c758a96043a16e57f6551437c191459709d",
+    "Server/Game_Server/protocol.h": "8b163ad6aa08ac8b3441bf30af5674acc4ce485d341553d520e07e2adbf507fe",
+    "scripts/Measure-ClientAssets.py": "aacc6b42bc4b5b0c39416a82e23ec1d39c1dc06694c41075b8da5ad5d488307e"
+  },
+  "phaseResults": [
+    {
+      "key": "minions",
+      "begin": "map_ready",
+      "end": "minions_ready",
+      "meanBytes": {
+        "privateBytes": 29937664,
+        "workingSetBytes": 16403114.666666666,
+        "dxgiLocalUsageBytes": 12906496
+      }
+    },
+    {
+      "key": "monsters",
+      "begin": "minions_ready",
+      "end": "monsters_ready",
+      "meanBytes": {
+        "privateBytes": 877509290.6666666,
+        "workingSetBytes": 450697898.6666667,
+        "dxgiLocalUsageBytes": 422694912
+      }
+    },
+    {
+      "key": "boss",
+      "begin": "monsters_ready",
+      "end": "boss_ready",
+      "meanBytes": {
+        "privateBytes": 87687168,
+        "workingSetBytes": 46671189.333333336,
+        "dxgiLocalUsageBytes": 40427520
+      }
+    }
+  ],
+  "models": [
+    {
+      "path": "Model/FreeLichPBR.bin",
+      "assetSha256": "6428beb87b6a78bd10ffbef5d6a02cd70591db5ded571e2171a79b81e63f7d2f",
+      "fileBytes": 618220,
+      "frames": 24,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 33376,
+        "gpuBufferPayloadBytes": 33376,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 33376,
+        "gpuBufferPayloadBytes": 33376,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 17504,
+        "boneNameAndCacheBytes": 1760,
+        "gpuBufferPayloadBytes": 16096,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 8,
+        "animatedBones": 24,
+        "keys": 360,
+        "matrixBytes": 552960,
+        "timeAndRowPointerBytes": 4320
+      },
+      "texturesCreated": {
+        "Albedo": 1,
+        "MS": 1,
+        "Normal": 1,
+        "Emission": 1
+      },
+      "instances": 12,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 27089578.666666668,
+        "workingSetBytes": 13589162.666666666,
+        "dxgiLocalUsageBytes": 12906496
+      },
+      "texturePayloadBytes": 12845056,
+      "textureUploadFootprintBytes": 12845056,
+      "estimatedObjectCbCount": 300,
+      "estimatedObjectCb256AlignedPayloadBytes": 76800,
+      "estimatedObjectCb64KiBAllocationBytes": 19660800
+    },
+    {
+      "path": "Model/Monsters/Unique/Red.bin",
+      "assetSha256": "272ef2406a80657264b20b8e628f0f28f5943925f8d3b87a7c09bb17efe094de",
+      "fileBytes": 4983223,
+      "frames": 121,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 243736,
+        "gpuBufferPayloadBytes": 243736,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 243736,
+        "gpuBufferPayloadBytes": 243736,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 113760,
+        "boneNameAndCacheBytes": 9520,
+        "gpuBufferPayloadBytes": 106144,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 10,
+        "animatedBones": 121,
+        "keys": 592,
+        "matrixBytes": 4584448,
+        "timeAndRowPointerBytes": 7104
+      },
+      "texturesCreated": {
+        "RedHP": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 40359253.333333336,
+        "workingSetBytes": 22417408,
+        "dxgiLocalUsageBytes": 17137664
+      },
+      "texturePayloadBytes": 16777216,
+      "textureUploadFootprintBytes": 16777216,
+      "estimatedObjectCbCount": 122,
+      "estimatedObjectCb256AlignedPayloadBytes": 31232,
+      "estimatedObjectCb64KiBAllocationBytes": 7995392
+    },
+    {
+      "path": "Model/Monsters/Rare/Green.bin",
+      "assetSha256": "b1e578da36cc56b98f53f54c9c7cba97abc7575a81f244e8f6a42a2c61e4ba16",
+      "fileBytes": 2023348,
+      "frames": 63,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 198352,
+        "gpuBufferPayloadBytes": 198352,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 198352,
+        "gpuBufferPayloadBytes": 198352,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 90496,
+        "boneNameAndCacheBytes": 4560,
+        "gpuBufferPayloadBytes": 86848,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 10,
+        "animatedBones": 63,
+        "keys": 424,
+        "matrixBytes": 1709568,
+        "timeAndRowPointerBytes": 5088
+      },
+      "texturesCreated": {
+        "GreenHP": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 36466688,
+        "workingSetBytes": 19346773.333333332,
+        "dxgiLocalUsageBytes": 17072128
+      },
+      "texturePayloadBytes": 16777216,
+      "textureUploadFootprintBytes": 16777216,
+      "estimatedObjectCbCount": 64,
+      "estimatedObjectCb256AlignedPayloadBytes": 16384,
+      "estimatedObjectCb64KiBAllocationBytes": 4194304
+    },
+    {
+      "path": "Model/Monsters/Rare/PBR_Golem.bin",
+      "assetSha256": "85a90639b232353d842af7617a205d2c60b73c8adb1ed658a80b61eab9089fd3",
+      "fileBytes": 493307,
+      "frames": 22,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 43328,
+        "gpuBufferPayloadBytes": 43328,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 43328,
+        "gpuBufferPayloadBytes": 43328,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 20800,
+        "boneNameAndCacheBytes": 1600,
+        "gpuBufferPayloadBytes": 19520,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 6,
+        "animatedBones": 22,
+        "keys": 296,
+        "matrixBytes": 416768,
+        "timeAndRowPointerBytes": 3552
+      },
+      "texturesCreated": {
+        "AlbedoGolem": 1,
+        "MRGolem": 1,
+        "NormalGolem": 1,
+        "EmissionGolem": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 135740074.66666666,
+        "workingSetBytes": 68034560,
+        "dxgiLocalUsageBytes": 67186688
+      },
+      "texturePayloadBytes": 67108864,
+      "textureUploadFootprintBytes": 67108864,
+      "estimatedObjectCbCount": 23,
+      "estimatedObjectCb256AlignedPayloadBytes": 5888,
+      "estimatedObjectCb64KiBAllocationBytes": 1507328
+    },
+    {
+      "path": "Model/Monsters/Normal/Bear_4.bin",
+      "assetSha256": "bc56e476ebbade6c11f1ccacbe11b8ff8fbf97864b0b022cea4ca15c611e0ecc",
+      "fileBytes": 7000173,
+      "frames": 66,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 526216,
+        "gpuBufferPayloadBytes": 526216,
+        "gpuBufferAllocationBytes": 786432,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 526216,
+        "gpuBufferPayloadBytes": 526216,
+        "gpuBufferAllocationBytes": 786432,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 224768,
+        "boneNameAndCacheBytes": 4640,
+        "gpuBufferPayloadBytes": 221056,
+        "gpuBufferAllocationBytes": 262144,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 16,
+        "animatedBones": 66,
+        "keys": 1468,
+        "matrixBytes": 6200832,
+        "timeAndRowPointerBytes": 17616
+      },
+      "texturesCreated": {
+        "Stylized_Bear_Albedo4": 1,
+        "Stylized_Bear_Normal": 1,
+        "Stylized_Bear_Emissive": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 110474581.33333333,
+        "workingSetBytes": 58519552,
+        "dxgiLocalUsageBytes": 51097600
+      },
+      "texturePayloadBytes": 50331648,
+      "textureUploadFootprintBytes": 50331648,
+      "estimatedObjectCbCount": 67,
+      "estimatedObjectCb256AlignedPayloadBytes": 17152,
+      "estimatedObjectCb64KiBAllocationBytes": 4390912
+    },
+    {
+      "path": "Model/Monsters/Normal/minotaur1.bin",
+      "assetSha256": "2c4fc04d6e8821dd59c2c695e52b7665fb1a8334a499b45edb19a975d6946af7",
+      "fileBytes": 3884812,
+      "frames": 83,
+      "meshRecords": 17,
+      "uniqueGeometry": 17,
+      "legacyGeometry": {
+        "cpuArrayBytes": 785856,
+        "gpuBufferPayloadBytes": 785856,
+        "gpuBufferAllocationBytes": 6750208,
+        "gpuBufferCount": 102
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 785856,
+        "gpuBufferPayloadBytes": 785856,
+        "gpuBufferAllocationBytes": 6750208,
+        "gpuBufferCount": 102
+      },
+      "skin": {
+        "count": 17,
+        "cpuArrayBytes": 396352,
+        "boneNameAndCacheBytes": 76160,
+        "gpuBufferPayloadBytes": 335424,
+        "gpuBufferAllocationBytes": 2359296,
+        "bindPosePayloadBytes": 278528,
+        "bindPoseAllocationBytes": 1114112
+      },
+      "animation": {
+        "sets": 13,
+        "animatedBones": 83,
+        "keys": 499,
+        "matrixBytes": 2650688,
+        "timeAndRowPointerBytes": 5988
+      },
+      "texturesCreated": {
+        "t_minotaur1_axe_AlbedoTransparency": 1,
+        "t_minotaur1_axe_MetallicSmoothness": 1,
+        "t_minotaur1_axe_Normal": 1,
+        "t_minotaur1_AlbedoTransparency": 1,
+        "t_minotaur1_MetallicSmoothness": 1,
+        "t_minotaur1_Normal": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 512431445.3333333,
+        "workingSetBytes": 258353834.66666666,
+        "dxgiLocalUsageBytes": 253059072
+      },
+      "texturePayloadBytes": 251658240,
+      "textureUploadFootprintBytes": 251658240,
+      "estimatedObjectCbCount": 84,
+      "estimatedObjectCb256AlignedPayloadBytes": 21504,
+      "estimatedObjectCb64KiBAllocationBytes": 5505024
+    },
+    {
+      "path": "Model/Monsters/Normal/ChestMonsterPBR.bin",
+      "assetSha256": "f6d6f73d901e992b772cc00787252c1d5febe5d1d32895f1cd753483279dc9db",
+      "fileBytes": 640834,
+      "frames": 24,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 120908,
+        "gpuBufferPayloadBytes": 120908,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 120908,
+        "gpuBufferPayloadBytes": 120908,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 58272,
+        "boneNameAndCacheBytes": 1760,
+        "gpuBufferPayloadBytes": 56864,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 11,
+        "animatedBones": 24,
+        "keys": 292,
+        "matrixBytes": 448512,
+        "timeAndRowPointerBytes": 3504
+      },
+      "texturesCreated": {
+        "AlbedoPBR": 1,
+        "MSPBR": 1
+      },
+      "instances": 2,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 18892117.333333332,
+        "workingSetBytes": 9460394.666666666,
+        "dxgiLocalUsageBytes": 8585216
+      },
+      "texturePayloadBytes": 8388608,
+      "textureUploadFootprintBytes": 8388608,
+      "estimatedObjectCbCount": 50,
+      "estimatedObjectCb256AlignedPayloadBytes": 12800,
+      "estimatedObjectCb64KiBAllocationBytes": 3276800
+    },
+    {
+      "path": "Model/Monsters/Normal/BeholderPBR.bin",
+      "assetSha256": "9a94164b6e6ac91fb3e8b6e97ea112a8a953fc4602370f8faa1118a8244c16a1",
+      "fileBytes": 1157541,
+      "frames": 48,
+      "meshRecords": 1,
+      "uniqueGeometry": 1,
+      "legacyGeometry": {
+        "cpuArrayBytes": 109692,
+        "gpuBufferPayloadBytes": 109692,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 109692,
+        "gpuBufferPayloadBytes": 109692,
+        "gpuBufferAllocationBytes": 393216,
+        "gpuBufferCount": 6
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 51808,
+        "boneNameAndCacheBytes": 3680,
+        "gpuBufferPayloadBytes": 48864,
+        "gpuBufferAllocationBytes": 131072,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 13,
+        "animatedBones": 48,
+        "keys": 318,
+        "matrixBytes": 976896,
+        "timeAndRowPointerBytes": 3816
+      },
+      "texturesCreated": {
+        "AlbedoPBR": 1,
+        "MSPBR": 1
+      },
+      "instances": 2,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 18731008,
+        "workingSetBytes": 10111658.666666666,
+        "dxgiLocalUsageBytes": 8556544
+      },
+      "texturePayloadBytes": 8388608,
+      "textureUploadFootprintBytes": 8388608,
+      "estimatedObjectCbCount": 98,
+      "estimatedObjectCb256AlignedPayloadBytes": 25088,
+      "estimatedObjectCb64KiBAllocationBytes": 6422528
+    },
+    {
+      "path": "Model/Boss_Ogre.bin",
+      "assetSha256": "81e2383cc071fbe5aeb733eb4baee998147b970ad49cb1e76b8a28fc6a833990",
+      "fileBytes": 5639361,
+      "frames": 36,
+      "meshRecords": 2,
+      "uniqueGeometry": 2,
+      "legacyGeometry": {
+        "cpuArrayBytes": 1166304,
+        "gpuBufferPayloadBytes": 1166304,
+        "gpuBufferAllocationBytes": 1638400,
+        "gpuBufferCount": 12
+      },
+      "sharedGeometry": {
+        "cpuArrayBytes": 1166304,
+        "gpuBufferPayloadBytes": 1166304,
+        "gpuBufferAllocationBytes": 1638400,
+        "gpuBufferCount": 12
+      },
+      "skin": {
+        "count": 1,
+        "cpuArrayBytes": 415936,
+        "boneNameAndCacheBytes": 2000,
+        "gpuBufferPayloadBytes": 414336,
+        "gpuBufferAllocationBytes": 524288,
+        "bindPosePayloadBytes": 16384,
+        "bindPoseAllocationBytes": 65536
+      },
+      "animation": {
+        "sets": 14,
+        "animatedBones": 36,
+        "keys": 1740,
+        "matrixBytes": 4008960,
+        "timeAndRowPointerBytes": 20880
+      },
+      "texturesCreated": {
+        "monster_BaseColor": 1,
+        "monster_Metallic": 1,
+        "monster_Normal": 1,
+        "eye": 1
+      },
+      "instances": 1,
+      "modelLoadingNetGrowthMeanBytes": {
+        "privateBytes": 87191552,
+        "workingSetBytes": 46181034.666666664,
+        "dxgiLocalUsageBytes": 40427520
+      },
+      "texturePayloadBytes": 38797312,
+      "textureUploadFootprintBytes": 38797312,
+      "estimatedObjectCbCount": 37,
+      "estimatedObjectCb256AlignedPayloadBytes": 9472,
+      "estimatedObjectCb64KiBAllocationBytes": 2424832
+    }
+  ],
+  "textures": {
+    "Albedo": {
+      "path": "Client/WarOfDimension/Model/Textures/Albedo.dds",
+      "assetSha256": "b5f45e3e1caa688b0f152185e99c50e34707dc57528be3d16bfa77a252393381",
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "MS": {
+      "path": "Client/WarOfDimension/Model/Textures/MS.dds",
+      "assetSha256": "623802ef3cc767eff5c2cf0b10e239fc3d1c414f7506d846c65ef6973f519916",
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "Normal": {
+      "path": "Client/WarOfDimension/Model/Textures/Normal.dds",
+      "assetSha256": "e1766b412b1b40f5c8bbe712351853671f0183d3bd72bd4d574680c3964b5195",
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "Emission": {
+      "path": "Client/WarOfDimension/Model/Textures/Emission.dds",
+      "assetSha256": "59fd38d4b327c34fa4aff4cd2f6094f6bc12521ac26bb778f24b589187782a5a",
+      "width": 256,
+      "height": 256,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 262144,
+      "fileBytes": 262272
+    },
+    "RedHP": {
+      "path": "Client/WarOfDimension/Model/Textures/RedHP.dds",
+      "assetSha256": "882a3ba620dbe0509bc2cb6038f4e1c1c4fdcb4333aaf6615946fffef1413d3b",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "GreenHP": {
+      "path": "Client/WarOfDimension/Model/Textures/GreenHP.dds",
+      "assetSha256": "cd2b5869086c9b3162fc07c78e2953a6a913864993074ba67c2fddd529532bfb",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "AlbedoGolem": {
+      "path": "Client/WarOfDimension/Model/Textures/AlbedoGolem.dds",
+      "assetSha256": "1f9e0dc8760b682d8c9d9c012ca3d89ab022de80a6741251aaa27e61a0e53523",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "MRGolem": {
+      "path": "Client/WarOfDimension/Model/Textures/MRGolem.dds",
+      "assetSha256": "9551ebf1d22378f1bdcc0e3637bdaefeb543ea1a86ff1490da119e98c4222738",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "NormalGolem": {
+      "path": "Client/WarOfDimension/Model/Textures/NormalGolem.dds",
+      "assetSha256": "0c1ebbf9e8d8777b0d60578a2888f8cf1173abc7b7cbcd696d21970a899fca81",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "EmissionGolem": {
+      "path": "Client/WarOfDimension/Model/Textures/EmissionGolem.dds",
+      "assetSha256": "6cbd73a40b80e446c832a0cbd3a5a35af2c47d6b99421ae1e29c5ef515014063",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "Stylized_Bear_Albedo4": {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Albedo4.dds",
+      "assetSha256": "31486cec6667f97177a870025924e5f0140c3c2ceb904528ed786c2e5d82889c",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "Stylized_Bear_Normal": {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Normal.dds",
+      "assetSha256": "f7108109cd56db57419a15996df5864530a218bec381f5fd0a4744fc8a9e7465",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "Stylized_Bear_Emissive": {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Emissive.dds",
+      "assetSha256": "368e73f600971c04adaf55439d7f61ac953ad95de15af376c87eb93396434c8d",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "t_minotaur1_axe_AlbedoTransparency": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_AlbedoTransparency.dds",
+      "assetSha256": "f98c5cb3f7ef29e657c4405694f43692c77b5d776bb82903e0f078d438f980e0",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "t_minotaur1_axe_MetallicSmoothness": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_MetallicSmoothness.dds",
+      "assetSha256": "58a2a9a3789ed79911cde9b8bb1e366df9f2e8e3e1cbe735285f9cd1ad55c032",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "t_minotaur1_axe_Normal": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_Normal.dds",
+      "assetSha256": "364397942f3a95554d0334284fa4a394c82f2e22389a92b4cc2070cc292c6c5d",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "t_minotaur1_AlbedoTransparency": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_AlbedoTransparency.dds",
+      "assetSha256": "4e621b0af94dc7051438a7368fd1fe84a5364a6e2d5596c686cfedd7a2f9e48b",
+      "width": 4096,
+      "height": 4096,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 67108864,
+      "fileBytes": 67108992
+    },
+    "t_minotaur1_MetallicSmoothness": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_MetallicSmoothness.dds",
+      "assetSha256": "9ba4be39ffbf83a3d4cf9fcb72e2e0d38891220b23f12a8a0b7574036745ec3a",
+      "width": 4096,
+      "height": 4096,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 67108864,
+      "fileBytes": 67108992
+    },
+    "t_minotaur1_Normal": {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_Normal.dds",
+      "assetSha256": "71582fd36d47364e35175f36b031be94e7e0753531ecbfbef58ba6469d883991",
+      "width": 4096,
+      "height": 4096,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 67108864,
+      "fileBytes": 67108992
+    },
+    "AlbedoPBR": {
+      "path": "Client/WarOfDimension/Model/Textures/AlbedoPBR.dds",
+      "assetSha256": "37fdb0815e4722fc077a59c35f293dbd668098627c64e558cff46884728f6c8c",
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "MSPBR": {
+      "path": "Client/WarOfDimension/Model/Textures/MSPBR.dds",
+      "assetSha256": "50c1ef4f5be83542def5442298833ac837e70053f29cb44dece755dd1669b210",
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "monster_BaseColor": {
+      "path": "Client/WarOfDimension/Model/Textures/monster_BaseColor.dds",
+      "assetSha256": "a2c140efcc075b2a0636a57a3662b166dea8aca4ace6ae3964308b43ad4ca1ec",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "monster_Metallic": {
+      "path": "Client/WarOfDimension/Model/Textures/monster_Metallic.dds",
+      "assetSha256": "06e84337b5412950b78efa4950466958376a75615d60e507fe3b7a0b0cac7110",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 8,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 4194304,
+      "fileBytes": 4194432
+    },
+    "monster_Normal": {
+      "path": "Client/WarOfDimension/Model/Textures/monster_Normal.dds",
+      "assetSha256": "b94ebe2e343429fb408074d8c4ba8790ff5de9f82130b75408662e989d9b7ffe",
+      "width": 2048,
+      "height": 2048,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 16777216,
+      "fileBytes": 16777344
+    },
+    "eye": {
+      "path": "Client/WarOfDimension/Model/Textures/eye.dds",
+      "assetSha256": "4d2c729b2e5ad1f203250162dde78e7002f453cee7c0d2ad7084a2f1105be9df",
+      "width": 512,
+      "height": 512,
+      "bitsPerPixel": 32,
+      "effectiveMipLevels": 1,
+      "payloadBytes": 1048576,
+      "fileBytes": 1048704
+    }
+  },
+  "geometry": {
+    "records": 26,
+    "unique": 26,
+    "crossModelDuplicates": []
+  },
+  "estimates": {
+    "scope": "payload/static estimates, not realized Private/WorkingSet/DXGI savings; candidates overlap",
+    "monsterTexturePayloadBytesBeforePathSharing": 419430400,
+    "monsterTexturePayloadBytesAfterPathSharing": 411041792,
+    "monsterPathSharingSavingBytes": 8388608,
+    "monsterTextureUploadReleaseCandidateBytesBeforeSharing": 419430400,
+    "monsterTextureUploadReleaseCandidateBytesAfterSharing": 411041792,
+    "minotaurRgba32PayloadBytes": 251658240,
+    "minotaurBc7SameSizeSingleMipBytes": 62914560,
+    "minotaurBc7SameSizeSingleMipSavingBytes": 188743680,
+    "minotaurHalfResolutionRgba32PayloadBytes": 62914560,
+    "allMonsterBc7SameSizeSingleMipBytesAfterPathSharing": 102760448,
+    "allMonsterBc7SameSizeSingleMipSavingBytesAfterPathSharing": 308281344,
+    "minionObjectCbCount": 300,
+    "minionObjectCbCurrent64KiBAllocationBytes": 19660800,
+    "minionObjectCbPacked64KiBAllocationBytes": 131072,
+    "minionRepeatedMaterialCbRecreationCount": 11,
+    "minionRepeatedMaterialCb64KiBBytes": 720896
+  },
+  "officialReferences": [
+    "https://learn.microsoft.com/en-us/windows/win32/direct3d12/fence-based-resource-management",
+    "https://learn.microsoft.com/en-us/windows/win32/direct3d11/bc7-format"
+  ],
+  "verification": {
+    "modelFilesParsedCompletely": 9,
+    "uniqueDdsFiles": 25,
+    "geometryRecords": 26,
+    "geometryUnique": 26,
+    "runtimeImplementationChanged": false,
+    "archifyExistingDiagramChecks": 9,
+    "archifyErrors": 0,
+    "archifyWarnings": 0
+  }
+}

@@ -3,6 +3,7 @@
 #include "GameFramework.h"
 #include "NetworkManager.h"
 #include "SceneManager.h"
+#include "SharedDdsTexture.h"
 #include <psapi.h>
 #include <filesystem>
 #include <cstdint>
@@ -22,6 +23,7 @@ namespace
         unsigned int capacity = 0, stride = 0;
     } particleAllocations;
     std::filesystem::path outputPath;
+    std::filesystem::path captureDirectory;
     struct Sample
     {
         std::string phase;
@@ -29,6 +31,8 @@ namespace
         std::uint64_t localUsage, nonLocalUsage, localBudget;
         ParticleAllocations particles;
         ParticleBufferPool::Statistics pool;
+        SharedDdsTexture::Statistics dds;
+        size_t objectConstantPages;
     };
     std::vector<Sample> samples;
     std::string adapterName;
@@ -59,7 +63,9 @@ namespace
                 << ",\"particleVertexStride\":" << s.particles.stride
                 << ",\"poolAllocatedPairs\":" << s.pool.allocatedPairs << ",\"poolLeasedPairs\":" << s.pool.leasedPairs
                 << ",\"poolPendingPairs\":" << s.pool.pendingPairs << ",\"poolReuseCount\":" << s.pool.reuseCount
-                << ",\"poolAllocationBytes\":" << s.pool.allocationBytes << ",\"poolAllocationFailures\":" << s.pool.allocationFailures << '}';
+                << ",\"poolAllocationBytes\":" << s.pool.allocationBytes << ",\"poolAllocationFailures\":" << s.pool.allocationFailures
+                << ",\"ddsLiveDefaultBytes\":" << s.dds.defaultBytes << ",\"ddsLiveUploadBytes\":" << s.dds.uploadBytes
+                << ",\"ddsLiveUploads\":" << s.dds.uploads << ",\"objectConstantPages\":" << s.objectConstantPages << '}';
         }
         report << "]";
         if (particleMeasurement)
@@ -138,7 +144,8 @@ void ClientMemoryProfileSnapshot(ID3D12Device* device, const char* phase, const 
         adapterName = name;
     }
     samples.push_back({phase, memory.PrivateUsage, memory.WorkingSetSize, memory.PeakWorkingSetSize,
-        local.CurrentUsage, nonLocal.CurrentUsage, local.Budget, particleAllocations, pool ? pool->GetStatistics() : ParticleBufferPool::Statistics{}});
+        local.CurrentUsage, nonLocal.CurrentUsage, local.Budget, particleAllocations, pool ? pool->GetStatistics() : ParticleBufferPool::Statistics{},
+        SharedDdsTexture::GetStatistics(), ObjectConstantArena::LivePages()});
     WriteReport(false);
 }
 
@@ -220,7 +227,14 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
             framework.ProfileParticleReuseFrames();
         }
         framework.ProfileMemorySnapshot("ingame_ready");
+        if (!captureDirectory.empty()) framework.CaptureMonsters(captureDirectory.c_str());
         if (particleMeasurement) { framework.ProfileReleaseParticles(); particleReleaseChecked = true; }
+        if (!captureDirectory.empty()) {
+            framework.OnDestroy();
+            std::ofstream lifetime(captureDirectory / "lifetime.json");
+            lifetime << "{\"objectConstantPagesAfterOnDestroy\":" << ObjectConstantArena::LivePages() << "}\n";
+            if (ObjectConstantArena::LivePages()) throw std::runtime_error("NPC arena 페이지 종료 해제 누락");
+        }
         WriteReport(true);
         DestroyWindow(window);
         // 전역 자원은 독립 측정 프로세스 종료 때 회수한다. 종료 경로를 진입 측정에 섞지 않는다.
@@ -230,11 +244,40 @@ int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath,
     {
         OutputDebugStringA(error.what());
         WriteReport(false);
+        if (!captureDirectory.empty()) { std::ofstream detail(captureDirectory / "error.txt"); detail << error.what(); }
         return 1;
     }
 }
 
 int RunParticleSelectionTestCases(const wchar_t* reportPath);
+int RunMonsterCapture(CGameFramework& framework, const wchar_t* directory)
+{
+    captureDirectory = directory;
+    std::filesystem::create_directories(captureDirectory);
+    const auto report = captureDirectory / "memory.json";
+    return RunClientMemoryProfile(framework, report.c_str(), false, true, false, true, false, false);
+}
+void ClientMemoryProfileRecordGpuDiagnostics(ID3D12Device* device, const char* phase)
+{
+    if (captureDirectory.empty()) return;
+    std::ofstream log(captureDirectory / (std::string("gpu-") + phase + ".txt"));
+    log << "removedReason=" << std::hex << device->GetDeviceRemovedReason() << '\n';
+    Microsoft::WRL::ComPtr<ID3D12InfoQueue> queue;
+    if (FAILED(device->QueryInterface(IID_PPV_ARGS(&queue)))) return;
+    size_t errors = 0, warnings = 0;
+    std::map<UINT, size_t> warningIds;
+    for (UINT64 i = 0; i < queue->GetNumStoredMessages(); ++i) {
+        SIZE_T size = 0; queue->GetMessage(i, nullptr, &size); std::vector<char> bytes(size);
+        auto message = reinterpret_cast<D3D12_MESSAGE*>(bytes.data()); queue->GetMessage(i, message, &size);
+        if (message->Severity <= D3D12_MESSAGE_SEVERITY_ERROR) { ++errors; log << message->pDescription << '\n'; }
+        else if (message->Severity == D3D12_MESSAGE_SEVERITY_WARNING) { ++warnings; ++warningIds[message->ID]; }
+    }
+    std::ofstream receipt(captureDirectory / (std::string("gpu-") + phase + ".json"));
+    receipt << "{\"errors\":" << errors << ",\"warnings\":" << warnings << ",\"removedReason\":" << device->GetDeviceRemovedReason() << ",\"warningIds\":{";
+    bool first = true; for (const auto& [id, count] : warningIds) { if (!first) receipt << ','; first = false; receipt << '"' << id << "\":" << count; }
+    receipt << "}}\n";
+    if (errors || FAILED(device->GetDeviceRemovedReason())) throw std::runtime_error("몬스터 촬영 GPU 진단 실패");
+}
 int RunParticleSelectionTests(const wchar_t* reportPath)
 {
     active = true; // 테스트에서는 소켓 연결을 생략한다.

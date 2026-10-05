@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "NPC 객체 상수 버퍼의 수명",
+    "output": "npc-memory.lifecycle.html",
+    "viewBox": [
+      980,
+      600
+    ],
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "프레임 수명"
+    },
+    {
+      "id": "events",
+      "label": "확장 · 종료"
+    }
+  ],
+  "states": [
+    {
+      "id": "ready",
+      "type": "start",
+      "label": "이전 GPU 완료",
+      "sublabel": "프레임 fence 대기",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "대기"
+    },
+    {
+      "id": "begin",
+      "type": "active",
+      "label": "프레임 시작",
+      "sublabel": "쓰기 위치 초기화",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "2개 영역"
+    },
+    {
+      "id": "write",
+      "type": "active",
+      "label": "draw 상수 기록",
+      "sublabel": "256B 별도 영역",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "값 독립"
+    },
+    {
+      "id": "submit",
+      "type": "active",
+      "label": "명령 제출",
+      "sublabel": "Execute · Signal",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "GPU 사용"
+    },
+    {
+      "id": "complete",
+      "type": "success",
+      "label": "GPU 완료",
+      "sublabel": "다음 프레임 재사용",
+      "lane": "main",
+      "col": 4,
+      "step": "05",
+      "tag": "fence"
+    },
+    {
+      "id": "grow",
+      "type": "active",
+      "label": "페이지 추가",
+      "sublabel": "64KiB · 기존 주소 유지",
+      "lane": "events",
+      "col": 0,
+      "tag": "용량 부족"
+    },
+    {
+      "id": "release",
+      "type": "success",
+      "label": "게임 종료",
+      "sublabel": "Wait · Unmap · Release",
+      "lane": "events",
+      "col": 2,
+      "tag": "페이지 0"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "capacity-needed",
+      "from": "write",
+      "to": "grow",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    },
+    {
+      "id": "capacity-ready",
+      "from": "grow",
+      "to": "write",
+      "variant": "emphasis"
+    },
+    {
+      "id": "shutdown",
+      "from": "complete",
+      "to": "release",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "상수 값은 개별 유지",
+      "items": [
+        "그림자 · 본 렌더링도 draw마다 별도 영역을 사용한다",
+        "808개 논리 슬롯은 2프레임 8페이지로 예약한다",
+        "객체별 64KiB 할당을 총 0.5MiB로 통합했다"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "확장 · 수명 보장",
+      "items": [
+        "부족하면 양쪽 프레임에 페이지를 추가한다",
+        "기존 GPU 주소와 이미 기록한 값을 유지한다",
+        "GPU 완료를 기다린 후 마지막 소유자가 해제한다"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "임시 복사 버퍼와 구분",
+      "items": [
+        "모델 · DDS의 임시 UPLOAD는 복사 fence 후 해제한다",
+        "상수 arena의 UPLOAD는 렌더링 중 계속 유지한다",
+        "GPU 오류 · 프레임 재사용 · 종료를 네이티브로 검증했다"
+      ]
+    }
+  ]
+}

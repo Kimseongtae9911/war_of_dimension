@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-05T08:19:16.750953+00:00",
+  "baseCommit": "38bb9ee76645b9f7e6cea16cab37d4613c4bb005",
+  "worktreeUncommitted": true,
+  "scope": "모델 material의 DDS 공용 resource와 동일 Scene 힙 SRV 재사용; NPC 조기 upload 순회·압축·arena는 미적용",
+  "sourcesSha256": {
+    "Client/WarOfDimension/SharedDdsTexture.h": "34b7918526fe196e94eb54392a4062f89bcd8cb9a93560e3f113e4d5a8be7d31",
+    "Client/WarOfDimension/SharedDdsTexture.cpp": "f60e760d4eb437180a2c734bb00e0b4dab4fa312095ae966b9c371c2f3140d2b",
+    "Client/WarOfDimension/SharedDdsTextureTests.cpp": "d26721358c718cc8434d3ed7f2aec44c118e5b58cac42e30a11b109a7d7e688e",
+    "Client/WarOfDimension/Object.h": "aa3bb1d1241eee9093acf3e32db0aea492d1c321d09ff1475e3e04728d930dce",
+    "Client/WarOfDimension/Object.cpp": "9c5d6c3cf4014128d747ff2ac037b9b8a93f33997e7942132a7a8d0bc2bcd178",
+    "Client/WarOfDimension/Scene.cpp": "c8130d096d716a6190f7fdb922028848d300a23e06dc73327650e394537bfc0b",
+    "Client/WarOfDimension/WarOfDimension.cpp": "83a52595e0705ab0b220fcf6911f937be717616f61593cf07a98214a2b7fcc75",
+    "Client/WarOfDimension/WarOfDimension.vcxproj": "43cb1db9ad024a48aacd4cd502cf81ce18ba5a1f62808d9b89983b06d6b6768c",
+    "Client/WarOfDimension/WarOfDimension.vcxproj.filters": "666527e6a565c6b317eacaf5dec4e3897cb89cba05a254ef3b58cb82e4fb937b",
+    "scripts/Test-DdsSharing.ps1": "be9b472952a7e38fc5c90117343b2f9d51d3601d90daab545f3f3e358b2ddde8",
+    "scripts/Measure-ClientMemory.ps1": "03a1268fbc6b4aa73fa99320eb0ed564bfb79f7d2df787910a9404f5bc1d4408"
+  },
+  "assetsSha256": {
+    "Client/WarOfDimension/Model/Textures/AlbedoPBR.dds": "37fdb0815e4722fc077a59c35f293dbd668098627c64e558cff46884728f6c8c",
+    "Client/WarOfDimension/Model/Textures/MSPBR.dds": "50c1ef4f5be83542def5442298833ac837e70053f29cb44dece755dd1669b210",
+    "Client/WarOfDimension/Model/Monsters/Normal/ChestMonsterPBR.bin": "f6d6f73d901e992b772cc00787252c1d5febe5d1d32895f1cd753483279dc9db",
+    "Client/WarOfDimension/Model/Monsters/Normal/BeholderPBR.bin": "9a94164b6e6ac91fb3e8b6e97ea112a8a953fc4602370f8faa1118a8244c16a1"
+  },
+  "releaseExecutableSha256": "482d99eeaae5d10cd7206967da5bdc9c5833bbcafbb036c3c9d85e58d30c3b4f",
+  "dedicatedBaselineAssetBytes": {
+    "defaultBytes": 16777216,
+    "uploadFootprintBytes": 16777216,
+    "method": "이전 material 로더는 두 모델의 두 경로를 각각 생성: 4 resources × 4MiB; 에셋 헤더와 footprint 동일"
+  },
+  "checks": [
+    "정규화 경로 공유",
+    "다른 경로·용도·device 격리",
+    "미완료 다른 command list 거부",
+    "실패 DDS/null device 거부·캐시 미등록",
+    "첫 mip 전체 GPU pixel readback 일치",
+    "GPU 완료 후 다른 list 공유·반복 upload 해제",
+    "weak cache 만료·재생성",
+    "실제 Chest/Beholder 4개 참조→2개 자원",
+    "DEFAULT 할당량·UPLOAD footprint 검증",
+    "root/handle 저장 독립·동일 힙 SRV 재사용",
+    "Scene 힙 교체·복사 wrapper 수명",
+    "마지막 소유자 해제·live DDS=0"
+  ],
+  "gpuTests": {
+    "Debug": {
+      "ok": true,
+      "checks": 12,
+      "assetTextures": 4,
+      "uniqueResources": 2,
+      "savedDefaultBytes": 8388608,
+      "savedUploadBytes": 8388608,
+      "liveAfterExit": 0,
+      "gpuErrors": 0,
+      "gpuWarnings": 16,
+      "gpuWarningIds": {
+        "1328": 16
+      }
+    },
+    "Release": {
+      "ok": true,
+      "checks": 12,
+      "assetTextures": 4,
+      "uniqueResources": 2,
+      "savedDefaultBytes": 8388608,
+      "savedUploadBytes": 8388608,
+      "liveAfterExit": 0,
+      "gpuErrors": 0,
+      "gpuWarnings": 16,
+      "gpuWarningIds": {
+        "1328": 16
+      }
+    }
+  },
+  "gpuWarningMeaning": {
+    "1328": "기존 모델 CreateBufferResource의 UPLOAD 초기 상태가 무시되는 CREATERESOURCE_STATE_IGNORED"
+  },
+  "regressions": {
+    "meshSharingRelease": true,
+    "meshAssetAuditRelease": true,
+    "heroSelectionComparedMatrixRows": 1576969,
+    "agentEnvironmentSourceCount": 231
+  },
+  "functionalReplay": {
+    "ok": true,
+    "runs": 1,
+    "scenario": "fixed_skills_all_categories_synthetic_particle_replay",
+    "offline": true,
+    "adapter": "NVIDIA GeForce RTX 4070 SUPER",
+    "particleReleaseChecked": true,
+    "snapshots": [
+      {
+        "phase": "ingame_before_particle_use",
+        "privateBytes": 2502606848,
+        "workingSetBytes": 1288400896,
+        "peakWorkingSetBytes": 1313062912,
+        "dxgiLocalUsageBytes": 1225490432,
+        "dxgiNonLocalUsageBytes": 734527488,
+        "dxgiLocalBudgetBytes": 11774459904,
+        "particleCreatedCount": 0,
+        "particleLargeBufferPayloadBytes": 0,
+        "particleLargeBufferAllocationBytes": 0,
+        "particleCapacity": 0,
+        "particleVertexStride": 0,
+        "poolAllocatedPairs": 0,
+        "poolLeasedPairs": 0,
+        "poolPendingPairs": 0,
+        "poolReuseCount": 0,
+        "poolAllocationBytes": 0,
+        "poolAllocationFailures": 0
+      },
+      {
+        "phase": "reuse_mixed_eighteen",
+        "privateBytes": 2785513472,
+        "workingSetBytes": 1289588736,
+        "peakWorkingSetBytes": 1313062912,
+        "dxgiLocalUsageBytes": 1592098816,
+        "dxgiNonLocalUsageBytes": 735641600,
+        "dxgiLocalBudgetBytes": 11774459904,
+        "particleCreatedCount": 19,
+        "particleLargeBufferPayloadBytes": 364800000,
+        "particleLargeBufferAllocationBytes": 366084096,
+        "particleCapacity": 300000,
+        "particleVertexStride": 32,
+        "poolAllocatedPairs": 19,
+        "poolLeasedPairs": 18,
+        "poolPendingPairs": 0,
+        "poolReuseCount": 30,
+        "poolAllocationBytes": 366084096,
+        "poolAllocationFailures": 0
+      },
+      {
+        "phase": "ingame_ready",
+        "privateBytes": 2785513472,
+        "workingSetBytes": 1289588736,
+        "peakWorkingSetBytes": 1313062912,
+        "dxgiLocalUsageBytes": 1592098816,
+        "dxgiNonLocalUsageBytes": 735641600,
+        "dxgiLocalBudgetBytes": 11774459904,
+        "particleCreatedCount": 19,
+        "particleLargeBufferPayloadBytes": 364800000,
+        "particleLargeBufferAllocationBytes": 366084096,
+        "particleCapacity": 300000,
+        "particleVertexStride": 32,
+        "poolAllocatedPairs": 19,
+        "poolLeasedPairs": 18,
+        "poolPendingPairs": 0,
+        "poolReuseCount": 30,
+        "poolAllocationBytes": 366084096,
+        "poolAllocationFailures": 0
+      }
+    ],
+    "measurementSourcesSha256": {
+      "Client/WarOfDimension/ClientMemoryProfile.cpp": "b9504cc3eb68bc8136241b3cca0758153bf8c24dd61e0cc290587fba6b7d6a01",
+      "Client/WarOfDimension/ClientMemoryProfile.h": "87d095438502f334ba27a01e14c82c97eedfd6ad25c0b3135c6e7c15173e219e",
+      "Client/WarOfDimension/ParticleBufferPool.cpp": "9a013c9946f1a8c7c8e821f7ac4b00690c57161ec1a90dadbd4f34e8d56b784f",
+      "Client/WarOfDimension/ParticleBufferPool.h": "d3bf99356bcd265ab6d013c1394310509504a798d521a4c951779811767d8311",
+      "Client/WarOfDimension/SharedDdsTexture.cpp": "f60e760d4eb437180a2c734bb00e0b4dab4fa312095ae966b9c371c2f3140d2b",
+      "Client/WarOfDimension/SharedDdsTexture.h": "34b7918526fe196e94eb54392a4062f89bcd8cb9a93560e3f113e4d5a8be7d31",
+      "Client/WarOfDimension/Mesh.h": "ce8152113f408b67cac3d71b2a863c3accf5efcfac433b413e28ad56658b3c64",
+      "Client/WarOfDimension/Object.h": "aa3bb1d1241eee9093acf3e32db0aea492d1c321d09ff1475e3e04728d930dce",
+      "Client/WarOfDimension/Scene.h": "5546602d5fbdefd57a5f9875907b51abe95f14f38027a03ff891ca2e9813f087",
+      "Client/WarOfDimension/Scene.cpp": "c8130d096d716a6190f7fdb922028848d300a23e06dc73327650e394537bfc0b",
+      "Client/WarOfDimension/Mesh.cpp": "5dcb04c19b8e95f055ad2f798bf253d701d67120b39eddd28dafd113bdc2332b",
+      "Client/WarOfDimension/GameFramework.cpp": "c3d0dfec1b3936496ea0aa5edf86a398f7719b04d85e744eb25129256760c120",
+      "Client/WarOfDimension/Object.cpp": "9c5d6c3cf4014128d747ff2ac037b9b8a93f33997e7942132a7a8d0bc2bcd178",
+      "Client/WarOfDimension/NetworkManager.cpp": "aeb78961ac54bf0611049c460a080c2f0d015b1d1f4ba48b0be71d4d62051565",
+      "Client/WarOfDimension/WarOfDimension.cpp": "83a52595e0705ab0b220fcf6911f937be717616f61593cf07a98214a2b7fcc75",
+      "scripts/Measure-ClientMemory.ps1": "03a1268fbc6b4aa73fa99320eb0ed564bfb79f7d2df787910a9404f5bc1d4408",
+      "Client/WarOfDimension/ModelPartSelection.cpp": "24ce473073de73b3bd08acf9cddaf977ee10109f5c167c07a431a094809fa5a8",
+      "Client/WarOfDimension/ModelPartSelection.h": "66eb83c0d1f453bed68cf9a6e8fedbfd11cdb83a9c1ef06e6e4c672153af676a",
+      "Client/WarOfDimension/NetworkManager.h": "767e881e1b886695c3a22db3b0c8d4fe4e790d03fa9e944e71ec53ffd9cd93f3",
+      "Client/WarOfDimension/Player.cpp": "a1db50869f8db73e14227d2e50e20cf02f46d7cbbb76d9b6611d3994b470fe46",
+      "Client/WarOfDimension/GameFramework.h": "4dc8f0224ef3aae6ec2bf0f9cc837d7631160dffe187506ce322ce1ecde9bfae",
+      "Client/WarOfDimension/HeroSelectionTests.cpp": "73e6eff0e0dc0bae8498fd90267a451cce17aa4df9f5cc25fbf2ac0138370166",
+      "Client/WarOfDimension/ParticleSelection.cpp": "342756068c0b444ccee55f6bd102d635c97b703dd5e8bf2f8bfd5ca775afbe9f",
+      "Client/WarOfDimension/ParticleSelection.h": "88d8d1d1966d2189eb75c497c7ee59f0dedec8b5468113dc7ee4a850ed5fb491",
+      "Client/WarOfDimension/ParticleSelectionTests.cpp": "e969478b1fbc2f259725f19154f726addba221cceb8e368a8a5d38ef13ed0fd0",
+      "Server/Game_Server/CMatch.cpp": "70f946cbef1cba24f46ca6f4e74674028f4dc726332fdf0b75dfaea51fb7af84",
+      "Server/Game_Server/CGameMgr.cpp": "28c1f9666e3bd3f4082e12429513131829b04658a3e9575cca63902c22058d90",
+      "Server/Lobby_Server/Job.h": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b",
+      "Server/Lobby_Server/JobQueue.h": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4",
+      "Server/Lobby_Server/Zone.h": "0237c230c4b655f6f205191a99e00509c9ed72f551ebd0b1954c94427038702f"
+    },
+    "note": "기능 확인 1회. 이전 3회 평균 대비 감소를 DDS 단독 A/B 성과로 주장하지 않음."
+  },
+  "notImplemented": [
+    "NPC 조기 upload 해제 순회",
+    "BC7/해상도 변경",
+    "상수 buffer arena",
+    "pose 독립성 리팩토링"
+  ],
+  "notVerified": [
+    "실전 멀티플레이 전투",
+    "압축 화질",
+    "공유 전후 반복 A/B"
+  ]
+}

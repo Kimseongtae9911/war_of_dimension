@@ -1,0 +1,1061 @@
+{
+  "schemaVersion": 1,
+  "samePoseCamera": true,
+  "textureChannels": "RGBA",
+  "screenshotChannels": "RGB",
+  "psnrIdenticalChannel": null,
+  "screenshots": [
+    {
+      "file": "red-front.png",
+      "beforeSha256": "ce98e862738cb7fc13b21720b63b86127e385f9463201d03ce6d2fd62632d9f3",
+      "afterSha256": "c4d2f73fcbdd26e50b738ff5f7ba3fad84ae3753bde2d5c6823a4caa4f8a5f18",
+      "foreground": {
+        "pixels": 54779,
+        "changedPixels": 34504,
+        "equal": false,
+        "mse": [
+          0.34560689315248544,
+          0.4669672684787966,
+          0.6121323864984757
+        ],
+        "maxAbsoluteError": [
+          15,
+          12,
+          12
+        ],
+        "psnrDb": [
+          52.74497964942326,
+          51.43793920595647,
+          50.26235003251603
+        ]
+      }
+    },
+    {
+      "file": "red-rear.png",
+      "beforeSha256": "544105ca51d27525db7caf7bd4ffbb1dc88d23f25b1f0c66db890063d44dc1eb",
+      "afterSha256": "862cecc344db13edf54769439a4885d040dfaa8e72a5db1e846a47bdcef53fb9",
+      "foreground": {
+        "pixels": 33481,
+        "changedPixels": 17536,
+        "equal": false,
+        "mse": [
+          2.0034049162211405,
+          0.2776201427675398,
+          0.2965562557868642
+        ],
+        "maxAbsoluteError": [
+          17,
+          4,
+          6
+        ],
+        "psnrDb": [
+          45.11311625699092,
+          53.696293876462136,
+          53.409732710584656
+        ]
+      }
+    },
+    {
+      "file": "green-front.png",
+      "beforeSha256": "1a7423766515c31aeafb0afafc077b123aeaf86fb452cfbdfddc0e6a23a7cee4",
+      "afterSha256": "3a86b822b63fef6e734e1c9404e44965437ac953fb9b623a8f6e0dcb6ca29dc0",
+      "foreground": {
+        "pixels": 85907,
+        "changedPixels": 48057,
+        "equal": false,
+        "mse": [
+          0.34599043151314796,
+          0.37058679735062333,
+          0.47283690502520165
+        ],
+        "maxAbsoluteError": [
+          17,
+          16,
+          18
+        ],
+        "psnrDb": [
+          52.740162724754256,
+          52.44190417930113,
+          51.383689948912796
+        ]
+      }
+    },
+    {
+      "file": "green-rear.png",
+      "beforeSha256": "7feadde96c764abf0aca911b410f2c834b1d8e0ba9c368f6c5b1a81396f71916",
+      "afterSha256": "594ee170d8027e1c8448a851ebc440eba176b0ced6a1c0086d07614bd4795b81",
+      "foreground": {
+        "pixels": 74007,
+        "changedPixels": 35642,
+        "equal": false,
+        "mse": [
+          0.6524112583944762,
+          0.2677719675165863,
+          0.25292202088991583
+        ],
+        "maxAbsoluteError": [
+          15,
+          7,
+          7
+        ],
+        "psnrDb": [
+          49.98558913992609,
+          53.85315251187036,
+          54.10093717626174
+        ]
+      }
+    },
+    {
+      "file": "golem-front.png",
+      "beforeSha256": "8ac0fc4469bcb05596090b10d861280c9e3b0a0b77289d71783e5b953806b9b7",
+      "afterSha256": "550047afad2e1d0c2f773a78fab818eaa4d4602afc195950f948c1df59ae0578",
+      "foreground": {
+        "pixels": 210156,
+        "changedPixels": 160304,
+        "equal": false,
+        "mse": [
+          2.362259464397876,
+          1.2424532252231675,
+          2.2269980395515714
+        ],
+        "maxAbsoluteError": [
+          31,
+          15,
+          20
+        ],
+        "psnrDb": [
+          44.39752763201098,
+          47.18800313088173,
+          44.65360526147437
+        ]
+      }
+    },
+    {
+      "file": "golem-rear.png",
+      "beforeSha256": "cc88f0073f5672246bdb4dc10063a563ab1f51de5aac9f52a1c3970abac98674",
+      "afterSha256": "9700c76bdb848adf4c91ba14ee2c9231c5660186e2852e7577fab495784367f7",
+      "foreground": {
+        "pixels": 206961,
+        "changedPixels": 156453,
+        "equal": false,
+        "mse": [
+          6.223327100274931,
+          1.2379820352626822,
+          1.1469455597914584
+        ],
+        "maxAbsoluteError": [
+          35,
+          18,
+          24
+        ],
+        "psnrDb": [
+          40.190577326118564,
+          47.20366018318621,
+          47.535375564306946
+        ]
+      }
+    },
+    {
+      "file": "bear-front.png",
+      "beforeSha256": "b27d20d26ca27b7203abe39b56b3902c1aab3b8bac27ef2f75423280411aa2e8",
+      "afterSha256": "884c07d769eda15f33bc07dc642e90685bc7d8b220a492f5fc192ff89821e6d0",
+      "foreground": {
+        "pixels": 122243,
+        "changedPixels": 44162,
+        "equal": false,
+        "mse": [
+          0.41091923463920227,
+          0.25187536300647073,
+          0.35882627226098834
+        ],
+        "maxAbsoluteError": [
+          133,
+          122,
+          137
+        ],
+        "psnrDb": [
+          51.99323890323598,
+          54.118946714706915,
+          52.58196127498466
+        ]
+      }
+    },
+    {
+      "file": "bear-rear.png",
+      "beforeSha256": "cdf584ee987910e317105d479bf3b0cf29a2bc06c8e23306069f3882a9a1374e",
+      "afterSha256": "db91bca673f5a3c5e04fa5986c20edf54a30a1a4242ddd4f8861d58a6c43f0f1",
+      "foreground": {
+        "pixels": 138257,
+        "changedPixels": 45385,
+        "equal": false,
+        "mse": [
+          0.42701635360234924,
+          0.1025192214499085,
+          0.11441012028324063
+        ],
+        "maxAbsoluteError": [
+          4,
+          2,
+          3
+        ],
+        "psnrDb": [
+          51.82635853188885,
+          58.022750614564885,
+          57.54615918676898
+        ]
+      }
+    },
+    {
+      "file": "minotaur-front.png",
+      "beforeSha256": "4b503bb1926b0ad8473864113733e6f6dc5ff0d18dfe350ef6c7b44df4cd2a25",
+      "afterSha256": "caa9f04268ec56d2a86d022e39eff0236ad2802871de885188ea71b6e7e5a8f5",
+      "foreground": {
+        "pixels": 138657,
+        "changedPixels": 75068,
+        "equal": false,
+        "mse": [
+          0.47851893521423366,
+          0.23497551512004441,
+          0.4391484021722668
+        ],
+        "maxAbsoluteError": [
+          9,
+          4,
+          6
+        ],
+        "psnrDb": [
+          51.331812331827386,
+          54.42057750520678,
+          51.70469053943784
+        ]
+      }
+    },
+    {
+      "file": "minotaur-rear.png",
+      "beforeSha256": "d50111ce11979e99720e76a92a8cbe28e1227fe71d27e965138997cdfaa3e9fb",
+      "afterSha256": "611befdcaadbe8dcbd733ffab5d61c4ff63250cba4cf0720d8ddf5a5f4473785",
+      "foreground": {
+        "pixels": 156620,
+        "changedPixels": 82610,
+        "equal": false,
+        "mse": [
+          0.6887817647809986,
+          0.21182479887626102,
+          0.3514621376580258
+        ],
+        "maxAbsoluteError": [
+          11,
+          6,
+          7
+        ],
+        "psnrDb": [
+          49.749987200410985,
+          54.87103558143393,
+          52.67201814703726
+        ]
+      }
+    },
+    {
+      "file": "chest-front.png",
+      "beforeSha256": "28b72053cfa273bbac0748c4a760057f83c99820b238fa2fc4b4b9aedf43ecd2",
+      "afterSha256": "cf5c119f3168efab75b01c96451648f76909b6ee538bfc465c4a9c719fda3035",
+      "foreground": {
+        "pixels": 267324,
+        "changedPixels": 106921,
+        "equal": false,
+        "mse": [
+          1.309108048660053,
+          0.7712999955110652,
+          1.054506890514881
+        ],
+        "maxAbsoluteError": [
+          138,
+          126,
+          141
+        ],
+        "psnrDb": [
+          46.96104867869267,
+          49.25857032032964,
+          47.900309389518995
+        ]
+      }
+    },
+    {
+      "file": "chest-rear.png",
+      "beforeSha256": "ffd5493b393e802811554ff7da2ac55e6c1c92465c240888b0433d5a379643d3",
+      "afterSha256": "7fa604e886539d380bed81b818cba0bde5c345e0bf3e0f407b8650de77bdf420",
+      "foreground": {
+        "pixels": 273149,
+        "changedPixels": 108354,
+        "equal": false,
+        "mse": [
+          1.2167754595477194,
+          0.02191111810769946,
+          0.1435370438844733
+        ],
+        "maxAbsoluteError": [
+          3,
+          2,
+          2
+        ],
+        "psnrDb": [
+          47.2786991877307,
+          64.72415821024492,
+          56.56116363083924
+        ]
+      }
+    },
+    {
+      "file": "beholder-front.png",
+      "beforeSha256": "65dd6c7db1cc10871303fed24b55c9a284580fe4892f71f26c4abc6aad2db7e8",
+      "afterSha256": "5188f38676ae61629112d5a2733dd230c4a00e809876e03a3d7fa917a8e29912",
+      "foreground": {
+        "pixels": 102584,
+        "changedPixels": 32244,
+        "equal": false,
+        "mse": [
+          7.871792872182796,
+          7.283513998284333,
+          8.088951493410278
+        ],
+        "maxAbsoluteError": [
+          155,
+          175,
+          150
+        ],
+        "psnrDb": [
+          39.170067027377556,
+          39.50739401628751,
+          39.05188129754683
+        ]
+      }
+    },
+    {
+      "file": "beholder-rear.png",
+      "beforeSha256": "88c824f8dd32624bf5bdd27ce6ba6a1f642f073c2b57585bad0f8e308d0dc9e4",
+      "afterSha256": "c715bbec387c72b8a47d416f47ff0f4ee2210cee4919a55901e8a227d2a9de68",
+      "foreground": {
+        "pixels": 90407,
+        "changedPixels": 67477,
+        "equal": false,
+        "mse": [
+          1.7203535124492573,
+          0.1270145010895174,
+          0.26971362836948465
+        ],
+        "maxAbsoluteError": [
+          27,
+          10,
+          3
+        ],
+        "psnrDb": [
+          45.77462662372709,
+          57.092270542139815,
+          53.82177469379319
+        ]
+      }
+    },
+    {
+      "file": "minion-front.png",
+      "beforeSha256": "9f155f4483b9cf3e7df14c97894984933940385d29ffb9bde501f3127e651832",
+      "afterSha256": "ea18c9a6e3b31e4e5a218f16ac4afbaaafd507cd95e51c3aefbc4416269fa21b",
+      "foreground": {
+        "pixels": 102702,
+        "changedPixels": 71404,
+        "equal": false,
+        "mse": [
+          28.16560534361551,
+          22.04363108800218,
+          30.304268660785574
+        ],
+        "maxAbsoluteError": [
+          141,
+          172,
+          146
+        ],
+        "psnrDb": [
+          33.63361271209315,
+          34.69797226604915,
+          33.31576553314416
+        ]
+      }
+    },
+    {
+      "file": "minion-rear.png",
+      "beforeSha256": "4d185749e7fe89164dd8b1cbfa8157d932a7824ee0fdfe2f9fa8fa48a99cab71",
+      "afterSha256": "dbf818b2877300b46b160d71f1ab18d8b230a0f0f7cc5d1a0ee663893f78b9ee",
+      "foreground": {
+        "pixels": 114629,
+        "changedPixels": 80407,
+        "equal": false,
+        "mse": [
+          3.047797677725532,
+          4.435212729762974,
+          8.3500684817978
+        ],
+        "maxAbsoluteError": [
+          120,
+          168,
+          169
+        ],
+        "psnrDb": [
+          43.290942270598485,
+          41.661659057764815,
+          38.91390323570543
+        ]
+      }
+    },
+    {
+      "file": "ogre-front.png",
+      "beforeSha256": "6dfe753d68e464d1972a178f2613e222a7183775e000e86b39c40041454a1678",
+      "afterSha256": "f27ce635d16d2c58443269bc658e7aee9841855e04cc71f707ebf5a94a8907a2",
+      "foreground": {
+        "pixels": 193274,
+        "changedPixels": 141857,
+        "equal": false,
+        "mse": [
+          1.35168206794499,
+          0.5443049763548123,
+          0.3531411364177282
+        ],
+        "maxAbsoluteError": [
+          11,
+          6,
+          7
+        ],
+        "psnrDb": [
+          46.82205808592494,
+          50.7723805595823,
+          52.65132050615365
+        ]
+      }
+    },
+    {
+      "file": "ogre-rear.png",
+      "beforeSha256": "f197fa3a37e5773023485b3a553ec0197a74bb9aab1ed90918e9beb9008bedb1",
+      "afterSha256": "f2fb65ecf6291cbbe7583dda8716b8601ad4eaf870bbd4c6035a6c865e57d40f",
+      "foreground": {
+        "pixels": 200354,
+        "changedPixels": 164920,
+        "equal": false,
+        "mse": [
+          1.2248520119388682,
+          0.5484192978428182,
+          0.943095720574583
+        ],
+        "maxAbsoluteError": [
+          7,
+          5,
+          6
+        ],
+        "psnrDb": [
+          47.24996740968007,
+          50.73967632476197,
+          48.38524586680285
+        ]
+      }
+    }
+  ],
+  "textures": [
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Albedo.dds",
+      "pixels": 1048576,
+      "changedPixels": 511964,
+      "equal": false,
+      "mse": [
+        1.296168327331543,
+        1.2020463943481445,
+        1.5247173309326172,
+        0.008080482482910156
+      ],
+      "maxAbsoluteError": [
+        50,
+        26,
+        41,
+        4
+      ],
+      "psnrDb": [
+        47.004189558732875,
+        47.33159130788084,
+        46.298910240670224,
+        69.05643067740651
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/MS.dds",
+      "pixels": 1048576,
+      "changedPixels": 500972,
+      "equal": false,
+      "mse": [
+        1.8778295516967773,
+        1.8765249252319336,
+        1.8778295516967773,
+        3.231991767883301
+      ],
+      "maxAbsoluteError": [
+        28,
+        28,
+        28,
+        48
+      ],
+      "psnrDb": [
+        45.39424191530473,
+        45.39726023497015,
+        45.39424191530473,
+        43.03610114943397
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Normal.dds",
+      "pixels": 1048576,
+      "changedPixels": 983516,
+      "equal": false,
+      "mse": [
+        13.213353157043457,
+        12.849370002746582,
+        14.990785598754883,
+        0.0022420883178710938
+      ],
+      "maxAbsoluteError": [
+        63,
+        67,
+        78,
+        4
+      ],
+      "psnrDb": [
+        36.92067318211157,
+        37.04198525888379,
+        36.372559680286905,
+        74.62427645022595
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Emission.dds",
+      "pixels": 65536,
+      "changedPixels": 211,
+      "equal": false,
+      "mse": [
+        0.012603759765625,
+        0.0125274658203125,
+        0.0126190185546875,
+        0.00030517578125
+      ],
+      "maxAbsoluteError": [
+        6,
+        6,
+        6,
+        1
+      ],
+      "psnrDb": [
+        67.12580244171227,
+        67.15217134372169,
+        67.12054781939062,
+        83.28530295827628
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/RedHP.dds",
+      "pixels": 4194304,
+      "changedPixels": 2633012,
+      "equal": false,
+      "mse": [
+        0.9282264709472656,
+        0.7172541618347168,
+        0.7098197937011719,
+        0.06520867347717285
+      ],
+      "maxAbsoluteError": [
+        42,
+        33,
+        35,
+        18
+      ],
+      "psnrDb": [
+        48.454264114989655,
+        49.574072839685456,
+        49.61932255155663,
+        59.98774995308567
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/GreenHP.dds",
+      "pixels": 4194304,
+      "changedPixels": 2782264,
+      "equal": false,
+      "mse": [
+        0.7776737213134766,
+        0.7610158920288086,
+        0.651853084564209,
+        0.15604591369628906
+      ],
+      "maxAbsoluteError": [
+        44,
+        57,
+        48,
+        13
+      ],
+      "psnrDb": [
+        49.22282937084924,
+        49.31686634782813,
+        49.98930635922348,
+        56.19827960390679
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/AlbedoGolem.dds",
+      "pixels": 4194304,
+      "changedPixels": 2289432,
+      "equal": false,
+      "mse": [
+        1.9136478900909424,
+        2.4018752574920654,
+        2.5145986080169678,
+        0.017028093338012695
+      ],
+      "maxAbsoluteError": [
+        44,
+        40,
+        56,
+        4
+      ],
+      "psnrDb": [
+        45.31218329965328,
+        44.3252991250112,
+        44.12611690058725,
+        65.81914338808855
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/MRGolem.dds",
+      "pixels": 4194304,
+      "changedPixels": 2485608,
+      "equal": false,
+      "mse": [
+        8.079448699951172,
+        8.074009656906128,
+        8.079448699951172,
+        10.481310367584229
+      ],
+      "maxAbsoluteError": [
+        31,
+        31,
+        31,
+        43
+      ],
+      "psnrDb": [
+        39.05698633105393,
+        39.05991096356095,
+        39.05698633105393,
+        37.92664779571706
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/NormalGolem.dds",
+      "pixels": 4194304,
+      "changedPixels": 2936806,
+      "equal": false,
+      "mse": [
+        27.756500244140625,
+        27.80940341949463,
+        31.1447696685791,
+        0.002105712890625
+      ],
+      "maxAbsoluteError": [
+        78,
+        80,
+        81,
+        4
+      ],
+      "psnrDb": [
+        33.69715654865917,
+        33.688886885949245,
+        33.19695237474575,
+        74.89681205090373
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/EmissionGolem.dds",
+      "pixels": 4194304,
+      "changedPixels": 5084,
+      "equal": false,
+      "mse": [
+        0.0010869503021240234,
+        0.001421213150024414,
+        0.000997304916381836,
+        5.841255187988281e-05
+      ],
+      "maxAbsoluteError": [
+        7,
+        6,
+        6,
+        1
+      ],
+      "psnrDb": [
+        77.76870673273534,
+        76.60421143646019,
+        78.14252400894867,
+        90.46574181110964
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Albedo4.dds",
+      "pixels": 4194304,
+      "changedPixels": 1350191,
+      "equal": false,
+      "mse": [
+        0.1433577537536621,
+        0.12156271934509277,
+        0.12055563926696777,
+        0.0017871856689453125
+      ],
+      "maxAbsoluteError": [
+        12,
+        10,
+        12,
+        1
+      ],
+      "psnrDb": [
+        56.56659173377094,
+        57.282799542300054,
+        57.31892830557225,
+        75.60910687595775
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Normal.dds",
+      "pixels": 4194304,
+      "changedPixels": 2041412,
+      "equal": false,
+      "mse": [
+        1.5280814170837402,
+        1.4773211479187012,
+        1.3634042739868164,
+        0.0012657642364501953
+      ],
+      "maxAbsoluteError": [
+        54,
+        59,
+        55,
+        4
+      ],
+      "psnrDb": [
+        46.289338665443324,
+        46.436054460514235,
+        46.784557097811074,
+        77.1072754013434
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/Stylized_Bear_Emissive.dds",
+      "pixels": 4194304,
+      "changedPixels": 486,
+      "equal": false,
+      "mse": [
+        0.000682830810546875,
+        0.000682830810546875,
+        0.0007183551788330078,
+        6.9141387939453125e-06
+      ],
+      "maxAbsoluteError": [
+        10,
+        10,
+        10,
+        1
+      ],
+      "psnrDb": [
+        79.78767251839679,
+        79.78767251839679,
+        79.56741133802139,
+        99.73342267576541
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_AlbedoTransparency.dds",
+      "pixels": 4194304,
+      "changedPixels": 2209116,
+      "equal": false,
+      "mse": [
+        0.2604849338531494,
+        0.25690484046936035,
+        0.2819669246673584,
+        0.008898496627807617
+      ],
+      "maxAbsoluteError": [
+        15,
+        9,
+        8,
+        1
+      ],
+      "psnrDb": [
+        53.972977515957496,
+        54.0330807377039,
+        53.62882193246812,
+        68.63763720672154
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_MetallicSmoothness.dds",
+      "pixels": 4194304,
+      "changedPixels": 282113,
+      "equal": false,
+      "mse": [
+        0.0016584396362304688,
+        0.0016584396362304688,
+        0.0016584396362304688,
+        0.10072898864746094
+      ],
+      "maxAbsoluteError": [
+        2,
+        2,
+        2,
+        12
+      ],
+      "psnrDb": [
+        75.93380692144822,
+        75.93380692144822,
+        75.93380692144822,
+        58.099258873561624
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_axe_Normal.dds",
+      "pixels": 4194304,
+      "changedPixels": 2681996,
+      "equal": false,
+      "mse": [
+        0.9252254962921143,
+        0.942375898361206,
+        0.8463037014007568,
+        0.0007195472717285156
+      ],
+      "maxAbsoluteError": [
+        44,
+        71,
+        50,
+        4
+      ],
+      "psnrDb": [
+        48.46832768820338,
+        48.388561905371326,
+        48.85554120554847,
+        79.56021030035926
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_AlbedoTransparency.dds",
+      "pixels": 16777216,
+      "changedPixels": 8751092,
+      "equal": false,
+      "mse": [
+        0.30407804250717163,
+        0.29005903005599976,
+        0.30432766675949097,
+        0.006564199924468994
+      ],
+      "maxAbsoluteError": [
+        17,
+        27,
+        20,
+        4
+      ],
+      "psnrDb": [
+        53.300953000209226,
+        53.5059397049044,
+        53.29738924530807,
+        69.95898561068901
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_MetallicSmoothness.dds",
+      "pixels": 16777216,
+      "changedPixels": 542620,
+      "equal": false,
+      "mse": [
+        0.00264585018157959,
+        0.0026457905769348145,
+        0.00264585018157959,
+        0.04718130826950073
+      ],
+      "maxAbsoluteError": [
+        18,
+        18,
+        18,
+        20
+      ],
+      "psnrDb": [
+        73.90515111778092,
+        73.90524895499061,
+        73.90515111778092,
+        61.3931038179295
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/t_minotaur1_Normal.dds",
+      "pixels": 16777216,
+      "changedPixels": 11122571,
+      "equal": false,
+      "mse": [
+        2.6967231035232544,
+        2.6063509583473206,
+        2.9169867038726807,
+        0.0014223456382751465
+      ],
+      "maxAbsoluteError": [
+        92,
+        81,
+        79,
+        4
+      ],
+      "psnrDb": [
+        43.82244004991772,
+        43.97047465603721,
+        43.481459113306435,
+        76.6007521556031
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/AlbedoPBR.dds",
+      "pixels": 1048576,
+      "changedPixels": 678125,
+      "equal": false,
+      "mse": [
+        2.655156135559082,
+        3.0581579208374023,
+        3.402618408203125,
+        0.010150909423828125
+      ],
+      "maxAbsoluteError": [
+        77,
+        103,
+        77,
+        13
+      ],
+      "psnrDb": [
+        43.88990296159288,
+        43.2762045259167,
+        42.81267113653975,
+        68.06575408268183
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/MSPBR.dds",
+      "pixels": 1048576,
+      "changedPixels": 97656,
+      "equal": false,
+      "mse": [
+        0.47650718688964844,
+        0.47638416290283203,
+        0.47650718688964844,
+        1.69219970703125
+      ],
+      "maxAbsoluteError": [
+        29,
+        29,
+        29,
+        48
+      ],
+      "psnrDb": [
+        51.35010905624985,
+        51.35123045668915,
+        51.35010905624985,
+        45.846287453424495
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/monster_BaseColor.dds",
+      "pixels": 4194304,
+      "changedPixels": 2420686,
+      "equal": false,
+      "mse": [
+        0.45864033699035645,
+        0.4530060291290283,
+        0.4900233745574951,
+        0.0015904903411865234
+      ],
+      "maxAbsoluteError": [
+        12,
+        13,
+        8,
+        4
+      ],
+      "psnrDb": [
+        51.51608112999167,
+        51.56976378722533,
+        51.22863564106301,
+        76.11549324822914
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/monster_Metallic.dds",
+      "pixels": 4194304,
+      "changedPixels": 0,
+      "equal": true,
+      "mse": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxAbsoluteError": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "psnrDb": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/monster_Normal.dds",
+      "pixels": 4194304,
+      "changedPixels": 2668602,
+      "equal": false,
+      "mse": [
+        3.083789348602295,
+        3.062143087387085,
+        2.959656000137329,
+        0.0004410743713378906
+      ],
+      "maxAbsoluteError": [
+        69,
+        76,
+        75,
+        4
+      ],
+      "psnrDb": [
+        43.23995656814602,
+        43.270548803806726,
+        43.41839124783294,
+        81.68568537072483
+      ]
+    },
+    {
+      "path": "Client/WarOfDimension/Model/Textures/eye.dds",
+      "pixels": 262144,
+      "changedPixels": 152472,
+      "equal": false,
+      "mse": [
+        0.8103294372558594,
+        0.6738662719726562,
+        0.5506248474121094,
+        0.009830474853515625
+      ],
+      "maxAbsoluteError": [
+        11,
+        10,
+        9,
+        1
+      ],
+      "psnrDb": [
+        49.04418744834342,
+        49.84506641048707,
+        50.72224555462458,
+        68.20505864268667
+      ]
+    }
+  ]
+}

@@ -15,3 +15,5 @@ void ClientMemoryProfileRecordParticle(ID3D12Device* device, ID3D12Resource* str
 int RunClientMemoryProfile(CGameFramework& framework, const wchar_t* reportPath, bool legacy, bool heroMeasurement = false, bool fullHeroParts = false, bool particleMeasurement = false, bool fullParticlePool = false, bool measureReuse = false, bool dedicatedBuffers = false);
 int RunParticleSelectionTests(const wchar_t* reportPath);
 int RunHeroSelectionAudit(CGameFramework& framework, const wchar_t* reportPath);
+int RunMonsterCapture(CGameFramework& framework, const wchar_t* directory);
+void ClientMemoryProfileRecordGpuDiagnostics(ID3D12Device* device, const char* phase);

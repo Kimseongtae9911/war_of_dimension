@@ -6,6 +6,7 @@
 
 #include "Shader.h"
 #include "Player.h"
+#include "ObjectConstantArena.h"
 
 
 struct LIGHT
@@ -67,6 +68,9 @@ public:
 	virtual void OnPostRenderParticle();
     std::shared_ptr<ParticleBufferPool> m_particleBufferPool;
     void SubmitParticleFrame(ID3D12CommandQueue* queue) { if (m_particleBufferPool) m_particleBufferPool->SubmitFrame(queue); }
+    std::shared_ptr<ObjectConstantArena> m_objectConstantArena;
+    void BeginObjectConstantFrame(UINT frame) { if (m_objectConstantArena) m_objectConstantArena->BeginFrame(frame); }
+    void SubmitObjectConstantFrame(ID3D12CommandQueue* queue) { if (m_objectConstantArena) m_objectConstantArena->SubmitFrame(queue); }
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bIsAnimate = true);
 	virtual void OnMTPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);

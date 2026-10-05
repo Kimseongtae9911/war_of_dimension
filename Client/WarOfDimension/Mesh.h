@@ -162,6 +162,13 @@ protected:
 public:
 	UINT GetType() { return(m_nType); }
 	XMFLOAT3 GetAABBExtents() { return m_xmf3AABBExtents; }
+	BoundingBox GetLocalBounds() const {
+		BoundingBox bounds{};
+		if (m_nVertices > 0 && m_pxmf3Positions)
+			BoundingBox::CreateFromPoints(bounds, m_nVertices, m_pxmf3Positions, sizeof(XMFLOAT3));
+		return bounds;
+	}
+	virtual BoundingBox GetPoseWorldBounds(const XMFLOAT4X4& world) const;
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) { }
@@ -249,6 +256,7 @@ class CSkinnedMesh : public CStandardMesh
 public:
 	CSkinnedMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual ~CSkinnedMesh();
+	BoundingBox GetPoseWorldBounds(const XMFLOAT4X4& world) const override;
 
 protected:
 	int								m_nBonesPerVertex = 4;

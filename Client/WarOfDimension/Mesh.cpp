@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
+
 #include "Mesh.h"
 #include "Object.h"
 #include "MeshContent.h"
@@ -1454,4 +1455,37 @@ bool CParticleMesh::PrepareBuffers(ID3D12GraphicsCommandList* commands)
     m_bufferPool->Touch(m_bufferBlock);
     m_rendered = true;
     return true;
+}
+
+BoundingBox CMesh::GetPoseWorldBounds(const XMFLOAT4X4& world) const
+{
+    BoundingBox result;
+    GetLocalBounds().Transform(result, XMLoadFloat4x4(&world));
+    return result;
+}
+
+BoundingBox CSkinnedMesh::GetPoseWorldBounds(const XMFLOAT4X4& world) const
+{
+    if (!m_pxmn4BoneIndices || !m_pxmf4BoneWeights || !m_ppSkinningBoneFrameCaches)
+        return CMesh::GetPoseWorldBounds(world);
+    std::vector<XMFLOAT3> positions(m_nVertices);
+    for (int vertex = 0; vertex < m_nVertices; ++vertex) {
+        const auto indices = reinterpret_cast<const int*>(&m_pxmn4BoneIndices[vertex]);
+        const auto weights = reinterpret_cast<const float*>(&m_pxmf4BoneWeights[vertex]);
+        XMVECTOR position = XMVectorZero();
+        for (int influence = 0; influence < 4; ++influence) {
+            const int bone = indices[influence];
+            if (weights[influence] == 0) continue;
+            if (bone < 0 || bone >= m_nSkinningBones || !m_ppSkinningBoneFrameCaches[bone])
+                throw std::runtime_error("촬영용 skinning bone 범위 오류");
+            const XMMATRIX transform = XMLoadFloat4x4(&m_pxmf4x4BindPoseBoneOffsets[bone]) *
+                XMLoadFloat4x4(&m_ppSkinningBoneFrameCaches[bone]->m_xmf4x4World);
+            position += XMVector4Transform(XMVectorSet(m_pxmf3Positions[vertex].x,
+                m_pxmf3Positions[vertex].y, m_pxmf3Positions[vertex].z, 1), transform) * weights[influence];
+        }
+        XMStoreFloat3(&positions[vertex], position);
+    }
+    BoundingBox result{};
+    if (!positions.empty()) BoundingBox::CreateFromPoints(result, positions.size(), positions.data(), sizeof(XMFLOAT3));
+    return result;
 }

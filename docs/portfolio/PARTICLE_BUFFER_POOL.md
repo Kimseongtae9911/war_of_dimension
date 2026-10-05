@@ -87,3 +87,40 @@ python ./scripts/Build-ParticleBufferPoolReport.py --summary artifacts/logs/part
 ```
 
 실행 가능한 Python과 matplotlib이 필요하다. GPU 검사와 메모리 측정을 동시에 실행하지 않는다. 기존 reference 폴더를 출력 경로로 재사용하지 않는다. 네 사용자 실전 최대 중첩·모든 스킬의 장시간 시각 품질·전체 매치 재진입·DB/블록체인은 미검증이다. 서버의 기존 ArrowRain/DarknessRay ID 충돌과 풀 고갈 반환 문제는 이 클라이언트 자원 작업에서 변경하지 않았다.
+
+## 최적화 후 클라이언트 메모리 구성 비율
+
+이 표·차트는 DDS 공유 적용 전 공용 파티클 풀의 확정 3회 측정이다. 이후 [모델 DDS 공유 구현·검증](NPC_RESOURCE_SHARING_REVIEW.md#후속-적용-모델-dds-공유), [NPC upload 회수·BC7·상수 arena](NPC_MEMORY_OPTIMIZATION.md)를 적용했다. 최신 후속 실측은 Private 중앙값 1,964.46MiB이며 기존 근거는 당시 기록으로 보존한다. 서로 다른 시점의 측정을 이 비율표에 섞지 않는다.
+
+2026-10-05의 동일 최종 바이너리 `pooled` 3회 원시 측정을 다시 집계했다. 새 게임 실행 측정이 아니며, 집계 당시 커밋 `38bb9ee7`에 포함된 계측 소스 28개와 Release 실행 파일의 SHA-256 일치를 확인했다. **고정 효과 재생 후 Private commit은 2,778.36MiB(약 2.71GiB)**다. Working Set은 1,289.69MiB, DXGI LOCAL은 1,574.34MiB이며 세 지표는 합산하지 않는다.
+
+아래 비율은 각 로딩/재생 checkpoint 사이의 **Private commit 순증가량 ÷ 최종 Private commit**이다. 자원별 최종 소유 메모리를 직접 추적한 heap 분석이 아니다. 기동 행은 프로세스 초기값을 포함하고, 각 실행의 전체 구간 합계가 최종 byte 값과 정확히 일치함을 검증했다.
+
+| 생성·재생 구간 | Private 순증가 (MiB) | 최종 사용량 대비 |
+|---|---:|---:|
+| 미니언·몬스터·보스 | 949.03 | 34.16% |
+| 기동·Title·공통 자원 | 631.00 | 22.71% |
+| 인게임 UI·dissolve | 297.98 | 10.72% |
+| 파티클 고정 재생 | 269.84 | 9.71% |
+| 영웅 모델·컨트롤러 | 215.08 | 7.74% |
+| 하늘 cubemap | 192.38 | 6.92% |
+| 맵 전체 | 176.88 | 6.37% |
+| 스킬 모델·객체·billboard | 27.23 | 0.98% |
+| 파티클 텍스처·공통 설정 | 13.40 | 0.48% |
+| 파티클 객체·소형 버퍼 | 5.05 | 0.18% |
+| GPU 제출·대기 | 0.50 | 0.02% |
+| **합계** | **2,778.36** | **100%** |
+
+현재 가장 큰 구간은 미니언·몬스터·보스 **34.16%**, 맵은 **6.37%**, 영웅 모델·컨트롤러는 **7.74%**다. 파티클 준비·객체·고정 재생 세 구간 합계는 288.29MiB / 10.38%다. 파티클 GPU 대형 버퍼 allocation 349.125MiB는 별도 지표이므로 이 Private 비율표에 대입하거나 합산하지 않는다.
+
+효과를 한 번도 재생하지 않은 로딩 완료 시점은 2,508.52MiB이고 대형 파티클 버퍼가 0쌍이다. 실제 표시를 반영한 고정 재생 후에는 19쌍을 보유하며 2,778.36MiB다. 정상 게임에서 환경 효과가 표시되므로 재생 전 값을 플레이 사용량으로 제시하지 않는다. 실전 동시 효과 수·확장 이력에 따라 풀 보유량과 메모리는 달라진다.
+
+![최적화 후 구간별 메모리 비율](evidence/figures/client-memory-current-share.png)
+
+[세부 JSON](evidence/client-memory-current-share-20261005.json) · [CSV](evidence/client-memory-current-share-20261005.csv) · [SVG](evidence/figures/client-memory-current-share.svg). 이전 5.8GiB 분석과 측정 시나리오가 다르므로 비율/절대값을 직접 이어 붙이지 않는다. 이전 비교는 당시 기록으로 보존한다.
+
+```powershell
+python scripts/Build-CurrentClientMemoryShare.py --summary docs/portfolio/evidence/particle-buffer-pool-runs-20261005.json --output artifacts/logs/current-memory-share.json --charts
+```
+
+구간 순서·중복·누락·반복 번호의 잘못된 입력 4종 거부, 지표별 byte 합계 및 비율 합계 검증 PASS. PNG의 한글·레이블·잘림 여부를 직접 확인했다. 게임 코드 변경이 없어 빌드·전투 실행은 반복하지 않았다.

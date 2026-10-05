@@ -253,3 +253,72 @@ Release 실행 파일 ced83cfa0ae04e77b58bffae130da6e716398f573ee06976f8a9123c8c
 사용자의 커밋·push 요청에 따라 14~18번 작업을 함께 준비한다. 저장소는 `C:/GitFolder/NewWod`, 브랜치는 `main`이다. 원격 fetch 후 HEAD와 origin/main 일치를 확인했다. 기존 `NewWod.slnx`의 로컬 프로젝트 경로 변경은 제외하고 작업 트리에 보존한다. 앞선 Debug/Release 빌드·GPU 수명·회귀 검증 결과를 확인했고 계측 소스 28개 및 Release 바이너리의 해시가 그대로임을 확인했다. GPU 오류 0·경고 각 12개와 실전 최대 동시 효과 수 미검증 범위는 유지한다. 정확한 staged snapshot과 한글 메시지를 제시한 뒤 승인받아 커밋·push한다.
 
 준비 검증: 작업 파일 56개를 명시적으로 stage했다. 공개 측정 JSON/CSV 재생성·소스/실행 파일 해시·구조도 전달 해시·UTF-8·JSON/Python/PowerShell 구문 검사 PASS. staged 공백 검사에서 새 matplotlib SVG의 경로 줄 끝 공백을 발견해 정리했으며 XML 요소·속성·텍스트의 의미가 동일함을 확인했다. 실행 소스와 측정값은 변경하지 않았다. 제외된 변경은 NewWod.slnx 하나다.
+
+## 20. 공용 풀 적용 후 클라이언트 메모리 구성 비율
+
+- [x] 최신 pooled 3회 원시 checkpoint와 현재 소스 28개·Release 실행 파일 해시 확인
+- [x] Private commit 구간별 순증가 비율 및 로딩 완료/고정 재생 후 총량 집계
+- [x] 포트폴리오·JSON/CSV·PNG/SVG·재생성 스크립트 기록 및 이전 분석의 시점 명시
+- [x] 구간/지표 byte 합계·비율 합계·잘못된 입력 4종·그림 직접 점검
+
+커밋 38bb9ee7이 GitHub main에 반영된 이후 구성 비율을 요청받았다. 기존 최종 측정의 pooled 3회 자료를 재집계했으며 재실행/실전 최대치 측정으로 주장하지 않는다. Private 2,778.36MiB 중 미니언·몬스터·보스 34.16%, 공통 자원 22.71%, UI 10.72%, 파티클 고정 재생 9.71%, 영웅 7.74%, 하늘 6.92%, 맵 6.37%다. 파티클 준비/객체/재생 합계는 10.38%이고 별도 GPU allocation과 합산하지 않는다. 순증가량을 최종 자원 소유량으로 해석하지 않는다. 현재 런타임 소스 변경이 없어 기존 검증을 유지하고 빌드·전투 실행은 반복하지 않았다. NewWod.slnx를 보존하며 이번 집계는 커밋·push하지 않았다.
+
+## 21. 미니언·몬스터 자원 공통화 가능성 검토
+
+- [x] compilation database와 Serena 상태 확인, 모델 로딩·인스턴스·애니메이션 소유권 조사
+- [x] 최신 3회 실측의 미니언/몬스터/보스 구간 및 에셋·DDS 비용 분해
+- [x] 기존 공유 범위·추가 공통화·용량 감소 후보와 예상 효과/위험 문서화
+- [x] 근거 해시·계산·문서 링크 및 기존 Archify 구조도와 설명 대조
+
+사용자의 검토 요청으로 구현은 변경하지 않는다. 미니언 반복 생성과 몬스터 동일 모델 반복 사용, 종류 간 동일 DDS와 geometry, 개별 pose/track 및 GPU 상수 버퍼의 경계를 확인한다. 실제 현재 자원 공유와 설계 제안을 구분하며 기존 최종 측정·reference 및 로컬 SLNX 변경을 보존한다.
+
+검토 결과: 모델은 미니언 1회→12개, 일반 몬스터 7종 1회씩→9개(Chest/Beholder 각 2개)로 이미 공유한다. 최신 pooled 3회 실측 구간을 미니언 Private 28.55MiB·일반 몬스터 836.86MiB·Ogre 83.63MiB로 나누었다. 9개 모델과 DDS 25개를 파싱·해시 확인했고 geometry 26개는 모두 다른 내용이다. 일반 몬스터 clip 행렬은 16.20MiB, 비압축 텍스처 payload는 400MiB이며 Minotaur 240MiB/로더 Private 증가 488.69MiB가 큰 비용이다.
+
+NPC upload 해제 순회 누락(일반 몬스터 texture upload 후보 400MiB), 모델 사이 동일 DDS 2장의 중복 8MiB, 300개 미니언 object CB의 arena 예약량 18.75→0.125MiB, 공유 material CB 반복 생성의 포인터 덮어쓰기를 확인했다. Minotaur의 동일 해상도 BC7 단일 mip 예시는 240→60MiB이며 아직 에셋 변경·품질/감소 실측은 하지 않았다. 후보의 메모리 지표·중첩·GPU 완료 조건을 문서화하고 공유 clip과 개별 pose를 분리하는 방향을 제안했다. compilation database 229개·Serena Object.cpp 194 심볼, 기존 Archify showcase 9/9·오류/경고 0, 현재 소스/에셋/원시 근거 해시·계산·UTF-8·문서 링크 검사 PASS. 실행 소스·에셋·구조도가 그대로여서 게임 빌드/전투 실행·HTML 재생성은 반복하지 않았다. 커밋·push하지 않았다.
+
+## 22. 모델 DDS 공용 자원 적용 및 upload·압축·상수 버퍼 설명
+
+- [x] 모델 material의 DDS resource를 device·정규화 경로·용도별로 공유하고 binding은 개별 유지
+- [x] GPU 초기 업로드 순서·반복 해제·마지막 소유자·잘못된 DDS 및 실제 Chest/Beholder 검사
+- [x] Debug/Release 빌드·관련 회귀·공용 자원 수명과 실제 Shader 고정 재생 검증
+- [x] 업로드 해제 누락 범위·BC7 및 상수 buffer arena 용어, 문서·Archify JSON/HTML 기록
+
+사용자는 검토 2번의 구현을 요청했고 1·3·4번은 설명을 요청했다. 조기 upload 해제 순회·에셋 압축·상수 arena는 이번에 적용하지 않는다. 모델 DDS의 공유 자원과 wrapper/binding 수명을 분리하고 기존 측정 근거·reference·로컬 SLNX 변경을 보존한다.
+
+적용 결과: SharedDdsTexture가 device·정규 경로·resource 용도별 DEFAULT/UPLOAD를 공유하고 weak cache로 마지막 소유자 수명을 유지한다. material별 wrapper/binding 저장은 독립, 같은 Scene SRV 힙의 읽기 전용 descriptor는 재사용하며 힙 교체 시 캐시를 비운다. CTexture 복사의 소유권·binding과 남은 upload 종료 회수를 보완했다. NPC 조기 해제 순회·압축·arena는 미적용이다.
+
+검증: Debug/Release Client 빌드 및 DDS 12개 범주 PASS. 실제 Chest/Beholder 4개 texture 참조→2개 GPU resource, DEFAULT/UPLOAD 각각 8MiB 중복 제거, GPU 첫 mip pixel readback 일치·upload 반복 해제·새 Scene 힙·복사 wrapper 마지막 소유자·live DDS=0·GPU errors=0. 기존 모델 UPLOAD 초기 상태 경고 1328은 16개씩 기록했다. Release 메시 12개/실제 모델 3종 audit·영웅 행렬 1,576,969개 비교 PASS. 실제 Shader 고정 재생 1회와 particle 종료 PASS(Private 2,656.47MiB, WS 1,229.85MiB, LOCAL 1,518.34MiB). 반복 A/B 성과로 사용하지 않는다. 에이전트 환경 231개 소스·Serena 3개 핵심 파일·Archify doctor PASS. DDS 구조도 showcase 9/9·오류/경고 0, 4해상도 containment 및 1440 light/2048 dark 직접 점검 PASS. 기존 signedness/narrowing 등 경고 유지. 실제 멀티플레이 전투·압축 화질·pose 분리·NPC 조기 upload 정리·arena는 미검증. 구현/근거 JSON·문서·해시/링크 검사 기록, 기존 baseline·로컬 SLNX 변경 보존. 커밋·push하지 않았다.
+
+## 23. NPC 임시 upload 회수·텍스처 BC7·상수 버퍼 arena 적용
+
+- [x] 실제 게임 Shader의 고정 카메라 몬스터 전후 캡처 경로와 변경 전 화면·메모리·소스·에셋 보존
+- [x] GPU 완료 후 누락된 NPC/타인/스킬의 임시 upload 순회와 반복 해제 검증
+- [x] NPC 객체 상수 버퍼를 frame별 독립 영역의 확장 가능한 arena에 배치, 공유 material CB 생성 멱등화
+- [x] 몬스터 DDS를 해상도·채널 해석·색 공간 유지 BC7로 변환하고 동일 조건 후 화면·픽셀/품질·실측 비교
+- [x] Debug/Release·GPU 수명/실패 경로·관련 회귀·로컬 실행 및 문서·근거·Archify JSON/HTML 기록
+
+사용자가 1·3·4번의 작업과 3번 변경 전후 몬스터 스크린샷을 요청했다. 실제 에셋/Shader의 화면을 먼저 보존하고 동일 fixture로 비교한다. 기존 원본 저장소와 선행 작업의 기준선은 보존하며 커밋·push는 이번 요청 범위가 아니다.
+
+적용 결과: GPU 초기 copy fence 이후 minion/monster/OtherClient/tower/skill/static skill model/particle texture를 순회해 임시 upload를 회수한다. 지속적으로 갱신하는 CB·particle counter는 유지한다. 공유 material CB 생성은 멱등으로 변경했다. 미니언 300·일반 몬스터 508개 논리 객체 CB를 2프레임 256byte draw 영역으로 통합하고 부족하면 64KiB 페이지를 확장한다. 기존 CB 예약 50.5→0.5MiB, 정상 종료·확장분 마지막 소유자 해제 후 page 0을 확인했다. Ogre·영웅 CB와 개별 pose/clip은 유지한다.
+
+에셋: Microsoft DirectXTex may2026 고정 도구/SHA 검증, BC7 `-bc x`로 24 DDS를 동일 해상도/단일 mip/UNORM/채널 배치에 변환했다. 기존 R8 Metallic 1장은 압축 이득이 없어 원본 유지. 25개 고유 NPC DDS의 실제 DEFAULT allocation 441.25→113.3125MiB(327.9375MiB 감소), Minotaur 240→60MiB. DDS 해시·헤더·payload 검증 후 LFS 등록. GPU backbuffer 원본 PNG 9종 앞·뒤 전후 36장과 동일 카메라 근거를 공개 포트폴리오에 보존했다. 캡처 양쪽은 1·4번 적용 후라 BC7 시각 차이만 비교한다. 실제 클라이언트 Shader의 고정 idle 모델 화면이며 네트워크 매치/맵 UI 화면이 아니다. 전후 직접 점검, 25 DDS RGBA와 18 화면 foreground RGB MSE/PSNR/최대 오차 기록. 모든 조명·거리·애니메이션의 무손실 동일 화질로 주장하지 않는다.
+
+Release 최종 EXE `64c50c4fa1617b904f4109088e3db8affc2be3ed32d9aada6c4d6fcb78dbda0e`, 비교 EXE `2622d1df0d6a5841e2238b777cbd46cb69d13a910bcfd97fe05a72c58f6ef356`. 동일 선택 외형/직업/스킬/pooled 합성 순서를 전후 각각 3회 순차 측정했다. 마지막 ingame_ready 중앙값 Private 2,656.35→1,964.46MiB(691.89MiB/26.05% 감소), WS 1,233.63→897.06MiB, LOCAL 1,518.3438→1,190.4062MiB. 파티클 19쌍/재사용 30회 양쪽 일치, 공유 DDS upload 28개/125.3125MiB가 복사 완료 후 0개/0byte. 전체 UPLOAD 0을 의미하지 않고 지표·중복 절감은 합산하지 않는다. 초기 5.8GiB·공용 풀 2,778MiB·DDS 기능 검사 1회 근거는 당시 자료로 유지한다.
+
+검증: Debug/Release Client 빌드·arena native 10범주·DDS native 12범주 PASS. 600 draw 성장·GPU readback 값 보존·프레임 격리·미완료 gate fence 대기·잘못된 입력/상태 거부·scope 복구·material 1회 생성·종료 page/resource 0 확인. 실제 모델 렌더/반복 upload 정리/OnDestroy 두 구성 PASS. 기존 UI 종료의 중복 ReleaseWrappedResources를 제거하고 Flush 후 GPU 완료를 기다려 device removed 오류를 보완했다. 최종 Debug 초기화 GPU 오류 0·기존 state ignored 1328 경고 1,511개, 캡처/종료 오류·경고 0, removedReason 0. DDS native 기존 1328 경고 16개씩과 particle pool 기존 경고 12개, 기존 compiler 경고는 유지한다.
+
+Release 메시 12범주·실제 모델 3종 audit, 영웅 행렬 1,576,969개 일치, 선택 파티클 및 공용 풀 성장/종료 회귀 PASS. Release 로컬 TCP 서버 연결·클라이언트 창 기동과 234개 소스 compilation database·Serena 3파일·Archify doctor PASS. 구조도 showcase 9/9·오류/경고 0 및 4해상도 containment, 1440 light/2048 dark 직접 점검 PASS. 구현/측정/변환/검증/품질/36 PNG 해시·JSON/CSV 집계·재현은 NPC_MEMORY_OPTIMIZATION.md에 기록했다. 실제 장치 OOM·장시간 네트워크 전투·전체 매치 재진입·운영 DB/블록체인은 미검증이다. 로컬 SLNX 변경과 원본 저장소를 보존했으며 커밋·push하지 않았다.
+
+최종 문서·산출물 검사: Playwright/실제 Chrome에서 갤러리 9모델×2시점의 선택 18조합·전후 원본 PNG 36개 1920×1080 로드·링크 변경·페이지 오류 0·가로 overflow 0 PASS. 갤러리 실제 화면도 직접 점검했다. 문서 상대 링크 151개, JSON/Python/PowerShell 구문, 추가 소스·EXE·에셋·PNG SHA, 수정 C++ 19개 strict UTF-8, project XML/source 경로, Git diff 공백 검사 PASS. SLNX SHA f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562 보존. 실행 프로세스는 중지했고 임시 검사/캡처 sidecar는 Git 제외를 확인했다.
+
+## 24. DDS 공유·NPC 메모리 최적화 커밋·push 준비
+
+- [x] 작업 범위·원격 main·최신 소스/실행 파일/에셋/스크린샷 해시·측정 근거 검토
+- [x] 한글 커밋 메시지·정확한 staged snapshot 미리보기 준비, SLNX 기존 수정 제외
+- [ ] 공통 commit 스킬의 미리보기 승인 후 커밋 및 GitHub main push
+
+사용자가 완료 작업의 커밋·push와 메모리 현황 표를 요청했다. 20~23번의 메모리 비율 분석·NPC 후보 검토·DDS 공유·임시 upload 회수·BC7·객체 arena·전후 화면/문서/검증을 함께 준비한다. 저장소는 C:/GitFolder/NewWod, 브랜치는 main이며 fetch 후 HEAD와 origin/main은 38bb9ee76645b9f7e6cea16cab37d4613c4bb005로 일치했다. 최신 소스/EXE/25 DDS/36 PNG 해시·집계와 151개 문서 링크 검사를 통과했고 직전 Debug/Release 빌드·native GPU·회귀·로컬 실행 결과를 확인했다. 기존 경고와 전체 네트워크 전투 미검증 범위는 유지한다. NewWod.slnx는 제외·보존하고, 실행 로그/바이너리/생성 DB/임시 검사는 Git에 포함하지 않는다. 메시지와 staged fingerprint를 제시한 뒤 승인받아 커밋·push한다.
+
+Stage 검토에서 원본 R8 Metallic의 새 LFS 속성에 맞게 해당 파일만 --renormalize했다. 실제 DDS bytes/SHA는 06e84337b5412950b78efa4950466958376a75615d60e507fe3b7a0b0cac7110으로 그대로이고 Git index만 LFS pointer로 전환한다. 압축 24장과 원본 유지 1장 모두 staged LFS pointer·내용 해시/크기를 검증한다. 공개 측정 JSON/CSV 재생성·현재 소스/바이너리/에셋/PNG와 추가 소스 해시 PASS, staged 공백 검사 PASS. 기존 실행 검증 이후 기능 변경은 없으므로 게임 테스트를 반복하지 않는다.
+
+NPC 수명도 v2 JSON은 검증/전달된 원본이 CRLF인 반면 Git의 기본 정규화가 LF로 바꾸는 것을 확인했다. 해당 JSON 하나에 -text를 지정해 frozen bytes와 receipt SHA-256을 그대로 stage한다. 원본 JSON/HTML은 수정하지 않았으며 두 DDS/NPC 구조도의 staged bytes가 전달 당시 SHA와 일치하는지 검사한다.

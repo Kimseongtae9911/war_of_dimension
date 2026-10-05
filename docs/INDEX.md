@@ -13,8 +13,11 @@
 | 메시 공유·자원 수명·검증 | [메시 공유 구현](architecture/MESH_SHARING.md), [구조도와 근거](diagrams/mesh-sharing/README.md) |
 | 확정 외형·영웅 선택 파츠 최적화 | [구현·검증·실측](portfolio/HERO_SELECTED_PARTS.md), [로딩 흐름도](diagrams/hero-selection/README.md) |
 | 선택 스킬의 파티클 버퍼 최적화 | [구현·실측·검증](portfolio/PARTICLE_SELECTED_SKILLS.md), [이전 5개 풀 필요성 검토](portfolio/PARTICLE_POOL_CAPACITY_REVIEW.md), [선택과 생성 흐름](diagrams/particle-selection/README.md) |
-| 전체 파티클 공용 GPU 버퍼 풀 | [재사용·확장·종료 해제 및 실측](portfolio/PARTICLE_BUFFER_POOL.md), [수명 흐름도](diagrams/particle-buffer-pool/README.md) |
+| 전체 파티클 공용 GPU 버퍼 풀 | [재사용·확장·종료 해제 및 실측](portfolio/PARTICLE_BUFFER_POOL.md), [현재 메모리 구성 비율](portfolio/PARTICLE_BUFFER_POOL.md#최적화-후-클라이언트-메모리-구성-비율), [수명 흐름도](diagrams/particle-buffer-pool/README.md) |
 | 포트폴리오·메모리 실측·맵/영웅 비용 | [포트폴리오 인덱스](portfolio/README.md), [최초 전후 비교](portfolio/CLIENT_MEMORY_OPTIMIZATION.md), [현재 비용 분해와 구간별 전후 비교](portfolio/CLIENT_MEMORY_BREAKDOWN.md) |
+| 미니언·몬스터 메모리 공통화 후보 | [현재 공유·텍스처/upload 비용·예상 효과 검토](portfolio/NPC_RESOURCE_SHARING_REVIEW.md) |
+| 모델 사이 DDS 공용 자원 | [구현·GPU 검사·조기 해제/BC7/상수 arena 설명](portfolio/NPC_RESOURCE_SHARING_REVIEW.md#후속-적용-모델-dds-공유), [소유권 구조도](diagrams/dds-sharing/README.md) |
+| NPC 메모리 최적화 적용 결과 | [임시 upload·BC7·상수 arena 및 3회 실측](portfolio/NPC_MEMORY_OPTIMIZATION.md), [9종 전후 스크린샷](portfolio/evidence/npc-memory-20261005/gallery.html), [상수 수명도](diagrams/npc-memory/README.md) |
 | 코드 개선 후보 | [리팩토링 검토](REFACTORING_PLAN.md) |
 | 파일 정리 근거 | [정리 기록](development/CLEANUP.md) |
 | GitLab에서 로컬로 이전 | [이전 기록](MIGRATION.md) |

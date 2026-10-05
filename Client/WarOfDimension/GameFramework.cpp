@@ -189,6 +189,11 @@ void CGameFramework::CreateDirect3DDevice()
 	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels;
+	if (ClientMemoryProfileActive()) {
+		Microsoft::WRL::ComPtr<ID3D12InfoQueue> diagnostics;
+		if (SUCCEEDED(m_pd3dDevice->QueryInterface(IID_PPV_ARGS(&diagnostics))))
+			diagnostics->SetMessageCountLimit(100000);
+	}
 	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	d3dMsaaQualityLevels.SampleCount = 4;
 	d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
@@ -1493,6 +1498,8 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	if (m_pUILayer) m_pUILayer->ReleaseResources();
+	if (m_pUILayer) WaitForGpuComplete(); // 11On12 Flush 완료 후 자원을 파괴한다.
+	if (ClientMemoryProfileActive()) ClientMemoryProfileRecordGpuDiagnostics(m_pd3dDevice, "ui-release");
 	if (m_pUILayer) delete m_pUILayer;
 
 	if (m_pPlayer) m_pPlayer->Release();
@@ -1785,6 +1792,7 @@ void CGameFramework::FrameAdvance()
 
 		HRESULT hResult = m_pd3dCommandAllocator->Reset();
 		hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+		if (m_pScene) m_pScene->BeginObjectConstantFrame(m_nSwapChainBufferIndex);
 
 		D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 		::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -2013,6 +2021,7 @@ void CGameFramework::FrameAdvance()
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
         if (m_pScene) m_pScene->SubmitParticleFrame(m_pd3dCommandQueue);
+		if (m_pScene) m_pScene->SubmitObjectConstantFrame(m_pd3dCommandQueue);
 
 		WaitForGpuComplete();
 

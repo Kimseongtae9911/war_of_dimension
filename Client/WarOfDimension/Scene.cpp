@@ -13,6 +13,18 @@
 #include "ClientMemoryProfile.h"
 #include "ParticleSelection.h"
 #include "Util.h"
+#include "SharedDdsTexture.h"
+
+namespace
+{
+	// 현재 Scene SRV 힙의 읽기 전용 모델 DDS descriptor. 자원의 수명은 연장하지 않는다.
+	struct ModelDdsSrv
+	{
+		std::weak_ptr<SharedDdsTexture> owner;
+		D3D12_GPU_DESCRIPTOR_HANDLE handle;
+	};
+	std::unordered_map<const SharedDdsTexture*, ModelDdsSrv> modelDdsSrvs;
+}
 
 namespace PARTICLE_SKILLSETTING
 {
@@ -170,6 +182,7 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
 {
+	modelDdsSrvs.clear(); // 이전 힙의 handle은 새 힙에서 사용할 수 없다.
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -210,11 +223,22 @@ void CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 		int nTextures = pTexture->GetTextures();
 		for (int i = 0; i < nTextures; i++)
 		{
+			const auto& shared = pTexture->GetSharedDds(i);
+			if (shared)
+			{
+				auto found = modelDdsSrvs.find(shared.get());
+				if (found != modelDdsSrvs.end() && found->second.owner.lock() == shared)
+				{
+					pTexture->SetGpuDescriptorHandle(i, found->second.handle);
+					continue;
+				}
+			}
 			ID3D12Resource* pShaderResource = pTexture->GetResource(i);
 			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
 			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
 			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 			pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
+			if (shared) modelDdsSrvs[shared.get()] = {shared, m_d3dSrvGPUDescriptorNextHandle};
 			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 		}
 	}
@@ -1556,6 +1580,7 @@ CIngameScene::~CIngameScene()
 
 void CIngameScene::ReleaseObjects()
 {
+    if (m_objectConstantArena) m_objectConstantArena->WaitForIdle();
     if (m_particleBufferPool) m_particleBufferPool->WaitForIdle();
 	CScene::ReleaseObjects();
 
@@ -1599,6 +1624,7 @@ void CIngameScene::ReleaseObjects()
 	m_skillObjects.clear();
 
 	ReleaseParticles();
+	m_objectConstantArena.reset();
 }
 
 void CIngameScene::ReleaseParticles()
@@ -1921,6 +1947,9 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	///*
 #endif
 	profile("map_ready");
+	m_objectConstantArena = std::make_shared<ObjectConstantArena>(pd3dDevice);
+	{
+	ObjectConstantArena::Scope constants(m_objectConstantArena);
 	m_minions = new CGameObject * [MAX_MINION];
 	CLoadedModelInfo* pMinion = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/FreeLichPBR.bin", NULL);
 	for (int i = 0; i < MAX_MINION; ++i) {
@@ -1977,6 +2006,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if (pNormal4) delete pNormal4;
 
 	profile("monsters_ready");
+	}
 	m_ppOtherClient = new CGameObject * [INGAME_PLAYER];
 
 	CLoadedModelInfo* pBoss = nullptr;
@@ -2209,6 +2239,22 @@ void CIngameScene::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 	if(m_BillboardShader)m_BillboardShader->ReleaseUploadBuffers();
+	// Framework가 copy command의 GPU fence 완료를 기다린 이후 호출한다.
+	// 런타임 UPLOAD 상수·파티클 filled-size 버퍼는 이 함수의 해제 대상이 아니다.
+	auto releaseObjects = [](CGameObject** objects, int count) {
+		if (objects) for (int i = 0; i < count; ++i) if (objects[i]) objects[i]->ReleaseUploadBuffers();
+	};
+	releaseObjects(m_minions, MAX_MINION);
+	releaseObjects(m_monsters, MONSTER_NUM);
+	releaseObjects(m_ppOtherClient, INGAME_PLAYER);
+	releaseObjects(m_towerAttacks, PATH_NUM);
+	for (const auto& [type, objects] : m_skillObjects)
+		for (auto object : objects) if (object) object->ReleaseUploadBuffers();
+	for (auto model : {CSkillModel::pWizardModel, CSkillModel::pArcherModel, CSkillModel::pOgreModel,
+		CSkillModel::pAreaHelloWorldModel, CSkillModel::pProtectedAreaModel})
+		if (model && model->m_pModelRootObject) model->m_pModelRootObject->ReleaseUploadBuffers();
+	if (m_pParticleTexture) for (int i = 0; i < m_iParticleTextureNum; ++i)
+		if (m_pParticleTexture[i]) m_pParticleTexture[i]->ReleaseUploadBuffers();
 }
 
 void CIngameScene::AnimateObjects(float fTimeElapsed)

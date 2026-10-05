@@ -68,3 +68,27 @@ Client/WarOfDimension/Model/Textures/t_minotaur1_MetallicSmoothness.dds filter=l
 Client/WarOfDimension/Model/Textures/t_minotaur1_Normal.dds filter=lfs diff=lfs merge=lfs -text
 Client/WarOfDimension/Skybox/Night.dds filter=lfs diff=lfs merge=lfs -text
 Client/WarOfDimension/Skybox/Space.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/monster_Normal.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/GreenHP.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/AlbedoGolem.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/t_minotaur1_axe_Normal.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/MRGolem.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Stylized_Bear_Albedo4.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/monster_BaseColor.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/NormalGolem.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/EmissionGolem.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/AlbedoPBR.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/eye.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Stylized_Bear_Normal.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Normal.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/RedHP.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Stylized_Bear_Emissive.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/monster_Metallic.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Albedo.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/Emission.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/t_minotaur1_axe_AlbedoTransparency.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/MS.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/t_minotaur1_axe_MetallicSmoothness.dds filter=lfs diff=lfs merge=lfs -text
+Client/WarOfDimension/Model/Textures/MSPBR.dds filter=lfs diff=lfs merge=lfs -text
+# 검증 receipt가 참조하는 frozen JSON bytes와 SHA-256을 그대로 보존한다.
+docs/diagrams/npc-memory/npc-memory.lifecycle.v2.json -text whitespace=cr-at-eol

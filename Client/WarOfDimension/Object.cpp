@@ -3,10 +3,12 @@
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "ObjectConstantArena.h"
 #include "Object.h"
 #include "ClientMemoryProfile.h"
 #include "ModelPartSelection.h"
 #include "MeshContent.h"
+#include "SharedDdsTexture.h"
 #include <stdexcept>
 #include "Shader.h"
 #include "Scene.h"
@@ -26,6 +28,7 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nTextureType = nTextureType;
 
 	m_nTextures = nTextures;
+	m_sharedDds.resize(nTextures);
 	if (m_nTextures > 0)
 	{
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
@@ -34,10 +37,10 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 		m_sharepd3dSrvGpuDescriptorHandles = make_shared<D3D12_GPU_DESCRIPTOR_HANDLE[]>(m_nTextures);
 
-		m_pnResourceTypes = new UINT[m_nTextures];
-		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
-		m_pnBufferElements = new int[m_nTextures];
-		m_pnBufferStrides = new int[m_nTextures];
+		m_pnResourceTypes = new UINT[m_nTextures]{};
+		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures]{};
+		m_pnBufferElements = new int[m_nTextures]{};
+		m_pnBufferStrides = new int[m_nTextures]{};
 	}
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_sharepnRootParameterIndices = make_shared<UINT[]>(nRootParameters);
@@ -47,27 +50,33 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 }
 
 CTexture::CTexture(const CTexture& rhs) : m_nTextureType{ rhs.m_nTextureType }, m_nTextures{ rhs.m_nTextures }, m_nRootParameters{rhs.m_nRootParameters}, m_nSamplers{rhs.m_nSamplers},
-m_nReferences{rhs.m_nReferences}
+m_nReferences{0}
 {
+	m_sharedDds = rhs.m_sharedDds;
 	if (m_nTextures > 0)
 	{
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
 		m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
-		m_pnResourceTypes = new UINT[m_nTextures];
-		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
-		m_pnBufferElements = new int[m_nTextures];
-		m_pnBufferStrides = new int[m_nTextures];
-		m_sharepd3dSrvGpuDescriptorHandles = rhs.m_sharepd3dSrvGpuDescriptorHandles;
+		m_pnResourceTypes = new UINT[m_nTextures]{};
+		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures]{};
+		m_pnBufferElements = new int[m_nTextures]{};
+		m_pnBufferStrides = new int[m_nTextures]{};
+		m_sharepd3dSrvGpuDescriptorHandles = make_shared<D3D12_GPU_DESCRIPTOR_HANDLE[]>(m_nTextures);
+		std::copy_n(rhs.m_sharepd3dSrvGpuDescriptorHandles.get(), m_nTextures, m_sharepd3dSrvGpuDescriptorHandles.get());
 	}
-	if (m_nRootParameters > 0) 
-		m_sharepnRootParameterIndices = rhs.m_sharepnRootParameterIndices;
+	if (m_nRootParameters > 0)
+	{
+		m_sharepnRootParameterIndices = make_shared<UINT[]>(m_nRootParameters);
+		std::copy_n(rhs.m_sharepnRootParameterIndices.get(), m_nRootParameters, m_sharepnRootParameterIndices.get());
+	}
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
 
 	for (int i = 0; i < m_nTextures; ++i)
 	{
 		m_ppd3dTextures[i] = rhs.m_ppd3dTextures[i];
-		m_ppd3dTextures[i]->AddRef();
-		m_ppd3dTextureUploadBuffers[i] = rhs.m_ppd3dTextureUploadBuffers[i];
+		if (m_ppd3dTextures[i] && !m_sharedDds[i]) m_ppd3dTextures[i]->AddRef();
+		m_ppd3dTextureUploadBuffers[i] = rhs.m_ppd3dTextureUploadBuffers ? rhs.m_ppd3dTextureUploadBuffers[i] : nullptr;
+		if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->AddRef();
 		m_pnResourceTypes[i] = rhs.m_pnResourceTypes[i];
 		m_pdxgiBufferFormats[i] = rhs.m_pdxgiBufferFormats[i];
 		m_pnBufferElements[i] = rhs.m_pnBufferElements[i];
@@ -82,10 +91,17 @@ m_nReferences{rhs.m_nReferences}
 
 CTexture::~CTexture()
 {
+	// 공유 DDS의 upload는 마지막 소유자가 관리한다. 일반 슬롯의 남은 upload도 회수한다.
+	if (m_ppd3dTextureUploadBuffers)
+	{
+		for (int i = 0; i < m_nTextures; ++i)
+			if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->Release();
+		delete[] m_ppd3dTextureUploadBuffers;
+	}
 	if (m_ppd3dTextures)
 	{
 		for (int i = 0; i < m_nTextures; i++) 
-			if (m_ppd3dTextures[i])
+			if (m_ppd3dTextures[i] && !m_sharedDds[i])
 			{
 				if (!m_ppd3dTextures[i]->Release()) {
 					m_ppd3dTextures[i] = nullptr;
@@ -143,6 +159,7 @@ void CTexture::ReleaseShaderVariables()
 
 void CTexture::ReleaseUploadBuffers()
 {
+	for (auto& shared : m_sharedDds) if (shared) shared->ReleaseUpload();
 	if (m_ppd3dTextureUploadBuffers)
 	{
 		for (int i = 0; i < m_nTextures; i++) 
@@ -158,6 +175,16 @@ void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	m_pnResourceTypes[nIndex] = nResourceType;
 	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ/*D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE*/);
+}
+
+void CTexture::LoadSharedTextureFromDDSFile(ID3D12Device* device, ID3D12GraphicsCommandList* commands, const wchar_t* path, UINT resourceType, UINT index)
+{
+	if (index >= static_cast<UINT>(m_nTextures) || m_ppd3dTextures[index])
+		throw std::invalid_argument("공용 DDS는 비어 있는 texture 슬롯에만 로드 가능");
+	auto shared = SharedDdsTexture::Load(device, commands, path, resourceType);
+	m_sharedDds[index] = std::move(shared);
+	m_ppd3dTextures[index] = m_sharedDds[index]->Resource();
+	m_pnResourceTypes[index] = resourceType;
 }
 
 void CTexture::LoadBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, UINT nIndex)
@@ -344,6 +371,7 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 
 void CMaterial::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (m_pd3dcbMaterial) return; // 공유 재질의 기존 CB를 덮어써 유실하지 않는다.
 	UINT ncbElementBytes = ((sizeof(MATERIAL_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbMaterial = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
@@ -355,8 +383,10 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	char pstrTextureName[64] = { '\0' };
 
 	BYTE nStrLength = 64;
-	UINT nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
-	nReads = (UINT)::fread(pstrTextureName, sizeof(char), nStrLength, pInFile);
+	if (::fread(&nStrLength, sizeof(BYTE), 1, pInFile) != 1 || nStrLength >= sizeof(pstrTextureName))
+		throw std::runtime_error("모델 DDS 이름 길이 오류");
+	if (::fread(pstrTextureName, sizeof(char), nStrLength, pInFile) != nStrLength)
+		throw std::runtime_error("잘린 모델 DDS 이름");
 	pstrTextureName[nStrLength] = '\0';
 
 	bool bDuplicated = false;
@@ -382,20 +412,15 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		if (bDuplicated && pParent)
-		{
-			while (pParent->m_pParent) pParent = pParent->m_pParent;
-			*ppTexture = pParent->FindReplicatedTexture(pwstrTextureName);
-			if (*ppTexture) (*ppTexture)->AddRef();
-		}
-		// 선택 파츠 로딩에서 원래 texture 소유 파츠가 제외되면 실제 DDS로 복구한다.
+		// 일반/@ 토큰 모두 같은 DDS 경로로 조회한다. 모델 트리와 무관하게 GPU 자원을 공유한다.
+		// CTexture wrapper는 개별 생성하여 root parameter/SRV를 다른 material에서 덮어쓰지 않는다.
 		if (!*ppTexture)
 		{
-			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-			(*ppTexture)->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
-			if (*ppTexture) (*ppTexture)->AddRef();
-
-			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
+			auto texture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+			texture->LoadSharedTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
+			CScene::CreateShaderResourceViews(pd3dDevice, texture.get(), 0, nRootParameter);
+			texture->AddRef();
+			*ppTexture = texture.release();
 		}
 	}
 }
@@ -1381,6 +1406,15 @@ void CGameObject::PureRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
+	if (auto arena = ObjectConstantArena::Current()) {
+		arena->ReserveSlot();
+		m_pd3dcbVecObject.push_back(nullptr);
+		m_pcbMappedVecObjects.push_back(nullptr);
+		m_objectConstantOwners.push_back(std::move(arena));
+		if (m_ppMaterials) for (int i = 0; i < m_nMaterials; ++i)
+			if (m_ppMaterials[i]) m_ppMaterials[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+		return;
+	}
 	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
 	//m_pd3dcbDissolve = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
@@ -1400,6 +1434,7 @@ void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12Graphics
 
 	m_pd3dcbVecObject.push_back(m_pd3dcbObject);
 	m_pcbMappedVecObjects.push_back(m_pcbMappedObjects);
+	m_objectConstantOwners.push_back(nullptr);
 
 
 	if (m_ppMaterials)
@@ -1426,6 +1461,15 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandLi
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World, int SharedNum)
 {
+	if (SharedNum < 0 || static_cast<size_t>(SharedNum) >= m_pd3dcbVecObject.size())
+		throw std::out_of_range("object constant SharedNum 범위 오류");
+	if (auto& arena = m_objectConstantOwners.at(SharedNum)) {
+		OBJECT_INFO value{};
+		XMStoreFloat4x4(&value.m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+		value.m_nObjectID = m_nObjectID; value.m_nObjectDissolveState = m_nObjectDissolveState;
+		pd3dCommandList->SetGraphicsRootConstantBufferView(1, arena->Write(&value, sizeof(value)).address);
+		return;
+	}
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
@@ -1464,12 +1508,15 @@ void CGameObject::ReleaseShaderVariables()
 	{
 		for (auto p : m_pd3dcbVecObject)
 		{
+			if (!p) continue;
 			p->Unmap(0, NULL);
 			p->Release();
 			p = NULL;
 		}
 		m_pd3dcbVecObject.clear();
 	}
+	m_pcbMappedVecObjects.clear();
+	m_objectConstantOwners.clear();
 
 }
 

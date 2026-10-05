@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "scope": "phase_net_growth_not_retained_heap_ownership",
+  "sourceEvidence": "particle-buffer-pool-runs-20261005.json",
+  "sourceEvidenceMeasuredAtUtc": "2026-10-05T06:50:41.9720940Z",
+  "executableSha256": "ced83cfa0ae04e77b58bffae130da6e716398f573ee06976f8a9123c8c557fac",
+  "runsPerMode": 3,
+  "scenario": "pooled_fixed_synthetic_replay_not_full_gameplay_peak",
+  "totalsMeanBytes": {
+    "privateBytes": 2913325056,
+    "workingSetBytes": 1352333994.6666667,
+    "dxgiLocalUsageBytes": 1650819072,
+    "dxgiNonLocalUsageBytes": 769458176
+  },
+  "beforeReplayMeanBytes": {
+    "privateBytes": 2630377472,
+    "workingSetBytes": 1350989141.3333333,
+    "dxgiLocalUsageBytes": 1284210688,
+    "dxgiNonLocalUsageBytes": 768344064
+  },
+  "stages": [
+    {
+      "key": "startup",
+      "label": "기동·Title·공통 자원",
+      "begin": null,
+      "end": "scene_setup_ready",
+      "meanBytes": {
+        "privateBytes": 661652821.3333334,
+        "workingSetBytes": 222483797.33333334,
+        "dxgiLocalUsageBytes": 459952128,
+        "dxgiNonLocalUsageBytes": 30633984
+      },
+      "privateCommitSharePercent": 22.71125976727718
+    },
+    {
+      "key": "skybox",
+      "label": "하늘 cubemap",
+      "begin": "scene_setup_ready",
+      "end": "skybox_ready",
+      "meanBytes": {
+        "privateBytes": 201725269.33333334,
+        "workingSetBytes": 100906325.33333333,
+        "dxgiLocalUsageBytes": 100667392,
+        "dxgiNonLocalUsageBytes": 100675584
+      },
+      "privateCommitSharePercent": 6.924228002566335
+    },
+    {
+      "key": "map",
+      "label": "맵 전체",
+      "begin": "skybox_ready",
+      "end": "map_ready",
+      "meanBytes": {
+        "privateBytes": 185470976,
+        "workingSetBytes": 149785258.66666666,
+        "dxgiLocalUsageBytes": 35438592,
+        "dxgiNonLocalUsageBytes": 82472960
+      },
+      "privateCommitSharePercent": 6.366298728596114
+    },
+    {
+      "key": "enemies",
+      "label": "미니언·몬스터·보스",
+      "begin": "map_ready",
+      "end": "boss_ready",
+      "meanBytes": {
+        "privateBytes": 995134122.6666666,
+        "workingSetBytes": 513772202.6666667,
+        "dxgiLocalUsageBytes": 476028928,
+        "dxgiNonLocalUsageBytes": 480649216
+      },
+      "privateCommitSharePercent": 34.15801888008293
+    },
+    {
+      "key": "skills",
+      "label": "스킬 모델·객체·billboard",
+      "begin": "boss_ready",
+      "end": "skill_objects_ready",
+      "meanBytes": {
+        "privateBytes": 28547754.666666668,
+        "workingSetBytes": 16568320,
+        "dxgiLocalUsageBytes": 11370496,
+        "dxgiNonLocalUsageBytes": 12996608
+      },
+      "privateCommitSharePercent": 0.9799028298566443
+    },
+    {
+      "key": "particle_setup",
+      "label": "파티클 텍스처·공통 설정",
+      "begin": "skill_objects_ready",
+      "end": "particle_shared_setup_ready",
+      "meanBytes": {
+        "privateBytes": 14047914.666666666,
+        "workingSetBytes": 7621290.666666667,
+        "dxgiLocalUsageBytes": 6291456,
+        "dxgiNonLocalUsageBytes": 5922816
+      },
+      "privateCommitSharePercent": 0.48219523728514097
+    },
+    {
+      "key": "particle_objects",
+      "label": "파티클 객체·소형 버퍼",
+      "begin": "particle_shared_setup_ready",
+      "end": "ingame_scene_objects",
+      "meanBytes": {
+        "privateBytes": 5294762.666666667,
+        "workingSetBytes": 4336298.666666667,
+        "dxgiLocalUsageBytes": 884736,
+        "dxgiNonLocalUsageBytes": 1777664
+      },
+      "privateCommitSharePercent": 0.18174294199550753
+    },
+    {
+      "key": "heroes",
+      "label": "영웅 모델·컨트롤러",
+      "begin": "ingame_scene_objects",
+      "end": "local_hero_created",
+      "meanBytes": {
+        "privateBytes": 225528490.66666666,
+        "workingSetBytes": 181303978.66666666,
+        "dxgiLocalUsageBytes": 37851136,
+        "dxgiNonLocalUsageBytes": 56328192
+      },
+      "privateCommitSharePercent": 7.74127453447703
+    },
+    {
+      "key": "ingame_ui",
+      "label": "인게임 UI·dissolve",
+      "begin": "local_hero_created",
+      "end": "ingame_ui_dissolve_ready",
+      "meanBytes": {
+        "privateBytes": 312449706.6666667,
+        "workingSetBytes": 153675093.33333334,
+        "dxgiLocalUsageBytes": 155725824,
+        "dxgiNonLocalUsageBytes": 151674880
+      },
+      "privateCommitSharePercent": 10.72484877796852
+    },
+    {
+      "key": "submission",
+      "label": "GPU 제출·대기",
+      "begin": "ingame_ui_dissolve_ready",
+      "end": "ingame_before_particle_use",
+      "meanBytes": {
+        "privateBytes": 525653.3333333334,
+        "workingSetBytes": 536576,
+        "dxgiLocalUsageBytes": 0,
+        "dxgiNonLocalUsageBytes": -154787840
+      },
+      "privateCommitSharePercent": 0.018043071858759772
+    },
+    {
+      "key": "replay",
+      "label": "파티클 고정 재생",
+      "begin": "ingame_before_particle_use",
+      "end": "reuse_mixed_eighteen",
+      "meanBytes": {
+        "privateBytes": 282947584,
+        "workingSetBytes": 1344853.3333333333,
+        "dxgiLocalUsageBytes": 366608384,
+        "dxgiNonLocalUsageBytes": 1114112
+      },
+      "privateCommitSharePercent": 9.712187228035841
+    },
+    {
+      "key": "finalization",
+      "label": "재생 후 진입 완료",
+      "begin": "reuse_mixed_eighteen",
+      "end": "ingame_ready",
+      "meanBytes": {
+        "privateBytes": 0,
+        "workingSetBytes": 0,
+        "dxgiLocalUsageBytes": 0,
+        "dxgiNonLocalUsageBytes": 0
+      },
+      "privateCommitSharePercent": 0.0
+    }
+  ],
+  "runs": [
+    {
+      "run": 1,
+      "stages": {
+        "startup": {
+          "privateBytes": 662011904,
+          "workingSetBytes": 222507008,
+          "dxgiLocalUsageBytes": 459952128,
+          "dxgiNonLocalUsageBytes": 30633984
+        },
+        "skybox": {
+          "privateBytes": 201732096,
+          "workingSetBytes": 100950016,
+          "dxgiLocalUsageBytes": 100667392,
+          "dxgiNonLocalUsageBytes": 100675584
+        },
+        "map": {
+          "privateBytes": 186769408,
+          "workingSetBytes": 149794816,
+          "dxgiLocalUsageBytes": 35438592,
+          "dxgiNonLocalUsageBytes": 82472960
+        },
+        "enemies": {
+          "privateBytes": 994705408,
+          "workingSetBytes": 513658880,
+          "dxgiLocalUsageBytes": 476028928,
+          "dxgiNonLocalUsageBytes": 480649216
+        },
+        "skills": {
+          "privateBytes": 28545024,
+          "workingSetBytes": 16551936,
+          "dxgiLocalUsageBytes": 11370496,
+          "dxgiNonLocalUsageBytes": 12996608
+        },
+        "particle_setup": {
+          "privateBytes": 13922304,
+          "workingSetBytes": 7520256,
+          "dxgiLocalUsageBytes": 6291456,
+          "dxgiNonLocalUsageBytes": 5922816
+        },
+        "particle_objects": {
+          "privateBytes": 5201920,
+          "workingSetBytes": 4231168,
+          "dxgiLocalUsageBytes": 884736,
+          "dxgiNonLocalUsageBytes": 1777664
+        },
+        "heroes": {
+          "privateBytes": 225533952,
+          "workingSetBytes": 181301248,
+          "dxgiLocalUsageBytes": 37851136,
+          "dxgiNonLocalUsageBytes": 56328192
+        },
+        "ingame_ui": {
+          "privateBytes": 312451072,
+          "workingSetBytes": 153731072,
+          "dxgiLocalUsageBytes": 155725824,
+          "dxgiNonLocalUsageBytes": 151674880
+        },
+        "submission": {
+          "privateBytes": 524288,
+          "workingSetBytes": 540672,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": -154787840
+        },
+        "replay": {
+          "privateBytes": 283938816,
+          "workingSetBytes": 1339392,
+          "dxgiLocalUsageBytes": 366608384,
+          "dxgiNonLocalUsageBytes": 1114112
+        },
+        "finalization": {
+          "privateBytes": 0,
+          "workingSetBytes": 0,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": 0
+        }
+      },
+      "beforeReplay": {
+        "privateBytes": 2631397376,
+        "workingSetBytes": 1350787072,
+        "dxgiLocalUsageBytes": 1284210688,
+        "dxgiNonLocalUsageBytes": 768344064
+      },
+      "final": {
+        "privateBytes": 2915336192,
+        "workingSetBytes": 1352126464,
+        "dxgiLocalUsageBytes": 1650819072,
+        "dxgiNonLocalUsageBytes": 769458176
+      }
+    },
+    {
+      "run": 2,
+      "stages": {
+        "startup": {
+          "privateBytes": 662241280,
+          "workingSetBytes": 222412800,
+          "dxgiLocalUsageBytes": 459952128,
+          "dxgiNonLocalUsageBytes": 30633984
+        },
+        "skybox": {
+          "privateBytes": 201723904,
+          "workingSetBytes": 100974592,
+          "dxgiLocalUsageBytes": 100667392,
+          "dxgiNonLocalUsageBytes": 100675584
+        },
+        "map": {
+          "privateBytes": 183263232,
+          "workingSetBytes": 149716992,
+          "dxgiLocalUsageBytes": 35438592,
+          "dxgiNonLocalUsageBytes": 82472960
+        },
+        "enemies": {
+          "privateBytes": 995295232,
+          "workingSetBytes": 513830912,
+          "dxgiLocalUsageBytes": 476028928,
+          "dxgiNonLocalUsageBytes": 480649216
+        },
+        "skills": {
+          "privateBytes": 28549120,
+          "workingSetBytes": 16588800,
+          "dxgiLocalUsageBytes": 11370496,
+          "dxgiNonLocalUsageBytes": 12996608
+        },
+        "particle_setup": {
+          "privateBytes": 13950976,
+          "workingSetBytes": 7471104,
+          "dxgiLocalUsageBytes": 6291456,
+          "dxgiNonLocalUsageBytes": 5922816
+        },
+        "particle_objects": {
+          "privateBytes": 5476352,
+          "workingSetBytes": 4517888,
+          "dxgiLocalUsageBytes": 884736,
+          "dxgiNonLocalUsageBytes": 1777664
+        },
+        "heroes": {
+          "privateBytes": 225824768,
+          "workingSetBytes": 181669888,
+          "dxgiLocalUsageBytes": 37851136,
+          "dxgiNonLocalUsageBytes": 56328192
+        },
+        "ingame_ui": {
+          "privateBytes": 312446976,
+          "workingSetBytes": 153665536,
+          "dxgiLocalUsageBytes": 155725824,
+          "dxgiNonLocalUsageBytes": 151674880
+        },
+        "submission": {
+          "privateBytes": 524288,
+          "workingSetBytes": 536576,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": -154787840
+        },
+        "replay": {
+          "privateBytes": 283865088,
+          "workingSetBytes": 1351680,
+          "dxgiLocalUsageBytes": 366608384,
+          "dxgiNonLocalUsageBytes": 1114112
+        },
+        "finalization": {
+          "privateBytes": 0,
+          "workingSetBytes": 0,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": 0
+        }
+      },
+      "beforeReplay": {
+        "privateBytes": 2629296128,
+        "workingSetBytes": 1351385088,
+        "dxgiLocalUsageBytes": 1284210688,
+        "dxgiNonLocalUsageBytes": 768344064
+      },
+      "final": {
+        "privateBytes": 2913161216,
+        "workingSetBytes": 1352736768,
+        "dxgiLocalUsageBytes": 1650819072,
+        "dxgiNonLocalUsageBytes": 769458176
+      }
+    },
+    {
+      "run": 3,
+      "stages": {
+        "startup": {
+          "privateBytes": 660705280,
+          "workingSetBytes": 222531584,
+          "dxgiLocalUsageBytes": 459952128,
+          "dxgiNonLocalUsageBytes": 30633984
+        },
+        "skybox": {
+          "privateBytes": 201719808,
+          "workingSetBytes": 100794368,
+          "dxgiLocalUsageBytes": 100667392,
+          "dxgiNonLocalUsageBytes": 100675584
+        },
+        "map": {
+          "privateBytes": 186380288,
+          "workingSetBytes": 149843968,
+          "dxgiLocalUsageBytes": 35438592,
+          "dxgiNonLocalUsageBytes": 82472960
+        },
+        "enemies": {
+          "privateBytes": 995401728,
+          "workingSetBytes": 513826816,
+          "dxgiLocalUsageBytes": 476028928,
+          "dxgiNonLocalUsageBytes": 480649216
+        },
+        "skills": {
+          "privateBytes": 28549120,
+          "workingSetBytes": 16564224,
+          "dxgiLocalUsageBytes": 11370496,
+          "dxgiNonLocalUsageBytes": 12996608
+        },
+        "particle_setup": {
+          "privateBytes": 14270464,
+          "workingSetBytes": 7872512,
+          "dxgiLocalUsageBytes": 6291456,
+          "dxgiNonLocalUsageBytes": 5922816
+        },
+        "particle_objects": {
+          "privateBytes": 5206016,
+          "workingSetBytes": 4259840,
+          "dxgiLocalUsageBytes": 884736,
+          "dxgiNonLocalUsageBytes": 1777664
+        },
+        "heroes": {
+          "privateBytes": 225226752,
+          "workingSetBytes": 180940800,
+          "dxgiLocalUsageBytes": 37851136,
+          "dxgiNonLocalUsageBytes": 56328192
+        },
+        "ingame_ui": {
+          "privateBytes": 312451072,
+          "workingSetBytes": 153628672,
+          "dxgiLocalUsageBytes": 155725824,
+          "dxgiNonLocalUsageBytes": 151674880
+        },
+        "submission": {
+          "privateBytes": 528384,
+          "workingSetBytes": 532480,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": -154787840
+        },
+        "replay": {
+          "privateBytes": 281038848,
+          "workingSetBytes": 1343488,
+          "dxgiLocalUsageBytes": 366608384,
+          "dxgiNonLocalUsageBytes": 1114112
+        },
+        "finalization": {
+          "privateBytes": 0,
+          "workingSetBytes": 0,
+          "dxgiLocalUsageBytes": 0,
+          "dxgiNonLocalUsageBytes": 0
+        }
+      },
+      "beforeReplay": {
+        "privateBytes": 2630438912,
+        "workingSetBytes": 1350795264,
+        "dxgiLocalUsageBytes": 1284210688,
+        "dxgiNonLocalUsageBytes": 768344064
+      },
+      "final": {
+        "privateBytes": 2911477760,
+        "workingSetBytes": 1352138752,
+        "dxgiLocalUsageBytes": 1650819072,
+        "dxgiNonLocalUsageBytes": 769458176
+      }
+    }
+  ],
+  "sourceEvidenceSha256": "44e9561d77611ad41da7e4b58ff8cbd976ea14edacd8be5df0102e0fb6e29a17"
+}

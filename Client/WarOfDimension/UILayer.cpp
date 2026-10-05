@@ -1225,11 +1225,8 @@ void UILayer::ReleaseResources()
     delete[] m_pTextBlocks;
     m_pTextBlocks = nullptr;
 
-    for (UINT i = 0; i < m_nRenderTargets; i++)
-    {
-        ID3D11Resource* ppResources[] = { m_ppd3d11WrappedRenderTargets[i] };
-        m_pd3d11On12Device->ReleaseWrappedResources(ppResources, _countof(ppResources));
-    }
+    // Render가 Acquire/Release를 쌍으로 완료한다. 종료 시 이미 PRESENT인
+    // 여러 swapchain buffer에 다시 transition을 기록하지 않는다.
 
     m_pd2dDeviceContext->SetTarget(nullptr);
     m_pd3d11DeviceContext->Flush();

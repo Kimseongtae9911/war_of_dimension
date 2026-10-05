@@ -56,6 +56,9 @@ for ($run = 1; $run -le $Runs; ++$run) {
         $hashes = [ordered]@{}
         foreach ($path in @('Client/WarOfDimension/ClientMemoryProfile.cpp', 'Client/WarOfDimension/ClientMemoryProfile.h',
             'Client/WarOfDimension/ParticleBufferPool.cpp', 'Client/WarOfDimension/ParticleBufferPool.h',
+            'Client/WarOfDimension/SharedDdsTexture.cpp', 'Client/WarOfDimension/SharedDdsTexture.h',
+            'Client/WarOfDimension/ObjectConstantArena.cpp', 'Client/WarOfDimension/ObjectConstantArena.h',
+            'Client/WarOfDimension/MonsterCapture.cpp', 'Client/WarOfDimension/UILayer.cpp',
             'Client/WarOfDimension/Mesh.h', 'Client/WarOfDimension/Object.h', 'Client/WarOfDimension/Scene.h',
             'Client/WarOfDimension/Scene.cpp', 'Client/WarOfDimension/Mesh.cpp', 'Client/WarOfDimension/GameFramework.cpp',
             'Client/WarOfDimension/Object.cpp', 'Client/WarOfDimension/NetworkManager.cpp',

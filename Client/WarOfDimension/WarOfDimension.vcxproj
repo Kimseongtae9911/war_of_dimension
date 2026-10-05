@@ -206,6 +206,8 @@
     <ClInclude Include="ParticleBufferPool.h" />
     <ClInclude Include="ModelPartSelection.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectConstantArena.h" />
+    <ClInclude Include="SharedDdsTexture.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
@@ -261,6 +263,9 @@
     <ClCompile Include="MeshContent.cpp" />
     <ClCompile Include="MeshSharingTests.cpp" />
     <ClCompile Include="ClientMemoryProfile.cpp" />
+    <ClCompile Include="MonsterCapture.cpp" />
+    <ClCompile Include="ObjectConstantArena.cpp" />
+    <ClCompile Include="ObjectConstantArenaTests.cpp" />
     <ClCompile Include="ModelPartSelection.cpp" />
     <ClCompile Include="ParticleSelection.cpp" />
     <ClCompile Include="ParticleBufferPool.cpp" />
@@ -268,6 +273,8 @@
     <ClCompile Include="ParticleSelectionTests.cpp" />
     <ClCompile Include="HeroSelectionTests.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="SharedDdsTexture.cpp" />
+    <ClCompile Include="SharedDdsTextureTests.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NPC 텍스처 압축 전후 비교</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#10141c;color:#eef2f8}
+body{max-width:1800px;margin:24px auto;padding:0 24px}h1{font-size:25px}p{color:#b9c3d4;line-height:1.7}
+label{margin-right:20px}select{padding:8px 12px;border:1px solid #48536a;border-radius:6px;font:inherit}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}figure{margin:0}figcaption{padding:12px;background:#1b2433}
+img{display:block;width:100%;height:auto;background:black}a{color:#8bc8ff}footer{margin:24px 0}
+@media(max-width:760px){.pair{grid-template-columns:1fr}label{display:block;margin-bottom:12px}}
+</style>
+<h1>NPC 텍스처 압축 전후 비교</h1>
+<p>실제 클라이언트의 모델·재질·Deferred 셰이더를 사용한 고정 모델 비교 화면입니다. 1920×1080, idle 0초, 동일 카메라·조명입니다. 이미지를 누르면 원본 크기로 볼 수 있습니다. 맵·전투 UI와 그림자 가림은 제외했습니다.</p>
+<label>모델 <select id="model"><option value="minotaur">Minotaur</option><option value="red">Unique Red</option><option value="green">Rare Green</option><option value="golem">Golem</option><option value="bear">Bear</option><option value="chest">Chest</option><option value="beholder">Beholder</option><option value="minion">FreeLich 미니언</option><option value="ogre">Ogre</option></select></label>
+<label>시점 <select id="view"><option value="front">앞쪽 3/4</option><option value="rear">뒤쪽</option></select></label>
+<div class="pair">
+<figure><figcaption>변경 전 · 원본 텍스처</figcaption><a id="beforeLink" href="before/minotaur-front.png" target="_blank"><img id="before" src="before/minotaur-front.png" alt="Minotaur 압축 전"></a></figure>
+<figure><figcaption>변경 후 · BC7 압축 텍스처</figcaption><a id="afterLink" href="after/minotaur-front.png" target="_blank"><img id="after" src="after/minotaur-front.png" alt="Minotaur 압축 후"></a></figure>
+</div>
+<p>해상도·mip 수는 유지했습니다. BC7은 손실 압축이며, Ogre의 R8 Metallic은 원본을 유지했습니다. 강한 빨간색 테두리와 일부 단색 재질은 기존 게임 셰이더에서도 보입니다. 이 화면만으로 모든 전투 환경의 화질을 보장하지 않습니다.</p>
+<footer><a href="../../NPC_MEMORY_OPTIMIZATION.md">구현·실측·검증 문서</a> · <a href="quality.json">채널별 품질 수치와 이미지 해시</a> · <a href="measurements.json">메모리·자원·수명 근거</a></footer>
+<script>
+const model=document.querySelector('#model'),view=document.querySelector('#view');
+function update(){for(const mode of ['before','after']){const path=mode+'/'+model.value+'-'+view.value+'.png';document.getElementById(mode).src=path;document.getElementById(mode).alt=model.selectedOptions[0].text+' '+(mode==='before'?'압축 전':'압축 후');document.getElementById(mode+'Link').href=path;}}
+model.addEventListener('change',update);view.addEventListener('change',update);
+</script>
+</html>

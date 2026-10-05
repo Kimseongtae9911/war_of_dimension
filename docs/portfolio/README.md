@@ -4,10 +4,11 @@
 
 | 주제 | 현재 기록 | 상태 |
 |---|---|---|
+| 미니언·몬스터 자원 공통화 | [검토·DDS 공유](NPC_RESOURCE_SHARING_REVIEW.md), [실측·최종 구현](NPC_MEMORY_OPTIMIZATION.md), [전후 화면](evidence/npc-memory-20261005/gallery.html), [상수 수명도](../diagrams/npc-memory/README.md) | 임시 upload 회수·DDS 공유·BC7·객체 arena 적용. 각 3회 Private 중앙값 2,656.35→1,964.46MiB, 고유 NPC texture 441.25→113.3125MiB, 객체 CB 50.5→0.5MiB. 9종 실제 셰이더 비교·GPU 수명 검증 |
 | 클라이언트 메시 공유와 인게임 진입 메모리 | [분석 및 결과](CLIENT_MEMORY_OPTIMIZATION.md), [수치 근거](evidence/client-memory-20261005.json), [CSV](evidence/client-memory-20261005.csv), [맵 자원 분석](evidence/ingame-map-resources-20261005.json) | 구현 완료, 이전 로딩 경로 재현 A/B 3회씩 측정·맵 로딩 구성 분석 완료 |
 | 솔루션 통합·VS2026·SLNX | [개발 환경](../development/SETUP.md), [마이그레이션](../development/VS2026.md), [작업 기록 6~7](../../tasks/todo.md) | 구현·빌드 완료, VS GUI 실행 프로필은 미검증 |
 | 에이전트 개발 환경 | [설정과 검증](../development/AGENTS.md) | 설정·도구 점검 완료 |
-| 현재 약 5,766MiB의 비용 분해 | [증가 원인과 맵 비중](CLIENT_MEMORY_BREAKDOWN.md), [계측 근거](evidence/client-memory-breakdown-20261005.json), [CSV](evidence/client-memory-breakdown-20261005.csv) | 현재 경로 3회 측정, 실제 파티클 131개·버퍼 용량 확인 |
+| 메시 공유 직후 약 5,766MiB의 비용 분해 | [당시 증가 원인과 맵 비중](CLIENT_MEMORY_BREAKDOWN.md), [계측 근거](evidence/client-memory-breakdown-20261005.json), [CSV](evidence/client-memory-breakdown-20261005.csv) | 당시 경로 3회 측정, 실제 파티클 131개·버퍼 용량 확인. 후속 변경 전 역사 자료 |
 | 메시 공유 전후의 항목별 비용 | [동일 조건의 구간별 비교](CLIENT_MEMORY_BREAKDOWN.md#후속-실측-메시-공유-전에는-각각-얼마였나), [전후 근거](evidence/client-memory-stage-comparison-20261005.json), [CSV](evidence/client-memory-stage-comparison-20261005.csv) | 동일 바이너리의 이전 경로 재현/현재 경로 각 3회 교대 측정, 마지막 해제 구간까지 합계 검증 |
 | 불필요 파일 정리·GitLab 이전 | [정리 근거](../development/CLEANUP.md), [이전 기록](../MIGRATION.md) | 완료 |
 | 확정 외형으로 영웅 선택 파츠 로딩 | [용어·구현·실측·검증 및 실제 인게임 화면](HERO_SELECTED_PARTS.md), [구조도](../diagrams/hero-selection/README.md) | 선택 외형과 공통 본·부모의 변환 행렬만 보관, 모든 clip/keyframe 유지. 전체/선택 각 3회 측정·행렬 1,576,969개 일치·Debug/Release 검증, Private commit 904.36MiB 감소 |

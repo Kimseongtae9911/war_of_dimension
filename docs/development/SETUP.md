@@ -1,5 +1,9 @@
 # 로컬 개발 환경
 
+NPC 객체 상수 arena 검사는 `./scripts/Test-ObjectConstants.ps1 -Configuration Debug`와 `Release`로 실행한다. GPU frame 격리·부족 시 확장·fence 완료 후 재사용·종료 잔여 page 0을 검사한다. `./scripts/Capture-Monsters.ps1 -Configuration Release -OutputDirectory artifacts/logs/npc-recheck`는 실제 클라이언트 셰이더로 9종 앞/뒤 PNG를 생성하고 upload 회수·정상 종료를 확인한다. 압축·메모리 재현과 한계는 [NPC 최적화 문서](../portfolio/NPC_MEMORY_OPTIMIZATION.md)를 따른다.
+
+모델 DDS 공유 검사는 `./scripts/Test-DdsSharing.ps1 -Configuration Debug`와 `Release`로 실행한다. WARP와 하드웨어 device 격리, 실제 Chest/Beholder의 texture 4→2, GPU 픽셀 비교·binding 독립·upload와 마지막 소유자 해제를 확인한다. [DDS 구현·검증](../portfolio/NPC_RESOURCE_SHARING_REVIEW.md#후속-적용-모델-dds-공유)과 [구조도](../diagrams/dds-sharing/README.md)를 참조한다.
+
 파티클 공용 풀 검사는 `./scripts/Test-ParticleBufferPool.ps1 -Configuration Debug`와 `Release`로 실행한다. 실제 GPU에서 종류 간 재사용·fence 대기·용량 확장·상태 복사·종료 해제를 검사한다. 전체 종류의 동일 재생 비교는 `Measure-ClientMemory.ps1 -Scenario ParticleReuse`이며 [재현과 검증 범위](../portfolio/PARTICLE_BUFFER_POOL.md)를 따른다.
 
 ## 사전 조건

@@ -12,6 +12,8 @@
 #include <locale>
 
 int RunParticleBufferPoolTests(const wchar_t* reportPath);
+int RunDdsSharingTests(const wchar_t* reportPath);
+int RunObjectConstantArenaTests(const wchar_t* reportPath);
 
 #define MAX_LOADSTRING 100
 
@@ -34,6 +36,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	int argumentCount = 0;
 	auto arguments = CommandLineToArgvW(GetCommandLineW(), &argumentCount);
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-object-constants") == 0)
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2]; LocalFree(arguments);
+		return RunObjectConstantArenaTests(report.c_str());
+	}
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--capture-monsters") == 0)
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const std::wstring directory = arguments[2]; LocalFree(arguments);
+		return RunMonsterCapture(gGameFramework, directory.c_str());
+	}
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-dds-sharing") == 0)
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2]; LocalFree(arguments);
+		return RunDdsSharingTests(report.c_str());
+	}
     if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-particle-buffer-pool") == 0)
     {
         if (argumentCount != 3) { LocalFree(arguments); return 2; }

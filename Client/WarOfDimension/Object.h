@@ -11,6 +11,8 @@
 class CShader;
 class CStandardShader;
 class ModelPartSelection;
+class SharedDdsTexture;
+class ObjectConstantArena;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -75,7 +77,9 @@ private:
 
 	int								m_nTextures = 0;
 	ID3D12Resource** m_ppd3dTextures = NULL;
-	ID3D12Resource** m_ppd3dTextureUploadBuffers;
+	ID3D12Resource** m_ppd3dTextureUploadBuffers = nullptr;
+	// 모델 DDS 슬롯의 raw resource는 이 소유자의 별칭이다. 직접 Release하지 않는다.
+	std::vector<std::shared_ptr<SharedDdsTexture>> m_sharedDds;
 
 	UINT* m_pnResourceTypes = NULL;
 
@@ -100,6 +104,7 @@ public:
 	void ReleaseShaderVariables();
 
 	void LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pszFileName, UINT nResourceType, UINT nIndex);
+	void LoadSharedTextureFromDDSFile(ID3D12Device* device, ID3D12GraphicsCommandList* commands, const wchar_t* path, UINT resourceType, UINT index);
 	void LoadBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, UINT nIndex);
 	void CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex);
 	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nIndex, UINT nResourceType, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
@@ -108,8 +113,11 @@ public:
 	void SetGpuDescriptorHandle(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle);
 
 	int GetRootParameters() { return(m_nRootParameters); }
+	UINT GetRootParameterIndex(int index) const { return m_sharepnRootParameterIndices[index]; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(int index) const { return m_sharepd3dSrvGpuDescriptorHandles[index]; }
 	int GetTextures() { return(m_nTextures); }
 	ID3D12Resource* GetResource(int nIndex) { return(m_ppd3dTextures[nIndex]); }
+	const std::shared_ptr<SharedDdsTexture>& GetSharedDds(int index) const { return m_sharedDds[index]; }
 
 	UINT GetTextureType() { return(m_nTextureType); }
 	UINT GetTextureType(int nIndex) { return(m_pnResourceTypes[nIndex]); }
@@ -451,6 +459,7 @@ public:
 
 	vector<ID3D12Resource*> m_pd3dcbVecObject;
 	vector<OBJECT_INFO*> m_pcbMappedVecObjects;
+	vector<std::shared_ptr<ObjectConstantArena>> m_objectConstantOwners;
 	int iTotalShareNum = 0;
 	int iMyShareNum = 0;
 
