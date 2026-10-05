@@ -9,6 +9,8 @@
 #include "SceneManager.h"
 #include "Frustum.h"
 #include "RenderManager.h"
+#include "ModelPartSelection.h"
+#include "ClientMemoryProfile.h"
 #include "SoundManager.h"
 #include "Shader.h"
 
@@ -318,7 +320,8 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 		
 	}
 	else if ((SceneManager::GetInstance()->m_nCurScene == SCENEKIND::READY || SceneManager::GetInstance()->m_nCurScene == SCENEKIND::INGAME) && NetworkManager::GetInstance()->GetId() != 3) {		
-		Customize(NetworkManager::GetInstance()->m_ArrayInGameClientsCustom[NetworkManager::GetInstance()->GetId()]);
+		const auto appearance = NetworkManager::GetInstance()->GetFrozenIngameAppearance(NetworkManager::GetInstance()->GetId());
+		Customize(appearance ? *appearance : NetworkManager::GetInstance()->m_ArrayInGameClientsCustom[NetworkManager::GetInstance()->GetId()]);
 		SetWeapon(static_cast<JOB>(NetworkManager::GetInstance()->readySceneInfo->playerJobs[NetworkManager::GetInstance()->GetId()]));
 	}
 	else if (SceneManager::GetInstance()->m_nCurScene == SCENEKIND::TITLE) {
@@ -468,7 +471,10 @@ CGamePlayer::CGamePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd
 				cout << "An error occurs when setting the player as boss because the job" << endl;
 		else
 		{
-			pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ModularModel.bin", NULL);
+			const auto appearance = NetworkManager::GetInstance()->GetFrozenIngameAppearance(NetworkManager::GetInstance()->GetId());
+			std::optional<ModelPartSelection> selection;
+			if (appearance && !ClientMemoryProfileFullHeroParts()) selection.emplace(std::span<const ModelCustomize>(&*appearance, 1));
+			pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ModularModel.bin", NULL, selection ? &*selection : nullptr);
 			SetChild(pAngrybotModel->m_pModelRootObject, true);
 			
 #ifdef WITH_DATABASE
@@ -479,8 +485,8 @@ CGamePlayer::CGamePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd
 			1, 0, 1, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1 };
 #endif
 
-			Customize(temp);
-			NetworkManager::GetInstance()->SendModelCustomizePacket(temp);
+			Customize(appearance ? *appearance : temp);
+			if (!appearance) NetworkManager::GetInstance()->SendModelCustomizePacket(temp);
 		}
 
 

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="360pt" viewBox="0 0 576 360" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-05T00:19:54.990465</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 360
+L 576 360
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 43.772857 322.914124
+L 572.99976 322.914124
+L 572.99976 20.273865
+L 43.772857 20.273865
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 67.828625 322.914124
+L 281.657677 322.914124
+L 281.657677 302.87797
+L 67.828625 302.87797
+z
+" clip-path="url(#p569e8003a2)" style="fill: #2879bd"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 335.11494 322.914124
+L 548.943992 322.914124
+L 548.943992 303.31041
+L 335.11494 303.31041
+z
+" clip-path="url(#p569e8003a2)" style="fill: #2879bd"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 67.828625 302.87797
+L 281.657677 302.87797
+L 281.657677 294.02341
+L 67.828625 294.02341
+z
+" clip-path="url(#p569e8003a2)" style="fill: #6bad8b"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 335.11494 303.31041
+L 548.943992 303.31041
+L 548.943992 294.455851
+L 335.11494 294.455851
+z
+" clip-path="url(#p569e8003a2)" style="fill: #6bad8b"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 67.828625 294.02341
+L 281.657677 294.02341
+L 281.657677 71.732243
+L 67.828625 71.732243
+z
+" clip-path="url(#p569e8003a2)" style="fill: #d5a044"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 335.11494 294.455851
+L 548.943992 294.455851
+L 548.943992 72.164684
+L 335.11494 72.164684
+z
+" clip-path="url(#p569e8003a2)" style="fill: #d5a044"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m8168275b99" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m8168275b99" x="174.743151" y="322.914124" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="174.743151" y="339.308811" transform="rotate(-0 174.743151 339.308811)">이전: 모델 1회 로딩</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m8168275b99" x="442.029466" y="322.914124" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="442.029466" y="339.308811" transform="rotate(-0 442.029466 339.308811)">현재: 캐시가 빈 모델 1회 로딩</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_3">
+      <defs>
+       <path id="mdc5023fa87" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mdc5023fa87" x="43.772857" y="322.914124" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="36.772857" y="327.31305" transform="rotate(-0 36.772857 327.31305)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#mdc5023fa87" x="43.772857" y="256.399781" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="36.772857" y="260.798707" transform="rotate(-0 36.772857 260.798707)">100</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#mdc5023fa87" x="43.772857" y="189.885439" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="36.772857" y="194.284364" transform="rotate(-0 36.772857 194.284364)">200</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#mdc5023fa87" x="43.772857" y="123.371096" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="36.772857" y="127.770022" transform="rotate(-0 36.772857 127.770022)">300</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#mdc5023fa87" x="43.772857" y="56.856753" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="36.772857" y="61.255679" transform="rotate(-0 36.772857 61.255679)">400</text>
+     </g>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="12.394928" y="171.593994" transform="rotate(-90 12.394928 171.593994)">계산된 CPU 배열 용량 (MiB)</text>
+    </g>
+   </g>
+   <g id="patch_9">
+    <path d="M 43.772857 322.914124
+L 43.772857 20.273865
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 572.99976 322.914124
+L 572.99976 20.273865
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 43.772857 322.914124
+L 572.99976 322.914124
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 43.772857 20.273865
+L 572.99976 20.273865
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="174.743151" y="67.076239" transform="rotate(-0 174.743151 67.076239)">377.64 MiB</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="442.029466" y="67.50868" transform="rotate(-0 442.029466 67.50868)">376.99 MiB</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 13.2px; font-family: 'Malgun Gothic'; text-anchor: middle" x="308.386309" y="14.273865" transform="rotate(-0 308.386309 14.273865)">영웅 ModularModel · 애니메이션 약 334MiB는 그대로 유지</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_13">
+     <path d="M 230.353496 75.865342
+L 386.419121 75.865342
+Q 388.219121 75.865342 388.219121 74.065342
+L 388.219121 32.62667
+Q 388.219121 30.82667 386.419121 30.82667
+L 230.353496 30.82667
+Q 228.553496 30.82667 228.553496 32.62667
+L 228.553496 74.065342
+Q 228.553496 75.865342 230.353496 75.865342
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="patch_14">
+     <path d="M 232.153496 42.113233
+L 250.153496 42.113233
+L 250.153496 35.813233
+L 232.153496 35.813233
+z
+" style="fill: #2879bd"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 9px; font-family: 'Malgun Gothic'; text-anchor: start" x="257.353496" y="42.113233" transform="rotate(-0 257.353496 42.113233)">base geometry CPU 배열</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 232.153496 56.475264
+L 250.153496 56.475264
+L 250.153496 50.175264
+L 232.153496 50.175264
+z
+" style="fill: #6bad8b"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 9px; font-family: 'Malgun Gothic'; text-anchor: start" x="257.353496" y="56.475264" transform="rotate(-0 257.353496 56.475264)">스키닝 CPU 배열</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 232.153496 70.463584
+L 250.153496 70.463584
+L 250.153496 64.163584
+L 232.153496 64.163584
+z
+" style="fill: #d5a044"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 9px; font-family: 'Malgun Gothic'; text-anchor: start" x="257.353496" y="70.463584" transform="rotate(-0 257.353496 70.463584)">애니메이션 행렬·시간·행 포인터</text>
+    </g>
+   </g>
+  </g>
+  <g id="text_15">
+   <text style="font-size: 9px; font-family: 'Malgun Gothic'; text-anchor: middle" x="288" y="355.198002" transform="rotate(-0 288 355.198002)">텍스처·객체·allocator·GPU/UPLOAD 버퍼 제외 / 화면의 영웅 수로 곱하지 않음</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p569e8003a2">
+   <rect x="43.772857" y="20.273865" width="529.226903" height="302.640259"/>
+  </clipPath>
+ </defs>
+</svg>

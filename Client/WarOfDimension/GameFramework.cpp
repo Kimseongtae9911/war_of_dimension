@@ -9,6 +9,8 @@
 #include "Frustum.h"
 #include "RenderManager.h"
 #include "SoundManager.h"
+#include "ClientMemoryProfile.h"
+#include "ModelPartSelection.h"
 
 #define TEST_JOB 2	// 0 archer, 1 fighter, 2 swordman, 3 wizzard, 4 ogre, 5 programmer
 #define TEST_SKILL1 92
@@ -505,6 +507,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		}
 		break;		
 		case VK_F7:
+			if (SceneManager::GetInstance()->m_nCurScene == SCENEKIND::INGAME && NetworkManager::GetInstance()->GetFrozenIngameAppearances()) break;
 			m_pPlayer->ModifyModel();
 			NetworkManager::GetInstance()->SendModelCustomizePacket(m_pPlayer->GetCustomizeInfo());
 			break;
@@ -515,6 +518,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '4': {
 			if (SceneManager::GetInstance()->m_nCurScene != SCENEKIND::TITLE || SceneManager::GetInstance()->m_TitleInfo.Chat.bOnChat)
 				break;
+			NetworkManager::GetInstance()->SeedTestIngameAppearances();
+			// 서버 전환 응답에서 슬롯 ID를 받을 때까지 씬 전환을 대기한다.
+			NetworkManager::GetInstance()->playerScene = SCENEKIND::NONE;
 
 			for (int i = 0; i < NetworkManager::GetInstance()->readySceneInfo->selectSkills.size(); ++i) {
 				for (int j = 0; j < NetworkManager::GetInstance()->readySceneInfo->selectSkills[i].size(); ++j) {
@@ -539,7 +545,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			//test job change
 			NetworkManager::GetInstance()->readySceneInfo->playerJobs[0] = TEST_JOB;
 
-			SceneManager::GetInstance()->m_nCurScene = SCENEKIND::READY;
 			testing = true;
 			CS_TEST_CHANGE_SERVER_PACKET* p = new CS_TEST_CHANGE_SERVER_PACKET;
 			p->size = sizeof(CS_TEST_CHANGE_SERVER_PACKET);
@@ -567,6 +572,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 			if (SceneManager::GetInstance()->m_nCurScene != SCENEKIND::TITLE || SceneManager::GetInstance()->m_TitleInfo.Chat.bOnChat)
 				break;
+			NetworkManager::GetInstance()->SeedTestIngameAppearances();
+			NetworkManager::GetInstance()->playerScene = SCENEKIND::NONE;
 
 			for (int i = 0; i < NetworkManager::GetInstance()->readySceneInfo->selectSkills.size(); ++i) {
 				for (int j = 0; j < NetworkManager::GetInstance()->readySceneInfo->selectSkills[i].size(); ++j) {
@@ -589,7 +596,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 			//CTextureShader::GetInstance()->SetBossJob(BOSSJOB::PROGRAMMER);
 			SceneManager::GetInstance()->SetOrder(ORDER::BOSS);
-			SceneManager::GetInstance()->m_nCurScene = SCENEKIND::READY;
 			testing = true;
 			CS_TEST_CHANGE_SERVER_PACKET* p = new CS_TEST_CHANGE_SERVER_PACKET;
 			p->size = sizeof(CS_TEST_CHANGE_SERVER_PACKET);
@@ -643,12 +649,17 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	return(0);
 }
 
+void CGameFramework::ProfileMemorySnapshot(const char* phase)
+{
+	ClientMemoryProfileSnapshot(m_pd3dDevice, phase);
+}
+
 void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 {
 	if (nSceneKind != SceneManager::GetInstance()->m_nCurScene)
 	{
-		HANDLE hThread;
-		if (nSceneKind != SCENEKIND::TITLE)
+		HANDLE hThread = nullptr;
+		if (nSceneKind != SCENEKIND::TITLE && !ClientMemoryProfileActive())
 		{
 			hThread = CreateThread(NULL, 0, ThreadProc, (void*)this, 0, NULL);
 
@@ -789,24 +800,32 @@ void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 		}
 		case SCENEKIND::INGAME:
 		{
+			NetworkManager::GetInstance()->FreezeIngameAppearances();
+			const auto appearances = NetworkManager::GetInstance()->GetFrozenIngameAppearances();
+			std::optional<ModelPartSelection> selection;
+			if (appearances && !ClientMemoryProfileFullHeroParts()) selection.emplace(*appearances);
 			if (S_OK != m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL)) {
 				cout << "CommandList Reset Fail" << endl;
 			}
 
 			m_pScene = new CIngameScene();
+			ProfileMemorySnapshot("ingame_build_begin");
 			if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature);
+			ProfileMemorySnapshot("ingame_scene_objects");
 
-			CLoadedModelInfo* pClient = CGameObject::LoadGeometryAndAnimationFromFile(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/ModularModel.bin", NULL);
+			CLoadedModelInfo* pClient = CGameObject::LoadGeometryAndAnimationFromFile(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/ModularModel.bin", NULL, selection ? &*selection : nullptr);
 
 			m_pScene->BuildOtherClient(m_pd3dDevice, m_pd3dCommandList, pClient);
 
 			// 인게임 테스트 패킷
+			ProfileMemorySnapshot("hero_other_controllers");
 			if (testing) {
 				NetworkManager::GetInstance()->SendTestIngamePacket(SceneManager::GetInstance()->m_Name);
 			}
 
 			// 인게임 테스트 패킷 보다 먼저 수행해야 networkManager의 myClient값이 null이 아님
 			CGamePlayer* pPlayer = new CGamePlayer(m_pd3dDevice, m_pd3dCommandList, m_pd3dGraphicsRootSignature, pClient);
+			ProfileMemorySnapshot("local_hero_created");
 			if (pClient)
 				delete pClient;
 
@@ -830,6 +849,7 @@ void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 			m_pDissolveTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 			m_pDissolveTexture->LoadTextureFromDDSFile(m_pd3dDevice, m_pd3dCommandList, L"Model/Textures/dissolve.dds", RESOURCE_TEXTURE2D, 0);
 			m_pScene->CreateShaderResourceViews(m_pd3dDevice, m_pDissolveTexture, 0, 20);
+			ProfileMemorySnapshot("ingame_ui_dissolve_ready");
 
 			SceneManager::GetInstance()->m_fLoadingProgressPercent = SceneManager::GetInstance()->ToIngamePercent[LOADING_TEXT::SHADER];
 
@@ -849,11 +869,12 @@ void CGameFramework::ChangeScene(SCENEKIND nSceneKind)
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 		WaitForGpuComplete();
+		ProfileMemorySnapshot("scene_gpu_complete_uploads_retained");
 
 		if (m_pScene) m_pScene->ReleaseUploadBuffers();
 		if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
-		if (nSceneKind != SCENEKIND::TITLE)
+		if (nSceneKind != SCENEKIND::TITLE && !ClientMemoryProfileActive())
 		{
 			WaitForSingleObject(hThread, INFINITE);
 			CloseHandle(hThread);
@@ -1373,6 +1394,7 @@ void CGameFramework::BuildObjects()
 	CreateShaderVariables();
 
 	//Frustum Create
+	ProfileMemorySnapshot("startup_framework_ready");
 	Frustum::GetInstance()->Create();
 
 	m_pScene = new CTitleScene();
@@ -1428,6 +1450,7 @@ void CGameFramework::BuildObjects()
 	Frustum::GetInstance()->m_xmf4x4CameraProjection = m_pCamera->GetProjectionMatrix();
 	Frustum::GetInstance()->Update();
 
+	ProfileMemorySnapshot("startup_render_ui_ready");
 	SoundManager::GetInstance()->Initialize();
 	SoundManager::GetInstance()->Load_SoundFile("Sound/Archer/");
 	SoundManager::GetInstance()->Load_SoundFile("Sound/BGM/");
@@ -1441,6 +1464,7 @@ void CGameFramework::BuildObjects()
 	SoundManager::GetInstance()->Load_SoundFile("Sound/SwordMan/");
 	SoundManager::GetInstance()->Load_SoundFile("Sound/Wizzard/");
 	SoundManager::GetInstance()->Load_SoundFile("Sound/");
+	ProfileMemorySnapshot("startup_sounds_ready");
 
 	SoundManager::GetInstance()->Play_BGM(L"TitleBGM.ogg", 0.4f);
 
@@ -1666,6 +1690,10 @@ void CGameFramework::MoveToNextFrame()
 void CGameFramework::FrameAdvance()
 {
 	try {
+		// 로컬 직접 진입도 서버가 ID를 확정한 후 같은 프레임에서 READY→INGAME 경로를 탄다.
+		if (testing && SceneManager::GetInstance()->m_nCurScene == SCENEKIND::TITLE &&
+			NetworkManager::GetInstance()->playerScene == SCENEKIND::INGAME)
+			SceneManager::GetInstance()->m_nCurScene = SCENEKIND::READY;
 		// Checking for scene change
 		if (SceneManager::GetInstance()->m_nCurScene != NetworkManager::GetInstance()->playerScene && NetworkManager::GetInstance()->playerScene != SCENEKIND::NONE) {
 			if (SceneManager::GetInstance()->m_nCurScene == SCENEKIND::TITLE) {

@@ -11,6 +11,8 @@
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |
 | 현재 구성·연결 | [아키텍처](architecture/OVERVIEW.md) |
 | 메시 공유·자원 수명·검증 | [메시 공유 구현](architecture/MESH_SHARING.md), [구조도와 근거](diagrams/mesh-sharing/README.md) |
+| 확정 외형·영웅 선택 파츠 최적화 | [구현·검증·실측](portfolio/HERO_SELECTED_PARTS.md), [로딩 흐름도](diagrams/hero-selection/README.md) |
+| 포트폴리오·메모리 실측·맵/영웅 비용 | [포트폴리오 인덱스](portfolio/README.md), [최초 전후 비교](portfolio/CLIENT_MEMORY_OPTIMIZATION.md), [현재 비용 분해와 구간별 전후 비교](portfolio/CLIENT_MEMORY_BREAKDOWN.md) |
 | 코드 개선 후보 | [리팩토링 검토](REFACTORING_PLAN.md) |
 | 파일 정리 근거 | [정리 기록](development/CLEANUP.md) |
 | GitLab에서 로컬로 이전 | [이전 기록](MIGRATION.md) |

@@ -1,0 +1,950 @@
+{
+  "schemaVersion": 1,
+  "kind": "sanitized_measurement_evidence_and_payload_calculation",
+  "measuredAtKst": "2026-10-05T00:00:58.888251+09:00",
+  "configuration": "Release",
+  "runsPerMode": 3,
+  "samplingIntervalMs": 50,
+  "adapter": "NVIDIA GeForce RTX 4070 SUPER",
+  "sourceBaseCommit": "bf7b4cee2547f91f9f8131d2490022db93eff7fd",
+  "instrumentedWorkingTree": true,
+  "legacyReferenceCommit": "ed3428e9e092bbb7f83f8d13f0094aa04b7a3361",
+  "baselineKind": "reconstructed_pre_sharing_geometry_path_in_same_binary",
+  "scenario": "fresh_process_title_to_ingame_local_hero_ogre_boss",
+  "offline": true,
+  "frameBuffer": {
+    "width": 1920,
+    "height": 1080
+  },
+  "executableSha256": "4f7154697b383f91703906c6e4c6de1cdd124f11e038e947004f5116392f5a75",
+  "measurementSourceSha256": {
+    "Client/WarOfDimension/ClientMemoryProfile.cpp": "2a435391f6c9764382fb371a2a8fba501b5e4c282a3db0da06a76f4daf30ef97",
+    "Client/WarOfDimension/ClientMemoryProfile.h": "4c41c1f1fa6604367413c6dc6bc8b473a974fbf60988865f802288822189b27d",
+    "Client/WarOfDimension/GameFramework.cpp": "16ebb163ff2658e8183f59ddd428e0428b69c4acbc8beeb0eba3e8c72efbd5bd",
+    "Client/WarOfDimension/GameFramework.h": "7cf779b2e4edd44eb2ac2abe3fdf765fb4509b30285068d7d0ae95a08ea3f74b",
+    "Client/WarOfDimension/NetworkManager.cpp": "65e61658b07c49bf3fd51adf82bd3f5243f65b960f6ef67f88fd91190ae79874",
+    "Client/WarOfDimension/Object.cpp": "3da9917abd9940bffad541d0d59779bc159486cf9b11b5d4125f760a5c2656d9",
+    "Client/WarOfDimension/WarOfDimension.cpp": "118262235b912aae7758491fa2229f9a1d1ac8cdd6e3cd500dd389865df83fd1",
+    "Client/WarOfDimension/WarOfDimension.vcxproj": "db139f98701ff1d1898266719b322c246e2e697b19e64adbcd0c919e39c14fa4",
+    "Client/WarOfDimension/WarOfDimension.vcxproj.filters": "998d9eafab7826260f6cca916a2ac096e55881025ad554d1511b0b1e8c8fa77b",
+    "scripts/Measure-ClientMemory.ps1": "e663bc0a79e35e3904a5733817eb7ee842c192223e757acfd9704018eaaf8b2d",
+    "scripts/Measure-ClientAssets.py": "aacc6b42bc4b5b0c39416a82e23ec1d39c1dc06694c41075b8da5ad5d488307e"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "legacy",
+      "entry": {
+        "privateBytes": 7289876480,
+        "workingSetBytes": 3006427136,
+        "peakWorkingSetBytes": 3299160064,
+        "dxgiLocalUsageBytes": 4267233280,
+        "dxgiNonLocalUsageBytes": 894836736
+      },
+      "sampledPeakPrivateBytes": 7582109696,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 588898304,
+          "workingSetBytes": 521584640,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 74674176
+        },
+        {
+          "privateBytes": 587628544,
+          "workingSetBytes": 520359936,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 73625600
+        }
+      ]
+    },
+    {
+      "run": 1,
+      "mode": "shared",
+      "entry": {
+        "privateBytes": 6045458432,
+        "workingSetBytes": 2206679040,
+        "peakWorkingSetBytes": 2231730176,
+        "dxgiLocalUsageBytes": 3840811008,
+        "dxgiNonLocalUsageBytes": 855203840
+      },
+      "sampledPeakPrivateBytes": 6045458432,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 586444800,
+          "workingSetBytes": 521281536,
+          "dxgiLocalUsageBytes": 61493248,
+          "dxgiNonLocalUsageBytes": 72691712
+        },
+        {
+          "privateBytes": 447954944,
+          "workingSetBytes": 417918976,
+          "dxgiLocalUsageBytes": 25493504,
+          "dxgiNonLocalUsageBytes": 36691968
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "mode": "shared",
+      "entry": {
+        "privateBytes": 6048976896,
+        "workingSetBytes": 2207375360,
+        "peakWorkingSetBytes": 2232033280,
+        "dxgiLocalUsageBytes": 3840811008,
+        "dxgiNonLocalUsageBytes": 855597056
+      },
+      "sampledPeakPrivateBytes": 6048976896,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 587833344,
+          "workingSetBytes": 521375744,
+          "dxgiLocalUsageBytes": 61493248,
+          "dxgiNonLocalUsageBytes": 72691712
+        },
+        {
+          "privateBytes": 447250432,
+          "workingSetBytes": 418418688,
+          "dxgiLocalUsageBytes": 25493504,
+          "dxgiNonLocalUsageBytes": 36691968
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "mode": "legacy",
+      "entry": {
+        "privateBytes": 7289212928,
+        "workingSetBytes": 3005964288,
+        "peakWorkingSetBytes": 3298693120,
+        "dxgiLocalUsageBytes": 4267233280,
+        "dxgiNonLocalUsageBytes": 894836736
+      },
+      "sampledPeakPrivateBytes": 7557853184,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 586674176,
+          "workingSetBytes": 520974336,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 74674176
+        },
+        {
+          "privateBytes": 588308480,
+          "workingSetBytes": 520736768,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 73625600
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "mode": "legacy",
+      "entry": {
+        "privateBytes": 7287042048,
+        "workingSetBytes": 3006726144,
+        "peakWorkingSetBytes": 3299618816,
+        "dxgiLocalUsageBytes": 4267233280,
+        "dxgiNonLocalUsageBytes": 894836736
+      },
+      "sampledPeakPrivateBytes": 7555682304,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 586694656,
+          "workingSetBytes": 520953856,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 74674176
+        },
+        {
+          "privateBytes": 587948032,
+          "workingSetBytes": 520552448,
+          "dxgiLocalUsageBytes": 62427136,
+          "dxgiNonLocalUsageBytes": 73625600
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "mode": "shared",
+      "entry": {
+        "privateBytes": 6048514048,
+        "workingSetBytes": 2207531008,
+        "peakWorkingSetBytes": 2232168448,
+        "dxgiLocalUsageBytes": 3840811008,
+        "dxgiNonLocalUsageBytes": 855597056
+      },
+      "sampledPeakPrivateBytes": 6048514048,
+      "heroModelLoadDeltas": [
+        {
+          "privateBytes": 588201984,
+          "workingSetBytes": 522031104,
+          "dxgiLocalUsageBytes": 61493248,
+          "dxgiNonLocalUsageBytes": 72691712
+        },
+        {
+          "privateBytes": 445681664,
+          "workingSetBytes": 417501184,
+          "dxgiLocalUsageBytes": 25493504,
+          "dxgiNonLocalUsageBytes": 36691968
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "privateBytes": {
+      "legacy": {
+        "medianBytes": 7289212928,
+        "minBytes": 7287042048,
+        "maxBytes": 7289876480
+      },
+      "shared": {
+        "medianBytes": 6048514048,
+        "minBytes": 6045458432,
+        "maxBytes": 6048976896
+      },
+      "savedBytes": 1240698880,
+      "savedPercent": 17.02102671790685
+    },
+    "workingSetBytes": {
+      "legacy": {
+        "medianBytes": 3006427136,
+        "minBytes": 3005964288,
+        "maxBytes": 3006726144
+      },
+      "shared": {
+        "medianBytes": 2207375360,
+        "minBytes": 2206679040,
+        "maxBytes": 2207531008
+      },
+      "savedBytes": 799051776,
+      "savedPercent": 26.578118805271455
+    },
+    "peakWorkingSetBytes": {
+      "legacy": {
+        "medianBytes": 3299160064,
+        "minBytes": 3298693120,
+        "maxBytes": 3299618816
+      },
+      "shared": {
+        "medianBytes": 2232033280,
+        "minBytes": 2231730176,
+        "maxBytes": 2232168448
+      },
+      "savedBytes": 1067126784,
+      "savedPercent": 32.345408022009806
+    },
+    "dxgiLocalUsageBytes": {
+      "legacy": {
+        "medianBytes": 4267233280,
+        "minBytes": 4267233280,
+        "maxBytes": 4267233280
+      },
+      "shared": {
+        "medianBytes": 3840811008,
+        "minBytes": 3840811008,
+        "maxBytes": 3840811008
+      },
+      "savedBytes": 426422272,
+      "savedPercent": 9.992944936912378
+    },
+    "dxgiNonLocalUsageBytes": {
+      "legacy": {
+        "medianBytes": 894836736,
+        "minBytes": 894836736,
+        "maxBytes": 894836736
+      },
+      "shared": {
+        "medianBytes": 855597056,
+        "minBytes": 855203840,
+        "maxBytes": 855597056
+      },
+      "savedBytes": 39239680,
+      "savedPercent": 4.385121712303058
+    },
+    "sampledPeakPrivateBytes": {
+      "legacy": {
+        "medianBytes": 7557853184,
+        "minBytes": 7555682304,
+        "maxBytes": 7582109696
+      },
+      "shared": {
+        "medianBytes": 6048514048,
+        "minBytes": 6045458432,
+        "maxBytes": 6048976896
+      },
+      "savedBytes": 1509339136,
+      "savedPercent": 19.970474409257854
+    }
+  },
+  "assets": {
+    "schemaVersion": 1,
+    "kind": "calculated_model_payload_not_process_memory",
+    "bufferAlignmentBytes": 65536,
+    "models": [
+      {
+        "path": "Model/Plane1.bin",
+        "assetSha256": "1ee336e608a47cb38df63a04916460bb7121d535713d1386db492550b54ad32c",
+        "fileBytes": 332967823,
+        "frames": 5594,
+        "meshRecords": 5185,
+        "uniqueGeometry": 78,
+        "legacyGeometry": {
+          "cpuArrayBytes": 328770552,
+          "gpuBufferPayloadBytes": 328770552,
+          "gpuBufferAllocationBytes": 2151874560,
+          "gpuBufferCount": 31655
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 9233172,
+          "gpuBufferPayloadBytes": 9233172,
+          "gpuBufferAllocationBytes": 36700160,
+          "gpuBufferCount": 489
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {
+          "colorpalette_standard": 1,
+          "wallpaint_white": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/FreeLichPBR.bin",
+        "assetSha256": "6428beb87b6a78bd10ffbef5d6a02cd70591db5ded571e2171a79b81e63f7d2f",
+        "fileBytes": 618220,
+        "frames": 24,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 33376,
+          "gpuBufferPayloadBytes": 33376,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 33376,
+          "gpuBufferPayloadBytes": 33376,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 17504,
+          "boneNameAndCacheBytes": 1760,
+          "gpuBufferPayloadBytes": 16096,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 8,
+          "animatedBones": 24,
+          "keys": 360,
+          "matrixBytes": 552960,
+          "timeAndRowPointerBytes": 4320
+        },
+        "texturesCreated": {
+          "Albedo": 1,
+          "MS": 1,
+          "Normal": 1,
+          "Emission": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Unique/Red.bin",
+        "assetSha256": "272ef2406a80657264b20b8e628f0f28f5943925f8d3b87a7c09bb17efe094de",
+        "fileBytes": 4983223,
+        "frames": 121,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 243736,
+          "gpuBufferPayloadBytes": 243736,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 243736,
+          "gpuBufferPayloadBytes": 243736,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 113760,
+          "boneNameAndCacheBytes": 9520,
+          "gpuBufferPayloadBytes": 106144,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 10,
+          "animatedBones": 121,
+          "keys": 592,
+          "matrixBytes": 4584448,
+          "timeAndRowPointerBytes": 7104
+        },
+        "texturesCreated": {
+          "RedHP": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Rare/Green.bin",
+        "assetSha256": "b1e578da36cc56b98f53f54c9c7cba97abc7575a81f244e8f6a42a2c61e4ba16",
+        "fileBytes": 2023348,
+        "frames": 63,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 198352,
+          "gpuBufferPayloadBytes": 198352,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 198352,
+          "gpuBufferPayloadBytes": 198352,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 90496,
+          "boneNameAndCacheBytes": 4560,
+          "gpuBufferPayloadBytes": 86848,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 10,
+          "animatedBones": 63,
+          "keys": 424,
+          "matrixBytes": 1709568,
+          "timeAndRowPointerBytes": 5088
+        },
+        "texturesCreated": {
+          "GreenHP": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Rare/PBR_Golem.bin",
+        "assetSha256": "85a90639b232353d842af7617a205d2c60b73c8adb1ed658a80b61eab9089fd3",
+        "fileBytes": 493307,
+        "frames": 22,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 43328,
+          "gpuBufferPayloadBytes": 43328,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 43328,
+          "gpuBufferPayloadBytes": 43328,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 20800,
+          "boneNameAndCacheBytes": 1600,
+          "gpuBufferPayloadBytes": 19520,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 6,
+          "animatedBones": 22,
+          "keys": 296,
+          "matrixBytes": 416768,
+          "timeAndRowPointerBytes": 3552
+        },
+        "texturesCreated": {
+          "AlbedoGolem": 1,
+          "MRGolem": 1,
+          "NormalGolem": 1,
+          "EmissionGolem": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Normal/Bear_4.bin",
+        "assetSha256": "bc56e476ebbade6c11f1ccacbe11b8ff8fbf97864b0b022cea4ca15c611e0ecc",
+        "fileBytes": 7000173,
+        "frames": 66,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 526216,
+          "gpuBufferPayloadBytes": 526216,
+          "gpuBufferAllocationBytes": 786432,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 526216,
+          "gpuBufferPayloadBytes": 526216,
+          "gpuBufferAllocationBytes": 786432,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 224768,
+          "boneNameAndCacheBytes": 4640,
+          "gpuBufferPayloadBytes": 221056,
+          "gpuBufferAllocationBytes": 262144,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 16,
+          "animatedBones": 66,
+          "keys": 1468,
+          "matrixBytes": 6200832,
+          "timeAndRowPointerBytes": 17616
+        },
+        "texturesCreated": {
+          "Stylized_Bear_Albedo4": 1,
+          "Stylized_Bear_Normal": 1,
+          "Stylized_Bear_Emissive": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Normal/minotaur1.bin",
+        "assetSha256": "2c4fc04d6e8821dd59c2c695e52b7665fb1a8334a499b45edb19a975d6946af7",
+        "fileBytes": 3884812,
+        "frames": 83,
+        "meshRecords": 17,
+        "uniqueGeometry": 17,
+        "legacyGeometry": {
+          "cpuArrayBytes": 785856,
+          "gpuBufferPayloadBytes": 785856,
+          "gpuBufferAllocationBytes": 6750208,
+          "gpuBufferCount": 102
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 785856,
+          "gpuBufferPayloadBytes": 785856,
+          "gpuBufferAllocationBytes": 6750208,
+          "gpuBufferCount": 102
+        },
+        "skin": {
+          "count": 17,
+          "cpuArrayBytes": 396352,
+          "boneNameAndCacheBytes": 76160,
+          "gpuBufferPayloadBytes": 335424,
+          "gpuBufferAllocationBytes": 2359296,
+          "bindPosePayloadBytes": 278528,
+          "bindPoseAllocationBytes": 1114112
+        },
+        "animation": {
+          "sets": 13,
+          "animatedBones": 83,
+          "keys": 499,
+          "matrixBytes": 2650688,
+          "timeAndRowPointerBytes": 5988
+        },
+        "texturesCreated": {
+          "t_minotaur1_axe_AlbedoTransparency": 1,
+          "t_minotaur1_axe_MetallicSmoothness": 1,
+          "t_minotaur1_axe_Normal": 1,
+          "t_minotaur1_AlbedoTransparency": 1,
+          "t_minotaur1_MetallicSmoothness": 1,
+          "t_minotaur1_Normal": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Normal/ChestMonsterPBR.bin",
+        "assetSha256": "f6d6f73d901e992b772cc00787252c1d5febe5d1d32895f1cd753483279dc9db",
+        "fileBytes": 640834,
+        "frames": 24,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 120908,
+          "gpuBufferPayloadBytes": 120908,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 120908,
+          "gpuBufferPayloadBytes": 120908,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 58272,
+          "boneNameAndCacheBytes": 1760,
+          "gpuBufferPayloadBytes": 56864,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 11,
+          "animatedBones": 24,
+          "keys": 292,
+          "matrixBytes": 448512,
+          "timeAndRowPointerBytes": 3504
+        },
+        "texturesCreated": {
+          "AlbedoPBR": 1,
+          "MSPBR": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Monsters/Normal/BeholderPBR.bin",
+        "assetSha256": "9a94164b6e6ac91fb3e8b6e97ea112a8a953fc4602370f8faa1118a8244c16a1",
+        "fileBytes": 1157541,
+        "frames": 48,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 109692,
+          "gpuBufferPayloadBytes": 109692,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 109692,
+          "gpuBufferPayloadBytes": 109692,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 51808,
+          "boneNameAndCacheBytes": 3680,
+          "gpuBufferPayloadBytes": 48864,
+          "gpuBufferAllocationBytes": 131072,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 13,
+          "animatedBones": 48,
+          "keys": 318,
+          "matrixBytes": 976896,
+          "timeAndRowPointerBytes": 3816
+        },
+        "texturesCreated": {
+          "AlbedoPBR": 1,
+          "MSPBR": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Boss_Ogre.bin",
+        "assetSha256": "81e2383cc071fbe5aeb733eb4baee998147b970ad49cb1e76b8a28fc6a833990",
+        "fileBytes": 5639361,
+        "frames": 36,
+        "meshRecords": 2,
+        "uniqueGeometry": 2,
+        "legacyGeometry": {
+          "cpuArrayBytes": 1166304,
+          "gpuBufferPayloadBytes": 1166304,
+          "gpuBufferAllocationBytes": 1638400,
+          "gpuBufferCount": 12
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 1166304,
+          "gpuBufferPayloadBytes": 1166304,
+          "gpuBufferAllocationBytes": 1638400,
+          "gpuBufferCount": 12
+        },
+        "skin": {
+          "count": 1,
+          "cpuArrayBytes": 415936,
+          "boneNameAndCacheBytes": 2000,
+          "gpuBufferPayloadBytes": 414336,
+          "gpuBufferAllocationBytes": 524288,
+          "bindPosePayloadBytes": 16384,
+          "bindPoseAllocationBytes": 65536
+        },
+        "animation": {
+          "sets": 14,
+          "animatedBones": 36,
+          "keys": 1740,
+          "matrixBytes": 4008960,
+          "timeAndRowPointerBytes": 20880
+        },
+        "texturesCreated": {
+          "monster_BaseColor": 1,
+          "monster_Metallic": 1,
+          "monster_Normal": 1,
+          "eye": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Cube.bin",
+        "assetSha256": "6eda04eea70a33b777b24d9b2c8bc8cc1801f60595b4d329df2c23d55039c06e",
+        "fileBytes": 2454,
+        "frames": 1,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 1680,
+          "gpuBufferPayloadBytes": 1680,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 1680,
+          "gpuBufferPayloadBytes": 1680,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {},
+        "loadCount": 2
+      },
+      {
+        "path": "Model/ArrowModel.bin",
+        "assetSha256": "01ba3d5702b7daf6051aee735a8eebd2d09b67fc176c3f525fe4daa646d09a70",
+        "fileBytes": 4123,
+        "frames": 1,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 3336,
+          "gpuBufferPayloadBytes": 3336,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 3336,
+          "gpuBufferPayloadBytes": 3336,
+          "gpuBufferAllocationBytes": 393216,
+          "gpuBufferCount": 6
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {
+          "colorpalette_standard": 1
+        },
+        "loadCount": 1
+      },
+      {
+        "path": "Model/SM_rock_001.bin",
+        "assetSha256": "4c9a10f2fec8eec048fe2784aba989b6438f721567c11e2790bd1c78a4c9e29f",
+        "fileBytes": 16561,
+        "frames": 1,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 15792,
+          "gpuBufferPayloadBytes": 15792,
+          "gpuBufferAllocationBytes": 327680,
+          "gpuBufferCount": 5
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 15792,
+          "gpuBufferPayloadBytes": 15792,
+          "gpuBufferAllocationBytes": 327680,
+          "gpuBufferCount": 5
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {},
+        "loadCount": 1
+      },
+      {
+        "path": "Model/Helloworld.bin",
+        "assetSha256": "39d6162d64c8ef3f67a93313f3dca19af7f42711ddc9f223b11bd99a6693c1d4",
+        "fileBytes": 42941,
+        "frames": 1,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 42176,
+          "gpuBufferPayloadBytes": 42176,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 42176,
+          "gpuBufferPayloadBytes": 42176,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {},
+        "loadCount": 1
+      },
+      {
+        "path": "Model/ProtectedArea.bin",
+        "assetSha256": "0fbad1c84e64a5e4c2ca1dddab94c86a922e321b520760045824a710ced7273d",
+        "fileBytes": 42944,
+        "frames": 1,
+        "meshRecords": 1,
+        "uniqueGeometry": 1,
+        "legacyGeometry": {
+          "cpuArrayBytes": 42176,
+          "gpuBufferPayloadBytes": 42176,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 42176,
+          "gpuBufferPayloadBytes": 42176,
+          "gpuBufferAllocationBytes": 458752,
+          "gpuBufferCount": 7
+        },
+        "skin": {
+          "count": 0,
+          "cpuArrayBytes": 0,
+          "boneNameAndCacheBytes": 0,
+          "gpuBufferPayloadBytes": 0,
+          "gpuBufferAllocationBytes": 0,
+          "bindPosePayloadBytes": 0,
+          "bindPoseAllocationBytes": 0
+        },
+        "animation": {
+          "sets": 0,
+          "animatedBones": 0,
+          "keys": 0,
+          "matrixBytes": 0,
+          "timeAndRowPointerBytes": 0
+        },
+        "texturesCreated": {},
+        "loadCount": 1
+      },
+      {
+        "path": "Model/ModularModel.bin",
+        "assetSha256": "461b447e9c2337e35ccd1fe48ea8786d204a0f399e830b4cb916cb527edd076c",
+        "fileBytes": 396827199,
+        "frames": 788,
+        "meshRecords": 724,
+        "uniqueGeometry": 698,
+        "legacyGeometry": {
+          "cpuArrayBytes": 31586316,
+          "gpuBufferPayloadBytes": 27833356,
+          "gpuBufferAllocationBytes": 296615936,
+          "gpuBufferCount": 4526
+        },
+        "sharedGeometry": {
+          "cpuArrayBytes": 30904588,
+          "gpuBufferPayloadBytes": 27189420,
+          "gpuBufferAllocationBytes": 285868032,
+          "gpuBufferCount": 4362
+        },
+        "skin": {
+          "count": 720,
+          "cpuArrayBytes": 13958912,
+          "boneNameAndCacheBytes": 281040,
+          "gpuBufferPayloadBytes": 13734080,
+          "gpuBufferAllocationBytes": 94371840,
+          "bindPosePayloadBytes": 11796480,
+          "bindPoseAllocationBytes": 47185920
+        },
+        "animation": {
+          "sets": 61,
+          "animatedBones": 788,
+          "keys": 6947,
+          "matrixBytes": 350351104,
+          "timeAndRowPointerBytes": 83364
+        },
+        "texturesCreated": {
+          "PolygonFantasyHero_Texture_01_A": 1,
+          "colorpalette_standard": 1
+        },
+        "loadCount": 2
+      }
+    ],
+    "retainedLoadSetGeometry": {
+      "legacy": {
+        "cpuArrayBytes": 395277792,
+        "gpuBufferPayloadBytes": 387771872,
+        "gpuBufferAllocationBytes": 2759196672,
+        "gpuBufferCount": 40902
+      },
+      "shared": {
+        "cpuArrayBytes": 43396624,
+        "gpuBufferPayloadBytes": 39681456,
+        "gpuBufferAllocationBytes": 335020032,
+        "gpuBufferCount": 5021
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@
 //#include "Shader.h"
 #include "CSkillModel.h"
 #include "SoundManager.h"
+#include "ClientMemoryProfile.h"
 #include "Util.h"
 
 namespace PARTICLE_SKILLSETTING
@@ -1858,6 +1859,7 @@ void CIngameScene::BuildDefaultLightsAndMaterials()
 
 void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	auto profile = [pd3dDevice](const char* phase) { ClientMemoryProfileSnapshot(pd3dDevice, phase); };
 #ifdef Test
 	cout << "Ingame Initialize Start" << endl;
 #endif // TEST
@@ -1870,8 +1872,10 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	BuildDefaultLightsAndMaterials();	
 
+	profile("scene_setup_ready");
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-#ifdef MAP_BUILDING	
+	profile("skybox_ready");
+#ifdef MAP_BUILDING
 	m_nHierarchicalGameObjects = 1;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
@@ -1894,6 +1898,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 	///*
 #endif
+	profile("map_ready");
 	m_minions = new CGameObject * [MAX_MINION];
 	CLoadedModelInfo* pMinion = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/FreeLichPBR.bin", NULL);
 	for (int i = 0; i < MAX_MINION; ++i) {
@@ -1906,6 +1911,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	
 	if (pMinion) delete pMinion;
 
+	profile("minions_ready");
 	m_monsters = new CGameObject * [MONSTER_NUM];
 	CLoadedModelInfo* pUnique = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monsters/Unique/Red.bin", NULL);
 	CLoadedModelInfo* pRare1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monsters/Rare/Green.bin", NULL);
@@ -1948,6 +1954,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if (pNormal3) delete pNormal3;
 	if (pNormal4) delete pNormal4;
 
+	profile("monsters_ready");
 	m_ppOtherClient = new CGameObject * [INGAME_PLAYER];
 
 	CLoadedModelInfo* pBoss = nullptr;
@@ -1961,6 +1968,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	if (pBoss) delete pBoss;
 
+	profile("boss_ready");
 	m_towerAttacks = new CGameObject * [PATH_NUM];
 	CLoadedModelInfo* pCube = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cube.bin", NULL);
 	for (int i = 0; i < PATH_NUM; ++i) {
@@ -1981,6 +1989,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if(CSkillModel::pProtectedAreaModel == nullptr)
 		CSkillModel::pProtectedAreaModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/ProtectedArea.bin", NULL);
 
+	profile("skill_models_ready");
 	CBlendSkillShader* pSkillShader = new CBlendSkillShader();
 	pSkillShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pSkillShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1991,6 +2000,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_BillboardShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 
 
+	profile("billboard_ready");
 	//Skill Objects
 	for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
 		m_skillObjects[SKILL_TYPE::WIZARD_ATTACK].push_back(new WizardAttack(pd3dDevice, pd3dCommandList, CSkillModel::pWizardModel));
@@ -2022,7 +2032,8 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_skillObjects[SKILL_TYPE::ARCHER_MULTIPLE_SHOT].push_back(new MultipleShot(pd3dDevice, pd3dCommandList, CSkillModel::pArcherModel));
 	}
 
-	//Create Particle Shared Texture 
+	profile("skill_objects_ready");
+	//Create Particle Shared Texture
 	m_iParticleTextureNum = PARTICLE_ADDRESS::ADDRESS_COUNT;
 	m_pParticleTexture = new CTexture* [m_iParticleTextureNum];
 
@@ -2033,6 +2044,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		CreateShaderResourceViews(pd3dDevice, m_pParticleTexture[i], 0, 21);
 	}
 
+	profile("particle_textures_ready");
 	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
 	for (int i = 0; i < 1024; i++) { pxmf4RandomValues[i].x = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].y = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].z = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].w = float((Util::GenerateRandomInt(0, RAND_MAX) % 10000) - 5000) / 5000.0f; }
 
@@ -2052,6 +2064,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 3);
 
 
+	profile("particle_shared_setup_ready");
 	for (int j = 0; j < MAX_SKILL_OBJECT; ++j)
 	{
 		for (int i = 0; i < static_cast<int>(SKILL_TYPE::TYPE_COUNT); ++i)
@@ -2072,6 +2085,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	}
 	
 
+	profile("particle_skill_pool_ready");
 	ParticleInfo* pInfo;
 	CParticleObject* pObj;
 	int Type = PARTICLE_TYPE::NONE;
@@ -2102,6 +2116,7 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	}
 
 
+	profile("particle_selected_skills_ready");
 	//jump particle
 	for (int i = 0; i < 6; ++i)
 	{
@@ -2152,7 +2167,9 @@ void CIngameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 
 
+	profile("particle_environment_ready");
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	profile("scene_constants_ready");
 
 #ifdef Test
 	cout << "Ingame Initialize Finish" << endl;
@@ -2228,7 +2245,8 @@ void CIngameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 				reinterpret_cast<COtherClientPlayer*>(m_ppOtherClient[i])->Update(i);
 				if (i != 3) {
-					reinterpret_cast<CPlayerObject*>(m_ppOtherClient[i])->Customize(NetworkManager::GetInstance()->m_ArrayInGameClientsCustom[i]);
+					const auto appearance = NetworkManager::GetInstance()->GetFrozenIngameAppearance(i);
+					reinterpret_cast<CPlayerObject*>(m_ppOtherClient[i])->Customize(appearance ? *appearance : NetworkManager::GetInstance()->m_ArrayInGameClientsCustom[i]);
 					reinterpret_cast<CPlayerObject*>(m_ppOtherClient[i])->SetWeapon(static_cast<JOB>(NetworkManager::GetInstance()->readySceneInfo->playerJobs[i]));
 				}
 				m_ppOtherClient[i]->Render(pd3dCommandList, pCamera, m_ppOtherClient[i]->iMyShareNum);

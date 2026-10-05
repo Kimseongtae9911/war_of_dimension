@@ -22,6 +22,7 @@ public:
     }
 
     template<typename Func>
+    requires std::is_invocable_v<Func&>
     void PushJob(Func&& f) {
         m_jobQueue.push(std::make_shared<Job<Func>>(std::forward<Func>(f)));
     }

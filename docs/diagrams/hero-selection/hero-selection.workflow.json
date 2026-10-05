@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": { "title": "인게임 영웅의 선택 파츠 로딩", "quality_profile": "showcase" },
+  "lanes": [
+    { "id": "match", "label": "매치 정보" },
+    { "id": "loader", "label": "모델 로더" },
+    { "id": "runtime", "label": "캐릭터 자원" }
+  ],
+  "mainPath": ["appearance", "snapshot", "selection", "geometry", "animation", "hero"],
+  "nodes": [
+    { "id": "appearance", "lane": "match", "col": 0, "type": "messagebus", "label": "확정 외형 수신", "sublabel": "ModelCustomize", "width": 168 },
+    { "id": "snapshot", "lane": "match", "col": 1, "type": "backend", "label": "진입 스냅샷", "sublabel": "수신 완료 후 고정", "width": 168 },
+    { "id": "selection", "lane": "loader", "col": 2, "type": "backend", "label": "파츠 선택 필터", "sublabel": "성별 · 파츠 번호", "width": 168 },
+    { "id": "geometry", "lane": "loader", "col": 3, "type": "database", "label": "필요 자원 생성", "sublabel": "메시 · 스킨 · 재질", "width": 168 },
+    { "id": "animation", "lane": "runtime", "col": 4, "type": "backend", "label": "필요 행렬 보관", "sublabel": "선택 파츠 · 본 · 부모", "width": 168 },
+    { "id": "hero", "lane": "runtime", "col": 5, "type": "frontend", "label": "인게임 영웅", "sublabel": "기존 직업 · 스킬 유지", "width": 168 },
+    { "id": "fallback", "lane": "loader", "col": 1, "type": "backend", "label": "전체 모델 로딩", "sublabel": "로비 · 수신 미완료", "width": 168 }
+  ],
+  "edges": [
+    { "id": "freeze", "from": "appearance", "to": "snapshot" },
+    { "id": "select", "from": "snapshot", "to": "selection", "label": "확정 정보" },
+    { "id": "create", "from": "selection", "to": "geometry" },
+    { "id": "compact", "from": "geometry", "to": "animation", "label": "계층 유지" },
+    { "id": "attach", "from": "animation", "to": "hero" },
+    { "id": "incomplete", "from": "snapshot", "to": "fallback", "label": "미완료", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "소유권", "items": ["base geometry 공유를 유지한다", "본과 컨트롤러의 기존 수명을 지킨다"] },
+    { "dot": "amber", "title": "선택 범위", "items": ["타인 모델은 참가 영웅의 파츠 합집합", "로컬 모델은 자신의 선택 파츠"] },
+    { "dot": "rose", "title": "보존과 검증", "items": ["전체 계층 · 61개 clip · keyframe 유지", "남녀 외형 · 본 연결 · 행렬 내용 검증"] }
+  ]
+}

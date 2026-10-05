@@ -13,7 +13,7 @@ namespace wod_server {
 
 		ZONE_STATE Update();
 
-		void AddJob(IJob& job) { m_jobQueue.PushJob(job); }
+		void AddJob(std::shared_ptr<IJob> job) { m_jobQueue.PushJob(std::move(job)); }
 
 	private:
 		std::vector<CClient*> m_clients; // Zone에 속한 클라이언트들

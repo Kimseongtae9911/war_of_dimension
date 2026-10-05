@@ -8,6 +8,7 @@
 #include "NetworkManager.h"
 #include "OverlapEx.h"
 #include "MeshSharingTests.h"
+#include "ClientMemoryProfile.h"
 #include <locale>
 
 #define MAX_LOADSTRING 100
@@ -31,6 +32,31 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	int argumentCount = 0;
 	auto arguments = CommandLineToArgvW(GetCommandLineW(), &argumentCount);
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--test-hero-selection") == 0)
+	{
+		if (argumentCount != 3) { LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2];
+		LocalFree(arguments);
+		return RunHeroSelectionAudit(gGameFramework, report.c_str());
+	}
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--profile-hero-memory") == 0)
+	{
+		if (argumentCount != 4 || (wcscmp(arguments[3], L"full") != 0 && wcscmp(arguments[3], L"selected") != 0))
+		{ LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2];
+		const bool full = wcscmp(arguments[3], L"full") == 0;
+		LocalFree(arguments);
+		return RunClientMemoryProfile(gGameFramework, report.c_str(), false, true, full);
+	}
+	if (arguments && argumentCount >= 2 && wcscmp(arguments[1], L"--profile-client-memory") == 0)
+	{
+		if (argumentCount != 4 || (wcscmp(arguments[3], L"legacy") != 0 && wcscmp(arguments[3], L"shared") != 0))
+		{ LocalFree(arguments); return 2; }
+		const std::wstring report = arguments[2];
+		const bool legacy = wcscmp(arguments[3], L"legacy") == 0;
+		LocalFree(arguments);
+		return RunClientMemoryProfile(gGameFramework, report.c_str(), legacy);
+	}
 	if (arguments && argumentCount >= 2 &&
 		(wcscmp(arguments[1], L"--test-mesh-sharing") == 0 || wcscmp(arguments[1], L"--audit-mesh-assets") == 0))
 	{

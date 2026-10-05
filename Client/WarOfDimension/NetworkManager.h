@@ -22,6 +22,8 @@
 #include "RockThrow.h"
 #include "DimensionCrush.h"
 #include "MultipleShot.h"
+#include <mutex>
+#include <optional>
 
 class OverlapEx;
 class CGameObject;
@@ -163,6 +165,7 @@ struct SkillObjectInfo
 class NetworkManager
 {
 	SINGLETON(NetworkManager);
+	friend struct HeroSelectionTestAccess;
 
 public:
 	void Initialize(string ip);
@@ -220,6 +223,11 @@ public:
 	int GetTokenNum() const { return m_tokenNum; }
 
 	void TestReady(bool type = false);
+	void StoreIngameAppearance(int slot, const ModelCustomize& appearance);
+	void FreezeIngameAppearances();
+	std::optional<std::array<ModelCustomize, 3>> GetFrozenIngameAppearances() const;
+	std::optional<ModelCustomize> GetFrozenIngameAppearance(int slot) const;
+	void SeedTestIngameAppearances();
 
 public:
 	SCENEKIND playerScene = SCENEKIND::NONE;
@@ -328,6 +336,9 @@ private:
 
 private:
 	SOCKET m_socket;
+	mutable std::mutex m_appearanceMutex;
+	std::array<bool, 3> m_appearanceReceived{};
+	std::optional<std::array<ModelCustomize, 3>> m_frozenAppearances;
 	HANDLE m_iocp;
 	OverlapEx* m_over;
 	int m_remainData = 0;

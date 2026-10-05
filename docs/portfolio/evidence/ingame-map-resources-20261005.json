@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "static_map_inventory_and_existing_loading_phase_delta",
+  "asset": {
+    "path": "C:\\GitFolder\\NewWod\\Client\\WarOfDimension\\Model\\Plane1.bin",
+    "assetSha256": "1ee336e608a47cb38df63a04916460bb7121d535713d1386db492550b54ad32c",
+    "fileBytes": 332967823,
+    "frames": 5594,
+    "meshRecords": 5185,
+    "uniqueGeometry": 78,
+    "legacyGeometry": {
+      "cpuArrayBytes": 328770552,
+      "gpuBufferPayloadBytes": 328770552,
+      "gpuBufferAllocationBytes": 2151874560,
+      "gpuBufferCount": 31655
+    },
+    "sharedGeometry": {
+      "cpuArrayBytes": 9233172,
+      "gpuBufferPayloadBytes": 9233172,
+      "gpuBufferAllocationBytes": 36700160,
+      "gpuBufferCount": 489
+    },
+    "skin": {
+      "count": 0,
+      "cpuArrayBytes": 0,
+      "boneNameAndCacheBytes": 0,
+      "gpuBufferPayloadBytes": 0,
+      "gpuBufferAllocationBytes": 0,
+      "bindPosePayloadBytes": 0,
+      "bindPoseAllocationBytes": 0
+    },
+    "animation": {
+      "sets": 0,
+      "animatedBones": 0,
+      "keys": 0,
+      "matrixBytes": 0,
+      "timeAndRowPointerBytes": 0
+    },
+    "texturesCreated": {
+      "colorpalette_standard": 1,
+      "wallpaint_white": 1
+    }
+  },
+  "framePrefixCounts": {
+    "other": 71,
+    "grassgroup": 58,
+    "grass": 746,
+    "lantern": 14,
+    "tree": 604,
+    "tent": 9,
+    "crate": 29,
+    "barrel": 15,
+    "banner": 6,
+    "bow": 1,
+    "sword": 1,
+    "shield": 2,
+    "rock": 34,
+    "bush": 22,
+    "stoneblocks": 6,
+    "Wall1": 8,
+    "cliffgroup": 296,
+    "cliff": 3061,
+    "retriever": 2,
+    "wall": 8,
+    "platform": 53,
+    "magnetic": 4,
+    "column": 26,
+    "stoneblock": 14,
+    "floortiles": 304,
+    "floor": 18,
+    "spawn": 2,
+    "capitol": 1,
+    "wallpiece": 19,
+    "turret": 4,
+    "pebbles": 19,
+    "stone": 133,
+    "cliffgate": 2,
+    "Wall2": 2
+  },
+  "materialSlots": 5897,
+  "mapTextures": [
+    {
+      "path": "Model/Textures/colorpalette_standard.dds",
+      "createCalls": 1,
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "mipLevels": 1,
+      "fileBytes": 4194432,
+      "logicalPixelPayloadBytes": 4194304,
+      "sha256": "46ba21cd6ec470163882653fbf0ffe7fd5d5ff40b4f852ce00f9fd10e2e9c834"
+    },
+    {
+      "path": "Model/Textures/wallpaint_white.dds",
+      "createCalls": 1,
+      "width": 1024,
+      "height": 1024,
+      "bitsPerPixel": 32,
+      "mipLevels": 1,
+      "fileBytes": 4194432,
+      "logicalPixelPayloadBytes": 4194304,
+      "sha256": "c18d195b058d949a29117f99f6aceb544b512b3a0f589349e30feb1c1ca5bc02"
+    }
+  ],
+  "modelLoadingDelta": {
+    "legacy": {
+      "privateBytes": {
+        "medianBytes": 1427484672,
+        "minBytes": 1426640896,
+        "maxBytes": 1428639744
+      },
+      "workingSetBytes": {
+        "medianBytes": 1010225152,
+        "minBytes": 1009942528,
+        "maxBytes": 1010425856
+      },
+      "dxgiLocalUsageBytes": {
+        "medianBytes": 407105536,
+        "minBytes": 407105536,
+        "maxBytes": 407105536
+      },
+      "dxgiNonLocalUsageBytes": {
+        "medianBytes": 409161728,
+        "minBytes": 409161728,
+        "maxBytes": 409161728
+      }
+    },
+    "shared": {
+      "privateBytes": {
+        "medianBytes": 56639488,
+        "minBytes": 56528896,
+        "maxBytes": 57581568
+      },
+      "workingSetBytes": {
+        "medianBytes": 41709568,
+        "minBytes": 41693184,
+        "maxBytes": 41803776
+      },
+      "dxgiLocalUsageBytes": {
+        "medianBytes": 18661376,
+        "minBytes": 18661376,
+        "maxBytes": 18661376
+      },
+      "dxgiNonLocalUsageBytes": {
+        "medianBytes": 18620416,
+        "minBytes": 18620416,
+        "maxBytes": 18620416
+      }
+    }
+  },
+  "measurementEvidence": "client-memory-20261005.json",
+  "phaseScope": "before_gpu_submission_and_before_CMap_AllCreateShaderVariables",
+  "particleBufferCapacity": {
+    "maxParticles": 300000,
+    "vertexBytesCalculatedFromCurrentLayout": 32,
+    "largeDefaultBuffersPerObject": 2,
+    "payloadBytesPerObject": 19200000
+  },
+  "note": "Static payloads and per-load deltas are not retained map-only process memory or observed physical VRAM."
+}

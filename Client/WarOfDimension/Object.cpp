@@ -4,6 +4,10 @@
 
 #include "stdafx.h"
 #include "Object.h"
+#include "ClientMemoryProfile.h"
+#include "ModelPartSelection.h"
+#include "MeshContent.h"
+#include <stdexcept>
 #include "Shader.h"
 #include "Scene.h"
 #include "NetworkManager.h"
@@ -378,27 +382,20 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		if (!bDuplicated)
+		if (bDuplicated && pParent)
+		{
+			while (pParent->m_pParent) pParent = pParent->m_pParent;
+			*ppTexture = pParent->FindReplicatedTexture(pwstrTextureName);
+			if (*ppTexture) (*ppTexture)->AddRef();
+		}
+		// 선택 파츠 로딩에서 원래 texture 소유 파츠가 제외되면 실제 DDS로 복구한다.
+		if (!*ppTexture)
 		{
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 			(*ppTexture)->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
 			if (*ppTexture) (*ppTexture)->AddRef();
 
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
-		}
-		else
-		{
-			if (pParent)
-			{
-				while (pParent)
-				{
-					if (!pParent->m_pParent) break;
-					pParent = pParent->m_pParent;
-				}
-				CGameObject* pRootGameObject = pParent;
-				*ppTexture = pRootGameObject->FindReplicatedTexture(pwstrTextureName);
-				if (*ppTexture) (*ppTexture)->AddRef();
-			}
 		}
 	}
 }
@@ -1787,7 +1784,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12Graphics
 	}
 }
 
-CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes)
+CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes, const ModelPartSelection* selection)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -1795,6 +1792,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 	int nFrame = 0, nTextures = 0;
 
 	CGameObject *pGameObject = new CGameObject();
+	bool includeResources = true;
 
 	for ( ; ; )
 	{
@@ -1805,6 +1803,8 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			nTextures = ::ReadIntegerFromFile(pInFile);
 
 			::ReadStringFromFile(pInFile, pGameObject->m_pstrFrameName);
+			includeResources = !selection || selection->Includes(pGameObject->m_pstrFrameName);
+			pGameObject->m_bLoadAnimationFrame = includeResources;
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
@@ -1821,10 +1821,25 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
-			pGameObject->SetSharedMesh(CStandardMesh::LoadSharedGeometryFromFile(pd3dDevice, pd3dCommandList, pInFile));
+			if (!includeResources) { ReadMeshContentRecord(pInFile); continue; }
+			if (ClientMemoryProfileLegacyGeometry())
+			{
+				auto mesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
+				mesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+				pGameObject->SetMesh(mesh);
+			}
+			else pGameObject->SetSharedMesh(CStandardMesh::LoadSharedGeometryFromFile(pd3dDevice, pd3dCommandList, pInFile));
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
+			if (!includeResources)
+			{
+				SkipModelSkinInfo(pInFile);
+				::ReadStringFromFile(pInFile, pstrToken);
+				if (strcmp(pstrToken, "<Mesh>:")) throw std::runtime_error("스킨 뒤의 메시 레코드 누락");
+				ReadMeshContentRecord(pInFile);
+				continue;
+			}
 			if (pnSkinnedMeshes) (*pnSkinnedMeshes)++;
 
 			CSkinnedMesh *pSkinnedMesh = new CSkinnedMesh(pd3dDevice, pd3dCommandList);
@@ -1832,13 +1847,18 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			pSkinnedMesh->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
-			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadSharedGeometryDataFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			if (!strcmp(pstrToken, "<Mesh>:"))
+			{
+				if (ClientMemoryProfileLegacyGeometry()) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+				else pSkinnedMesh->LoadSharedGeometryDataFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			}
 
 			pGameObject->SetMesh(pSkinnedMesh);
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader);
+			if (includeResources) pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader);
+			else SkipModelMaterials(pInFile);
 		}
 		else if (!strcmp(pstrToken, "<Children>:"))
 		{
@@ -1847,7 +1867,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes);
+					CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes, selection);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -1877,6 +1897,8 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 	if (MultiplyZ > pGameObject->m_fMaxRadius)
 		pGameObject->m_fMaxRadius = MultiplyZ;
 
+	// 미선택 노드라도 선택 자식의 부모라면 그 transform 애니메이션은 유지한다.
+	if (pGameObject->m_pChild) pGameObject->m_bLoadAnimationFrame = true;
 	return(pGameObject);
 }
 
@@ -1948,6 +1970,9 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 	UINT nReads = 0;
 
 	int nAnimationSets = 0;
+	int sourceAnimatedFrames = 0;
+	std::vector<int> keptFrameIndices;
+	std::vector<XMFLOAT4X4> sourceTransforms;
 
 	for ( ; ; )
 	{
@@ -1959,13 +1984,15 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 		}
 		else if (!strcmp(pstrToken, "<FrameNames>:"))
 		{
-			pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames = ::ReadIntegerFromFile(pInFile); 
-			pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches = new CGameObject*[pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames];
-
-			for (int j = 0; j < pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames; j++)
+			sourceAnimatedFrames = ::ReadIntegerFromFile(pInFile);
+			if (sourceAnimatedFrames < 0) throw std::runtime_error("애니메이션 프레임 수 오류");
+			std::vector<CGameObject*> keptFrames;
+			for (int j = 0; j < sourceAnimatedFrames; j++)
 			{
 				::ReadStringFromFile(pInFile, pstrToken);
-				pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j] = pLoadedModel->m_pModelRootObject->FindFrame(pstrToken);
+				auto frame = pLoadedModel->m_pModelRootObject->FindFrame(pstrToken);
+				if (!frame) throw std::runtime_error("애니메이션 프레임 연결 누락");
+				if (frame->m_bLoadAnimationFrame) { keptFrames.push_back(frame); keptFrameIndices.push_back(j); }
 
 #ifdef _WITH_DEBUG_SKINNING_BONE
 				TCHAR pstrDebug[256] = { 0 };
@@ -1973,11 +2000,15 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 				TCHAR pwstrBoneCacheName[64] = { 0 };
 				size_t nConverted = 0;
 				mbstowcs_s(&nConverted, pwstrAnimationBoneName, 64, pstrToken, _TRUNCATE);
-				mbstowcs_s(&nConverted, pwstrBoneCacheName, 64, pLoadedModel->m_ppAnimatedBoneFrameCaches[j]->m_pstrFrameName, _TRUNCATE);
+				mbstowcs_s(&nConverted, pwstrBoneCacheName, 64, frame->m_pstrFrameName, _TRUNCATE);
 				_stprintf_s(pstrDebug, 256, _T("AnimationBoneFrame:: Cache(%s) AnimationBone(%s)\n"), pwstrBoneCacheName, pwstrAnimationBoneName);
 				OutputDebugString(pstrDebug);
 #endif
 			}
+			pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames = static_cast<int>(keptFrames.size());
+			pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches = new CGameObject*[keptFrames.size()];
+			std::copy(keptFrames.begin(), keptFrames.end(), pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches);
+			sourceTransforms.resize(sourceAnimatedFrames);
 		}
 		else if (!strcmp(pstrToken, "<AnimationSet>:"))
 		{
@@ -2010,7 +2041,10 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 					nReads = (UINT)::fread(pAnimationSet->m_ppxmf3KeyFrameTranslations[i], sizeof(XMFLOAT3), pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames, pInFile);
 #else
 					pAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
-					nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(XMFLOAT4X4), pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames, pInFile);
+					if (::fread(sourceTransforms.data(), sizeof(XMFLOAT4X4), sourceAnimatedFrames, pInFile) != static_cast<size_t>(sourceAnimatedFrames))
+						throw std::runtime_error("잘린 애니메이션 행렬");
+					for (size_t frame = 0; frame < keptFrameIndices.size(); ++frame)
+						pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i][frame] = sourceTransforms[keptFrameIndices[frame]];
 #endif
 				}
 			}
@@ -2022,10 +2056,13 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 	}
 }
 
-CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, const char *pstrFileName, CShader *pShader)
+CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, const char *pstrFileName, CShader *pShader, const ModelPartSelection* selection)
 {
+	if (ClientMemoryProfileActive()) ClientMemoryProfileSnapshot(pd3dDevice, (std::string("model_begin:") + pstrFileName).c_str());
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
+	if (!pInFile) throw std::runtime_error("모델 파일 열기 실패");
+	std::unique_ptr<FILE, decltype(&fclose)> fileOwner(pInFile, &fclose);
 	::rewind(pInFile);
 
 	CLoadedModelInfo *pLoadedModel = new CLoadedModelInfo();
@@ -2038,7 +2075,7 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 		{
 			if (!strcmp(pstrToken, "<Hierarchy>:"))
 			{
-				pLoadedModel->m_pModelRootObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
+				pLoadedModel->m_pModelRootObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes, selection);
 				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
 			}
 			else if (!strcmp(pstrToken, "<Animation>:"))
@@ -2065,6 +2102,15 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 	CGameObject::PrintFrameInfo(pGameObject, NULL);
 #endif
 
+	if (ClientMemoryProfileActive()) ClientMemoryProfileSnapshot(pd3dDevice, (std::string("model_loaded:") + pstrFileName).c_str());
+	if (!strcmp(pstrFileName, "Model/ModularModel.bin") && pLoadedModel->m_pAnimationSets)
+	{
+		unsigned long long matrixBytes = 0;
+		auto animations = pLoadedModel->m_pAnimationSets;
+		for (int i = 0; i < animations->m_nAnimationSets; ++i)
+			matrixBytes += static_cast<unsigned long long>(animations->m_pAnimationSets[i]->m_nKeyFrames) * animations->m_nAnimatedBoneFrames * sizeof(XMFLOAT4X4);
+		ClientMemoryProfileRecordHeroModel(pLoadedModel->m_nSkinnedMeshes, animations->m_nAnimatedBoneFrames, matrixBytes);
+	}
 	return(pLoadedModel);
 }
 

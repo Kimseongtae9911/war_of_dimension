@@ -3,8 +3,13 @@
   <ItemGroup>
     <ClCompile Include="MeshContent.cpp"><Filter>소스 파일</Filter></ClCompile>
     <ClCompile Include="MeshSharingTests.cpp"><Filter>소스 파일</Filter></ClCompile>
+    <ClCompile Include="ClientMemoryProfile.cpp"><Filter>소스 파일</Filter></ClCompile>
+    <ClCompile Include="ModelPartSelection.cpp"><Filter>소스 파일</Filter></ClCompile>
+    <ClCompile Include="HeroSelectionTests.cpp"><Filter>소스 파일</Filter></ClCompile>
     <ClInclude Include="MeshContent.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="MeshSharingTests.h"><Filter>헤더 파일</Filter></ClInclude>
+    <ClInclude Include="ClientMemoryProfile.h"><Filter>헤더 파일</Filter></ClInclude>
+    <ClInclude Include="ModelPartSelection.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

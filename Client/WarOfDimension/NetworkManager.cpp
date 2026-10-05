@@ -8,6 +8,7 @@
 #include "PeerManager.h"
 #include "SoundManager.h"
 #include "SceneManager.h"
+#include "ClientMemoryProfile.h"
 
 std::unique_ptr<NetworkManager> NetworkManager::m_instance;
 
@@ -194,6 +195,7 @@ void NetworkManager::Initialize(string ip)
     }
 
 
+    if (ClientMemoryProfileActive()) return;
     SocketUtil::Startup();
     m_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
     if (INVALID_SOCKET == m_socket) {
@@ -334,6 +336,11 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::Reset()
 {
+    {
+        std::lock_guard lock(m_appearanceMutex);
+        m_appearanceReceived.fill(false);
+        m_frozenAppearances.reset();
+    }
     readySceneInfo->Initialize();
     channelNum = 0;
     gameSceneInfo->Initialize();
@@ -402,8 +409,51 @@ void NetworkManager::Reset()
 
 }
 
+void NetworkManager::StoreIngameAppearance(int slot, const ModelCustomize& appearance)
+{
+    if (slot < 0 || slot >= INGAME_PLAYER) return;
+    std::lock_guard lock(m_appearanceMutex);
+    m_ArrayInGameClientsCustom[slot] = appearance;
+    if (slot < 3) m_appearanceReceived[slot] = true;
+}
+
+void NetworkManager::FreezeIngameAppearances()
+{
+    std::lock_guard lock(m_appearanceMutex);
+    if (m_frozenAppearances || !std::all_of(m_appearanceReceived.begin(), m_appearanceReceived.end(), [](bool received) { return received; })) return;
+    std::array<ModelCustomize, 3> appearances;
+    std::copy_n(m_ArrayInGameClientsCustom.begin(), 3, appearances.begin());
+    m_frozenAppearances = appearances;
+}
+
+std::optional<std::array<ModelCustomize, 3>> NetworkManager::GetFrozenIngameAppearances() const
+{
+    std::lock_guard lock(m_appearanceMutex);
+    return m_frozenAppearances;
+}
+
+std::optional<ModelCustomize> NetworkManager::GetFrozenIngameAppearance(int slot) const
+{
+    const auto appearances = GetFrozenIngameAppearances();
+    if (!appearances || slot < 0 || slot >= 3) return std::nullopt;
+    return (*appearances)[slot];
+}
+
+void NetworkManager::SeedTestIngameAppearances()
+{
+#ifdef WITH_DATABASE
+    const ModelCustomize appearance{ 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        0, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#else
+    const ModelCustomize appearance{ 0, 1, 0, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 1,
+        1, 0, 1, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1 };
+#endif
+    for (int slot = 0; slot < 3; ++slot) StoreIngameAppearance(slot, appearance);
+}
+
 void NetworkManager::SendPacket(BASE_PACKET* packet) const
 {
+    if (ClientMemoryProfileActive()) { delete packet; return; }
     OverlapEx* over = new OverlapEx(packet);
     WSASend(m_socket, &over->GetWSA(), 1, 0, 0, &over->GetOver(), 0);
     delete packet;
@@ -447,6 +497,7 @@ void NetworkManager::WorkerThread()
 
 void NetworkManager::TestReady(bool type)
 {
+    SeedTestIngameAppearances();
     for (int i = 0; i < INGAME_PLAYER; ++i) {
         otherClientsInfo[i].Initialize();
     }
@@ -658,6 +709,9 @@ void NetworkManager::LoginFailPacket(int id, BASE_PACKET* packet)
 void NetworkManager::AddPlayerPacket(int id, BASE_PACKET* packet)
 {
     SC_ADD_PLAYER_PACKET* p = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet);
+    if (p->id < 0 || p->id >= INGAME_PLAYER) return;
+    // READY 모델 생성 이전에 도착한 외형도 진입 스냅샷에 포함한다.
+    if (playerScene != SCENEKIND::LOBBY) StoreIngameAppearance(p->id, p->model);
     cout << "Add Player " << p->id << endl;
     if (m_id == p->id) {
         cout << m_id << endl;
@@ -671,11 +725,6 @@ void NetworkManager::AddPlayerPacket(int id, BASE_PACKET* packet)
     if (playerScene == SCENEKIND::LOBBY) {
         if (OtherClients[p->id]) {
             m_ArrayOtherClientCustom[p->id] = p->model;
-        }
-    }
-    else {
-        if (OtherClients[p->id]) {
-            m_ArrayInGameClientsCustom[p->id] = p->model;
         }
     }
 }
@@ -960,6 +1009,7 @@ void NetworkManager::JobSelectPacket(int id, BASE_PACKET* packet)
 
 void NetworkManager::GameStartPacket(int id, BASE_PACKET* packet)
 {
+    FreezeIngameAppearances();
     otherClientsInfo[m_id].show = false;
     playerScene = SCENEKIND::INGAME;
     ListChating.clear();
@@ -974,7 +1024,7 @@ void NetworkManager::CustomizePacket(int id, BASE_PACKET* packet)
         m_ArrayOtherClientCustom[p->id] = p->model;
     }
     else {
-        m_ArrayInGameClientsCustom[p->id] = p->model;
+        StoreIngameAppearance(p->id, p->model);
     }
 }
 
@@ -1399,8 +1449,8 @@ void NetworkManager::ChangeServerPacket(int id, BASE_PACKET* packet)
         delete over;
     }
 
-    delete otherClientsInfo;
-    otherClientsInfo = new ObjectInfo[INGAME_PLAYER];
+    delete[] otherClientsInfo;
+    otherClientsInfo = new ObjectInfo[LOBBY_MAX_CLIENT];
     for (int i = 0; i < INGAME_PLAYER; ++i) {
         otherClientsInfo[i].Initialize();
     }

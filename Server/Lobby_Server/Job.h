@@ -12,7 +12,7 @@ class Job : public IJob {
 public:
     Job(Func&& f) : m_Func(std::forward<Func>(f)) {}
     void Execute() override {
-        //m_Func();
+        m_Func();
     }
 private:
     Func m_Func;

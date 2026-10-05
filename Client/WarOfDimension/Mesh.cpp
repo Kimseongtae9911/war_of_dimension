@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Object.h"
 #include "MeshContent.h"
+#include "ClientMemoryProfile.h"
 #include <tuple>
 #include <stdexcept>
 
@@ -1209,6 +1210,7 @@ CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nType);
 	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
+	ClientMemoryProfileRecordParticle(pd3dDevice, m_pd3dStreamOutputBuffer, m_pd3dDrawBuffer, nMaxParticles, m_nStride);
 }
 
 CParticleMesh::~CParticleMesh()

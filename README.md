@@ -16,6 +16,7 @@ Visual Studio에서는 `NewWod.slnx`를 열어 로비·게임 서버와 클라�
 - [에이전트 공통 지침](AGENTS.md) · [도구 설정](docs/development/AGENTS.md)
 - [VS2026 이전](docs/development/VS2026.md) · [파일 정리 기록](docs/development/CLEANUP.md)
 - [메시 공유 구현과 테스트](docs/architecture/MESH_SHARING.md) · [공유 구조도](docs/diagrams/mesh-sharing/mesh-sharing.architecture.html)
+- [리팩토링 포트폴리오](docs/portfolio/README.md) · [인게임·영웅 메모리 개선 결과](docs/portfolio/CLIENT_MEMORY_OPTIMIZATION.md) · [현재 메모리 증가 원인](docs/portfolio/CLIENT_MEMORY_BREAKDOWN.md)
 - [문서 인덱스](docs/INDEX.md) · [리팩토링 우선순위](docs/REFACTORING_PLAN.md)
 
 GitLab 최신 코드와 필수 에셋으로 새 이력을 시작했다. 초기 커밋은 [GitHub 저장소](https://github.com/Kimseongtae9911/war_of_dimension)에 업로드했으며 대용량 에셋은 Git LFS로 관리한다.

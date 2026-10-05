@@ -62,6 +62,46 @@ Visual Studio의 다중 프로젝트 실행은 프로세스 시작 순서를 지
 
 빌드한 클라이언트의 전용 진입점을 사용해 창·네트워크 없이 D3D12 자원을 생성하고 공유·수명을 검사한다. 기본 12개 검사는 WARP와 별도 D3D12 하드웨어 adapter가 필요하다. `-AuditAssets`는 실제 3개 모델 파일의 base geometry를 WARP에서 로딩해 생성·재사용 횟수를 확인한다. 결과 JSON은 `artifacts/logs/test-mesh-sharing-<Configuration>.json`, `audit-mesh-assets-<Configuration>.json`에 남긴다. 구현 범위와 결과는 [메시 공유 문서](../architecture/MESH_SHARING.md)를 참조한다.
 
+## 클라이언트 메모리 비교
+
+```powershell
+./scripts/Build.ps1 -Configuration Release -Module Client
+./scripts/Measure-ClientMemory.ps1 -Configuration Release -Runs 3
+python ./scripts/Measure-ClientAssets.py --profile artifacts/logs/client-memory/shared-Release-1.json --output artifacts/logs/client-asset-memory-ingame.json
+```
+
+전용 `--profile-client-memory <report.json> legacy|shared` 진입점이 이전 geometry 로딩 방식을 현재 바이너리에서 재현하고 현재 공유 방식과 비교한다. 각 실행은 독립된 숨김 클라이언트 프로세스에서 실제 인게임 자원을 로딩하고 GPU 완료·기존 upload 해제 후 프로세스 및 DXGI 메모리를 수집한다. 네트워크와 loading render thread는 측정 모드에서만 생략한다. 일반 실행은 기존 경로를 유지한다. 전체 로그인·전투 실행과 과거 바이너리 직접 비교는 이 측정의 범위가 아니다.
+
+Python 3.12 이상의 실행 가능한 설치/가상 환경을 사용한다. 결과 로그는 `artifacts/logs/client-memory`에 둔다. GPU와 수 GiB 메모리가 필요하므로 다른 게임/검증을 동시에 실행하지 않는다. 의미가 다른 지표를 합산하지 않으며 [포트폴리오 문서](../portfolio/CLIENT_MEMORY_OPTIMIZATION.md)의 결과·정의·영웅 계산·그래프 재현 절차를 따른다.
+
+현재 경로만 세부 계측할 때는 `Measure-ClientMemory.ps1 -Runs 3 -Modes shared -OutputDirectory artifacts/logs/client-memory-breakdown`을 사용한다. 기존 A/B 로그를 덮어쓰지 않고 구간/파티클 카운터를 수집한다. `Build-ClientMemoryBreakdown.py`로 JSON/CSV를 만들며 결과·재현·해석은 [현재 메모리 비용 분해](../portfolio/CLIENT_MEMORY_BREAKDOWN.md)에 있다.
+
+구간별 전후 비교는 두 모드를 같은 바이너리로 교대 실행한 새 summary를 사용한다. `--compare`는 모드별 완료 횟수·파티클 시나리오·각 지표의 구간 합계를 확인하고 JSON/CSV를 생성한다. `--charts`를 추가하면 matplotlib이 필요하다.
+
+```powershell
+./scripts/Measure-ClientMemory.ps1 -Configuration Release -Runs 3 -OutputDirectory artifacts/logs/client-memory-stage-comparison
+python ./scripts/Build-ClientMemoryBreakdown.py --compare --summary artifacts/logs/client-memory-stage-comparison/summary-Release.json --output artifacts/logs/client-memory-stage-comparison-report.json
+```
+
+## 영웅 선택 파츠 검증·측정
+
+```powershell
+./scripts/Test-HeroSelection.ps1 -Configuration Debug
+./scripts/Test-HeroSelection.ps1 -Configuration Release
+./scripts/Measure-ClientMemory.ps1 -Configuration Release -Runs 3 -Scenario HeroParts -OutputDirectory artifacts/logs/hero-selected-parts-final
+python ./scripts/Build-ClientMemoryBreakdown.py --compare-hero --summary artifacts/logs/hero-selected-parts-final/summary-Release.json --output artifacts/logs/hero-selected-parts-report.json --charts
+```
+
+양 구성은 먼저 빌드한다. 실제 `ModularModel.bin`의 남녀·다른 파츠 조합, 본·텍스처 연결 및 모든 보존 행렬을 검사한다. `full`/`selected` 각 3회는 같은 바이너리·geometry 공유·확정 외형으로 비교한다. 기존 geometry 비교와 다른 로그 경로를 사용한다. [범위와 결과](../portfolio/HERO_SELECTED_PARTS.md)를 참조한다.
+
+로비 작업 큐와 분할 테스트 전환 패킷은 새 로컬 서버에서 검사한다. Python이 0 이외로 종료하면 검사 실패다.
+
+```powershell
+./scripts/Start-Local.ps1 -Configuration Release -ServersOnly
+try { python ./scripts/Test-LobbyTestTransition.py --output artifacts/logs/test-lobby-transition-Release.json }
+finally { ./scripts/Stop-Local.ps1 }
+```
+
 ## 로컬 모드와 리소스
 
 원본 `protocol.h`의 `LOCAL_TEST`가 켜져 있고 `WITH_DATABASE`는 꺼져 있다. 루프백 주소와 로비 8910, 게임 8911 포트를 사용한다. DB 없는 기존 개발 모드를 재현한다. 실제 ODBC DSN과 저장 프로시저, DB 인증·거래 동작은 검증하지 않았다.

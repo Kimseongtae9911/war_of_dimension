@@ -57,6 +57,8 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	void ChangeScene(SCENEKIND nSceneKind);
+	void ProfileMemorySnapshot(const char* phase);
+	int AuditHeroSelection(const wchar_t* reportPath);
 	void Update();
 
 	void CreateShaderVariables();
