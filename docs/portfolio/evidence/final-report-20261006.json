@@ -1,0 +1,918 @@
+{
+  "schemaVersion": 1,
+  "kind": "final_refactoring_report_summary_of_existing_evidence",
+  "preparedDateKst": "2026-10-06",
+  "referenceCommit": "e85eba42958acfdaff5713eb188d7959b39b2fe8",
+  "githubMainVerified": "e85eba42958acfdaff5713eb188d7959b39b2fe8",
+  "newRuntimeMeasurement": false,
+  "unit": "bytes; MiB = bytes / 1048576",
+  "scope": "Eight major categories; existing stage reports and measurements; independent experiment baselines are not summed",
+  "purpose": "멀티플레이 테스트 편의성 개선의 일부로 에이전트 환경 구축 및 메모리 최적화; 단일 클라이언트의 큰 메모리 소비로 4개 동시 실행이 불가하다는 사용자 제약",
+  "fourGameClientsConcurrentExecutionValidated": false,
+  "categories": [
+    {
+      "number": 1,
+      "title": "에이전트 기반 개발 환경 구축",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 2,
+      "title": "메모리 병목을 측정",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 3,
+      "title": "공통 geometry와 모델 DDS 자원 공유",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 4,
+      "title": "확정 외형을 이용한 영웅 메모리 최적화",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 5,
+      "title": "선택 스킬 파티클과 전체 효과 GPU 버퍼 풀",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 6,
+      "title": "미니언·몬스터·보스 자원과 상수 버퍼 최적화",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 7,
+      "title": "인게임 UI BC7 압축과 사전 로딩 유지",
+      "deliverableSummaryIncluded": true
+    },
+    {
+      "number": 8,
+      "title": "조사 내용과 적용하지 않은 후보",
+      "deliverableSummaryIncluded": true
+    }
+  ],
+  "agentEnvironmentFileIndex": {
+    "section": 1,
+    "configuredFilePathsVerified": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      "GEMINI.md",
+      ".codex/config.toml",
+      ".mcp.json",
+      ".gemini/settings.json",
+      ".serena/project.yml",
+      ".agents/skills/archify/SKILL.md",
+      "docs/AGENTS.md",
+      "docs/INDEX.md",
+      "docs/guides/INDEX.md",
+      "docs/guides/archify.md",
+      "docs/development/AGENTS.md",
+      "docs/development/SETUP.md",
+      "docs/architecture/OVERVIEW.md",
+      "docs/portfolio/README.md",
+      "docs/portfolio/FINAL_REFACTORING_REPORT.md",
+      "scripts/New-CompilationDatabase.ps1",
+      "scripts/Test-AgentEnvironment.ps1",
+      "scripts/Build.ps1",
+      "scripts/Start-Local.ps1",
+      "scripts/Stop-Local.ps1",
+      "scripts/Test-Local.ps1",
+      "scripts/Test-MeshSharing.ps1",
+      "tasks/todo.md"
+    ],
+    "verifiedDirectories": [
+      "docs/diagrams",
+      "docs/portfolio/evidence"
+    ],
+    "generatedFile": "compile_commands.json",
+    "generatedFileIgnoredByGit": true,
+    "readingOrder": [
+      "AGENTS.md",
+      "docs/guides/INDEX.md",
+      "docs/INDEX.md",
+      "implementation/tests",
+      "tasks/todo.md"
+    ],
+    "settingsContentsIncluded": false
+  },
+  "unappliedInvestigations": [
+    {
+      "label": "skyBc7SameResolution",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 75497472,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.skyBc7SameResolution.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "sky_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": "Mutually exclusive alternatives; no GPU allocation/Private Bytes A/B measurement"
+    },
+    {
+      "label": "skyBc7FullMips",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 67108704,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.skyBc7FullMips.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "sky_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": "Mutually exclusive alternatives; no GPU allocation/Private Bytes A/B measurement"
+    },
+    {
+      "label": "skyBc1SameResolution",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 88080384,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.skyBc1SameResolution.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "sky_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": "Mutually exclusive alternatives; no GPU allocation/Private Bytes A/B measurement"
+    },
+    {
+      "label": "skyBc7HalfResolution",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 94371840,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.skyBc7HalfResolution.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "sky_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": "Mutually exclusive alternatives; no GPU allocation/Private Bytes A/B measurement"
+    },
+    {
+      "label": "uiPlayerUploadEarlyRelease",
+      "applied": false,
+      "metric": "retained UPLOAD allocation",
+      "expectedSavedBytes": 38666240,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "existingUiActualAllocation.player.uploadAllocationBytes",
+      "alternativeOrOverlapGroup": "UI_role_alternatives",
+      "excludedByUser": false,
+      "limitation": "Requires fence completion and release of all references; not measured Private Bytes savings"
+    },
+    {
+      "label": "uiBossUploadEarlyRelease",
+      "applied": false,
+      "metric": "retained UPLOAD allocation",
+      "expectedSavedBytes": 37552128,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "existingUiActualAllocation.boss.uploadAllocationBytes",
+      "alternativeOrOverlapGroup": "UI_role_alternatives",
+      "excludedByUser": false,
+      "limitation": "Requires fence completion and release of all references; not measured Private Bytes savings"
+    },
+    {
+      "label": "dissolveBc4SameMips",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 0,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.dissolveBc4SameMips.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "dissolve_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": null
+    },
+    {
+      "label": "dissolveR8SameMips",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": -699037,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.dissolveR8SameMips.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "dissolve_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": null
+    },
+    {
+      "label": "dissolveBc1HalfResolution",
+      "applied": false,
+      "metric": "DDS payload",
+      "expectedSavedBytes": 524288,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": "candidates.dissolveBc1HalfResolution.savedPayloadBytes",
+      "alternativeOrOverlapGroup": "dissolve_format_or_resolution",
+      "excludedByUser": false,
+      "limitation": null
+    },
+    {
+      "label": "nonIngameBgmRemoval",
+      "applied": false,
+      "metric": "decoded PCM",
+      "expectedSavedBytes": 79106124,
+      "source": "startup-resource-review-20261005.json",
+      "sourceLocation": "audio[].pcmBytes filtered by Sound/BGM/ path",
+      "alternativeOrOverlapGroup": "audio_bgm_overlap",
+      "excludedByUser": false,
+      "limitation": "PCM payload estimate only; real playback/loop and process savings unmeasured; streaming retains buffers"
+    },
+    {
+      "label": "bgmStreamingPcmAvoidanceUpperBound",
+      "applied": false,
+      "metric": "decoded PCM",
+      "expectedSavedBytes": 90676812,
+      "source": "startup-resource-review-20261005.json",
+      "sourceLocation": "audio[].pcmBytes filtered by Sound/BGM/ path",
+      "alternativeOrOverlapGroup": "audio_bgm_overlap",
+      "excludedByUser": false,
+      "limitation": "PCM payload estimate only; real playback/loop and process savings unmeasured; streaming retains buffers"
+    },
+    {
+      "label": "shadow8192To4096",
+      "applied": false,
+      "metric": "logical GPU texel",
+      "expectedSavedBytes": 201326592,
+      "source": "docs/portfolio/STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md",
+      "sourceLocation": "8192² D32 → 4096² D32",
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": true,
+      "limitation": "User requires current shadow quality"
+    },
+    {
+      "label": "positionFp32ToFp16",
+      "applied": false,
+      "metric": "logical GPU texel",
+      "expectedSavedBytes": 16588800,
+      "source": "docs/portfolio/STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md",
+      "sourceLocation": "1920×1080 RGBA32_FLOAT → RGBA16_FLOAT",
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": true,
+      "limitation": "Excluded by user due to precision and rendering side effects"
+    },
+    {
+      "label": "dissolveUploadEarlyRelease",
+      "applied": false,
+      "metric": "UPLOAD allocation",
+      "expectedSavedBytes": null,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Independent upload allocation unmeasured"
+    },
+    {
+      "label": "dissolveSampleSkip",
+      "applied": false,
+      "metric": "resident texture payload",
+      "expectedSavedBytes": 0,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "GPU time is unmeasured"
+    },
+    {
+      "label": "selectedOrDuplicateAudio",
+      "applied": false,
+      "metric": "decoded PCM / allocation",
+      "expectedSavedBytes": null,
+      "source": "startup-resource-review-20261005.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Event dependencies and duplicate ownership require investigation"
+    },
+    {
+      "label": "titleAdditionalRelease",
+      "applied": false,
+      "metric": "steady-state in-game memory",
+      "expectedSavedBytes": null,
+      "source": "startup-resource-review-20261005.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Existing scene release path; no additional savings established"
+    },
+    {
+      "label": "renderTargetCreationDelay",
+      "applied": false,
+      "metric": "final in-game memory",
+      "expectedSavedBytes": 0,
+      "source": "startup-resource-review-20261005.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Creation timing affects startup, not final residency"
+    },
+    {
+      "label": "heroClipSharingOrSelection",
+      "applied": false,
+      "metric": "CPU animation state",
+      "expectedSavedBytes": null,
+      "source": "docs/portfolio/HERO_SELECTED_PARTS.md",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Post-selected-appearance savings unquantified"
+    },
+    {
+      "label": "particleCapacityOrIdleShrink",
+      "applied": false,
+      "metric": "GPU pool allocation",
+      "expectedSavedBytes": null,
+      "source": "docs/portfolio/PARTICLE_BUFFER_POOL.md",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "Depends on real combat peak and fence lifetime"
+    },
+    {
+      "label": "speedBlurShader",
+      "applied": false,
+      "metric": "memory / GPU time",
+      "expectedSavedBytes": null,
+      "source": "skybox-dissolve-review-20261006.json",
+      "sourceLocation": null,
+      "alternativeOrOverlapGroup": null,
+      "excludedByUser": false,
+      "limitation": "GPU time unmeasured; additional pass can increase RT memory"
+    }
+  ],
+  "report": {
+    "path": "docs/portfolio/FINAL_REFACTORING_REPORT.md",
+    "sha256": "fe44b417135d40149e43e49af14fbdce69b920d28ecda70574c6b8a9a110d28f"
+  },
+  "sourceDocumentsSha256": {
+    "docs/development/SETUP.md": "c51ba3f7cd0f77eedeecb7662b5e655b089497bbd798ff883354fc231c9c0144",
+    "docs/development/AGENTS.md": "9253c2d5d0a12cd909ecdcebecc01a691238376c98ac01844b14e9955ad04f8d",
+    "docs/development/VS2026.md": "4a2d891fbcf625dd77ea1862cd532b0c7fcff1da36426e709ac2729dca84f44c",
+    "docs/architecture/MESH_SHARING.md": "e37e2f6a05aad64cc4f89b466cd9c6fd713e24a500feea392d619daa10d01d7e",
+    "docs/architecture/OVERVIEW.md": "48813dedd292b4dd6b82e1abab87f2d158aaeb86e85f97c8f45ec9d9cda83c25",
+    "docs/portfolio/CLIENT_MEMORY_OPTIMIZATION.md": "01e67927dd5657a2c4bd4e5348c146d83325627088e25326748284c8f55bfb76",
+    "docs/portfolio/CLIENT_MEMORY_BREAKDOWN.md": "bab2806b67629681531d1405018d33b56ea4fdeb4913a368ca765974fb018e8c",
+    "docs/portfolio/HERO_SELECTED_PARTS.md": "d297dbce0468557eba7076d55d14f157b59db7cb813cf4a6c61536b3a4d7c3d8",
+    "docs/portfolio/PARTICLE_SELECTED_SKILLS.md": "b8da7bd0f3867581292e1e219f5a292a92020c567d779287385c56910ed856fe",
+    "docs/portfolio/PARTICLE_POOL_CAPACITY_REVIEW.md": "05ab84bc73d0bd87dcfeda293da2b9db00e783e3b8a14ba5a446d6ca10409e19",
+    "docs/portfolio/PARTICLE_BUFFER_POOL.md": "b9d4a689d872e73b14637fcb90476eef793cdd932aeb2a5f8ec4944e6f0bbe98",
+    "docs/portfolio/NPC_RESOURCE_SHARING_REVIEW.md": "730be743b64a557ac365c2c30bd10a4d1ac98e250b6c577b45dbc36ce7d9819a",
+    "docs/portfolio/NPC_MEMORY_OPTIMIZATION.md": "5cec2f6c12a23e84a822c65f962c639b1e9e53d813cde1cf281bcb84a5257e0e",
+    "docs/portfolio/UI_TEXTURE_COMPRESSION.md": "4d36a63b04e619c8aa650ddb60c8981a8336b826ec52f38c21dfea56a62a16e9",
+    "docs/portfolio/STARTUP_RESOURCE_OPTIMIZATION_REVIEW.md": "53123bb52448e5b356754ce93a928f0993886ef371b9c77e180efe0d7366072f",
+    "docs/portfolio/SKYBOX_DISSOLVE_OPTIMIZATION_REVIEW.md": "9ddb4df13a1c5a44158b76e09e0b21e48a53da9340a1834f499a7c9d3a745f9e"
+  },
+  "sourceDatasetsSha256": {
+    "client-memory-20261005.json": "d767f94c84c257c0ba54bae263be392cc3738aee7db6b4416dc01d4ebb6438cd",
+    "hero-selected-parts-memory-20261005.json": "012d5e734e8667ff52fd9ba457202dba6d561d82ff19354f10b751f81ea66057",
+    "particle-selected-skills-20261005.json": "cf1e83deb5938ad111bc9755578a310cb7f5a2a32a5c67627a4a5483e979397a",
+    "particle-buffer-pool-20261005.json": "42a4853f030b208cf9c30008984cc97f908a1aa00e22ab10aec0bb9362d162cc",
+    "npc-memory-20261005/measurements.json": "5653fb3aaad3db05a0eb1e76e7237518ce474d5f7c32e6c934f0cdfe2334640d",
+    "ui-bc7-20261005/measurements.json": "b62d5e8bd6749bfcc3936e68c7e53e24fe5a81b5a82937c3e3022db0ba3ec2ab",
+    "client-memory-breakdown-20261005.json": "62a87435597d6d4a5d35be2d866c70394034438be7ed84526ef76a6727c9b072",
+    "client-memory-stage-comparison-20261005.json": "8ff61fc9c4d00504cf966186b4d34b69091f418b433c1eadcf4780e7fe159ac8",
+    "npc-memory-20261005/quality.json": "56e61f4cda4a6b9bd8322596603eea6b8bb78c1e73dd6a58a5f73693db7a1eef",
+    "skybox-dissolve-review-20261006.json": "beb01952647ece9b29d54cd2b04b306b44246971dde829826a016aa697714778",
+    "startup-resource-review-20261005.json": "5a4c640f38c63a452f0e8aac3277b2628a3b95212450bed261da2278bb07eb42"
+  },
+  "privateBytesStageComparisons": [
+    {
+      "label": "동일 geometry 공유",
+      "source": "client-memory-20261005.json",
+      "sourceSha256": "d767f94c84c257c0ba54bae263be392cc3738aee7db6b4416dc01d4ebb6438cd",
+      "statistic": "median",
+      "beforeBytes": 7289212928,
+      "afterBytes": 6048514048,
+      "savedBytes": 1240698880,
+      "savedPercent": 17.021026717906846,
+      "runsPerMode": 3,
+      "sourceLocation": "comparison.privateBytes",
+      "reportSectionNumber": 3,
+      "sectionFooterReductionIncluded": true
+    },
+    {
+      "label": "영웅 선택 외형·변환 행렬",
+      "source": "hero-selected-parts-memory-20261005.json",
+      "sourceSha256": "012d5e734e8667ff52fd9ba457202dba6d561d82ff19354f10b751f81ea66057",
+      "statistic": "mean",
+      "beforeBytes": 6116349269.333333,
+      "afterBytes": 5168054272,
+      "savedBytes": 948294997.333333,
+      "savedPercent": 15.50426497204753,
+      "runsPerMode": 3,
+      "sourceLocation": "totals.privateBytes",
+      "reportSectionNumber": 4,
+      "sectionFooterReductionIncluded": true
+    },
+    {
+      "label": "선택 스킬 파티클 종류 제한",
+      "source": "particle-selected-skills-20261005.json",
+      "sourceSha256": "cf1e83deb5938ad111bc9755578a310cb7f5a2a32a5c67627a4a5483e979397a",
+      "statistic": "mean",
+      "beforeBytes": 5093223082.666667,
+      "afterBytes": 4023650986.6666665,
+      "savedBytes": 1069572096.0000005,
+      "savedPercent": 20.999906712116818,
+      "runsPerMode": 3,
+      "sourceLocation": "totals.privateBytes",
+      "reportSectionNumber": 5,
+      "sectionFooterReductionIncluded": true
+    },
+    {
+      "label": "전체 파티클 공용 GPU 풀",
+      "source": "particle-buffer-pool-20261005.json",
+      "sourceSha256": "42a4853f030b208cf9c30008984cc97f908a1aa00e22ab10aec0bb9362d162cc",
+      "statistic": "mean",
+      "beforeBytes": 4025120085.3333335,
+      "afterBytes": 2913325056,
+      "savedBytes": 1111795029.3333335,
+      "savedPercent": 27.621412672493275,
+      "runsPerMode": 3,
+      "sourceLocation": "metrics.privateBytes",
+      "reportSectionNumber": 5,
+      "sectionFooterReductionIncluded": true
+    },
+    {
+      "label": "NPC upload·BC7·상수 arena",
+      "source": "npc-memory-20261005/measurements.json",
+      "sourceSha256": "5653fb3aaad3db05a0eb1e76e7237518ce474d5f7c32e6c934f0cdfe2334640d",
+      "statistic": "median",
+      "beforeBytes": 2785382400,
+      "afterBytes": 2059882496,
+      "savedBytes": 725499904,
+      "savedPercent": 26.046689459946325,
+      "runsPerMode": 3,
+      "sourceLocation": "metrics.privateBytes",
+      "reportSectionNumber": 6,
+      "sectionFooterReductionIncluded": true
+    },
+    {
+      "label": "UI BC7·사전 로딩 유지",
+      "source": "ui-bc7-20261005/measurements.json",
+      "sourceSha256": "b62d5e8bd6749bfcc3936e68c7e53e24fe5a81b5a82937c3e3022db0ba3ec2ab",
+      "statistic": "median",
+      "beforeBytes": 2059948032,
+      "afterBytes": 1841754112,
+      "savedBytes": 218193920,
+      "savedPercent": 10.592205075589014,
+      "runsPerMode": 3,
+      "sourceLocation": "memory.{before,after}.mediansBytes.privateBytes",
+      "reportSectionNumber": 7,
+      "sectionFooterReductionIncluded": true
+    }
+  ],
+  "overallPrivateBytesComparison": {
+    "beforeSource": "client-memory-20261005.json",
+    "beforeLocation": "comparison.privateBytes.legacy.medianBytes",
+    "afterSource": "ui-bc7-20261005/measurements.json",
+    "afterLocation": "memory.after.mediansBytes.privateBytes",
+    "statistic": "median",
+    "runsPerEndpoint": 3,
+    "beforeBytes": 7289212928,
+    "afterBytes": 1841754112,
+    "savedBytes": 5447458816,
+    "savedPercent": 74.73315527763933,
+    "comparisonKind": "historical endpoint observations; different fixtures/binaries/replay conditions",
+    "controlledEndToEndAb": false,
+    "arithmeticSumOfStageSavingsBytes": 5314054826.666667,
+    "stageSumIsOverallMeasuredSaving": false
+  },
+  "memoryBottleneckBaseline": {
+    "source": "client-memory-breakdown-20261005.json",
+    "measuredAtKst": "2026-10-05T00:50:26.922101+09:00",
+    "statistic": "mean",
+    "runs": 3,
+    "scenario": "fresh_process_title_to_ingame_local_hero_ogre_boss",
+    "latestOptimizedComposition": false,
+    "scope": "After mesh sharing, before hero/particle/NPC/UI optimization; checkpoint net increases, not resource-owned heaps",
+    "stages": [
+      {
+        "key": "startup",
+        "label": "기동·Title·공통 자원",
+        "begin": null,
+        "end": "scene_setup_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 662282240,
+            "medianBytes": 662515712,
+            "minBytes": 661450752,
+            "maxBytes": 662880256
+          },
+          "workingSetBytes": {
+            "meanBytes": 224900437.33333334,
+            "medianBytes": 224890880,
+            "minBytes": 224817152,
+            "maxBytes": 224993280
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 459952128,
+            "medianBytes": 459952128,
+            "minBytes": 459952128,
+            "maxBytes": 459952128
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 30633984,
+            "medianBytes": 30633984,
+            "minBytes": 30633984,
+            "maxBytes": 30633984
+          }
+        },
+        "privateCommitSharePercent": 10.953679397070031
+      },
+      {
+        "key": "skybox",
+        "label": "하늘 cubemap",
+        "begin": "scene_setup_ready",
+        "end": "skybox_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 201863168,
+            "medianBytes": 201871360,
+            "minBytes": 201723904,
+            "maxBytes": 201994240
+          },
+          "workingSetBytes": {
+            "meanBytes": 100990976,
+            "medianBytes": 100978688,
+            "minBytes": 100958208,
+            "maxBytes": 101036032
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 100667392,
+            "medianBytes": 100667392,
+            "minBytes": 100667392,
+            "maxBytes": 100667392
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 100675584,
+            "medianBytes": 100675584,
+            "minBytes": 100675584,
+            "maxBytes": 100675584
+          }
+        },
+        "privateCommitSharePercent": 3.338673892793632
+      },
+      {
+        "key": "map",
+        "label": "맵 전체",
+        "begin": "skybox_ready",
+        "end": "map_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 149233664,
+            "medianBytes": 148963328,
+            "minBytes": 148754432,
+            "maxBytes": 149983232
+          },
+          "workingSetBytes": {
+            "meanBytes": 133087232,
+            "medianBytes": 133148672,
+            "minBytes": 132902912,
+            "maxBytes": 133210112
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 18661376,
+            "medianBytes": 18661376,
+            "minBytes": 18661376,
+            "maxBytes": 18661376
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 65695744,
+            "medianBytes": 65695744,
+            "minBytes": 65695744,
+            "maxBytes": 65695744
+          }
+        },
+        "privateCommitSharePercent": 2.46821915488187
+      },
+      {
+        "key": "enemies",
+        "label": "미니언·몬스터·보스",
+        "begin": "map_ready",
+        "end": "boss_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 994537472,
+            "medianBytes": 994869248,
+            "minBytes": 992944128,
+            "maxBytes": 995799040
+          },
+          "workingSetBytes": {
+            "meanBytes": 513672533.3333333,
+            "medianBytes": 513679360,
+            "minBytes": 513605632,
+            "maxBytes": 513732608
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 476028928,
+            "medianBytes": 476028928,
+            "minBytes": 476028928,
+            "maxBytes": 476028928
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 480649216,
+            "medianBytes": 480649216,
+            "minBytes": 480649216,
+            "maxBytes": 480649216
+          }
+        },
+        "privateCommitSharePercent": 16.448945719366584
+      },
+      {
+        "key": "skills",
+        "label": "스킬 모델·객체·billboard",
+        "begin": "boss_ready",
+        "end": "skill_objects_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 28860416,
+            "medianBytes": 28946432,
+            "minBytes": 28655616,
+            "maxBytes": 28979200
+          },
+          "workingSetBytes": {
+            "meanBytes": 16822272,
+            "medianBytes": 16732160,
+            "minBytes": 16687104,
+            "maxBytes": 17047552
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 11370496,
+            "medianBytes": 11370496,
+            "minBytes": 11370496,
+            "maxBytes": 11370496
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 12996608,
+            "medianBytes": 12996608,
+            "minBytes": 12996608,
+            "maxBytes": 12996608
+          }
+        },
+        "privateCommitSharePercent": 0.47733084935218906
+      },
+      {
+        "key": "particle_setup",
+        "label": "파티클 텍스처·공통 설정",
+        "begin": "skill_objects_ready",
+        "end": "particle_shared_setup_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 14340096,
+            "medianBytes": 14368768,
+            "minBytes": 14262272,
+            "maxBytes": 14389248
+          },
+          "workingSetBytes": {
+            "meanBytes": 7790592,
+            "medianBytes": 7782400,
+            "minBytes": 7749632,
+            "maxBytes": 7839744
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 6291456,
+            "medianBytes": 6291456,
+            "minBytes": 6291456,
+            "maxBytes": 6291456
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 5922816,
+            "medianBytes": 5922816,
+            "minBytes": 5922816,
+            "maxBytes": 5922816
+          }
+        },
+        "privateCommitSharePercent": 0.23717503598949954
+      },
+      {
+        "key": "particles",
+        "label": "파티클 객체·대형 버퍼",
+        "begin": "particle_shared_setup_ready",
+        "end": "ingame_scene_objects",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 2538156032,
+            "medianBytes": 2538242048,
+            "minBytes": 2537975808,
+            "maxBytes": 2538250240
+          },
+          "workingSetBytes": {
+            "meanBytes": 7970816,
+            "medianBytes": 7958528,
+            "minBytes": 7852032,
+            "maxBytes": 8101888
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 2525126656,
+            "medianBytes": 2525126656,
+            "minBytes": 2525126656,
+            "maxBytes": 2525126656
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 3227648,
+            "medianBytes": 3227648,
+            "minBytes": 3227648,
+            "maxBytes": 3227648
+          }
+        },
+        "privateCommitSharePercent": 41.97930392073842
+      },
+      {
+        "key": "heroes",
+        "label": "영웅 모델 2회·컨트롤러 4개",
+        "begin": "ingame_scene_objects",
+        "end": "local_hero_created",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 1141078698.6666667,
+            "medianBytes": 1140965376,
+            "minBytes": 1140445184,
+            "maxBytes": 1141825536
+          },
+          "workingSetBytes": {
+            "meanBytes": 1046504789.3333334,
+            "medianBytes": 1046708224,
+            "minBytes": 1045258240,
+            "maxBytes": 1047547904
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 86986752,
+            "medianBytes": 86986752,
+            "minBytes": 86986752,
+            "maxBytes": 86986752
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 181358592,
+            "medianBytes": 181358592,
+            "minBytes": 181358592,
+            "maxBytes": 181358592
+          }
+        },
+        "privateCommitSharePercent": 18.87263386682474
+      },
+      {
+        "key": "ingame_ui",
+        "label": "인게임 UI·dissolve",
+        "begin": "local_hero_created",
+        "end": "ingame_ui_dissolve_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 315592704,
+            "medianBytes": 315129856,
+            "minBytes": 313995264,
+            "maxBytes": 317652992
+          },
+          "workingSetBytes": {
+            "meanBytes": 154447872,
+            "medianBytes": 154488832,
+            "minBytes": 154312704,
+            "maxBytes": 154542080
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 155725824,
+            "medianBytes": 155725824,
+            "minBytes": 155725824,
+            "maxBytes": 155725824
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": 152723456,
+            "medianBytes": 152723456,
+            "minBytes": 152723456,
+            "maxBytes": 152723456
+          }
+        },
+        "privateCommitSharePercent": 5.219679905157084
+      },
+      {
+        "key": "submission",
+        "label": "GPU 제출·대기·upload 해제",
+        "begin": "ingame_ui_dissolve_ready",
+        "end": "ingame_ready",
+        "metrics": {
+          "privateBytes": {
+            "meanBytes": 263509.3333333333,
+            "medianBytes": 131072,
+            "minBytes": 131072,
+            "maxBytes": 528384
+          },
+          "workingSetBytes": {
+            "meanBytes": 275797.3333333333,
+            "medianBytes": 155648,
+            "minBytes": 139264,
+            "maxBytes": 532480
+          },
+          "dxgiLocalUsageBytes": {
+            "meanBytes": 0,
+            "medianBytes": 0,
+            "minBytes": 0,
+            "maxBytes": 0
+          },
+          "dxgiNonLocalUsageBytes": {
+            "meanBytes": -178548736,
+            "medianBytes": -178679808,
+            "minBytes": -178679808,
+            "maxBytes": -178286592
+          }
+        },
+        "privateCommitSharePercent": 0.004358257825951957
+      }
+    ],
+    "totals": {
+      "privateBytes": {
+        "meanBytes": 6046208000,
+        "medianBytes": 6045003776,
+        "minBytes": 6042890240,
+        "maxBytes": 6050729984
+      },
+      "workingSetBytes": {
+        "meanBytes": 2206463317.3333335,
+        "medianBytes": 2206515200,
+        "minBytes": 2205319168,
+        "maxBytes": 2207555584
+      },
+      "dxgiLocalUsageBytes": {
+        "meanBytes": 3840811008,
+        "medianBytes": 3840811008,
+        "minBytes": 3840811008,
+        "maxBytes": 3840811008
+      },
+      "dxgiNonLocalUsageBytes": {
+        "meanBytes": 855334912,
+        "medianBytes": 855203840,
+        "minBytes": 855203840,
+        "maxBytes": 855597056
+      }
+    }
+  },
+  "latestMeasuredUiAfter": {
+    "source": "ui-bc7-20261005/measurements.json",
+    "statistic": "median",
+    "measuredAtUtc": "2026-10-05T14:43:11.3382452Z",
+    "executableSha256": "e8c0949a0c22a9cb0824bc770592b7dd31329891051f1fb4b0bb891d54c3f462",
+    "scenario": "Same Release executable and UI shader; original assets then BC7 assets, 3 sequential processes each; fixed offline loadout and synthetic particle replay, not network combat",
+    "metrics": {
+      "privateBytes": {
+        "medianBytes": 1841754112,
+        "runsBytes": [
+          1841754112,
+          1845309440,
+          1838985216
+        ]
+      },
+      "workingSetBytes": {
+        "medianBytes": 828833792,
+        "runsBytes": [
+          828743680,
+          828833792,
+          830578688
+        ]
+      },
+      "dxgiLocalUsageBytes": {
+        "medianBytes": 1137410048,
+        "runsBytes": [
+          1137410048,
+          1137410048,
+          1137410048
+        ]
+      },
+      "dxgiNonLocalUsageBytes": {
+        "medianBytes": 143687680,
+        "runsBytes": [
+          143687680,
+          143687680,
+          143687680
+        ]
+      }
+    }
+  },
+  "validatedResourceExamples": {
+    "particleEffectObjects": 72,
+    "particlePooledPairs": 19,
+    "particleReuseCount": 30,
+    "uiUniqueFiles": 21,
+    "uiScreenshotPairs": 32,
+    "uiPlayerDefaultAllocationBytes": 43974656.0,
+    "uiPlayerRetainedUploadAllocationBytes": 38666240.0,
+    "skyBc7ProposedSavedPayloadBytes": 75497472,
+    "skyBc7Applied": false,
+    "dissolveBc4ProposedSavedPayloadBytes": 0
+  },
+  "commits": [
+    {
+      "commit": "ed3428e9e092bbb7f83f8d13f0094aa04b7a3361",
+      "title": "[War Of Dimension 초기 코드 이전 및 개발 환경 구축]"
+    },
+    {
+      "commit": "bf7b4cee2547f91f9f8131d2490022db93eff7fd",
+      "title": "[SLNX 통합 솔루션 구성 및 클라이언트 메시 공유]"
+    },
+    {
+      "commit": "ee60ac1687a83b6830ee573c618b7f7ac4d82b4d",
+      "title": "[영웅 선택 외형 메모리 최적화 및 분석 기록]"
+    },
+    {
+      "commit": "38bb9ee76645b9f7e6cea16cab37d4613c4bb005",
+      "title": "[파티클 선택 로딩 및 공용 GPU 버퍼 풀 최적화]"
+    },
+    {
+      "commit": "076d2692cb843f6263425f66d108983e3bf7e3f9",
+      "title": "[NPC 자원 공유 및 메모리 최적화]"
+    },
+    {
+      "commit": "e85eba42958acfdaff5713eb188d7959b39b2fe8",
+      "title": "[UI BC7 압축으로 클라이언트 메모리 최적화]"
+    }
+  ],
+  "preservedUserFile": {
+    "path": "NewWod.slnx",
+    "sha256": "f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562"
+  }
+}
