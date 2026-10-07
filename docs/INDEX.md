@@ -5,7 +5,7 @@
 | 목적 | 문서 |
 |---|---|
 | 공통 에이전트 규칙 | [AGENTS.md](../AGENTS.md) |
-| 테스트 편의성 개선·에이전트/메모리 최종 정리 | [최종 보고서](portfolio/FINAL_REFACTORING_REPORT.md), [수치·출처 근거](portfolio/evidence/final-report-20261006.json) |
+| 테스트 편의성 개선·에이전트/메모리 최종 정리 | [최종 보고서](portfolio/FINAL_REFACTORING_REPORT.md), [수치·출처 근거](portfolio/evidence/final-report-20261006.json), [로딩 실측](portfolio/evidence/client-loading-20261007.json) |
 | 작업별 필수 지침 | [작업 지침 인덱스](guides/INDEX.md) |
 | 빌드·실행·중지 | [개발 환경](development/SETUP.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |

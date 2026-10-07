@@ -3,7 +3,7 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/Client/">
-    <Project Path="Client/WarOfDimension/WarOfDimension.vcxproj" />
+    <Project Path="Client/WarOfDimension/WarOfDimension.vcxproj" Id="1eb15378-08e5-4968-8822-783e90677599" />
   </Folder>
   <Folder Name="/Development/">
     <File Path="docs/development/SETUP.md" />
@@ -15,7 +15,7 @@
   <Folder Name="/Servers/">
     <Project Path="Server/ServerCore/ServerCore.vcxproj" Id="9f0e573d-6ee7-4658-ab7f-a17057b0d76d" />
     <Project Path="Server/ServerCore/tests/ServerCore.Tests.vcxproj" Id="83b27745-994d-4ca8-86c7-bb06c00e503c" />
-    <Project Path="Server/Game_Server/Game_Server.vcxproj" />
-    <Project Path="Server/Lobby_Server/Lobby_Server.vcxproj" />
+    <Project Path="Server/Game_Server/Game_Server.vcxproj" Id="f0157282-10fd-41eb-a7fb-00cfb0684521" />
+    <Project Path="Server/Lobby_Server/Lobby_Server.vcxproj" Id="4796cfd7-1a27-4d78-8caf-189cc71132f1" />
   </Folder>
 </Solution>

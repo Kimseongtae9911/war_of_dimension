@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "kind": "final_refactoring_report_summary_of_existing_evidence",
+  "kind": "final_refactoring_report_with_scene_loading_comparison",
   "preparedDateKst": "2026-10-06",
   "referenceCommit": "e85eba42958acfdaff5713eb188d7959b39b2fe8",
   "githubMainVerified": "e85eba42958acfdaff5713eb188d7959b39b2fe8",
-  "newRuntimeMeasurement": false,
+  "newRuntimeMeasurement": true,
   "unit": "bytes; MiB = bytes / 1048576",
-  "scope": "Eight major categories; existing stage reports and measurements; independent experiment baselines are not summed",
+  "scope": "Eight major categories; existing stage memory reports and measurements plus new scene loading comparison; independent experiment baselines are not summed",
   "purpose": "멀티플레이 테스트 편의성 개선의 일부로 에이전트 환경 구축 및 메모리 최적화; 단일 클라이언트의 큰 메모리 소비로 4개 동시 실행이 불가하다는 사용자 제약",
   "fourGameClientsConcurrentExecutionValidated": false,
   "categories": [
@@ -330,7 +330,7 @@
   ],
   "report": {
     "path": "docs/portfolio/FINAL_REFACTORING_REPORT.md",
-    "sha256": "fe44b417135d40149e43e49af14fbdce69b920d28ecda70574c6b8a9a110d28f"
+    "sha256": "e67de21b7d534bafd2d12d75c7f82849f19bbfab5740c808d8e78dea7594a071"
   },
   "sourceDocumentsSha256": {
     "docs/development/SETUP.md": "c51ba3f7cd0f77eedeecb7662b5e655b089497bbd798ff883354fc231c9c0144",
@@ -914,5 +914,37 @@
   "preservedUserFile": {
     "path": "NewWod.slnx",
     "sha256": "f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562"
+  },
+  "updatedDateKst": "2026-10-07",
+  "newRuntimeMeasurementScope": "scene_loading_only; 기존 메모리 수치 재측정 없음",
+  "loadingComparison": {
+    "path": "docs/portfolio/evidence/client-loading-20261007.json",
+    "sha256": "15bca2db40bd2b25ae9126d0e9d9441e8f8f44ca1daa7bbda4d1b1eb2c161c60",
+    "results": [
+      {
+        "label": "title_to_lobby",
+        "name": "타이틀→로비",
+        "beforeMedianMs": 8918.476,
+        "afterMedianMs": 7103.1972,
+        "savedMs": 1815.278800000001,
+        "savedPercent": 20.354136738160207
+      },
+      {
+        "label": "lobby_to_ingame",
+        "name": "로비→인게임",
+        "beforeMedianMs": 40172.8189,
+        "afterMedianMs": 15545.3703,
+        "savedMs": 24627.448599999996,
+        "savedPercent": 61.303760289522515
+      },
+      {
+        "label": "ingame_to_lobby",
+        "name": "인게임→로비",
+        "beforeMedianMs": 14765.3115,
+        "afterMedianMs": 8056.7306,
+        "savedMs": 6708.5809,
+        "savedPercent": 45.43474006626951
+      }
+    ]
   }
 }

@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "kind": "final_client_scene_loading_comparison",
+  "dateKst": "2026-10-07",
+  "status": "complete",
+  "scope": "메모리 최적화 시작 직전/현재의 실제 클라이언트 장면 자원 로딩 비교. 서버 대기 시간 제외.",
+  "environment": {
+    "os": "Windows 11",
+    "cpu": "AMD Ryzen 5 7500F",
+    "gpu": "NVIDIA GeForce RTX 4070 SUPER",
+    "driver": "32.0.15.9186",
+    "build": "Release x64 MSVC v145 C++20",
+    "resolution": [
+      1920,
+      1080
+    ]
+  },
+  "method": {
+    "clock": "std::chrono::steady_clock",
+    "runsPerVersion": 5,
+    "warmupRunsPerVersionExcluded": 1,
+    "executionOrder": [
+      "before",
+      "after",
+      "before",
+      "after",
+      "before",
+      "after",
+      "before",
+      "after",
+      "before",
+      "after"
+    ],
+    "freshProcesses": true,
+    "coldBoot": false,
+    "hiddenWindow": true,
+    "loadingRenderWorkerEnabled": true,
+    "clientMemoryProfileEnabled": false,
+    "networkWaitExcluded": true,
+    "userInputDisabled": true,
+    "start": "ChangeScene 호출 직전",
+    "end": "원래 로딩 worker join과 BGM 선택 후, 목적지 첫 FrameAdvance의 GPU fence 완료",
+    "lobbyToIngame": "동일 실행의 Lobby→Ready와 Ready→Ingame 시간을 합산한 뒤 5회 중앙값. 매칭·선택 대기 제외.",
+    "ingameBeforeReturnFrames": 10,
+    "localId": 0,
+    "jobs": [
+      0,
+      1,
+      2,
+      4
+    ],
+    "skills": [
+      [
+        48,
+        53,
+        54,
+        58
+      ],
+      [
+        60,
+        65,
+        69,
+        70
+      ],
+      [
+        72,
+        79,
+        81,
+        82
+      ],
+      [
+        24,
+        27,
+        29,
+        30
+      ]
+    ],
+    "appearances": "영웅 세 명 모두 기존 LOCAL_TEST 기본 외형; 두 버전 동일",
+    "baselineAssetRestoration": {
+      "uiFiles": 21,
+      "modelTextureFiles": 25
+    }
+  },
+  "versions": {
+    "before": {
+      "commit": "ed3428e9e092bbb7f83f8d13f0094aa04b7a3361",
+      "executableSha256": "ea23d2f14237acf1851b4b90b085499eab6ead157a4df333acb4d9b3ec5aadd2",
+      "harnessSha256": "e64ffeceec3182aa266721eec6498decbb39c78ee151eb1611d4853983bff9a6",
+      "summary": {
+        "title_to_lobby": {
+          "medianMs": 8918.476,
+          "minMs": 8330.4717,
+          "maxMs": 10100.3165,
+          "runs": 5
+        },
+        "lobby_to_ingame": {
+          "medianMs": 40172.8189,
+          "minMs": 37743.6599,
+          "maxMs": 42656.0546,
+          "runs": 5
+        },
+        "ingame_to_lobby": {
+          "medianMs": 14765.3115,
+          "minMs": 14438.0527,
+          "maxMs": 15552.8339,
+          "runs": 5
+        }
+      }
+    },
+    "after": {
+      "commit": "d02737a59e8d1c5434941ab6229d46922621f999",
+      "executableSha256": "60cb1129a12dd9bd7559e5a8482cd368ffa3a9f3c423a3017a4c29b65f52461b",
+      "harnessSha256": "e64ffeceec3182aa266721eec6498decbb39c78ee151eb1611d4853983bff9a6",
+      "summary": {
+        "title_to_lobby": {
+          "medianMs": 7103.1972,
+          "minMs": 6884.3162,
+          "maxMs": 7551.8708,
+          "runs": 5
+        },
+        "lobby_to_ingame": {
+          "medianMs": 15545.3703,
+          "minMs": 14628.5883,
+          "maxMs": 15665.7652,
+          "runs": 5
+        },
+        "ingame_to_lobby": {
+          "medianMs": 8056.7306,
+          "minMs": 7170.1742,
+          "maxMs": 8846.6111,
+          "runs": 5
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "label": "title_to_lobby",
+      "name": "타이틀→로비",
+      "beforeMedianMs": 8918.476,
+      "afterMedianMs": 7103.1972,
+      "savedMs": 1815.278800000001,
+      "savedPercent": 20.354136738160207
+    },
+    {
+      "label": "lobby_to_ingame",
+      "name": "로비→인게임",
+      "beforeMedianMs": 40172.8189,
+      "afterMedianMs": 15545.3703,
+      "savedMs": 24627.448599999996,
+      "savedPercent": 61.303760289522515
+    },
+    {
+      "label": "ingame_to_lobby",
+      "name": "인게임→로비",
+      "beforeMedianMs": 14765.3115,
+      "afterMedianMs": 8056.7306,
+      "savedMs": 6708.5809,
+      "savedPercent": 45.43474006626951
+    }
+  ],
+  "rawResultReferencesIgnoredByGit": [
+    {
+      "path": "artifacts/logs/client-loading/measured-before-1.json",
+      "sha256": "e494bd00b9cfd90cb096a8603ce2748207600f6e10abade0058ce3eb81d7a0a2",
+      "version": "before",
+      "run": 1
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-before-2.json",
+      "sha256": "738f568f10ad69f809a2cc68c9f0c48f46b58f301a8de7fe58936469405fc074",
+      "version": "before",
+      "run": 2
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-before-3.json",
+      "sha256": "75e92758808330026580739ab44990bb963883edc68e05e8f6eef27ddb6bc90d",
+      "version": "before",
+      "run": 3
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-before-4.json",
+      "sha256": "c9438f628ac39e83ced0418387c2d4b5bdfc78b251000639e18fa0af1bc3ab39",
+      "version": "before",
+      "run": 4
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-before-5.json",
+      "sha256": "a29cc6ef69a7a89b7a926c7f78b4c13fd770e8e888fce4c29cd3dc80d59d6d59",
+      "version": "before",
+      "run": 5
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-after-1.json",
+      "sha256": "ef3a657e99422849e9843c77568c46b016e3c33c01d18e03c8e52c97055d4aa2",
+      "version": "after",
+      "run": 1
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-after-2.json",
+      "sha256": "75be066bf211e1e57da6bab63570d703dadafb808f3e0026b56fb675de81baa3",
+      "version": "after",
+      "run": 2
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-after-3.json",
+      "sha256": "3cde362f4bec866969522c2e7b0513c2b8aa0ddb386c8e846b338c73cad8f6db",
+      "version": "after",
+      "run": 3
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-after-4.json",
+      "sha256": "3f43d4fa639e7ae62154c8844844bf516e343bf0211605a31a6a89427f8043fe",
+      "version": "after",
+      "run": 4
+    },
+    {
+      "path": "artifacts/logs/client-loading/measured-after-5.json",
+      "sha256": "f8b818d3c4a51c7897dd33eb06d799097437a5faf5c9fdfba6e1db25633f5bf3",
+      "version": "after",
+      "run": 5
+    }
+  ],
+  "instrumentation": {
+    "location": "격리된 artifacts/loading-benchmark의 두 source snapshot; 제품 소스 변경 없음",
+    "commonHarnessSource": "#include \"stdafx.h\"\n#include \"LoadingBenchmark.h\"\n#include \"GameFramework.h\"\n#include \"NetworkManager.h\"\n#include \"SceneManager.h\"\n#include \"SoundManager.h\"\n#include <chrono>\n#include <filesystem>\n#include <iomanip>\n#include <fstream>\n#include <stdexcept>\n#include <psapi.h>\n#pragma comment(lib,\"psapi.lib\")\n\nnamespace { bool active=false; }\nbool LoadingBenchmarkActive() { return active; }\n\nint CGameFramework::BenchmarkSceneLoading(const wchar_t* reportPath)\n{\n    active=true;\n    _set_error_mode(_OUT_TO_STDERR);\n    _set_abort_behavior(0,_WRITE_ABORT_MSG|_CALL_REPORTFAULT);\n    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);\n    using Clock=std::chrono::steady_clock;\n    struct Result { const char* label; double readyMs,loaderMs; unsigned long long privateBytes; };\n    std::vector<Result> results;\n    std::ofstream output;\n    output.open(std::filesystem::path(reportPath));\n    if (!output) return 2;\n    auto write=[&](bool ok,const char* phase) {\n        output.close();\n        output.open(std::filesystem::path(reportPath),std::ios::trunc);\n        output << std::setprecision(12) << \"{\\\"ok\\\":\" << (ok?\"true\":\"false\") << \",\\\"phase\\\":\\\"\" << phase\n               << \"\\\",\\\"offline\\\":true,\\\"loadingThread\\\":true,\\\"width\\\":\" << FRAME_BUFFER_WIDTH << \",\\\"height\\\":\" << FRAME_BUFFER_HEIGHT << \",\\\"segments\\\":[\";\n        for (size_t i=0;i<results.size();++i) {\n            if (i) output << ',';\n            auto& r=results[i]; output << \"{\\\"label\\\":\\\"\" << r.label << \"\\\",\\\"readyMs\\\":\" << r.readyMs << \",\\\"loaderMs\\\":\" << r.loaderMs << \",\\\"privateBytes\\\":\" << r.privateBytes << '}';\n        }\n        output << \"]}\\n\"; output.flush();\n    };\n    try {\n        auto net=NetworkManager::GetInstance();\n        net->Initialize(\"\"); net->SetId(0);\n        net->readySceneInfo->playerJobs={0,1,2,4};\n        const int skills[4][4]={{48,53,54,58},{60,65,69,70},{72,79,81,82},{24,27,29,30}};\n        for (int player=0;player<4;++player)\n            for (int slot=0;slot<4;++slot) net->readySceneInfo->selectSkills[player][slot]=skills[player][slot];\n        ModelCustomize appearance{0,1,0,0,1,1,3,1,0,1,0,0,1,1,1,1,0,1,3,2,2,2,2,1,1,1,1,1};\n        for (int slot=0;slot<3;++slot) net->m_ArrayInGameClientsCustom[slot]=appearance;\n#ifdef LOADING_BENCH_OPTIMIZED\n        for (int slot=0;slot<3;++slot) net->StoreIngameAppearance(slot,appearance);\n#endif\n        for (int slot=0;slot<5;++slot) {\n            net->structureInfo[slot].active=false; net->structureInfo[slot].broken=false;\n            net->structureInfo[slot].curHp=net->structureInfo[slot].maxHp=100;\n        }\n        SceneManager::GetInstance()->SetOrder(ORDER::PLAYER1);\n        strcpy_s(SceneManager::GetInstance()->m_Name,NAME_SIZE,\"DummyLoad\");\n        const auto instance=GetModuleHandle(nullptr); ghAppInstance=instance;\n        RECT rectangle{0,0,FRAME_BUFFER_WIDTH,FRAME_BUFFER_HEIGHT};\n        AdjustWindowRect(&rectangle,WS_OVERLAPPEDWINDOW,FALSE);\n        auto window=CreateWindowEx(0,L\"STATIC\",L\"WOD loading benchmark\",WS_OVERLAPPEDWINDOW,\n            0,0,rectangle.right-rectangle.left,rectangle.bottom-rectangle.top,nullptr,nullptr,instance,nullptr);\n        if (!window || !OnCreate(instance,window)) throw std::runtime_error(\"benchmark initialization\");\n        net->playerScene=SCENEKIND::TITLE;\n        for (int frame=0;frame<2;++frame) FrameAdvance();\n        WaitForGpuComplete(); write(false,\"title_ready\");\n        auto transition=[&](SCENEKIND scene,const char* label,const wchar_t* bgm,float volume) {\n            const auto started=Clock::now();\n            net->playerScene=scene;\n            ChangeScene(scene);\n            const auto loaded=Clock::now();\n            if (SceneManager::GetInstance()->m_nCurScene!=scene) throw std::runtime_error(\"scene mismatch\");\n            SoundManager::GetInstance()->Play_BGM(bgm,volume);\n            FrameAdvance(); WaitForGpuComplete();\n            if (FAILED(m_pd3dDevice->GetDeviceRemovedReason())) throw std::runtime_error(\"GPU device removed\");\n            PROCESS_MEMORY_COUNTERS_EX memory{}; memory.cb=sizeof(memory);\n            GetProcessMemoryInfo(GetCurrentProcess(),reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memory),sizeof(memory));\n            const auto finished=Clock::now();\n            results.push_back({label,std::chrono::duration<double,std::milli>(finished-started).count(),\n                std::chrono::duration<double,std::milli>(loaded-started).count(),memory.PrivateUsage});\n            write(false,label);\n        };\n        transition(SCENEKIND::LOBBY,\"title_to_lobby\",L\"LobbyBGM.wav\",0.2f);\n        transition(SCENEKIND::READY,\"lobby_to_ready\",L\"ReadyBGM.ogg\",1.4f);\n        transition(SCENEKIND::INGAME,\"ready_to_ingame\",L\"IngameBGM.mp3\",0.1f);\n        for (int frame=0;frame<10;++frame) FrameAdvance();\n        WaitForGpuComplete();\n        transition(SCENEKIND::LOBBY,\"ingame_to_lobby\",L\"LobbyBGM.wav\",0.2f);\n        write(true,\"complete\"); return 0;\n    } catch (const std::exception& error) {\n        std::cerr << \"Loading benchmark failed: \" << error.what() << '\\n';\n        write(false,\"failed\"); return 1;\n    }\n}\n",
+    "patches": {
+      "before": [
+        {
+          "path": "GameFramework.h",
+          "beforeSha256": "02c4b66b9d1fb71509464f2e280270370a97406028de3b55ca300da3f0299aaf",
+          "afterSha256": "e629d7eb42d3026f61167ade69baf1c9765b7a878ab692f320d3f8df0e174c5c"
+        },
+        {
+          "path": "GameFramework.cpp",
+          "beforeSha256": "316de04d822fc3603bd1feec7453b2b31df91718ed78a17b6fe81d9bc10b7197",
+          "afterSha256": "f17b8743264cc447f13abdd2716e14435d9a64278dcb307d5641d7aaa0253b22"
+        },
+        {
+          "path": "NetworkManager.cpp",
+          "beforeSha256": "6a56939a92ea13e9a837fe1f89aa48ddc4434383c289f2e91bb3ffe9fd871b28",
+          "afterSha256": "88cf87c61449ce652d9312b6eb755b533a3fc6ed46722119dcddf0de378f9bd0"
+        },
+        {
+          "path": "WarOfDimension.cpp",
+          "beforeSha256": "b8239fcada97919455bce5927e69c01d064864b881d20474538bb4f9313f0c3b",
+          "afterSha256": "306d41b34e156b3de248292a827907bd9c87dc3f26d93f0e72df47ef5f236e1e"
+        },
+        {
+          "path": "WarOfDimension.vcxproj",
+          "beforeSha256": "765bd1dd61afe30deb8002903a0be6960f6053b48e546f30ebcb36cef0d08395",
+          "afterSha256": "5fe3a37d2279eb8079079d5fb47b66c0730f4f1d9930526b9363a1956c61efeb"
+        }
+      ],
+      "after": [
+        {
+          "path": "GameFramework.h",
+          "beforeSha256": "5a8d0eb0391f923273f246f5c91486633d3de4c1fde79fe2a951e83e44874718",
+          "afterSha256": "00e61ff4a306e84d8f3ef4043250d8bff820707134b3282ffdea69d776741f2b"
+        },
+        {
+          "path": "GameFramework.cpp",
+          "beforeSha256": "7e2b14a927a9da22444919d65a20b5d1e15e010595fe7980e6fdf6aa442e4843",
+          "afterSha256": "aaf454b4625b843d3e085998b53a626f6e44cfa9d119338a75e8660cae213011"
+        },
+        {
+          "path": "NetworkManager.cpp",
+          "beforeSha256": "0fccd4d49327c41bd6c28c78259aaf34db1d7bd7d54bb650c6a375a2df177e5f",
+          "afterSha256": "4827ddeccd59149915db4bc4cd3eb806e69f3c4449ca2b5fea3b8272ad3ea7ff"
+        },
+        {
+          "path": "WarOfDimension.cpp",
+          "beforeSha256": "c95ed20c98a6339c9cd40eaaef455071316e972226bb98062040ac7a855bc5fa",
+          "afterSha256": "cf4a55b31381f4310ceb87951d6470bb356eee3b444bd0755dd664a4d33f7d9a"
+        },
+        {
+          "path": "WarOfDimension.vcxproj",
+          "beforeSha256": "1ef846977c3f4955a72d1766ea661a88a8b8d47e3c9476ac34ce4998f2ed8dfd",
+          "afterSha256": "94a0c64fe35e590c979911a51eccb689f96638020a6a046f32ff5753c61bd2c9"
+        }
+      ]
+    },
+    "assetSnapshotManifestSha256": "a3b1b94b550f2e3af777fb16fbcc5f787fc7d851865ca4de24a90e999874cbe9"
+  },
+  "limits": [
+    "cold boot·캐시 비움 측정 아님",
+    "로그인·매칭·선택·서버 응답 대기 제외",
+    "한 가지 확정 외형·스킬·역할 fixture",
+    "전투 전체·4클라이언트 동시 실행 미검증"
+  ],
+  "commitCreated": false,
+  "pushed": false
+}
