@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+#include "pch.h"
+#include <Protocol/Validation.h>
 #include "CNetworkMgr.h"
 #include "CPacketMgr.h"
 #include "CUserMgr.h"
@@ -32,6 +33,7 @@ namespace wod_server {
 	void CClient::Initialize(const SOCKET& socket)
 	{
 		m_packetSender->Initailize(socket);
+        m_isDisconnected.store(false);
 		m_socketID = static_cast<int>(socket);
 
 		stateLock.lock();
@@ -45,36 +47,20 @@ namespace wod_server {
 
 	void CClient::RecvPacket(int recvBytes, OverlapEx* overEx)
 	{
-		int remaindata = recvBytes + m_packetSender->GetSession()->GetRemainData();
-		char* packet = overEx->GetSendBuf();
 
-		bool needProcess = false;
-		while (remaindata > 0) {
-			BASE_PACKET* basePacket = reinterpret_cast<BASE_PACKET*>(packet);
+        auto session = m_packetSender->GetSession();
+        const auto generation = session->Generation();
+        std::vector<wod::core::FrameDecoder::Frame> frames;
+        if (!session->Decode(recvBytes, *overEx, frames)) { Disconnect(); return; }
+        for (auto& frame : frames) {
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyClient)) { Disconnect(); return; }
+            m_jobQueue->PushJob([this, session, generation, frame = std::move(frame)]() mutable {
+                session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), this); });
+            });
+        }
+        session->Recv();
+        if (!frames.empty()) GPacketJobQueue->AddSessionQueue(this);
 
-			if (basePacket->size <= remaindata) {
-				// 개선 필요. 매번 동적할당 일어남
-				std::unique_ptr<char[]> packetCopy = std::make_unique<char[]>(basePacket->size);
-				memcpy(packetCopy.get(), basePacket, basePacket->size);
-
-				m_jobQueue->PushJob([this, p = std::move(packetCopy)]() {
-					CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(p.get()), this);
-					});
-				
-				packet += basePacket->size;
-				remaindata -= basePacket->size;
-				needProcess = true;
-			}
-			else
-				break;
-		}
-		m_packetSender->GetSession()->SetRemainData(remaindata);
-		if (remaindata > 0)
-			memmove(overEx->GetSendBuf(), packet, remaindata);
-		m_packetSender->GetSession()->Recv();
-
-		if(needProcess)
-			GPacketJobQueue->AddSessionQueue(this);
 	}
 
 	void CClient::Move()
@@ -124,6 +110,8 @@ namespace wod_server {
 			m_viewList->ClearViewList();
 
 			m_socketID = -1;
+            m_packetSender->GetSession()->Invalidate();
+            m_jobQueue->Clear();
 			m_packetSender->Reset();
 			m_transform->Reset();
 			m_id = -1;
@@ -157,11 +145,11 @@ namespace wod_server {
 
 	void CClient::Disconnect()
 	{
-		OverlapEx* over = Resource::GetOverObjectFromPool();
-		over->SetOP(OP_TYPE::OP_DISCONNECT);
-		if (!SocketUtil::DisconnectEx(m_packetSender->GetSession()->GetSocket(), &over->GetOver(), TF_REUSE_SOCKET, NULL) &&
-			WSA_IO_PENDING != WSAGetLastError() && ERROR_IO_PENDING != WSAGetLastError()) {
-			SocketUtil::PrintError("Disconnect");
-		}
+        auto session = m_packetSender->GetSession();
+        session->Invalidate();
+        auto* over = Resource::GetOverObjectFromPool();
+        over->SetOP(OP_TYPE::OP_DISCONNECT);
+        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::overExPool.push(over);
+
 	}
 }

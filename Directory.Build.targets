@@ -1,8 +1,11 @@
 <Project>
   <ItemDefinitionGroup Condition="'$(WodCoreProject)' == 'true'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WodRepositoryRoot)Server\Game_Server\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WodRepositoryRoot)Server\ServerCore\include;$(WodRepositoryRoot)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectName)' == 'Game_Server' Or '$(MSBuildProjectName)' == 'Lobby_Server' Or '$(MSBuildProjectName)' == 'WarOfDimension'">
+    <ClCompile><AdditionalIncludeDirectories>$(WodRepositoryRoot)Server\Game_Server\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(MSBuildProjectName)' == 'WarOfDimension'">
     <Link>

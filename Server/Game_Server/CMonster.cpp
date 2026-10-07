@@ -12,6 +12,9 @@ namespace wod_server {
 		if (nullptr == npcCsv)
 			return;
 
+        if (_posIndex >= npcCsv->respawnPos.size() || _posIndex >= npcCsv->respawnLook.size())
+            throw std::out_of_range("NPC spawn index");
+
 		uint32_t maxHp = static_cast<uint32_t>(npcCsv->BaseHp) + static_cast<uint32_t>((CGameMgr::GetInstance()->GetGameTime(m_matchNum) / TimeUtil::Min) * npcCsv->HpIncrease);
 		const auto monster = static_cast<CMonster*>(CObjectMgr::GetInstance()->GetNpc(m_matchNum, monsterId).get());
 

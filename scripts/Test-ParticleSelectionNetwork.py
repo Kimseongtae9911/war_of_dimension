@@ -41,6 +41,7 @@ def until(stream, wanted):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--boss-job', type=int, choices=(4, 5), default=4)
+    parser.add_argument('--load-complete', action='store_true', help='로딩 완료와 초기 NPC/쿨타임 응답까지 검사')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     with ExitStack() as stack:
@@ -116,6 +117,15 @@ def main():
             if skills[3][0] != boss_raw + 1 or skills[3][3] != boss_begin + 9 or skills[2][3] != 94:
                 raise RuntimeError('Manual selection overwritten or ultimate index changed')
             results.append({'slot': slot, 'jobs': jobs, 'skillsBeforeStart': skills})
+        if args.load_complete:
+            for slot, game in slots.items():
+                game.sendall(packet(8, struct.pack('<i',slot)))
+            for slot, game in slots.items():
+                initial = set()
+                while not {9,11}.issubset(initial):  # SC_COOLTIME + SC_ADD_NPC
+                    kind, data = receive(game)
+                    initial.add(kind)
+                results[slot]['loadCompleteConfirmed'] = True
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps({'ok': True, 'splitReadyHeader': True,
             'bossJob': args.boss_job, 'clients': results}, indent=2) + '\n', encoding='utf-8')

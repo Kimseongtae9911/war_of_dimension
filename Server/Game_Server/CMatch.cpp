@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "CMatch.h"
 #include "ClientInfos.h"
 #include "Stats.h"
@@ -60,8 +60,10 @@ namespace wod_server {
 	{
 		Update();
 
-		if (!IsLoadComplete())
-			return;
+		if (!IsLoadComplete()) {
+            network::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::PassedTimeMSec(50), EVENT_TYPE::EV_LOADING_UPDATE, 0 });
+            return;
+        }
 
 		// 스킬 쿨타임, 마나 소모량 세팅
 		for (int id : m_clientid) 
@@ -207,7 +209,7 @@ namespace wod_server {
 			m_sceneType = ESceneType::LoadingScene;
 
 			//Initialize Client Position
-			for (int i = 0; i < MAX_PLAYER; ++i)
+			for (size_t i = 0; i < ClientInfos::HERO_START_POS.size(); ++i)
 				CObjectMgr::GetInstance()->GetClient(m_clientid[i])->SetPos(ClientInfos::HERO_START_POS[i]);
 
 			CObjectMgr::GetInstance()->GetClient(m_clientid[3])->SetPos(ClientInfos::BOSS_START_POS);
@@ -332,8 +334,10 @@ namespace wod_server {
 		}
 
 		//Npc Update
-		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i)
-			CObjectMgr::GetInstance()->GetNpc(matchNum, i)->Update(elapsedTime);
+		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
+            const auto npc = CObjectMgr::GetInstance()->GetNpc(matchNum,i);
+            if (npc->active.load()) npc->Update(elapsedTime);
+        }
 
 		//골드 지급
 		if (now - m_lastGoldUpdateTime >= std::chrono::milliseconds(300))

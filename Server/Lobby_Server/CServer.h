@@ -6,12 +6,15 @@ namespace wod_server {
     {
     public:
         bool Initialize();
+
         bool Release();
         void Run();
 
     private:
-        std::vector<std::thread> m_iocpThreads;
-        std::vector<std::thread> m_workerThreads;
+        bool m_transportReady = false;
+        bool m_matchReady = false;
+        bool m_packetReady = false;
+
     };
 
 }

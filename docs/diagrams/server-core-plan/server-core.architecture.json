@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "ServerCore 공통화 설계안 · 미구현",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kimseongtae9911/war_of_dimension",
+      "revision": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1"
+    },
+    "viewBox": [1200, 740]
+  },
+  "components": [
+    { "id": "lobby-app", "type": "backend", "label": "Lobby_Server", "sublabel": "유저 · 매칭 · DB", "pos": [60, 170], "size": [240, 90], "sources": [{ "path": "Server/Lobby_Server/CNetworkMgr.cpp", "label": "현재 로비 구현" }] },
+    { "id": "game-app", "type": "backend", "label": "Game_Server", "sublabel": "월드 · NPC · 게임 규칙", "pos": [900, 170], "size": [240, 90], "sources": [{ "path": "Server/Game_Server/CNetworkMgr.cpp", "label": "현재 게임 구현" }] },
+    { "id": "core-library", "type": "backend", "label": "ServerCore", "sublabel": "통신 · 작업 큐 · 자원 수명", "tag": "신규 정적 라이브러리", "pos": [475, 365], "size": [250, 110] },
+    { "id": "os-network", "type": "external", "label": "Winsock / IOCP", "sublabel": "Windows 비동기 I/O", "pos": [495, 640], "size": [210, 70] },
+    { "id": "wire-contract", "type": "messagebus", "label": "Shared/Protocol", "sublabel": "패킷 선언 · packing 유지", "tag": "헤더 계약 분리", "pos": [475, 40], "size": [250, 90], "sources": [{ "path": "Server/Game_Server/protocol.h", "label": "현재 공통 패킷 선언" }] }
+  ],
+  "connections": [
+    { "id": "lobby-core", "from": "lobby-app", "to": "core-library", "label": "공통 기반 사용", "variant": "emphasis" },
+    { "id": "game-core", "from": "game-app", "to": "core-library", "label": "공통 기반 사용", "variant": "emphasis" },
+    { "id": "core-os", "from": "core-library", "to": "os-network", "label": "비동기 I/O", "labelDy": 24 },
+    { "id": "lobby-contract", "from": "lobby-app", "to": "wire-contract", "label": "패킷 계약 사용", "variant": "dashed" },
+    { "id": "game-contract", "from": "game-app", "to": "wire-contract", "label": "패킷 계약 사용", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "공통화", "items": ["같은 소스와 정적 라이브러리를 두 서버에 연결", "서버별 큐 처리 예산은 어댑터에서 지정"] },
+    { "dot": "emerald", "title": "서버별 책임", "items": ["콘텐츠 · DB · NPC 동작은 각 서버에 유지", "프로세스와 월드 상태는 독립적으로 소유"] },
+    { "dot": "amber", "title": "후속 단계", "items": ["Shared/Protocol은 로비 · 게임 · 클라이언트가 사용", "새 더미 도구와 월드 관찰 기능은 2~4단계"] }
+  ]
+}

@@ -8,7 +8,7 @@
 #include <vector>
 #include <chrono>
 #include <cstdint>
-#include "protocol.h"
+#include <Protocol/protocol.h>
 
 #include <iostream>
 #include <ranges>

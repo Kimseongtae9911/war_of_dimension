@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "CPacketMgr.h"
 #include "CMatchMgr.h"
 #include "CNetworkMgr.h"
@@ -37,11 +37,12 @@ namespace wod_server {
 			m_randomEngine = std::mt19937(std::random_device{}());
 
 			std::fstream in("Resource/CustomizeNumber.txt");
+            if (!in) throw std::runtime_error("missing Resource/CustomizeNumber.txt");
 			std::string temp;
 			for (int i = 0; i < m_shopMaxNums.size(); ++i) {
-				in >> temp;
+                if (!(in >> temp)) throw std::runtime_error("incomplete CustomizeNumber.txt");
 				if (temp == "#" || temp == "") {
-					in >> temp;
+	                if (!(in >> temp)) throw std::runtime_error("incomplete CustomizeNumber.txt");
 					--i;
 					continue;
 				}

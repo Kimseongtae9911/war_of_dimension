@@ -1,4 +1,6 @@
-﻿#include "pch.h"
+#include "pch.h"
+#include <ServerCore/Session.h>
+#include "Resource.h"
 #include "CServer.h"
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
@@ -14,6 +16,7 @@ namespace wod_server {
 	{
 		LogPrinter::PrintMsg("Server Initialize Start");
 		SocketUtil::Startup();
+        m_transportReady = true;
 
 		if (!network::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("NetworkMgr Initialize Fail");
@@ -24,11 +27,13 @@ namespace wod_server {
 			LogPrinter::PrintMsg("MatchMgr Initialize Fail");
 			return false;
 		}
+        m_matchReady = true;
 
 		if (!CPacketMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("PacketMgr Initialize Fail");
 			return false;
 		}
+        m_packetReady = true;
 
 		if (!CUserMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("UserMgr Initialize Fail");
@@ -56,64 +61,38 @@ namespace wod_server {
 
 	bool CServer::Release()
 	{
-		LogPrinter::PrintMsg("Server Release");
-
-		if (!network::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("NetworkMgr Release Fail");
-			return false;
-		}
-
-		if (!match::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("MatchMgr Release Fail");
-			return false;
-		}
-
-		if (!CPacketMgr::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("PacketMgr Release Fail");
-			return false;
-		}
-
-		if (!CUserMgr::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("UserMgr Release Fail");
-			return false;
-		}
-
-		SocketUtil::Cleanup();
-		return true;
+        if (!m_transportReady) return true;
+        bool ok = true;
+        ok = network::GetInstance()->Release() && ok;
+        if (std::exchange(m_matchReady, false)) ok = match::GetInstance()->Release() && ok;
+        if (std::exchange(m_packetReady, false)) ok = CPacketMgr::GetInstance()->Release() && ok;
+        ok = CUserMgr::GetInstance()->Release() && ok;
+        SocketUtil::Cleanup(); m_transportReady = false; return ok;
 	}
 
 	void CServer::Run()
 	{
-		unsigned int threadNum = std::thread::hardware_concurrency() / 2;
-
-		m_iocpThreads.reserve(threadNum);
-		for (unsigned int i = 0; i < 4; ++i) {
-			m_iocpThreads.emplace_back([this]() {network::GetInstance()->IOCPFunc(); });
-		}
-
-		for (unsigned int i = 0; i < 1; ++i) {
-			m_workerThreads.emplace_back([this]() {GPacketJobQueue->ProcessJob(); });
-		}
-
-		//DataBase
+        wod::core::ProcessStopSignal signal;
+        const unsigned int count = 4u;
+        const auto failure = [](std::exception_ptr error) {
+            try { std::rethrow_exception(error); }
+            catch (const std::exception& detail) { LogPrinter::PrintMsg(std::string("Worker failed: ") + detail.what()); }
+            catch (...) { LogPrinter::PrintMsg("Worker failed: unknown exception"); }
+            wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
+        };
+        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); SocketUtil::Runtime().RequestStop(count); },failure);
+        wod::core::ThreadGroup producers([] { network::GetInstance()->PrepareStop(); GPacketJobQueue->Stop(); },failure);
+        for (unsigned int i=0; i<count; ++i) iocp.Launch([] { network::GetInstance()->IOCPFunc(); });
+        producers.Launch([] { network::GetInstance()->TimerFunc(); });
+        producers.Launch([] { GPacketJobQueue->ProcessJob(); });
 #ifdef WITH_DATABASE
-		std::thread database{[this]() {network::GetInstance()->DataBaseFunc(); }};
+        producers.Launch([] { network::GetInstance()->DataBaseFunc(); });
 #endif
+        signal.Wait();
+        producers.StopAndJoin(); iocp.StopAndJoin();
+        if (producers.Failed() || iocp.Failed() || network::GetInstance()->WorkerFailed())
+            throw std::runtime_error("server worker failure");
 
-		// Timer -> Event, Npc
-		std::thread timer{ [this]() {network::GetInstance()->TimerFunc(); } };
-
-		timer.join();
-#ifdef WITH_DATABASE
-		database.join();
-#endif
-		for (unsigned int i = 0; i < threadNum; ++i) {
-			m_workerThreads[i].join();
-		}
-
-		for (unsigned int i = 0; i < threadNum; ++i) {
-			m_iocpThreads[i].join();
-		}
 	}
 
 }

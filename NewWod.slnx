@@ -13,6 +13,8 @@
     <File Path="scripts/Test-MeshSharing.ps1" />
   </Folder>
   <Folder Name="/Servers/">
+    <Project Path="Server/ServerCore/ServerCore.vcxproj" Id="9f0e573d-6ee7-4658-ab7f-a17057b0d76d" />
+    <Project Path="Server/ServerCore/tests/ServerCore.Tests.vcxproj" Id="83b27745-994d-4ca8-86c7-bb06c00e503c" />
     <Project Path="Server/Game_Server/Game_Server.vcxproj" />
     <Project Path="Server/Lobby_Server/Lobby_Server.vcxproj" />
   </Folder>

@@ -19,7 +19,7 @@ namespace wod_server {
 				m_instance.reset(nullptr);
 		}
 
-		~TSingleton() { DestroyInstance(); }
+		virtual ~TSingleton() = default;
 
 	protected:
 		TSingleton() {}

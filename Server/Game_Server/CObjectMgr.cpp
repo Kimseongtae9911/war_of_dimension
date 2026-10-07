@@ -72,7 +72,9 @@ namespace wod_server {
 
 	bool CObjectMgr::Release()
 	{
-		return false;
+        m_clients.clear();
+        for(auto& match : m_npcs) for(auto& npc : match) npc.reset();
+        m_clientnames.clear(); return true;
 	}
 
 	void CObjectMgr::DisconnectClient(int key)

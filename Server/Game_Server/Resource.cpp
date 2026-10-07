@@ -4,15 +4,11 @@
 
 namespace wod_server {
 	CSessionPool Resource::sessionPool;
-	concurrency::concurrent_priority_queue<OverlapEx*> Resource::overExPool;
+	wod::core::ObjectPool<OverlapEx> Resource::overExPool;
 
 	OverlapEx* Resource::GetOverObjectFromPool()
 	{
-		OverlapEx* overEx;
-		if (!overExPool.try_pop(overEx)) {
-			overEx = new OverlapEx;
-		}
-		return overEx;
+		return overExPool.Acquire();
 	}
 
 	void CSessionPool::push(const std::shared_ptr<Session>& session)

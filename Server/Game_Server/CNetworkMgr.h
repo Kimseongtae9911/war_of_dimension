@@ -18,6 +18,8 @@ namespace wod_server {
 		CStat changeStat;
 		int changeMaxHp;
 		int changeMaxMp;
+        uint64_t sessionGeneration = 0;
+        bool checkSessionGeneration = false;
 		constexpr bool operator < (const TIMER_EVENT& L) const
 		{
 			return (wakeUpTime > L.wakeUpTime);
@@ -31,11 +33,14 @@ namespace wod_server {
 		bool Release() override;
 
 		void IOCPFunc();
+        void PrepareStop() { m_stopping.store(true); }
+        bool WorkerFailed() const { return m_workerFailed.load(); }
+        bool IsStopping() const { return m_stopping.load(); }
 		void TimerFunc();
 
 		const HANDLE& GetHandle() const { return m_handle->GetHandle(); }
 
-		void RegisterTimerEvent(const TIMER_EVENT& ev) { m_timerQueue.push(ev); }
+		void RegisterTimerEvent(const TIMER_EVENT& ev);
 		void RegisterSkillEvent(const SKILL_EVENT& ev);		
 
 		void InitializeMonster(int matchNum);
@@ -43,6 +48,7 @@ namespace wod_server {
 		void SendPacketToLobby(BASE_PACKET* pkt) { m_LobbyServer->Send(pkt); }
 
 	private:
+		void ProcessTimerEvent(const TIMER_EVENT& ev);
 		//IOCP Func
 		void Accept(int id, int bytes, OverlapEx* over_ex);
 		void Recv(int id, int bytes, OverlapEx* over_ex);
@@ -64,7 +70,9 @@ namespace wod_server {
 		std::string lobbyIP;
 
 	private:
-		std::shared_ptr<TCPSocket> m_handle = nullptr;
+		std::atomic_bool m_stopping = false;
+        std::atomic_bool m_workerFailed = false;
+        std::shared_ptr<TCPSocket> m_handle = nullptr;
 		std::shared_ptr<Session> m_LobbyServer = nullptr;
 
 		std::atomic<int> m_clientID;
@@ -72,7 +80,7 @@ namespace wod_server {
 		
 		std::unordered_map<OP_TYPE, std::function<void(int, int, OverlapEx*)>> m_iocpfunc;
 
-		CSkillTimer* m_skillTimer;
+		CSkillTimer* m_skillTimer = nullptr;
 		concurrency::concurrent_priority_queue<TIMER_EVENT> m_timerQueue;
 	};
 }

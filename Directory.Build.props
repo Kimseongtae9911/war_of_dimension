@@ -1,12 +1,14 @@
 <Project>
   <PropertyGroup>
     <WodRepositoryRoot>$(MSBuildThisFileDirectory)</WodRepositoryRoot>
-    <WodCoreProject Condition="'$(MSBuildProjectName)' == 'Game_Server' Or '$(MSBuildProjectName)' == 'Lobby_Server' Or '$(MSBuildProjectName)' == 'WarOfDimension'">true</WodCoreProject>
+    <WodCoreProject Condition="'$(MSBuildProjectName)' == 'Game_Server' Or '$(MSBuildProjectName)' == 'Lobby_Server' Or '$(MSBuildProjectName)' == 'WarOfDimension' Or '$(MSBuildProjectName)' == 'ServerCore' Or '$(MSBuildProjectName)' == 'ServerCore.Tests'">true</WodCoreProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(WodCoreProject)' == 'true'">
     <WodModuleName Condition="'$(MSBuildProjectName)' == 'Game_Server'">GameServer</WodModuleName>
     <WodModuleName Condition="'$(MSBuildProjectName)' == 'Lobby_Server'">LobbyServer</WodModuleName>
     <WodModuleName Condition="'$(MSBuildProjectName)' == 'WarOfDimension'">Client</WodModuleName>
+    <WodModuleName Condition="'$(MSBuildProjectName)' == 'ServerCore'">ServerCore</WodModuleName>
+    <WodModuleName Condition="'$(MSBuildProjectName)' == 'ServerCore.Tests'">ServerCore.Tests</WodModuleName>
     <OutDir>$(WodRepositoryRoot)artifacts\bin\$(Configuration)\$(WodModuleName)\</OutDir>
     <IntDir>$(WodRepositoryRoot)artifacts\obj\$(Configuration)\$(WodModuleName)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(MSBuildProjectDirectory)</LocalDebuggerWorkingDirectory>

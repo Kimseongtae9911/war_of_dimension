@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "CPacketMgr.h"
 #include "CSkillHandlerFactory.h"
 #include "CSkill.h"
@@ -60,6 +60,9 @@ namespace wod_server {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 
 		UserDataFromLobby data = CObjectMgr::GetInstance()->GetUserData(p->name);
+        if (data.matchNum < 0 || data.matchNum >= MAX_MATCH || data.id < 0 || data.id >= MAX_PLAYER) {
+            client->Disconnect(); return;
+        }
 		client->SetMatchNum(data.matchNum);
 
 		auto& match = CMatchMgr::GetInstance()->GetMatch(data.matchNum);

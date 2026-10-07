@@ -29,3 +29,24 @@
 ## 정리 후 확인
 
 핵심 3개 모듈 Debug/Release x64 재빌드와 두 configuration의 로컬 시작 점검을 통과했다. `.obj` 리소스 보존, 프로젝트 source 참조 존재, LFS pointer·실제 파일 해시, 초기 커밋 후보에서 삭제된 파일 제외 여부도 확인했다. 세부 실행 결과는 [작업 목록](../../tasks/todo.md)에 기록했다.
+
+## ServerCore 추출에 따른 중복 소스 제거 (2026-10-07)
+
+`Server/Game_Server`와 `Server/Lobby_Server`에서 아래 `.cpp`를 각각 제거했다.
+총 12개이며 대응 헤더와 서버별 어댑터는 유지한다.
+
+| 각 서버의 제거 파일 | 대체 구현 |
+|---|---|
+| `SockAddr.cpp` | `ServerCore/Net.h`·`src/Net.cpp` |
+| `Job.cpp`, `JobQueue.cpp` | `ServerCore/Concurrency.h`·서버별 budget/스케줄러 |
+| `LogUtil.cpp` | `ServerCore/Diagnostics.h` |
+| `OverlapEx.cpp` | `ServerCore/Net.h`·서버별 `OverlapEx.h` |
+| `TCPSocket.cpp` | `ServerCore/Session.h`·서버별 `TCPSocket.h` |
+
+두 프로젝트의 compile/filter 항목을 함께 제거했다.
+공통 라이브러리 참조로 대체하며 Debug/Release 링크·네트워크 회귀를 검사했다.
+삭제 파일의 이름을 참조하는 프로젝트 항목이 남지 않았는지 확인한다.
+
+복구 근거는 이전 commit `86f83a94f76e7218c4cd2f34d992f9d2d02174f1`의 같은 경로다.
+이 소스 추출에서 런타임 에셋·외부 라이브러리·원본 저장소는 삭제하거나 수정하지 않았다.
+[구현·검증 기록](../architecture/SERVER_CORE.md)을 참조한다.

@@ -26,7 +26,7 @@ UI 압축 검사는 `./scripts/Capture-UiTextures.ps1 -Configuration Release -Ro
 ./scripts/Stop-Local.ps1
 ```
 
-기본 빌드는 핵심 3개 프로젝트가 들어 있는 `NewWod.slnx`를 사용한다. `Build.ps1 -Module Servers`는 같은 솔루션의 서버 전용 filter인 `NewWod.Servers.slnf`를 빌드한다. `-Module Client`, `-Module LobbyServer`, `-Module GameServer`는 해당 프로젝트만 빌드한다. `-Configuration Release`와 `-Rebuild`도 지원한다. 빌드 결과는 `artifacts/bin/<Configuration>/<Module>`에, 중간 결과는 `artifacts/obj`에, 빌드·서버 실행 로그는 `artifacts/logs`에 둔다. 클라이언트용 FMOD DLL은 실행 파일 옆으로 복사한다.
+기본 빌드는 `NewWod.slnx`를 사용한다. 실행 프로젝트 3개와 ServerCore 정적 라이브러리·테스트를 포함한다. `Build.ps1 -Module Servers`는 서버·Core·테스트가 들어 있는 `NewWod.Servers.slnf`를 빌드한다. `-Module Client`, `-Module LobbyServer`, `-Module GameServer`는 해당 프로젝트와 의존성을 빌드한다. `-Configuration Release`와 `-Rebuild`도 지원한다. 빌드 결과는 `artifacts/bin/<Configuration>/<Module>`에, 중간 결과는 `artifacts/obj`에, 빌드·서버 실행 로그는 `artifacts/logs`에 둔다. 클라이언트용 FMOD DLL은 실행 파일 옆으로 복사한다.
 
 실행 순서는 로비 서버 → 게임 서버 → 클라이언트다. 서버는 숨긴 백그라운드 프로세스, 클라이언트는 조작 가능한 게임 창으로 시작한다. 모델과 CSV의 상대 경로를 유지하기 위해 작업 디렉터리는 각 모듈 원본 폴더로 지정한다. 다른 프로세스가 8910/8911 포트를 사용하면 시작을 중단한다.
 
@@ -37,7 +37,17 @@ UI 압축 검사는 `./scripts/Capture-UiTextures.ps1 -Configuration Release -Ro
 
 점검 스크립트는 자신이 시작한 프로세스를 종료하고 JSON 결과를 남긴다. 확인 범위는 서버 listener, 서버 간 TCP 연결, 클라이언트 게임 창 시작이다. 스크립트 결과만으로 UI 렌더링·로그인·전투 전체를 검증했다고 간주하지 않는다. 로그인 화면 렌더링은 별도 화면 점검으로 확인했다.
 
-`Stop-Local.ps1`은 `.runtime/processes.json`의 실행 파일 경로와 시작 시간이 일치하는 PID만 중지한다. 기존 서버 구현에 정상 종료 인터페이스가 없어 개발 프로세스를 종료하는 방식이다. 운영 서비스의 graceful shutdown은 후속 리팩토링 범위다.
+`Stop-Local.ps1`은 `.runtime/processes.json`의 실행 파일 경로와 시작 시간이 일치하는 PID만 중지한다. 서버는 named event로 종료를 요청하고 15초 이내 종료 코드 0을 확인한다. 시간 초과 시 해당 프로세스를 정리하고 실패로 보고한다. 클라이언트는 기존 프로세스 종료 방식을 유지한다. 서버 종료·실패 회수의 구현과 범위는 [ServerCore](../architecture/SERVER_CORE.md)에 있다.
+
+ServerCore 검사는 다음 순서로 실행한다. Python 3.12 이상의 실행 경로를 지정한다.
+
+```powershell
+./scripts/Build.ps1 -Module Servers -Configuration Debug
+./scripts/Test-ServerCore.ps1 -Configuration Debug
+./scripts/Test-ServerCoreIntegration.ps1 -Configuration Debug -Python <python.exe>
+```
+
+Release도 같은 순서로 검사한다. 통합 검사는 8910/8911 포트를 사용하므로 동시에 실행하지 않는다. 네트워크 참가자 4개의 매칭·로딩 전환을 검사하며 게임 창 4개를 렌더링하는 검사는 아니다. Core·테스트는 실행 프로필의 서버가 아니다.
 
 ## Visual Studio 통합 개발
 

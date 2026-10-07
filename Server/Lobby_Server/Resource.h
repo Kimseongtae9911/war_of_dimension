@@ -1,4 +1,5 @@
 #pragma once
+#include <ServerCore/Concurrency.h>
 
 namespace wod_server {
 
@@ -29,7 +30,7 @@ namespace wod_server {
 		static OverlapEx* GetOverObjectFromPool();
 
 		static CSocketPool socketpool;
-		static concurrency::concurrent_priority_queue<OverlapEx*> overExPool;
+		static wod::core::ObjectPool<OverlapEx> overExPool;
 	};
 
 }

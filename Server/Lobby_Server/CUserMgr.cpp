@@ -19,6 +19,7 @@ namespace wod_server {
 				delete iter.second;
 			}
 
+            m_clients.clear();
 			return true;
 		}
 		catch (std::exception ex) {
@@ -38,17 +39,7 @@ namespace wod_server {
 
 	void CUserMgr::DisconnectClient(int key)
 	{
-		try {
-			OverlapEx* over = Resource::GetOverObjectFromPool();
-			over->SetOP(OP_TYPE::OP_DISCONNECT);
-			if (!SocketUtil::DisconnectEx(m_clients[key]->GetPacketSender()->GetSession()->GetSocket(), &over->GetOver(), TF_REUSE_SOCKET, NULL) &&
-				WSA_IO_PENDING != WSAGetLastError() && ERROR_IO_PENDING != WSAGetLastError()) {
-				delete over;
-			}
-		}
-		catch (std::exception ex) {
-			LogPrinter::PrintMsg("Err(DisconnectClient): " + std::string(ex.what()));
-		}
+        m_clients.at(key)->Disconnect();
 	}
 
 	void CUserMgr::ClientReset(int index)

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <Protocol/Validation.h>
 #include "SockAddr.h"
 #include "SocketUtil.h"
 #include "Resource.h"
@@ -37,7 +38,7 @@ namespace wod_server {
 				s->SetSocketID(i);
 				SocketUtil::socketpool.push(s);
 				
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(s->GetSocket()), m_handle->GetHandle(), i, 0);
+				SocketUtil::Runtime().Attach(s->GetSocket(), i);
 
 				CObjectMgr::GetInstance()->MakeClientObject(i);
 			}
@@ -55,7 +56,7 @@ namespace wod_server {
 #endif
 
 			m_LobbyServer->Connect(lobbyIP);	// Connect To Lobby Server
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_LobbyServer->GetSocket()), m_handle->GetHandle(), LOBBY_SERVER_ID, 0);
+			SocketUtil::Runtime().Attach(m_LobbyServer->GetSocket(), LOBBY_SERVER_ID);
 			m_LobbyServer->Recv();
 
 			m_handle->Bind(SockAddr(GAME_PORT));
@@ -64,10 +65,6 @@ namespace wod_server {
 			std::shared_ptr<Session> session;
 			SocketUtil::socketpool.try_pop(session);
 			m_handle->Accept(session);
-
-			GUID op = WSAID_DISCONNECTEX;
-			DWORD bytes = 0;
-			WSAIoctl(m_handle->GetSocket(), SIO_GET_EXTENSION_FUNCTION_POINTER, &op, sizeof(op), &SocketUtil::DisconnectEx, sizeof(SocketUtil::DisconnectEx), &bytes, NULL, NULL);
 			
 			m_clientnum = 0;
 
@@ -81,48 +78,79 @@ namespace wod_server {
 
 	bool CNetworkMgr::Release()
 	{
-		delete m_skillTimer;
-		return true;
+        m_stopping.store(true);
+        SocketUtil::Runtime().RequestStop(1);
+        wod::core::Completion completion;
+        while (SocketUtil::Runtime().Stats().pending && SocketUtil::Runtime().Poll(completion)) {
+            auto op = completion.context->operation;
+            if (op == wod::core::IoOperation::Send || op == wod::core::IoOperation::Disconnect || op == wod::core::IoOperation::AppEvent)
+                Resource::overExPool.push(static_cast<OverlapEx*>(completion.context));
+        }
+        SocketUtil::Runtime().Finish();
+        LogPrinter::PrintMsg("ServerCore stop pending=0 sockets=0 leased=" + std::to_string(Resource::overExPool.Leased()));
+        Resource::overExPool.Clear();
+        delete m_skillTimer; m_skillTimer = nullptr;
+        std::shared_ptr<Session> session;
+        while(SocketUtil::socketpool.try_pop(session)) {}
+        while(Resource::sessionPool.try_pop(session)) {}
+        m_LobbyServer.reset();
+        m_handle.reset(); return true;
 	}
 
 	void CNetworkMgr::IOCPFunc()
 	{
-		// Key Value 0~1999 client, 9999 lobby server, 2000~ npcs
-		while (true) {
-			DWORD bytes;
-			ULONG_PTR key;
-			WSAOVERLAPPED* over = nullptr;
-			int err = GetQueuedCompletionStatus(m_handle->GetHandle(), &bytes, &key, &over, INFINITE);
-			OverlapEx* overEx = reinterpret_cast<OverlapEx*>(over);
 
-			if (0 == err) {
-				if (OP_TYPE::OP_ACCEPT == overEx->GetOP())
-					LogPrinter::PrintMsg("Accept Error");
-				else if (OP_TYPE::OP_SEND == overEx->GetOP()) {
-					overEx->Reset();
-					Resource::overExPool.push(overEx);
-				}
-				else {
-					if (key == LOBBY_SERVER_ID)
-						continue;	//Disconnect Lobby
-					CObjectMgr::GetInstance()->DisconnectClient(static_cast<int>(key));
-				}
-				continue;
-			}
+        try {
+        wod::core::Completion completion;
+        while (SocketUtil::Runtime().Poll(completion)) {
+            auto* over = static_cast<OverlapEx*>(completion.context);
+            const auto operation = over->operation;
+            if (m_stopping.load() || SocketUtil::Runtime().IsStopping()) {
+                if (operation == wod::core::IoOperation::Send || operation == wod::core::IoOperation::Disconnect || operation == wod::core::IoOperation::AppEvent)
+                    Resource::overExPool.push(over);
+                continue;
+            }
+            if (completion.error || (operation == wod::core::IoOperation::Receive && completion.bytes == 0)) {
+                if (operation == wod::core::IoOperation::Send) { Resource::overExPool.push(over); continue; }
+                if (operation == wod::core::IoOperation::Accept) {
+                    m_workerFailed.store(true);
+                    LogPrinter::PrintMsg("Accept failed: " + std::to_string(completion.error));
+                    wod::core::ProcessStopSignal::Request(GetCurrentProcessId()); continue;
+                }
+                if (operation != wod::core::IoOperation::Disconnect) {
+                    if (completion.key == LOBBY_SERVER_ID) { LogPrinter::PrintMsg("Server link closed"); continue; }
+                    CObjectMgr::GetInstance()->DisconnectClient(static_cast<int>(completion.key));
+                    continue;
+                }
+            }
 
-			// Process GQCS
-			auto iter = m_iocpfunc.find(overEx->GetOP());
-			if (iter != m_iocpfunc.end()) {
-				iter->second(static_cast<int>(key), bytes, overEx);
-			}
-			else
-				LogPrinter::PrintMsg("Wrong Key Value For IOCP Function");
-		}
+            auto found = m_iocpfunc.find(over->GetOP());
+            if (found != m_iocpfunc.end()) {
+                if (operation==wod::core::IoOperation::AppEvent && over->HasSessionGeneration()) {
+                    bool handled=false;
+                    auto session=CObjectMgr::GetInstance()->GetClient(static_cast<int>(completion.key))->GetPacketSender()->GetSession();
+                    session->WithGeneration(over->GetSessionGeneration(),[&] {
+                        handled=true; found->second(static_cast<int>(completion.key),static_cast<int>(completion.bytes),over);
+                    });
+                    if (!handled) Resource::overExPool.push(over);
+                } else found->second(static_cast<int>(completion.key),static_cast<int>(completion.bytes),over);
+            }
+            else {
+                LogPrinter::PrintMsg("Unknown application completion");
+                if (operation == wod::core::IoOperation::AppEvent) Resource::overExPool.push(over);
+            }
+        }
+
+        } catch (const std::exception& error) {
+            m_workerFailed.store(true);
+            LogPrinter::PrintMsg(std::string("IOCP worker failed: ") + error.what());
+            wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
+        }
 	}
 
 	void CNetworkMgr::TimerFunc()
 	{
-		while (true) {
+		while (!m_stopping.load()) {
 			TIMER_EVENT ev;
 			auto current_time = TimeUtil::CurTime();
 			if (m_timerQueue.try_pop(ev)) {
@@ -131,33 +159,55 @@ namespace wod_server {
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 					continue;
 				}
+                if (ev.checkSessionGeneration) {
+                    auto session=CObjectMgr::GetInstance()->GetClient(ev.objID)->GetPacketSender()->GetSession();
+                    session->WithGeneration(ev.sessionGeneration,[&] { ProcessTimerEvent(ev); });
+                } else ProcessTimerEvent(ev);
+				continue;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+	}
+
+
+    void CNetworkMgr::RegisterTimerEvent(const TIMER_EVENT& event) {
+        if (m_stopping.load()) return;
+        auto captured=event;
+        if (event.objID>=0 && event.objID<MAX_CLIENT &&
+            (event.eventID==EVENT_TYPE::EV_STAT_CHANGE || event.eventID==EVENT_TYPE::EV_SKILL_END || event.eventID==EVENT_TYPE::EV_HEALTHMANA_CHANGE)) {
+            captured.sessionGeneration=CObjectMgr::GetInstance()->GetClient(event.objID)->GetPacketSender()->GetSession()->Generation();
+            captured.checkSessionGeneration=true;
+        }
+        m_timerQueue.push(captured);
+    }
+    void CNetworkMgr::ProcessTimerEvent(const TIMER_EVENT& ev) {
 				switch (ev.eventID) {
 				case EVENT_TYPE::EV_CONNECT_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_CONNECT_UPDATE);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_READY_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_READY_UPDATE);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_LOADING_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_LOADING_UPDATE);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_MATCH_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_UPDATE);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_STAT_CHANGE:
@@ -181,32 +231,29 @@ namespace wod_server {
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_FINISH);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_HEALTHMANA_CHANGE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_HEALTHMANA_CHANGE);
+                    ov->SetSessionGeneration(ev.sessionGeneration);
 					ov->SetSocketID(ev.changeMaxHp);
 					ov->SetInfo(ev.changeMaxMp);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_NPC_ACTIVE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_NPC_ACTIVE);
-					PostQueuedCompletionStatus(network::GetInstance()->GetHandle(), 1, ev.objID, &ov->GetOver());
+                    ov->SetSocketID(ev.targetID);
+					if (!SocketUtil::Runtime().Post(ev.objID, *ov)) Resource::overExPool.push(ov);
 					break;
 				}
 				}
-				continue;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
-	}
-
+    }
 
 	void CNetworkMgr::Accept(int id, int bytes, OverlapEx* overEx)
 	{
@@ -233,35 +280,24 @@ namespace wod_server {
 
 	void CNetworkMgr::Recv(int id, int bytes, OverlapEx* overEx)
 	{
-		//Recv from Lobby Server
-		if (LOBBY_SERVER_ID == id) {
-			int remaindata = bytes + m_LobbyServer->GetRemainData();
-			char* packet = overEx->GetSendBuf();
-			while (remaindata > 0) {
-				BASE_PACKET* p = reinterpret_cast<BASE_PACKET*>(packet);
-				if (p->size <= remaindata) {
-					Packet_Exec(p);
-					packet += p->size;
-					remaindata -= p->size;
-				}
-				else 
-					break;
-			}
-			m_LobbyServer->SetRemainData(remaindata);
-			if (remaindata < 0)
-				memmove(overEx->GetSendBuf(), packet, remaindata);
-			m_LobbyServer->Recv();
-		}
-		else {
-			//Recv from Clients
-			int clientIndex = CObjectMgr::GetInstance()->GetUserIDFromSocket(id);
-			CObjectMgr::GetInstance()->GetClient(clientIndex)->RecvProcess(bytes, overEx);
-		}
+
+        if (id != LOBBY_SERVER_ID) {
+            int client = CObjectMgr::GetInstance()->GetUserIDFromSocket(id);
+            CObjectMgr::GetInstance()->GetClient(client)->RecvProcess(bytes, overEx); return;
+        }
+        std::vector<wod::core::FrameDecoder::Frame> frames;
+        if (!m_LobbyServer->Decode(bytes, *overEx, frames)) { LogPrinter::PrintMsg("Invalid lobby frame"); SocketUtil::Runtime().Close(m_LobbyServer->GetSocket()); return; }
+        for (auto& frame : frames) {
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyToGame)) { LogPrinter::PrintMsg("Invalid lobby packet"); SocketUtil::Runtime().Close(m_LobbyServer->GetSocket()); return; }
+            Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()));
+        }
+        m_LobbyServer->Recv();
+
 	}
 
 	void CNetworkMgr::Send(int id, int bytes, OverlapEx* overEx)
 	{
-		Resource::overExPool.push(overEx);
+        Resource::overExPool.push(overEx);
 	}
 
 	void CNetworkMgr::Disconnect(int id, int bytes, OverlapEx* overEx)
@@ -375,10 +411,17 @@ namespace wod_server {
 		switch (packet->type) {
 		case LG_MATCH_START: {
 			LG_MATCH_START_PACKET* p = reinterpret_cast<LG_MATCH_START_PACKET*>(packet);
+			if (p->match_num < 0 || p->match_num >= MAX_MATCH) {
+				LogPrinter::PrintMsg("Invalid lobby match index"); return;
+			}
 			m_timerQueue.push({ p->match_num, TimeUtil::PassedTimeMSec(1000), EVENT_TYPE::EV_CONNECT_UPDATE, -1 });
+			break;
 		}
 		case LG_MATCH_PLAYER: {
 			LG_MATCH_PACKET* p = reinterpret_cast<LG_MATCH_PACKET*>(packet);
+			if (p->match_num < 0 || p->match_num >= MAX_MATCH || p->id < 0 || p->id >= MAX_PLAYER) {
+				LogPrinter::PrintMsg("Invalid lobby player index"); return;
+			}
 			CObjectMgr::GetInstance()->RegisterClientToServer(p->name, p->id, p->match_num, p->model);
 			break;
 		}
@@ -390,23 +433,24 @@ namespace wod_server {
 
 	void CNetworkMgr::InitializeMonster(int matchNum)
 	{
-		constexpr uint8_t RARE_MONSTER_NUM = 2;
-
-		auto uniquePosIndexs = std::move(RandomUtil::GenerateUniqueRandomNumbers(0, 2, 1));
-		auto rarePosIndexs = std::move(RandomUtil::GenerateUniqueRandomNumbers(0, 3, RARE_MONSTER_NUM));
-		auto normalPosIndexs = std::move(RandomUtil::GenerateUniqueRandomNumbers(0, 11, 6));
-		auto posIter = uniquePosIndexs.begin();
-		for (int8_t i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i)
-		{
-			auto monster = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-			monster->Initialize(*posIter);
-			if (i == MAX_MINION)
-				posIter = rarePosIndexs.begin();
-			else if (i == MAX_MINION + RARE_MONSTER_NUM)
-				posIter = normalPosIndexs.begin();
-			else
-				posIter++;
-		}
+        // CSV가 제공하는 공통 위치 수 안에서만 그룹별 중복 없는 index를 고른다.
+        const auto spawnGroup = [matchNum](int begin, int count) {
+            size_t positions = SIZE_MAX;
+            for (int i=begin; i<begin+count; ++i) {
+                const auto npc = CObjectMgr::GetInstance()->GetNpc(matchNum,i);
+                const auto csv = NpcCsvMgr::GetInstance()->GetNpcCsv(npc->GetNpcType());
+                if (!csv) throw std::runtime_error("missing NPC CSV for spawn");
+                positions = (std::min)(positions,(std::min)(csv->respawnPos.size(),csv->respawnLook.size()));
+            }
+            if (positions < static_cast<size_t>(count)) throw std::runtime_error("insufficient NPC spawn positions");
+            auto indices = RandomUtil::GenerateUniqueRandomNumbers(0,static_cast<int>(positions)-1,count);
+            auto position = indices.begin();
+            for (int i=begin; i<begin+count; ++i,++position)
+                CObjectMgr::GetInstance()->GetNpc(matchNum,i)->Initialize(*position);
+        };
+        spawnGroup(MAX_MINION,1);
+        spawnGroup(MAX_MINION+1,2);
+        spawnGroup(MAX_MINION+3,6);
 	}
 
 	void CNetworkMgr::RegisterSkillEvent(const SKILL_EVENT& ev)

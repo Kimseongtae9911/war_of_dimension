@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "docs/diagrams/server-core-plan/server-core.architecture.json",
+  "output": "docs/diagrams/server-core-plan/server-core.architecture.html",
+  "specification": {
+    "sha256": "f994445c642258addb9f9151297123a3e6e929a8d95b0e27d278817cc9329915",
+    "bytes": 2726
+  },
+  "artifact": {
+    "sha256": "13649158cb2d8861c8803b77a7ba8255aa40fde88b82c6890aaef617246a65f7",
+    "bytes": 706044
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "evidence": {
+    "verified": true,
+    "repository": "https://github.com/Kimseongtae9911/war_of_dimension",
+    "revision": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+    "references": 3
+  }
+}

@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+#include "pch.h"
+#include <Protocol/Validation.h>
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
 #include "SocketUtil.h"
@@ -31,12 +32,12 @@ namespace wod_server {
 
 		// Make Socket Pool
 		for (int i = 0; i < MAX_SOCKET; ++i) {
-			SOCKET s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+			SOCKET s = SocketUtil::Runtime().CreateSocket();
 			Resource::socketpool.push(s);
 
 			//Register socket to iocp, Create Client Objects
 			int id = static_cast<int>(s);
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(s), m_handle->GetHandle(), id, 0);
+			SocketUtil::Runtime().Attach(s, id);
 			CUserMgr::GetInstance()->MakeClientObject(id);
 		}
 
@@ -52,10 +53,6 @@ namespace wod_server {
 		Resource::socketpool.try_pop(socketResource);
 		m_handle->Accept(socketResource.socket);
 
-		GUID op = WSAID_DISCONNECTEX;
-		DWORD bytes = 0;
-		WSAIoctl(m_handle->GetSocket(), SIO_GET_EXTENSION_FUNCTION_POINTER, &op, sizeof(op), &SocketUtil::DisconnectEx, sizeof(SocketUtil::DisconnectEx), &bytes, NULL, NULL);
-
 		m_clientNum = 0;
 		m_gameseverConnected = false;
 
@@ -66,57 +63,76 @@ namespace wod_server {
 
 	bool CNetworkMgr::Release()
 	{
-		try {
+        m_stopping.store(true);
+        SocketUtil::Runtime().RequestStop(1);
+        wod::core::Completion completion;
+        while (SocketUtil::Runtime().Stats().pending && SocketUtil::Runtime().Poll(completion)) {
+            auto op = completion.context->operation;
+            if (op == wod::core::IoOperation::Send || op == wod::core::IoOperation::Disconnect || op == wod::core::IoOperation::AppEvent)
+                Resource::overExPool.push(static_cast<OverlapEx*>(completion.context));
+        }
+        SocketUtil::Runtime().Finish();
+        LogPrinter::PrintMsg("ServerCore stop pending=0 sockets=0 leased=" + std::to_string(Resource::overExPool.Leased()));
+        Resource::overExPool.Clear();
+        SocketResource socket;
+        while(Resource::socketpool.try_pop(socket)) {}
+        delete m_p2pNetwork; m_p2pNetwork = nullptr;
 #ifdef WITH_DATABASE
-			delete m_dataBaseThread;
+        delete m_dataBaseThread; m_dataBaseThread = nullptr;
 #endif
-			delete m_p2pNetwork;
-			return true;
-		}
-		catch (std::exception ex) {
-			LogPrinter::PrintMsg("Err(NetworkMgr Release): " + std::string(ex.what()));
-			return false;
-		}
+        m_gameServer.reset();
+        m_handle.reset(); return true;
 	}
 
 	void CNetworkMgr::IOCPFunc()
 	{
-		while (true) {
-			DWORD bytes;
-			ULONG_PTR key;
-			WSAOVERLAPPED* over = nullptr;
-			int err = GetQueuedCompletionStatus(m_handle->GetHandle(), &bytes, &key, &over, INFINITE);
-			OverlapEx* overEx = reinterpret_cast<OverlapEx*>(over);
 
-			if (!m_gameseverConnected) {
-				m_gameseverConnected = true;
-				overEx->SetOP(OP_TYPE::OP_SERVER_CONNECT);
-			}
+        try {
+        wod::core::Completion completion;
+        while (SocketUtil::Runtime().Poll(completion)) {
+            auto* over = static_cast<OverlapEx*>(completion.context);
+            const auto operation = over->operation;
+            if (m_stopping.load() || SocketUtil::Runtime().IsStopping()) {
+                if (operation == wod::core::IoOperation::Send || operation == wod::core::IoOperation::Disconnect || operation == wod::core::IoOperation::AppEvent)
+                    Resource::overExPool.push(over);
+                continue;
+            }
+            if (completion.error || (operation == wod::core::IoOperation::Receive && completion.bytes == 0)) {
+                if (operation == wod::core::IoOperation::Send) { Resource::overExPool.push(over); continue; }
+                if (operation == wod::core::IoOperation::Accept) {
+                    m_workerFailed.store(true);
+                    LogPrinter::PrintMsg("Accept failed: " + std::to_string(completion.error));
+                    wod::core::ProcessStopSignal::Request(GetCurrentProcessId()); continue;
+                }
+                if (operation != wod::core::IoOperation::Disconnect) {
+                    if (completion.key == m_gameServer->GetSocket()) { LogPrinter::PrintMsg("Server link closed"); continue; }
+                    CUserMgr::GetInstance()->DisconnectClient(static_cast<int>(completion.key));
+                    continue;
+                }
+            }
 
-			if (0 == err) {
-				if (OP_TYPE::OP_ACCEPT == overEx->GetOP())
-					LogPrinter::PrintMsg("Accept Error");
-				else if (OP_TYPE::OP_SEND == overEx->GetOP()) {
-					overEx->Reset();
-					Resource::overExPool.push(overEx);
-				}
-				else
-					CUserMgr::GetInstance()->DisconnectClient(static_cast<int>(key));
-				continue;
-			}
+            if (completion.context->operation == wod::core::IoOperation::Accept && !m_gameseverConnected) {
+                m_gameseverConnected = true; over->SetOP(OP_TYPE::OP_SERVER_CONNECT);
+            }
 
-			auto iter = m_iocpfunc.find(overEx->GetOP());
-			if (iter != m_iocpfunc.end()) {
-				iter->second(static_cast<int>(key), bytes, overEx);
-			}
-			else
-				LogPrinter::PrintMsg("Wrong Key Value For IOCP Function");
-		}
+            auto found = m_iocpfunc.find(over->GetOP());
+            if (found != m_iocpfunc.end()) found->second(static_cast<int>(completion.key), static_cast<int>(completion.bytes), over);
+            else {
+                LogPrinter::PrintMsg("Unknown application completion");
+                if (operation == wod::core::IoOperation::AppEvent) Resource::overExPool.push(over);
+            }
+        }
+
+        } catch (const std::exception& error) {
+            m_workerFailed.store(true);
+            LogPrinter::PrintMsg(std::string("IOCP worker failed: ") + error.what());
+            wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
+        }
 	}
 	
 	void CNetworkMgr::TimerFunc()
 	{
-		while (true) {
+		while (!m_stopping.load()) {
 			TIMER_EVENT ev;
 			auto current_time = std::chrono::system_clock::now();
 			if (m_timerQueue.try_pop(ev)) {
@@ -150,7 +166,7 @@ namespace wod_server {
 		m_gameServer->SetRemainData(0);
 		m_gameServer->SetSocket(m_handle->GetClientSocket());
 
-		CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_handle->GetClientSocket()), m_handle->GetHandle(), static_cast<int>(m_gameServer->GetSocket()), 0);
+		SocketUtil::Runtime().Attach(m_handle->GetClientSocket(), static_cast<int>(m_gameServer->GetSocket()));
 		m_gameServer->Recv();
 		m_handle->GetOverEx().ResetOver();
 		m_handle->GetOverEx().SetOP(OP_TYPE::OP_ACCEPT);
@@ -186,42 +202,29 @@ namespace wod_server {
 		if (Resource::socketpool.try_pop(socketResource))
 			m_handle->Accept(socketResource.socket);
 		else {
-			SOCKET s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(s), m_handle->GetHandle(), static_cast<int>(s), 0);
+			SOCKET s = SocketUtil::Runtime().CreateSocket();
+			SocketUtil::Runtime().Attach(s, static_cast<int>(s));
 			m_handle->Accept(s);
 		}
 	}
 
 	void CNetworkMgr::Recv(int id, int bytes, OverlapEx* overEx)
 	{
-		if (id == m_gameServer->GetSocket()) {
-			int remaindata = bytes + m_gameServer->GetRemainData();
-			char* packet = overEx->GetSendBuf();
 
-			while (remaindata > 0) {
-				BASE_PACKET* p = reinterpret_cast<BASE_PACKET*>(packet);
+        if (id != m_gameServer->GetSocket()) { CUserMgr::GetInstance()->GetClient(id)->RecvPacket(bytes, overEx); return; }
+        std::vector<wod::core::FrameDecoder::Frame> frames;
+        if (!m_gameServer->Decode(bytes, *overEx, frames)) { LogPrinter::PrintMsg("Invalid game frame"); SocketUtil::Runtime().Close(m_gameServer->GetSocket()); return; }
+        for (auto& frame : frames) {
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::GameToLobby)) { LogPrinter::PrintMsg("Invalid game packet"); SocketUtil::Runtime().Close(m_gameServer->GetSocket()); return; }
+            PacketExec(reinterpret_cast<BASE_PACKET*>(frame.data()));
+        }
+        m_gameServer->Recv();
 
-				if (p->size <= remaindata) {
-					PacketExec(p);
-					packet += p->size;
-					remaindata -= p->size;
-				}
-				else break;
-			}
-			m_gameServer->SetRemainData(remaindata);
-			if (remaindata > 0)
-				memmove(overEx->GetSendBuf(), packet, remaindata);
-			m_gameServer->Recv();
-		}
-		else {
-			CUserMgr::GetInstance()->GetClient(id)->RecvPacket(bytes, overEx);
-		}
 	}
 
 	void CNetworkMgr::Send(int id, int bytes, OverlapEx* overEx)
 	{
-		overEx->Reset();
-		Resource::overExPool.push(overEx);
+        Resource::overExPool.push(overEx);
 	}
 
 	void CNetworkMgr::Disconnect(int id, int bytes, OverlapEx* overEx)
@@ -250,7 +253,9 @@ namespace wod_server {
 		case GL_TRANSACTIONS:
 		{
 			GL_TRANSACTIONS_PACKET* p = reinterpret_cast<GL_TRANSACTIONS_PACKET*>(packet);
-			m_dataBaseThread->RegisterDBEvent(DB_EVENT(std::string(p->name), p->token, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
+			#ifdef WITH_DATABASE
+            m_dataBaseThread->RegisterDBEvent(DB_EVENT(std::string(p->name), p->token, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
+#endif
 
 #ifdef WITH_DATABASE
 			TransactionData transaction;

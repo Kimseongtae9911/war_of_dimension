@@ -3,7 +3,9 @@
     "path": "NewWod.slnx",
     "projects": [
       "Server\\Lobby_Server\\Lobby_Server.vcxproj",
-      "Server\\Game_Server\\Game_Server.vcxproj"
+      "Server\\Game_Server\\Game_Server.vcxproj",
+      "Server/ServerCore/ServerCore.vcxproj",
+      "Server/ServerCore/tests/ServerCore.Tests.vcxproj"
     ]
   }
 }

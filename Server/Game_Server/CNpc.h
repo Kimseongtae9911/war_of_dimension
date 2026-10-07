@@ -16,6 +16,7 @@ namespace wod_server {
 		CNpc();
 		virtual ~CNpc();
 
+		ENpcType GetNpcType() const { return m_npcType; }
 		virtual void Initialize(uint8_t _posIndex) = 0;
 
 		void SetTargetPos(const vec2& target) { m_targetPos = target; }

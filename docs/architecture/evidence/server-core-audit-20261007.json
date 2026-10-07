@@ -1,0 +1,1048 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-07",
+  "status": "plan_only_not_implemented",
+  "repository": "https://github.com/Kimseongtae9911/war_of_dimension",
+  "base_revision": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+  "audit_scope": "top-level .cpp and .h in Game_Server and Lobby_Server; raw bytes, not semantic equality",
+  "summary": {
+    "same_named_pairs": 35,
+    "byte_identical_pairs": 4,
+    "different_pairs": 31,
+    "identical_names": [
+      "Job.cpp",
+      "JobQueue.cpp",
+      "SockAddr.cpp",
+      "SockAddr.h"
+    ]
+  },
+  "pairs": [
+    {
+      "name": "CClient.cpp",
+      "game": {
+        "path": "Server/Game_Server/CClient.cpp",
+        "sha256": "650459a7f51f2fd37b716223766dea6500ba078f6e6a8e8b9ed80373a02888c0",
+        "bytes": 17492
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CClient.cpp",
+        "sha256": "527989df6d3a670160a6b924291d55577ed9bfd4e6bbdcfdd9720d1a7b2b81e7",
+        "bytes": 4914
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "CClient.h",
+      "game": {
+        "path": "Server/Game_Server/CClient.h",
+        "sha256": "75cc98e764692e8bf057de54bf4fcda108ebd7ac1229ae0644f3b1f030d576de",
+        "bytes": 5509
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CClient.h",
+        "sha256": "3f2ab1cf4a191df23d2ea954391f10fef75178d18b815cc8d11e245dd9d97a3c",
+        "bytes": 3147
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "CMatchMgr.cpp",
+      "game": {
+        "path": "Server/Game_Server/CMatchMgr.cpp",
+        "sha256": "e1eae76fe9c34f003af017790994ea3b1ed3880b0d8ae15415ba73b4241be670",
+        "bytes": 243
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CMatchMgr.cpp",
+        "sha256": "a8059f93e265af30008313f2543244fa227bce705d085a3ec17652a05a8d199c",
+        "bytes": 906
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CMatchMgr.h",
+      "game": {
+        "path": "Server/Game_Server/CMatchMgr.h",
+        "sha256": "e5a79e10e65b2fee2a3124fd0022dfda1a186e4c14c7b89e9f3fa9ea225fe937",
+        "bytes": 512
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CMatchMgr.h",
+        "sha256": "2a898288a11d242e44821f40f4ae21fbdbf38c8598908d2bdf69af88561e1fa3",
+        "bytes": 909
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CNetworkMgr.cpp",
+      "game": {
+        "path": "Server/Game_Server/CNetworkMgr.cpp",
+        "sha256": "e646610c10cbdd230a4109f3fe7cb7300c4d77ba0e0e13b34fb5212fc041512e",
+        "bytes": 14000
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CNetworkMgr.cpp",
+        "sha256": "35e10832fea96455d27ad89880f7dfe1c4d547ffd5dd801f5075abe14562fc9d",
+        "bytes": 8020
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "CNetworkMgr.h",
+      "game": {
+        "path": "Server/Game_Server/CNetworkMgr.h",
+        "sha256": "a0dc5b459c859558f085c80d6dbb787f7f934a60a4162dbab801eec8189e319f",
+        "bytes": 2444
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CNetworkMgr.h",
+        "sha256": "92566355f76aa50a593efb7355c9c6f42817ff7d325e00b99f92bb6eca3f3720",
+        "bytes": 1883
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "CPacketMgr.cpp",
+      "game": {
+        "path": "Server/Game_Server/CPacketMgr.cpp",
+        "sha256": "caeb70956e0d64feb539d4bb0f428b911df1aae820bc7a3507eedb2a4802e837",
+        "bytes": 24888
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CPacketMgr.cpp",
+        "sha256": "6efe544fa140401948356b0d589ebee200f88f769486dfc0287e5fca10c02e7b",
+        "bytes": 25751
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CPacketMgr.h",
+      "game": {
+        "path": "Server/Game_Server/CPacketMgr.h",
+        "sha256": "49feb2901a8714c331e1a3d3442956dea3b214758c39003386de77f2537f9687",
+        "bytes": 2464
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CPacketMgr.h",
+        "sha256": "4d4289d6fb747e757f648071c80f5ec575666c7abdd76079f96fedc44db80e00",
+        "bytes": 2111
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CPacketSender.cpp",
+      "game": {
+        "path": "Server/Game_Server/CPacketSender.cpp",
+        "sha256": "c0bb09c063fcef00aaf6359684d0f151d973437790e3f856893c8989226fdf89",
+        "bytes": 12061
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CPacketSender.cpp",
+        "sha256": "f2e34f98fa1937d1ff01c8c8d3902347a19f7191af85ddb12b5d6acb3e9a2a99",
+        "bytes": 9035
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CPacketSender.h",
+      "game": {
+        "path": "Server/Game_Server/CPacketSender.h",
+        "sha256": "f44c6da35ad48d81e144329f1bd4352558b215065080dc495f900f916570fc34",
+        "bytes": 3274
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CPacketSender.h",
+        "sha256": "3a481f275ebad8904c70f448d7b91b21dde840430c17deb1e10f70b487141f71",
+        "bytes": 2363
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "CServer.cpp",
+      "game": {
+        "path": "Server/Game_Server/CServer.cpp",
+        "sha256": "d64e1f963ea7954c63687da0bb6ba531eab4f314f483bd7aa0ee9480ec1f3b6b",
+        "bytes": 5197
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CServer.cpp",
+        "sha256": "13b00744159134c0cec8596fa8bacf65ae2ff2a15f083f1571e8c016759c6b78",
+        "bytes": 2793
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "CServer.h",
+      "game": {
+        "path": "Server/Game_Server/CServer.h",
+        "sha256": "82372c60f7cdfd25ae7907511e8f86fbe16834cb878ca9a3c9bd7f383b5f3c93",
+        "bytes": 227
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/CServer.h",
+        "sha256": "d50f66b0f6c6549c617a95ad5f558b07a02e955c318f9c701ad602341290b7c1",
+        "bytes": 284
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "GameUtil.cpp",
+      "game": {
+        "path": "Server/Game_Server/GameUtil.cpp",
+        "sha256": "94efd46b41a50006a975a5cca48dddf1c4020bf8aa6145a6bc30813b68148aa2",
+        "bytes": 26916
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/GameUtil.cpp",
+        "sha256": "a05369031f8f22263a1c501c55f5eb239e3ad59ffe40a89134d0f0dfb5073995",
+        "bytes": 4158
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "GameUtil.h",
+      "game": {
+        "path": "Server/Game_Server/GameUtil.h",
+        "sha256": "30a1abf12b95e1d2549c99759f06bec442e9311ad2109fa3d0c051fa74521f79",
+        "bytes": 4410
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/GameUtil.h",
+        "sha256": "bb90e61c4fb225ce39d783db1151603440f303511cae79250df7834a3ec5571e",
+        "bytes": 1315
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "Global.cpp",
+      "game": {
+        "path": "Server/Game_Server/Global.cpp",
+        "sha256": "e5d6f2588898e50163bab32cc2edd5f4e6bb0b2ffd427a42f259b7e4a5483ec5",
+        "bytes": 47
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Global.cpp",
+        "sha256": "add5a68de917d58a40ca23303809578f6aa5d0c575f0beab5040946b54bb762b",
+        "bytes": 264
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "Global.h",
+      "game": {
+        "path": "Server/Game_Server/Global.h",
+        "sha256": "e5013ccf7e9fa54d6ee81ccce7cc68d42404d7adf05f0d4a2a5a5fb991a657fd",
+        "bytes": 188
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Global.h",
+        "sha256": "2ba91188fdf41b8543771240d93a02eec8c52d24c5bf4715b9339fd3af05fbe9",
+        "bytes": 88
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "Job.cpp",
+      "game": {
+        "path": "Server/Game_Server/Job.cpp",
+        "sha256": "e79715ad5d7eb7554464c5d8bbf863f80dd36018ed1b512e3f2a93296afde591",
+        "bytes": 18
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Job.cpp",
+        "sha256": "e79715ad5d7eb7554464c5d8bbf863f80dd36018ed1b512e3f2a93296afde591",
+        "bytes": 18
+      },
+      "byte_identical": true,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "Job.h",
+      "game": {
+        "path": "Server/Game_Server/Job.h",
+        "sha256": "e7194bcf87315ed72b04ad0705e5824ac9d4254123bc7407d685cbbf2fb59eff",
+        "bytes": 655
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Job.h",
+        "sha256": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b",
+        "bytes": 423
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "JobQueue.cpp",
+      "game": {
+        "path": "Server/Game_Server/JobQueue.cpp",
+        "sha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d",
+        "bytes": 16
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/JobQueue.cpp",
+        "sha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d",
+        "bytes": 16
+      },
+      "byte_identical": true,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "JobQueue.h",
+      "game": {
+        "path": "Server/Game_Server/JobQueue.h",
+        "sha256": "e6ff60343e2c0a948ce5b47ad00775815b1207c0e427d6c2b4f29907446cc2dc",
+        "bytes": 899
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/JobQueue.h",
+        "sha256": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4",
+        "bytes": 1692
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "LogUtil.cpp",
+      "game": {
+        "path": "Server/Game_Server/LogUtil.cpp",
+        "sha256": "59b02a4f038d6b0d3a5657a478780aa4695ab9f4bf431e882f8800e356edffc2",
+        "bytes": 369
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/LogUtil.cpp",
+        "sha256": "3049971448de8273ba981bf74ac55ae474f16c6720d1aa1636d2239ea22a2fba",
+        "bytes": 247
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "LogUtil.h",
+      "game": {
+        "path": "Server/Game_Server/LogUtil.h",
+        "sha256": "8108c1267c0efff182de56f92e77c84fa437b752b8b311c8728f7cd8a8d8e8dc",
+        "bytes": 662
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/LogUtil.h",
+        "sha256": "6ae7c3d87b53092b2ca206d20241f05bfd15a02903dc8e519d0308f9ab16a74b",
+        "bytes": 165
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "OverlapEx.cpp",
+      "game": {
+        "path": "Server/Game_Server/OverlapEx.cpp",
+        "sha256": "d8196acafff06edd6f4ab7a168e30b307944d64561b99b43303097752a397f1a",
+        "bytes": 659
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/OverlapEx.cpp",
+        "sha256": "d4b7bc3eb5b2e392187bf8ec0d71996ce456f01651a3e1c5f6100ed4ec95462a",
+        "bytes": 629
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "OverlapEx.h",
+      "game": {
+        "path": "Server/Game_Server/OverlapEx.h",
+        "sha256": "1d84badec05779dc2f3681741c9c86692c6d66cd975e0454966df60bab9a555b",
+        "bytes": 767
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/OverlapEx.h",
+        "sha256": "e47835d8be5890b6defeca537a44191a2ecee792bf66f69b19535145605f9fca",
+        "bytes": 555
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "Resource.cpp",
+      "game": {
+        "path": "Server/Game_Server/Resource.cpp",
+        "sha256": "b98980d0b975e633697cce2bf256ef992b7304b159bd10ddfc4f1a1c3e89710f",
+        "bytes": 641
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Resource.cpp",
+        "sha256": "9c37e2c397dbe4af4016d9c396a9c92db524013e4d277cd835c341745d057407",
+        "bytes": 347
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "Resource.h",
+      "game": {
+        "path": "Server/Game_Server/Resource.h",
+        "sha256": "822fb5e3a8d4525d068553243873f7b1ed7eba8b06e545cbbb94269d394ba05f",
+        "bytes": 496
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/Resource.h",
+        "sha256": "fe691d54a06c6b15a231526be50812fa3e101ba1780c994a72f92f33aa82ce4a",
+        "bytes": 850
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "SockAddr.cpp",
+      "game": {
+        "path": "Server/Game_Server/SockAddr.cpp",
+        "sha256": "9929484386d1306cf4e5d670b3d1c72e312a5d5490edc505b3d3c2150d77c3fc",
+        "bytes": 834
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/SockAddr.cpp",
+        "sha256": "9929484386d1306cf4e5d670b3d1c72e312a5d5490edc505b3d3c2150d77c3fc",
+        "bytes": 834
+      },
+      "byte_identical": true,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "SockAddr.h",
+      "game": {
+        "path": "Server/Game_Server/SockAddr.h",
+        "sha256": "10f6aa12d30a57861104ee947c3824ad9651acff743a4c532f0243d6fedcd496",
+        "bytes": 703
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/SockAddr.h",
+        "sha256": "10f6aa12d30a57861104ee947c3824ad9651acff743a4c532f0243d6fedcd496",
+        "bytes": 703
+      },
+      "byte_identical": true,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "SocketUtil.cpp",
+      "game": {
+        "path": "Server/Game_Server/SocketUtil.cpp",
+        "sha256": "044314f9bcf7d1345e31a0e0ee2b3f6777ace2229576e621cee43ac3b5ec9696",
+        "bytes": 982
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/SocketUtil.cpp",
+        "sha256": "79cc67236c376372a6714d1d9d78cd1fd8901e16b2e4e587fd219ff81d1a1f7f",
+        "bytes": 908
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "SocketUtil.h",
+      "game": {
+        "path": "Server/Game_Server/SocketUtil.h",
+        "sha256": "d8bee38fafd088e2441a097567cc89fd3edd1fe7e2b7714d1c48b5648d8f3142",
+        "bytes": 358
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/SocketUtil.h",
+        "sha256": "0a2eab418d26e19cd1c64e75186011206fc79228a54f15bcc52de70364504bd5",
+        "bytes": 271
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "TCPSocket.cpp",
+      "game": {
+        "path": "Server/Game_Server/TCPSocket.cpp",
+        "sha256": "085445862bfa96813f00733f62586d599ee0859de3dbe69beb24494fbd141c30",
+        "bytes": 3307
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/TCPSocket.cpp",
+        "sha256": "70a33b097e0c74e8884a0855921077af87ca3a5f69f8781abe71f5ac14b357ec",
+        "bytes": 2634
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "TCPSocket.h",
+      "game": {
+        "path": "Server/Game_Server/TCPSocket.h",
+        "sha256": "2aa1d4db2ad5f09e18172b1b40d0e3f9958c2bf2ebc45ee6c040de76f742114e",
+        "bytes": 1347
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/TCPSocket.h",
+        "sha256": "ee7144a88213faa2e1004b0f70a90180594bdfcfb312dc8f219adcc6b1009e5f",
+        "bytes": 1025
+      },
+      "byte_identical": false,
+      "proposed_scope": "core_primitives_with_policy_review"
+    },
+    {
+      "name": "enum.h",
+      "game": {
+        "path": "Server/Game_Server/enum.h",
+        "sha256": "48dc1428e00525447e7694b47d69da10821152203ad04b3b25a28b0a20c784fe",
+        "bytes": 1195
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/enum.h",
+        "sha256": "cb63f20d72a72173ab883c98afe4bf5a313658b16d1f535841b60a269b0da3e5",
+        "bytes": 736
+      },
+      "byte_identical": false,
+      "proposed_scope": "keep_in_application"
+    },
+    {
+      "name": "main.cpp",
+      "game": {
+        "path": "Server/Game_Server/main.cpp",
+        "sha256": "eb8b71089199900f99fac7a05a6adf2208cb5f793b49ca848f2aad8938dfc27c",
+        "bytes": 212
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/main.cpp",
+        "sha256": "a03aa9f2664bfdf6f2740dfc289895d2c7e64ef8604b1ca8c7e3b5c72eb51635",
+        "bytes": 443
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    },
+    {
+      "name": "pch.h",
+      "game": {
+        "path": "Server/Game_Server/pch.h",
+        "sha256": "44e6ca50b0e6d8248a071d958756652f8a85be3ea2aa1364d905acac275dfb73",
+        "bytes": 2847
+      },
+      "lobby": {
+        "path": "Server/Lobby_Server/pch.h",
+        "sha256": "ec154705eaadcf312175a3b570bdf5cd1a536dbda3906dfaa8fd5daef2eabb07",
+        "bytes": 1640
+      },
+      "byte_identical": false,
+      "proposed_scope": "extract_infrastructure_keep_domain"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "Client/WarOfDimension/stdafx.h",
+      "sha256": "a714378cd387c2b32d9d512058a57b3010d344a9498d9f214aa5fd74629f3d69"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "42d3f4485bfcfd383811291edded5e1aedb96a4309015225a456a3e181817d30"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "26525eb3ad3aea5c40fd61a028a41c204cef1675ba3048bcf5d65b0d6794b9af"
+    },
+    {
+      "path": "NewWod.Servers.slnf",
+      "sha256": "d49bf652d16941df7ac2d5ed75765f31d94391ecb71c881f63728a19ee18ba80"
+    },
+    {
+      "path": "Server/Game_Server/CClient.cpp",
+      "sha256": "650459a7f51f2fd37b716223766dea6500ba078f6e6a8e8b9ed80373a02888c0"
+    },
+    {
+      "path": "Server/Game_Server/CClient.h",
+      "sha256": "75cc98e764692e8bf057de54bf4fcda108ebd7ac1229ae0644f3b1f030d576de"
+    },
+    {
+      "path": "Server/Game_Server/CMatchMgr.cpp",
+      "sha256": "e1eae76fe9c34f003af017790994ea3b1ed3880b0d8ae15415ba73b4241be670"
+    },
+    {
+      "path": "Server/Game_Server/CMatchMgr.h",
+      "sha256": "e5a79e10e65b2fee2a3124fd0022dfda1a186e4c14c7b89e9f3fa9ea225fe937"
+    },
+    {
+      "path": "Server/Game_Server/CNetworkMgr.cpp",
+      "sha256": "e646610c10cbdd230a4109f3fe7cb7300c4d77ba0e0e13b34fb5212fc041512e"
+    },
+    {
+      "path": "Server/Game_Server/CNetworkMgr.h",
+      "sha256": "a0dc5b459c859558f085c80d6dbb787f7f934a60a4162dbab801eec8189e319f"
+    },
+    {
+      "path": "Server/Game_Server/CPacketMgr.cpp",
+      "sha256": "caeb70956e0d64feb539d4bb0f428b911df1aae820bc7a3507eedb2a4802e837"
+    },
+    {
+      "path": "Server/Game_Server/CPacketMgr.h",
+      "sha256": "49feb2901a8714c331e1a3d3442956dea3b214758c39003386de77f2537f9687"
+    },
+    {
+      "path": "Server/Game_Server/CPacketSender.cpp",
+      "sha256": "c0bb09c063fcef00aaf6359684d0f151d973437790e3f856893c8989226fdf89"
+    },
+    {
+      "path": "Server/Game_Server/CPacketSender.h",
+      "sha256": "f44c6da35ad48d81e144329f1bd4352558b215065080dc495f900f916570fc34"
+    },
+    {
+      "path": "Server/Game_Server/CServer.cpp",
+      "sha256": "d64e1f963ea7954c63687da0bb6ba531eab4f314f483bd7aa0ee9480ec1f3b6b"
+    },
+    {
+      "path": "Server/Game_Server/CServer.h",
+      "sha256": "82372c60f7cdfd25ae7907511e8f86fbe16834cb878ca9a3c9bd7f383b5f3c93"
+    },
+    {
+      "path": "Server/Game_Server/DataFile/CSV/item_info.csv",
+      "sha256": "a98e274c799335aafbca84c8c621fc2b3c116ae18d8b9018e5fe621caeff15c8"
+    },
+    {
+      "path": "Server/Game_Server/DataFile/CSV/npc_info.csv",
+      "sha256": "21f8fe006ac2bf461da34d95bb0ba203b5c785662c87d4b9aa8a9a10c4e0995e"
+    },
+    {
+      "path": "Server/Game_Server/DataFile/CSV/skill_info.csv",
+      "sha256": "d9afd7b6558e0e98566742166e5f91627fdd2d7d8f2400ea9ce9fd4ee6528337"
+    },
+    {
+      "path": "Server/Game_Server/GameUtil.cpp",
+      "sha256": "94efd46b41a50006a975a5cca48dddf1c4020bf8aa6145a6bc30813b68148aa2"
+    },
+    {
+      "path": "Server/Game_Server/GameUtil.h",
+      "sha256": "30a1abf12b95e1d2549c99759f06bec442e9311ad2109fa3d0c051fa74521f79"
+    },
+    {
+      "path": "Server/Game_Server/Game_Server.vcxproj",
+      "sha256": "91496560d41aeb8ad88f23d7e8821bafe1fcc730a3323b00a8d9160866923982"
+    },
+    {
+      "path": "Server/Game_Server/Global.cpp",
+      "sha256": "e5d6f2588898e50163bab32cc2edd5f4e6bb0b2ffd427a42f259b7e4a5483ec5"
+    },
+    {
+      "path": "Server/Game_Server/Global.h",
+      "sha256": "e5013ccf7e9fa54d6ee81ccce7cc68d42404d7adf05f0d4a2a5a5fb991a657fd"
+    },
+    {
+      "path": "Server/Game_Server/Interface.h",
+      "sha256": "2a6102b33d2feb3db1ccb4a35fd68604ba39c266519c7b84992009ae0fde72b1"
+    },
+    {
+      "path": "Server/Game_Server/ItemCsvMgr.cpp",
+      "sha256": "01eb8b8f71792dad9713b4175a315d29e775bd764e10525a9c698e428a945c29"
+    },
+    {
+      "path": "Server/Game_Server/Job.cpp",
+      "sha256": "e79715ad5d7eb7554464c5d8bbf863f80dd36018ed1b512e3f2a93296afde591"
+    },
+    {
+      "path": "Server/Game_Server/Job.h",
+      "sha256": "e7194bcf87315ed72b04ad0705e5824ac9d4254123bc7407d685cbbf2fb59eff"
+    },
+    {
+      "path": "Server/Game_Server/JobQueue.cpp",
+      "sha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d"
+    },
+    {
+      "path": "Server/Game_Server/JobQueue.h",
+      "sha256": "e6ff60343e2c0a948ce5b47ad00775815b1207c0e427d6c2b4f29907446cc2dc"
+    },
+    {
+      "path": "Server/Game_Server/LogUtil.cpp",
+      "sha256": "59b02a4f038d6b0d3a5657a478780aa4695ab9f4bf431e882f8800e356edffc2"
+    },
+    {
+      "path": "Server/Game_Server/LogUtil.h",
+      "sha256": "8108c1267c0efff182de56f92e77c84fa437b752b8b311c8728f7cd8a8d8e8dc"
+    },
+    {
+      "path": "Server/Game_Server/MathUtil.h",
+      "sha256": "42e0f64d6d6808374466c904146c43a882c37eb6870d56ac4f087c1490f63bb1"
+    },
+    {
+      "path": "Server/Game_Server/NpcCsvMgr.cpp",
+      "sha256": "800e667d60ca24d6942a5962228ac39dc12cbd222f0fe40b4ac3d6ae4be381e8"
+    },
+    {
+      "path": "Server/Game_Server/OverlapEx.cpp",
+      "sha256": "d8196acafff06edd6f4ab7a168e30b307944d64561b99b43303097752a397f1a"
+    },
+    {
+      "path": "Server/Game_Server/OverlapEx.h",
+      "sha256": "1d84badec05779dc2f3681741c9c86692c6d66cd975e0454966df60bab9a555b"
+    },
+    {
+      "path": "Server/Game_Server/Resource.cpp",
+      "sha256": "b98980d0b975e633697cce2bf256ef992b7304b159bd10ddfc4f1a1c3e89710f"
+    },
+    {
+      "path": "Server/Game_Server/Resource.h",
+      "sha256": "822fb5e3a8d4525d068553243873f7b1ed7eba8b06e545cbbb94269d394ba05f"
+    },
+    {
+      "path": "Server/Game_Server/SkillCsvMgr.cpp",
+      "sha256": "1edd71b51b2b606e4c4d6cf874d02f4ee969f6cfd261d471a323973b95520e67"
+    },
+    {
+      "path": "Server/Game_Server/SockAddr.cpp",
+      "sha256": "9929484386d1306cf4e5d670b3d1c72e312a5d5490edc505b3d3c2150d77c3fc"
+    },
+    {
+      "path": "Server/Game_Server/SockAddr.h",
+      "sha256": "10f6aa12d30a57861104ee947c3824ad9651acff743a4c532f0243d6fedcd496"
+    },
+    {
+      "path": "Server/Game_Server/SocketUtil.cpp",
+      "sha256": "044314f9bcf7d1345e31a0e0ee2b3f6777ace2229576e621cee43ac3b5ec9696"
+    },
+    {
+      "path": "Server/Game_Server/SocketUtil.h",
+      "sha256": "d8bee38fafd088e2441a097567cc89fd3edd1fe7e2b7714d1c48b5648d8f3142"
+    },
+    {
+      "path": "Server/Game_Server/TCPSocket.cpp",
+      "sha256": "085445862bfa96813f00733f62586d599ee0859de3dbe69beb24494fbd141c30"
+    },
+    {
+      "path": "Server/Game_Server/TCPSocket.h",
+      "sha256": "2aa1d4db2ad5f09e18172b1b40d0e3f9958c2bf2ebc45ee6c040de76f742114e"
+    },
+    {
+      "path": "Server/Game_Server/enum.h",
+      "sha256": "48dc1428e00525447e7694b47d69da10821152203ad04b3b25a28b0a20c784fe"
+    },
+    {
+      "path": "Server/Game_Server/main.cpp",
+      "sha256": "eb8b71089199900f99fac7a05a6adf2208cb5f793b49ca848f2aad8938dfc27c"
+    },
+    {
+      "path": "Server/Game_Server/pch.h",
+      "sha256": "44e6ca50b0e6d8248a071d958756652f8a85be3ea2aa1364d905acac275dfb73"
+    },
+    {
+      "path": "Server/Game_Server/protocol.h",
+      "sha256": "8b163ad6aa08ac8b3441bf30af5674acc4ce485d341553d520e07e2adbf507fe"
+    },
+    {
+      "path": "Server/Lobby_Server/CClient.cpp",
+      "sha256": "527989df6d3a670160a6b924291d55577ed9bfd4e6bbdcfdd9720d1a7b2b81e7"
+    },
+    {
+      "path": "Server/Lobby_Server/CClient.h",
+      "sha256": "3f2ab1cf4a191df23d2ea954391f10fef75178d18b815cc8d11e245dd9d97a3c"
+    },
+    {
+      "path": "Server/Lobby_Server/CMatchMgr.cpp",
+      "sha256": "a8059f93e265af30008313f2543244fa227bce705d085a3ec17652a05a8d199c"
+    },
+    {
+      "path": "Server/Lobby_Server/CMatchMgr.h",
+      "sha256": "2a898288a11d242e44821f40f4ae21fbdbf38c8598908d2bdf69af88561e1fa3"
+    },
+    {
+      "path": "Server/Lobby_Server/CNetworkMgr.cpp",
+      "sha256": "35e10832fea96455d27ad89880f7dfe1c4d547ffd5dd801f5075abe14562fc9d"
+    },
+    {
+      "path": "Server/Lobby_Server/CNetworkMgr.h",
+      "sha256": "92566355f76aa50a593efb7355c9c6f42817ff7d325e00b99f92bb6eca3f3720"
+    },
+    {
+      "path": "Server/Lobby_Server/CPacketMgr.cpp",
+      "sha256": "6efe544fa140401948356b0d589ebee200f88f769486dfc0287e5fca10c02e7b"
+    },
+    {
+      "path": "Server/Lobby_Server/CPacketMgr.h",
+      "sha256": "4d4289d6fb747e757f648071c80f5ec575666c7abdd76079f96fedc44db80e00"
+    },
+    {
+      "path": "Server/Lobby_Server/CPacketSender.cpp",
+      "sha256": "f2e34f98fa1937d1ff01c8c8d3902347a19f7191af85ddb12b5d6acb3e9a2a99"
+    },
+    {
+      "path": "Server/Lobby_Server/CPacketSender.h",
+      "sha256": "3a481f275ebad8904c70f448d7b91b21dde840430c17deb1e10f70b487141f71"
+    },
+    {
+      "path": "Server/Lobby_Server/CServer.cpp",
+      "sha256": "13b00744159134c0cec8596fa8bacf65ae2ff2a15f083f1571e8c016759c6b78"
+    },
+    {
+      "path": "Server/Lobby_Server/CServer.h",
+      "sha256": "d50f66b0f6c6549c617a95ad5f558b07a02e955c318f9c701ad602341290b7c1"
+    },
+    {
+      "path": "Server/Lobby_Server/GameUtil.cpp",
+      "sha256": "a05369031f8f22263a1c501c55f5eb239e3ad59ffe40a89134d0f0dfb5073995"
+    },
+    {
+      "path": "Server/Lobby_Server/GameUtil.h",
+      "sha256": "bb90e61c4fb225ce39d783db1151603440f303511cae79250df7834a3ec5571e"
+    },
+    {
+      "path": "Server/Lobby_Server/Global.cpp",
+      "sha256": "add5a68de917d58a40ca23303809578f6aa5d0c575f0beab5040946b54bb762b"
+    },
+    {
+      "path": "Server/Lobby_Server/Global.h",
+      "sha256": "2ba91188fdf41b8543771240d93a02eec8c52d24c5bf4715b9339fd3af05fbe9"
+    },
+    {
+      "path": "Server/Lobby_Server/Job.cpp",
+      "sha256": "e79715ad5d7eb7554464c5d8bbf863f80dd36018ed1b512e3f2a93296afde591"
+    },
+    {
+      "path": "Server/Lobby_Server/Job.h",
+      "sha256": "64f3e0aa1eb750582433cc22248f3ef9c5a9e13b34935223391252311df86f7b"
+    },
+    {
+      "path": "Server/Lobby_Server/JobQueue.cpp",
+      "sha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d"
+    },
+    {
+      "path": "Server/Lobby_Server/JobQueue.h",
+      "sha256": "a24d3b2d2edfac4c3dd6062b783102dd85e862e4fefe9789a8ece52bc9c8e9a4"
+    },
+    {
+      "path": "Server/Lobby_Server/Lobby_Server.vcxproj",
+      "sha256": "843370954ca3c2d4a0fc5265e441f8bb6412737df82154b1b573804a65fcc2d7"
+    },
+    {
+      "path": "Server/Lobby_Server/LogUtil.cpp",
+      "sha256": "3049971448de8273ba981bf74ac55ae474f16c6720d1aa1636d2239ea22a2fba"
+    },
+    {
+      "path": "Server/Lobby_Server/LogUtil.h",
+      "sha256": "6ae7c3d87b53092b2ca206d20241f05bfd15a02903dc8e519d0308f9ab16a74b"
+    },
+    {
+      "path": "Server/Lobby_Server/OverlapEx.cpp",
+      "sha256": "d4b7bc3eb5b2e392187bf8ec0d71996ce456f01651a3e1c5f6100ed4ec95462a"
+    },
+    {
+      "path": "Server/Lobby_Server/OverlapEx.h",
+      "sha256": "e47835d8be5890b6defeca537a44191a2ecee792bf66f69b19535145605f9fca"
+    },
+    {
+      "path": "Server/Lobby_Server/Resource.cpp",
+      "sha256": "9c37e2c397dbe4af4016d9c396a9c92db524013e4d277cd835c341745d057407"
+    },
+    {
+      "path": "Server/Lobby_Server/Resource.h",
+      "sha256": "fe691d54a06c6b15a231526be50812fa3e101ba1780c994a72f92f33aa82ce4a"
+    },
+    {
+      "path": "Server/Lobby_Server/SockAddr.cpp",
+      "sha256": "9929484386d1306cf4e5d670b3d1c72e312a5d5490edc505b3d3c2150d77c3fc"
+    },
+    {
+      "path": "Server/Lobby_Server/SockAddr.h",
+      "sha256": "10f6aa12d30a57861104ee947c3824ad9651acff743a4c532f0243d6fedcd496"
+    },
+    {
+      "path": "Server/Lobby_Server/SocketUtil.cpp",
+      "sha256": "79cc67236c376372a6714d1d9d78cd1fd8901e16b2e4e587fd219ff81d1a1f7f"
+    },
+    {
+      "path": "Server/Lobby_Server/SocketUtil.h",
+      "sha256": "0a2eab418d26e19cd1c64e75186011206fc79228a54f15bcc52de70364504bd5"
+    },
+    {
+      "path": "Server/Lobby_Server/TCPSocket.cpp",
+      "sha256": "70a33b097e0c74e8884a0855921077af87ca3a5f69f8781abe71f5ac14b357ec"
+    },
+    {
+      "path": "Server/Lobby_Server/TCPSocket.h",
+      "sha256": "ee7144a88213faa2e1004b0f70a90180594bdfcfb312dc8f219adcc6b1009e5f"
+    },
+    {
+      "path": "Server/Lobby_Server/enum.h",
+      "sha256": "cb63f20d72a72173ab883c98afe4bf5a313658b16d1f535841b60a269b0da3e5"
+    },
+    {
+      "path": "Server/Lobby_Server/main.cpp",
+      "sha256": "a03aa9f2664bfdf6f2740dfc289895d2c7e64ef8604b1ca8c7e3b5c72eb51635"
+    },
+    {
+      "path": "Server/Lobby_Server/pch.h",
+      "sha256": "ec154705eaadcf312175a3b570bdf5cd1a536dbda3906dfaa8fd5daef2eabb07"
+    },
+    {
+      "path": "scripts/Development.ps1",
+      "sha256": "ff626610d95f0dc61688eb98bb3b7aa3b3d3d5506f809f8c6f0ad0a9a673348a"
+    },
+    {
+      "path": "scripts/New-CompilationDatabase.ps1",
+      "sha256": "f4cc33c03e9ec4776a526e162df8b5df66a4c4ac072d5a08c9631516c8a33f35"
+    },
+    {
+      "path": "scripts/Test-AgentEnvironment.ps1",
+      "sha256": "d1fb75cac660ac3bdf8a38356d57052681347959fa61bfac69d07302a2b57d29"
+    },
+    {
+      "path": "scripts/Test-Local.ps1",
+      "sha256": "36b553683c68547001076d9fa137008fa442e1ac77b1193a0fa457e5875a4192"
+    }
+  ],
+  "findings": [
+    {
+      "id": "game_lobby_receive_tail",
+      "path": "Server/Game_Server/CNetworkMgr.cpp",
+      "lines": [
+        251
+      ],
+      "search": "if (remaindata < 0)",
+      "finding_ko": "잔여 데이터 이동 조건이 음수 검사",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_error_spin",
+      "path": "Server/Lobby_Server/SocketUtil.cpp",
+      "lines": [
+        36
+      ],
+      "search": "while (true);",
+      "finding_ko": "오류 출력 후 무한 루프",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_job_budget",
+      "path": "Server/Lobby_Server/JobQueue.h",
+      "lines": [
+        17
+      ],
+      "search": "MAX_JOB_PROCESS = 5",
+      "finding_ko": "호출당 최대 5개",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "game_job_budget",
+      "path": "Server/Game_Server/JobQueue.h",
+      "lines": [
+        30
+      ],
+      "search": "int jobSize = m_jobQueue.size()",
+      "finding_ko": "호출 시작 시 크기만큼 시도",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_delayed_raw_this",
+      "path": "Server/Lobby_Server/CClient.cpp",
+      "lines": [
+        60
+      ],
+      "search": "[this, p = std::move(packetCopy)]",
+      "finding_ko": "지연 Job raw this 캡처",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "game_delayed_shared_owner",
+      "path": "Server/Game_Server/CClient.cpp",
+      "lines": [
+        281
+      ],
+      "search": "client = shared_from_this()",
+      "finding_ko": "지연 Job shared owner 캡처",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_worker_count",
+      "path": "Server/Lobby_Server/CServer.cpp",
+      "lines": [
+        94
+      ],
+      "search": "i < 1;",
+      "finding_ko": "패킷 worker 1개",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_iocp_count",
+      "path": "Server/Lobby_Server/CServer.cpp",
+      "lines": [
+        90
+      ],
+      "search": "i < 4;",
+      "finding_ko": "IOCP worker 4개",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "game_iocp_count",
+      "path": "Server/Game_Server/CServer.cpp",
+      "lines": [
+        164
+      ],
+      "search": "hardware_concurrency() / 2",
+      "finding_ko": "IOCP worker hardware_concurrency/2",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "wire_base_header",
+      "path": "Server/Game_Server/protocol.h",
+      "lines": [
+        289
+      ],
+      "search": "struct BASE_PACKET",
+      "finding_ko": "길이 1byte/type 1byte 헤더",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "lobby_wire_include",
+      "path": "Server/Lobby_Server/pch.h",
+      "lines": [
+        28
+      ],
+      "search": "../Game_Server/protocol.h",
+      "finding_ko": "현재 게임 폴더 wire 참조",
+      "basis": "static_source_not_runtime_reproduction"
+    },
+    {
+      "id": "client_wire_include",
+      "path": "Client/WarOfDimension/stdafx.h",
+      "lines": [
+        44
+      ],
+      "search": "../../Server/Game_Server/protocol.h",
+      "finding_ko": "현재 게임 폴더 wire 참조",
+      "basis": "static_source_not_runtime_reproduction"
+    }
+  ],
+  "agent_environment": {
+    "compilation_database_sources": 235,
+    "server_sources": 171,
+    "missing_source_paths": [],
+    "serena_cli_indexed_symbols": {
+      "Server/Game_Server/CNetworkMgr.cpp": 22,
+      "Server/Lobby_Server/CNetworkMgr.cpp": 14,
+      "Server/Game_Server/CClient.cpp": 24,
+      "Server/Lobby_Server/CClient.cpp": 9
+    }
+  },
+  "preserved_user_edit": {
+    "path": "NewWod.slnx",
+    "sha256": "f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562",
+    "expected_sha256": "f3447f2a3a56e5a04b4cae2d11f7e5ccef60bc0ee116713eed3c48156d4f2562"
+  },
+  "limitations_ko": [
+    "정적 조사이며 장애·부하 재현 아님",
+    "서버 코드·프로젝트 설정 변경 없음",
+    "서버 빌드·실행·DB 검증 미실행",
+    "계획·문서 작성이며 커밋·push 미수행"
+  ]
+}

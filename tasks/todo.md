@@ -484,3 +484,51 @@ UI upload 실제 잔존 플레이어36.8750/보스35.8125MiB와 dissolve staging
 - [x] 사용자 SLNX 변경 제외 및 한글 커밋 미리보기 준비
 
 사용자가 커밋·push를 요청했다. 공통 commit 스킬의 2단계 절차로 준비하며, 미리보기 승인 후 동일 staged snapshot을 커밋하고 origin/main에 push한다. 문서 변경만 포함하고 기존 NewWod.slnx 변경은 보존한다. 새 게임 실행·측정·빌드는 수행하지 않는다.
+
+완료: 승인된 fingerprint 0d2acb41d3c5275a5cd4fcd95d26b02d895ef448와 메시지로 86f83a94f76e7218c4cd2f34d992f9d2d02174f1을 생성·push했다. GitHub main과 로컬 HEAD 일치, 문서 5개 반영과 기존 사용자 SLNX 변경만 남았음을 확인했다.
+
+## 39. 서버 리팩토링 1단계 ServerCore 구현 계획
+
+- [x] 두 서버의 동일 파일·의미 차이·의존성·프로젝트 설정 조사
+- [x] ServerCore 범위·프로토콜/콘텐츠 경계·자원 수명·단계별 구현/검증 계획 작성
+- [x] 1~6단계 순차 로드맵과 후속 새 더미 도구의 연결 지점 기록
+- [x] 미구현 설계 Archify JSON/HTML·출처 및 문서 검증
+
+사용자 요청은 1단계 구현 계획 작성이다. 현재 서버 소스와 동작은 변경하지 않는다. 2~4단계의 신규 시나리오 더미·agent/GUI 제어·월드 관찰, 5단계 상세 서버 문서화, 6단계 콘텐츠 데이터화 완료는 순차 후속 작업으로 구분한다. 원본 저장소와 기존 사용자 SLNX 변경을 보존하고 커밋·push는 수행하지 않는다.
+
+검증: 최상위 동일 이름 35쌍 중 4쌍의 byte 동일·31쌍의 차이를 확인하고 소스 SHA-256·줄 위치를 근거 JSON에 기록했다. 로비 5개/게임 시작 크기 budget, 다른 OP_TYPE·풀·스레드 및 4개 수신 경로의 경계를 계획에 반영했다. 계획은 1-A~1-H 구현·검증 단위와 완료 기준으로 작성했다. compilation database 235개/서버171개, 누락 경로0개; Serena로 두 CNetworkMgr·CClient를 인덱싱(22/14/24/9 symbols)했고 Test-AgentEnvironment.ps1 -StaticOnly PASS. Archify 출처3개·showcase9/9 오류0/경고0, desktop4크기 containment와 light/dark4화면 직접 확인 PASS. 정상 종료·패킷·부하 테스트는 구현 후 수행할 계획이며 이번에는 서버 빌드·구동·DB 검증을 실행하지 않았다.
+
+마무리: 조사 대상 89개 소스·설정의 SHA-256, 문서 상대 링크73개, frozen JSON/HTML 해시·byte, UTF-8·공백을 확인했다. 문서별 정규화 예외만 .gitattributes에 추가했고 서버/클라이언트 소스·프로젝트·개발 스크립트는 변경하지 않았다. 사용자 SLNX SHA-256과 기준 HEAD를 보존했다.
+
+## 40. ServerCore 공통 기반 구현
+
+- [x] 기존 빌드·LOCAL_TEST·패킷 ABI 기준 확보
+- [x] 공통 정적 라이브러리·Protocol·주소·진단·Job·풀 추출
+- [x] 공유 송수신·IOCP·프레임·오류·자원 수명과 서버 어댑터 연결
+- [x] 정상 종료·회귀 테스트·Debug/Release·에이전트 환경 검증
+- [x] 실제 구현 문서·Archify 구조도·정리 근거 작성
+
+사용자가 1단계 구현을 요청했다. 계획의 1-A~1-H를 순차 적용한다. 새 더미 제품·GUI·월드 관찰·콘텐츠 데이터화는 다음 단계이며 이번에 함께 구현하지 않는다. 기존 사용자 SLNX 경로를 보존하며 프로젝트만 추가하고 커밋·push는 하지 않는다. 기준 빌드를 막던 LFS 와일드카드 사전 검사를 실제 Git LFS 파일 목록으로 수정한다.
+
+완료: ServerCore 정적 라이브러리와 테스트를 추가했다. Winsock·소켓·IOCP·부분 송신·프레임·Job·풀·스레드 회수·진단을 공통화했다. Protocol은 Shared로 이동하고 이전 경로에 forwarding header를 남겼다. 서버별 OP_TYPE·content handler·작업 budget과 도메인 풀은 어댑터에 유지한다. 중복 `.cpp` 12개의 compile/filter 참조를 제거하고 복구 commit과 대체 구현을 기록했다.
+
+수명: 연결별 callback 직렬화, 송신 완료 후 풀 반환, Disconnect 이전 native I/O 배출, 접속 세대에 따른 지연 패킷·사용자 상태 타이머 검사, 생산자 → IOCP → 콘텐츠 순서의 정상 종료를 적용했다. 부분 초기화/worker 생성 실패도 회수한다. 기존 싱글턴 자기 재해제·보스 시작 위치·로딩 재예약·몬스터 배치 범위·비활성 미니언 navigation·NPC 이벤트 대상·패킷 fall-through·누락 외형 파일의 무한 읽기 결함을 회귀 검사에 필요한 범위에서 수정했다.
+
+검증: 서버/Core/tests Debug·Release 빌드, 구성별 Core 93항목·Protocol 구조체110종/상수106개, 네트워크12종, 보스4/5의 4인 매칭·전원 로딩 완료·첫 NPC 알림 PASS. 통합7시나리오에는 리소스 누락2종·로비 미실행·배타 포트 충돌의 실패 종료4종을 포함한다. 정상/실패 종료에서 pending·sockets·leased0을 확인했다. 마지막 패킷 분기·범위 수정 후 두 구성의 빌드/Core/전체 통합 검사를 다시 통과했다.
+
+추가 확인: Client Debug 빌드와 실제 게임 창 시작, Release 서버 간 연결 smoke, Test-AgentEnvironment 전체와 Core Net.cpp Serena51 symbols PASS. compilation database226개·누락0개. 실제 구현 Archify showcase9/9 오류0/경고0·4viewport containment·4PNG 직접 확인 PASS. 구조도 frozen byte/해시·소스 UTF-8·문서 링크·삭제 파일 참조·기존 사용자 SLNX3경로를 확인하고 구현/정리 문서·인덱스·소스/검증 근거를 작성했다.
+
+한계: 기존 서버/클라이언트 컴파일 경고를 유지한다. DB 없는 LOCAL_TEST이며 운영 DB·블록체인·전투 전체·장시간 부하·4개 렌더링 클라이언트는 미검증이다. NPC/매치/스킬 전체 타이머 수명과 ExtraPos/Look CSV 파싱은 후속 범위다. CPU/메모리 개선량은 측정하지 않았다. 기준 HEAD 유지, 커밋·push는 수행하지 않았다.
+
+## 41. ServerCore 커밋·push 준비
+
+- [x] 계획·구현·테스트·문서·구조도와 프로젝트 추가를 커밋 범위로 확정
+- [x] 기존 사용자 SLNX 경로/ID와 이에 맞춘 로컬 filter 경로는 작업 트리에 보존
+- [x] 소스 해시·문서 링크·UTF-8·공백·staged 프로젝트/filter 정합성 검사
+- [x] 한글 메시지와 staged fingerprint를 준비하고 승인 절차 적용
+
+사용자가 커밋·push를 요청했다. 공통 commit 스킬에 따라 미리보기를 준비한다.
+승인 후 동일 snapshot을 커밋하고 origin/main으로 push한다.
+SLNX/filter에는 Core/test 프로젝트 추가만 stage하고 기존 상대 경로를 유지한다.
+사용자의 기존 긴 SLNX 경로·ID와 로컬 filter 호환 경로는 미커밋으로 보존한다.
+직전 Debug/Release 검증 이후 구현 변경은 없어 게임 검사를 반복하지 않는다.

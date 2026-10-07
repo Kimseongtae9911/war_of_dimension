@@ -1,5 +1,12 @@
 # 현재 코드 구성
 
+서버 공통 기반은 [ServerCore 구현](SERVER_CORE.md)과
+[현재 의존성 구조도](../diagrams/server-core/README.md)에 정리했다.
+로비·게임 서버가 공통 정적 라이브러리를 사용하고 Protocol은 Shared로 분리했다.
+[구현 계획](SERVER_CORE_PLAN.md)과 [계획 설계도](../diagrams/server-core-plan/README.md)는 구현 전 기록이다.
+새 더미·agent/GUI 제어·월드 관찰·상세 서버 문서·콘텐츠 데이터화는 1~6단계로 순차 진행한다.
+아래는 현재 구현이다. 후속 도구와 전체 서버 문서화는 아직 완료하지 않았다.
+
 ## 로컬 실행 구성
 
 [인터랙티브 구성도](../diagrams/local-runtime/runtime.architecture.html), [JSON 원본](../diagrams/local-runtime/runtime.architecture.json), [근거와 재생성](../diagrams/local-runtime/README.md)을 함께 관리한다.
@@ -8,7 +15,7 @@
 - 게임 서버도 로비에 연결하고 TCP 8911 listener를 준비한다.
 - 매칭 후 클라이언트는 전달받은 게임 서버 주소로 전환한다. listener·서버 연결·로그인 화면 시작과 DB 없는 Title 영웅 테스트의 8910→8911 전환 및 실제 인게임 렌더링을 확인했다. 멀티플레이 전투 전체는 검증하지 않았다.
 - 로비는 매칭·사용자·거래·DB 관련 코드를 포함한다. 현재 개발 모드는 DB 없이 실행한다.
-- 공유 wire format은 `Server/Game_Server/protocol.h`에 있고 로비·클라이언트가 상대 경로로 참조한다. 독립 Shared 모듈 분리는 후속 리팩토링 제안이다.
+- 공유 wire format은 `Shared/Protocol/protocol.h`에 있다. 두 서버와 클라이언트가 공통 헤더를 참조하며 이전 서버 경로에는 forwarding header를 둔다. x64 MSVC ABI와 상수를 유지했다.
 - 실행 리소스는 각 모듈 폴더의 상대 경로로 읽는다. 빌드 결과와 에이전트 캐시는 소스와 분리한다.
 
 ## 개발 기반 변경의 경계
@@ -23,7 +30,7 @@
 
 파일에서 읽은 동일한 정점·인덱스 geometry는 device별 내용 캐시를 통해 공유한다. 각 프레임의 transform·material은 유지하고 스킨드 메시의 본 연결·가중치·애니메이션 상태는 별도로 소유한다. [메시 공유 구현](MESH_SHARING.md)과 [공유 구조도](../diagrams/mesh-sharing/mesh-sharing.architecture.html)에 소유권과 검증 결과를 기록했다. 이 변경은 TCP 연결 구성을 바꾸지 않아 기존 로컬 실행 구성도는 재생성하지 않았다.
 
-VS toolset·인코딩·빌드 경로·개발 문서 변경은 패킷 형식이나 게임 규칙을 바꾸지 않는다. 게임 객체 생명주기, 패킷 검증, 정상 종료와 큰 클래스 책임 분리는 [리팩토링 검토](../REFACTORING_PLAN.md)의 후속 작업이다.
+VS toolset·인코딩·빌드 경로·개발 문서 변경은 패킷 형식이나 게임 규칙을 바꾸지 않는다. ServerCore에서 패킷 형식 검사와 I/O 수명·정상 종료를 적용했다. 콘텐츠 전체 수명과 큰 클래스 책임 분리는 [리팩토링 검토](../REFACTORING_PLAN.md)의 후속 작업이다.
 
 인게임에서는 확정된 외형의 선택 파츠만 생성하고, 각 keyframe에서 선택한 외형 파츠와 공통 본·부모 프레임의 변환 행렬만 보관한다. 모든 61개 애니메이션과 keyframe은 유지하며 선택 스킬별 clip 로딩은 미적용이다. 전체 프레임 계층·본 링크·base geometry 공유를 유지하며 로비/READY 편집 및 외형 미수신은 전체 모델을 사용한다. [선택 파츠 구현·실측](../portfolio/HERO_SELECTED_PARTS.md)과 [변경 흐름](../diagrams/hero-selection/README.md)에 근거를 기록한다. 실제 진입 검증 중 발견한 로비 Job 실행 누락과 Title의 서버 응답 전 장면 전환도 복구했으며 wire format은 유지했다.
 

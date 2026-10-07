@@ -1,80 +1,40 @@
-﻿#pragma once
-
-namespace wod_server{
-
-class IJobQueue
-{
+#pragma once
+#include <ServerCore/Concurrency.h>
+namespace wod_server {
+using IJobQueue = wod::core::JobQueue;
+class JobQueue : public wod::core::JobQueue {
 public:
-    using JobRef = std::shared_ptr<IJob>;
-
-    virtual ~IJobQueue() = default;
-    virtual void PushJob(JobRef job) = 0;
-    virtual void ProcessJob() = 0;    
+    JobQueue() : wod::core::JobQueue(wod::core::JobBudget::Five) {}
 };
-
-class JobQueue : public IJobQueue
-{
-    enum { MAX_JOB_PROCESS = 5 };
-
+class PacketJobQueue {
 public:
-    void PushJob(JobRef job) override {
-        m_jobQueue.push(job);
+    void AddSessionQueue(CClient* client) {
+        std::lock_guard lock(mutex_);
+        if (!stopping_ && client->TryMarkInQueue()) { queue_.push(client); ready_.notify_one(); }
     }
-
-    template<typename Func>
-    requires std::is_invocable_v<Func&>
-    void PushJob(Func&& f) {
-        m_jobQueue.push(std::make_shared<Job<Func>>(std::forward<Func>(f)));
-    }
-
-    void ProcessJob() override {       
-        JobRef job = nullptr;
-
-        int jobcnt = 0;
-        while (m_jobQueue.try_pop(job))
-        {
-            job->Execute();
-            if (++jobcnt >= MAX_JOB_PROCESS)
-                break;
-        }
-    }
-
-private:
-    concurrency::concurrent_priority_queue<JobRef> m_jobQueue;
-};
-
-
-class PacketJobQueue
-{   
-public:
-    void AddSessionQueue(CClient* object)
-    {
-        if (object->TryMarkInQueue())
-            m_jobQueue.push(object);
-    }
-
+    void Stop() { std::lock_guard lock(mutex_); stopping_ = true; ready_.notify_all(); }
     void ProcessJob() {
-
-        while (true)
-        {
-            CClient* client = nullptr;
-            while (m_jobQueue.try_pop(client))
+        for (;;) {
+            CClient* client;
             {
-                client->UnmarkInQueue();
-
-                if (client->IsDisconnected())
-                {
-                    CUserMgr::GetInstance()->ClientReset(client->GetID());
-                    continue;
-                }
-
-                client->GetJobQueue()->ProcessJob();
+                std::unique_lock lock(mutex_);
+                ready_.wait(lock, [this] { return stopping_ || !queue_.empty(); });
+                if (stopping_) return;
+                client = queue_.top(); queue_.pop();
+            }
+            if (client->IsDisconnected()) {
+                client->GetJobQueue()->Clear(); client->UnmarkInQueue();
+                CUserMgr::GetInstance()->ClientReset(client->GetSocketID());
+            } else {
+                client->GetJobQueue()->ProcessJob(); client->UnmarkInQueue();
+                if (client->GetJobQueue()->HasJobs() || client->IsDisconnected()) AddSessionQueue(client);
             }
         }
     }
-
 private:
-    concurrency::concurrent_priority_queue<CClient*> m_jobQueue;
+    std::mutex mutex_;
+    std::condition_variable ready_;
+    std::priority_queue<CClient*> queue_;
+    bool stopping_ = false;
 };
-
 }

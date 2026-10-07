@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+#include "pch.h"
+#include <Protocol/Validation.h>
 #include "CClient.h"
 #include "SocketUtil.h"
 #include "CPacketMgr.h"
@@ -261,53 +262,37 @@ namespace wod_server {
 
 	void CClient::RecvProcess(const DWORD& bytes, OverlapEx* overEx)
 	{
-		int remaindata = bytes + m_packetSender->GetSession()->GetRemainData();
-		char* packet = overEx->GetSendBuf();
 
-		while (remaindata > 0) {
-			BASE_PACKET* p = reinterpret_cast<BASE_PACKET*>(packet);
+        auto session = m_packetSender->GetSession();
+        const auto generation = session->Generation();
+        std::vector<wod::core::FrameDecoder::Frame> frames;
+        if (!session->Decode(bytes, *overEx, frames)) { Disconnect(); return; }
+        for (auto& frame : frames) {
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::GameClient)) { Disconnect(); return; }
+            auto* packet = reinterpret_cast<BASE_PACKET*>(frame.data());
+            if (packet->type == CS_LOGIN || packet->type == CS_RTT || packet->type == CS_TEST_INGAME || packet->type == CS_TEST_INGAME2)
+                session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(packet, shared_from_this()); });
+            else {
+                if (m_matchNum < 0 || m_matchNum >= MAX_MATCH) { Disconnect(); return; }
+                auto& match = CMatchMgr::GetInstance()->GetMatch(m_matchNum);
+                match.PushJob([client = shared_from_this(), session, generation, frame = std::move(frame)]() mutable {
+                    session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), client); });
+                });
+            }
+        }
+        session->Recv();
 
-			if (p->size <= remaindata) {
-				if (p->type == CS_LOGIN || p->type == CS_RTT || p->type == CS_TEST_INGAME || p->type == CS_TEST_INGAME2)
-				{
-					CPacketMgr::GetInstance()->Packet_Exec(p, shared_from_this());
-				}
-				else
-				{
- 					std::vector<char> packetCopy(p->size);
-					memcpy(packetCopy.data(), p, p->size);
-
-					auto& match = CMatchMgr::GetInstance()->GetMatch(m_matchNum);
-					match.PushJob([client = shared_from_this(), packetCopy = std::move(packetCopy)]() mutable {
-						CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(packetCopy.data()), client);
-						});
-				}
-
-				packet += p->size;
-				remaindata -= p->size;
-			}
-			else break;
-		}
-		m_packetSender->GetSession()->SetRemainData(remaindata);
-		if (remaindata > 0)
-			memmove(overEx->GetSendBuf(), packet, remaindata);
-		m_packetSender->GetSession()->Recv();
 	}
 
 	void CClient::Disconnect()
 	{
-		OverlapEx* over = Resource::GetOverObjectFromPool();
-		over->SetOP(OP_TYPE::OP_DISCONNECT);
-		if (!SocketUtil::DisconnectEx(m_packetSender->GetSession()->GetSocket(), &over->GetOver(), TF_REUSE_SOCKET, NULL) &&
-			WSA_IO_PENDING != WSAGetLastError() && ERROR_IO_PENDING != WSAGetLastError()) {
-			SocketUtil::PrintError("Disconnect");
-			Resource::overExPool.push(over);
-		}
-		else {
-			stateLock.lock();
-			m_state = CL_STATE::ST_FREE;
-			stateLock.unlock();
-		}
+        auto session = m_packetSender->GetSession();
+        session->Invalidate();
+        auto* over = Resource::GetOverObjectFromPool();
+        over->SetOP(OP_TYPE::OP_DISCONNECT);
+        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::overExPool.push(over);
+        std::unique_lock lock(stateLock); m_state = CL_STATE::ST_FREE;
+
 	}
 
 	void CClient::ProcessRespawn(TimePoint now)

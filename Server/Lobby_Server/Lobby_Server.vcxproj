@@ -198,23 +198,18 @@
     <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="CViewList.cpp" />
     <ClCompile Include="Global.cpp" />
-    <ClCompile Include="Job.cpp" />
-    <ClCompile Include="JobQueue.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="CServer.cpp" />
     <ClCompile Include="CUserMgr.cpp" />
     <ClCompile Include="GameUtil.cpp" />
     <ClCompile Include="HashUtil.cpp" />
-    <ClCompile Include="LogUtil.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OverlapEx.cpp" />
     <ClCompile Include="SHA256.cpp" />
-    <ClCompile Include="SockAddr.cpp" />
     <ClCompile Include="SocketUtil.cpp" />
-    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="Zone.cpp" />
     <ClCompile Include="ZoneManager.cpp" />
   </ItemGroup>
+  <ItemGroup><ProjectReference Include="../ServerCore/ServerCore.vcxproj"><Project>{9F0E573D-6EE7-4658-AB7F-A17057B0D76D}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

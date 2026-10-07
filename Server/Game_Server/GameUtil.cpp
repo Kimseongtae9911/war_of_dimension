@@ -843,6 +843,7 @@ namespace wod_server {
 
 	bool GameUtil::GetSlidingVector(const vec3& pos, const vec3& shift, int nodeNum, vec3& slidingVector)
 	{
+		if (nodeNum < 0 || static_cast<size_t>(nodeNum) >= m_naviMesh.size()) return false;
 		const Triangle& triangle = m_naviMesh[nodeNum]->triangle;
 
 		int edgeIndex = FindEdgeAdjacentToPosition(pos, triangle);

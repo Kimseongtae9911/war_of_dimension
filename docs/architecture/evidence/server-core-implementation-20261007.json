@@ -1,0 +1,683 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-07",
+  "status": "implemented-working-tree",
+  "stage": 1,
+  "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+  "scope": "로비/게임 ServerCore 공통화; 단계 2~6은 후속 작업",
+  "protocolFixture": {
+    "path": "Shared/Protocol/tests/abi-x64-msvc.json",
+    "sha256": "cdc3e11eafcd3c4c0b4fdba2ed9d9f638b0996eb66965fb6849932599f14dedb",
+    "basis": "공통 헤더 분리 전 x64 MSVC에서 추출한 구조체 크기·정렬·멤버 offset/크기·상수"
+  },
+  "sources": [
+    {
+      "path": ".gitattributes",
+      "sha256": "a34d70ab437f319002a0933df0bb41b7b6e282c876894eddb950b395029cc6ea",
+      "bytes": 8027
+    },
+    {
+      "path": "Client/WarOfDimension/stdafx.h",
+      "sha256": "79ea6d8d65b54a927e059d8127c66b601c0e4beb3a14cc9789b0b0675d08572d",
+      "bytes": 26076
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "4a547713b60cdb03e8450d880e99731462c9a5d0667a8548a6ede67a96d4db8a",
+      "bytes": 1544
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "ae2174140b6149ce7a47951091f8118cbfa7f4362ee03d21656c295f170ba6a5",
+      "bytes": 1400
+    },
+    {
+      "path": "NewWod.Servers.slnf",
+      "sha256": "1007f4d9d82f75f134690f246b68f5f0f0f0e8bccbafeea1e6784d74488acf5d",
+      "bytes": 369
+    },
+    {
+      "path": "NewWod.slnx",
+      "sha256": "ee98bb612ee54f48a1ad8870beb625764c1d860ed13b4a037182cd349e8522a9",
+      "bytes": 1113
+    },
+    {
+      "path": "Server/Game_Server/CClient.cpp",
+      "sha256": "8e994528a88f73cb81a5ec7351ae78bd9239715b51241e45d1ff0f6a9c5a7067",
+      "bytes": 17617
+    },
+    {
+      "path": "Server/Game_Server/CMatch.cpp",
+      "sha256": "0b5deb0b2f297680feea6fdd8fa08a095ef0486a6db6bb1e5dc1d12b0737b9f5",
+      "bytes": 14900
+    },
+    {
+      "path": "Server/Game_Server/CMonster.cpp",
+      "sha256": "ee16c5505fa3f947c9afa36e219c10d2ce65ed890100cc28d7a2e0283ecf5fdd",
+      "bytes": 14885
+    },
+    {
+      "path": "Server/Game_Server/CNetworkMgr.cpp",
+      "sha256": "c6598384a8560edb92ba2812cc79e6131d5a58c0bd689a26392e0898dc926a82",
+      "bytes": 18331
+    },
+    {
+      "path": "Server/Game_Server/CNetworkMgr.h",
+      "sha256": "4cfa81a089035e984683715c766250a23fa7412de199ad42376b602c113047d4",
+      "bytes": 2849
+    },
+    {
+      "path": "Server/Game_Server/CNpc.h",
+      "sha256": "e76d43e4b0a96b9cfe3134f42f39b1bf3341cb318d93bf2088da1d1a3bb2ccce",
+      "bytes": 2244
+    },
+    {
+      "path": "Server/Game_Server/CObjectMgr.cpp",
+      "sha256": "7e5b8204a7002f6b586aaa455068ab683d9e855684ea8f81bd19ace55112d174",
+      "bytes": 4505
+    },
+    {
+      "path": "Server/Game_Server/CObjectMgr.h",
+      "sha256": "4daa56a01ec317e9326f988b861939b338f4395fb8b8b538fe3ea1f3d79fbace",
+      "bytes": 1672
+    },
+    {
+      "path": "Server/Game_Server/CPacketMgr.cpp",
+      "sha256": "aed932c34b98ede595da5de175c20acdc733ccb0003107cdfe5f9aec32b0d26c",
+      "bytes": 25043
+    },
+    {
+      "path": "Server/Game_Server/CServer.cpp",
+      "sha256": "5831b57f8d1298d7329266b4e84819ed956c34e6d879d14d9af28241464a5097",
+      "bytes": 6501
+    },
+    {
+      "path": "Server/Game_Server/CServer.h",
+      "sha256": "f7b230fda2707daa208c5d695de425ee23bc32459bdea4c0555a6e6dc726b724",
+      "bytes": 461
+    },
+    {
+      "path": "Server/Game_Server/GameUtil.cpp",
+      "sha256": "d05fd69bacc2dd4e7208b0d930c2c943d96d0eba29b665ec66c82156e6c2297f",
+      "bytes": 27003
+    },
+    {
+      "path": "Server/Game_Server/Game_Server.vcxproj",
+      "sha256": "2f9187c78c01c3d2f2a5a5bc91527fd8067fc009fa0b743d67c95fd44196322c",
+      "bytes": 21962
+    },
+    {
+      "path": "Server/Game_Server/Game_Server.vcxproj.filters",
+      "sha256": "a2adecf5663bd203ace372975ed19fc83e96e5d749dff53ff3a0526f2fc35c59",
+      "bytes": 39830
+    },
+    {
+      "path": "Server/Game_Server/Interface.h",
+      "sha256": "497837572df30e73fdb7e7661393afb143b87cbf39710e368bc5b873569c11a8",
+      "bytes": 1335
+    },
+    {
+      "path": "Server/Game_Server/Job.h",
+      "sha256": "245f63b15366e0475f6bed032ef6121a063070c31ad68033e3b2f7495d41ab01",
+      "bytes": 138
+    },
+    {
+      "path": "Server/Game_Server/JobQueue.h",
+      "sha256": "8e73b0f4f734bc2c85b1af830c28b7db6db373a8d23b5d1a1b004e0e16e81968",
+      "bytes": 251
+    },
+    {
+      "path": "Server/Game_Server/LogUtil.h",
+      "sha256": "662f05cc9436df12a86b4838ff2558669ec4849c4056801a101c8539f1d74db7",
+      "bytes": 119
+    },
+    {
+      "path": "Server/Game_Server/OverlapEx.h",
+      "sha256": "ca38642e7a46636f4f5b19005cb96e1782a12fbef7ebd4d9a1a61ed3352f1005",
+      "bytes": 1522
+    },
+    {
+      "path": "Server/Game_Server/Resource.cpp",
+      "sha256": "f9d63d1f55b03c975397165efa0fafb1f0936c5f21cbea2b2662115d7404badf",
+      "bytes": 544
+    },
+    {
+      "path": "Server/Game_Server/Resource.h",
+      "sha256": "f247f1ac66cf943a485ed7a20a174a4f5cadc079f22815a0e94e77e1e287afcc",
+      "bytes": 515
+    },
+    {
+      "path": "Server/Game_Server/SockAddr.h",
+      "sha256": "dda7c7fa6f9b01a4d001d722f8bbe29f786d557a81c6a386f3856e4814190287",
+      "bytes": 107
+    },
+    {
+      "path": "Server/Game_Server/SocketUtil.cpp",
+      "sha256": "d747910b3e3071621a83d08a64b76c233cc226c0fe36b07534eb32101bc6be1e",
+      "bytes": 239
+    },
+    {
+      "path": "Server/Game_Server/SocketUtil.h",
+      "sha256": "f9bf9b272c1a83c0ed98f0a7d545f89c0c76fd5f8edc05850f37ac3f84228c0a",
+      "bytes": 494
+    },
+    {
+      "path": "Server/Game_Server/TCPSocket.h",
+      "sha256": "bfeebfe509a5717b5aac20608ceeb1dc01fa222ce0907d2591f86c42e17cef66",
+      "bytes": 1219
+    },
+    {
+      "path": "Server/Game_Server/main.cpp",
+      "sha256": "6ef1e74f7d618d562c886fef43048990c01315a69dc179bf8111e8f9d5980564",
+      "bytes": 524
+    },
+    {
+      "path": "Server/Game_Server/pch.h",
+      "sha256": "bb17326c55fc052f98aa05247178de32a2e39ce62999f6576be06c17c55ecf1b",
+      "bytes": 2856
+    },
+    {
+      "path": "Server/Game_Server/protocol.h",
+      "sha256": "24e13e518b30cdb2628af8135f8564191f61758dcc7323a8c9cf65d1e2740bb9",
+      "bytes": 131
+    },
+    {
+      "path": "Server/Lobby_Server/CClient.cpp",
+      "sha256": "2761c4bb88726331b71f9e33c7ba717d36f19e9b74bab601b87b2a7e08e04754",
+      "bytes": 4783
+    },
+    {
+      "path": "Server/Lobby_Server/CDataBaseThread.cpp",
+      "sha256": "9319e05c46f2ebf36debc2d212f4b2de699ff8f801ec1999e86833ee13053fc7",
+      "bytes": 2269
+    },
+    {
+      "path": "Server/Lobby_Server/CNetworkMgr.cpp",
+      "sha256": "234c9a38922d2271bf7060d083c1539c2d2a2fcc1a686cd220d1744f701d452d",
+      "bytes": 9992
+    },
+    {
+      "path": "Server/Lobby_Server/CNetworkMgr.h",
+      "sha256": "1c20797c42ebd6dae8b17a3905d1fe6eee6d86680324f483c94dcd11a7bbba11",
+      "bytes": 2185
+    },
+    {
+      "path": "Server/Lobby_Server/CPacketMgr.cpp",
+      "sha256": "2bd3dae816555aec1c93a1bb10a88c7a523fabd9dffa4214958e407e5e3a69f8",
+      "bytes": 25994
+    },
+    {
+      "path": "Server/Lobby_Server/CServer.cpp",
+      "sha256": "c2d07c4a72d417a475f260e5bf26a9535a8919e1053d22dcdcc3616f856604a8",
+      "bytes": 3318
+    },
+    {
+      "path": "Server/Lobby_Server/CServer.h",
+      "sha256": "a0e191566e1914bf9b63329b32ef53c450dbee00f0cbf67f9f4e3648fcf53ce2",
+      "bytes": 301
+    },
+    {
+      "path": "Server/Lobby_Server/CUserMgr.cpp",
+      "sha256": "12e13eb6a2f2dcb8f6101a9c3c5613e39609b624dbfae34e37a40d8bae56cbe0",
+      "bytes": 2716
+    },
+    {
+      "path": "Server/Lobby_Server/Job.h",
+      "sha256": "245f63b15366e0475f6bed032ef6121a063070c31ad68033e3b2f7495d41ab01",
+      "bytes": 138
+    },
+    {
+      "path": "Server/Lobby_Server/JobQueue.h",
+      "sha256": "870943ed08a1a948fe05d2908322d60a630a832e0d7215dc0a42068db4c06961",
+      "bytes": 1478
+    },
+    {
+      "path": "Server/Lobby_Server/Lobby_Server.vcxproj",
+      "sha256": "83b670122a26f9212046b05025cfa1a912398a0af3ae73a54e0e6d4af523e7ce",
+      "bytes": 10261
+    },
+    {
+      "path": "Server/Lobby_Server/Lobby_Server.vcxproj.filters",
+      "sha256": "4e407d4f3161201e8f225c2be53d5f634ee5d03a24ccf80d1d9a1cf8f801c694",
+      "bytes": 8635
+    },
+    {
+      "path": "Server/Lobby_Server/LogUtil.h",
+      "sha256": "662f05cc9436df12a86b4838ff2558669ec4849c4056801a101c8539f1d74db7",
+      "bytes": 119
+    },
+    {
+      "path": "Server/Lobby_Server/OverlapEx.h",
+      "sha256": "7f0ee6b2d22e186de9f831ce0bc61a2dde9cc756ec83fe895915a7c190cd15b8",
+      "bytes": 1188
+    },
+    {
+      "path": "Server/Lobby_Server/Resource.cpp",
+      "sha256": "e65765c6b2b162a34732a664ccfd378a4672c098292db19a4b5307d11c30624b",
+      "bytes": 250
+    },
+    {
+      "path": "Server/Lobby_Server/Resource.h",
+      "sha256": "35f231359cca8f60a52b701558abfe5749e118714f5defef4911f27f5f6306bc",
+      "bytes": 869
+    },
+    {
+      "path": "Server/Lobby_Server/SockAddr.h",
+      "sha256": "dda7c7fa6f9b01a4d001d722f8bbe29f786d557a81c6a386f3856e4814190287",
+      "bytes": 107
+    },
+    {
+      "path": "Server/Lobby_Server/SocketUtil.cpp",
+      "sha256": "60ffcd21d8699557b2e317a4cfbbb5d81826c86768b6b4e70cd90f57d8cefcec",
+      "bytes": 201
+    },
+    {
+      "path": "Server/Lobby_Server/SocketUtil.h",
+      "sha256": "268222a814110e77687a5955c5107292fd6c481da2b07ba5baeaaeb8ece5de8e",
+      "bytes": 434
+    },
+    {
+      "path": "Server/Lobby_Server/TCPSocket.h",
+      "sha256": "bfeebfe509a5717b5aac20608ceeb1dc01fa222ce0907d2591f86c42e17cef66",
+      "bytes": 1219
+    },
+    {
+      "path": "Server/Lobby_Server/main.cpp",
+      "sha256": "6ef1e74f7d618d562c886fef43048990c01315a69dc179bf8111e8f9d5980564",
+      "bytes": 524
+    },
+    {
+      "path": "Server/Lobby_Server/pch.h",
+      "sha256": "d7ab52dad2dd61c353a9c5b9fae28c39fb621aa147e681ed768fe7d95022649f",
+      "bytes": 1631
+    },
+    {
+      "path": "Server/ServerCore/ServerCore.vcxproj",
+      "sha256": "1363a5b736d4785fa090909c17530e2963b852b53566f22580c604a46a529b8c",
+      "bytes": 1986
+    },
+    {
+      "path": "Server/ServerCore/include/ServerCore/Concurrency.h",
+      "sha256": "8eb5a16168e3e22a49be52ae8366f162ec2a494f771898657c9a635034bd757d",
+      "bytes": 4827
+    },
+    {
+      "path": "Server/ServerCore/include/ServerCore/Diagnostics.h",
+      "sha256": "45c2fa8973127ecfd091d636a74c93a82cd5f6c30aa2e09e9667fe9372f042c3",
+      "bytes": 878
+    },
+    {
+      "path": "Server/ServerCore/include/ServerCore/Net.h",
+      "sha256": "b61b5aa3ddc529847944b98ff978e30f60f981943865cd16633c470e8135b6c9",
+      "bytes": 5465
+    },
+    {
+      "path": "Server/ServerCore/include/ServerCore/Session.h",
+      "sha256": "0b1de7652d2a377e5b6910285db1a4c8d2c6ff4478382126de46be18523217b3",
+      "bytes": 4119
+    },
+    {
+      "path": "Server/ServerCore/src/Net.cpp",
+      "sha256": "e5087fab988116360e8bed2f91f49f1bfb09784db684561d08fc9c56406fd88c",
+      "bytes": 15980
+    },
+    {
+      "path": "Server/ServerCore/tests/CoreTests.cpp",
+      "sha256": "999e5a080722f7c9ea5148f64e281709a0b43a45c2003f6673179052d9c1c7cf",
+      "bytes": 16342
+    },
+    {
+      "path": "Server/ServerCore/tests/ProtocolAbi.cpp",
+      "sha256": "65faf08aeb3e94663c3cb1ac6580123eb730629990f17a3182ee0a709f97be72",
+      "bytes": 66039
+    },
+    {
+      "path": "Server/ServerCore/tests/ServerCore.Tests.vcxproj",
+      "sha256": "6155c8e99a1beb5323021c07f59c802a9e6257dbf9ae190fac285b8db5a90459",
+      "bytes": 2188
+    },
+    {
+      "path": "Shared/Protocol/Validation.h",
+      "sha256": "ba904dda6f6a12bf680fb92213dd9fc8bf51a0561f1748ce1d8066f448ec8253",
+      "bytes": 7593
+    },
+    {
+      "path": "Shared/Protocol/protocol.h",
+      "sha256": "66ceb9144877e23bf1fe9c94d42d9e7120c6336ef457dafe01c448aebb81a0d1",
+      "bytes": 19696
+    },
+    {
+      "path": "Shared/Protocol/tests/abi-x64-msvc.json",
+      "sha256": "cdc3e11eafcd3c4c0b4fdba2ed9d9f638b0996eb66965fb6849932599f14dedb",
+      "bytes": 18882
+    },
+    {
+      "path": "scripts/Check-Prerequisites.ps1",
+      "sha256": "9f0f95ea65c3a293592747c639b3a36830afde25ce4148859ff3c01a433be9b9",
+      "bytes": 1363
+    },
+    {
+      "path": "scripts/New-CompilationDatabase.ps1",
+      "sha256": "01bd7f755cda918119647b35a2eaaacbf59607bcf7984af6a471e51bab540ce3",
+      "bytes": 2600
+    },
+    {
+      "path": "scripts/Stop-Local.ps1",
+      "sha256": "8bde3a3ba5954aadfbd6f179176fac118c8a0d3ace86d56376ddf48501ee52df",
+      "bytes": 2359
+    },
+    {
+      "path": "scripts/Test-ParticleSelectionNetwork.py",
+      "sha256": "9ad9599b1615f40c9a2578abf93204ba81d4d80aedb94ecf6a3a3f4dd94d7d9e",
+      "bytes": 6195
+    },
+    {
+      "path": "scripts/Test-ServerCore.ps1",
+      "sha256": "601b8a91b8182c952b1f1f82a7a73082ac27299633699a60d0fdf6046215d7a4",
+      "bytes": 1630
+    },
+    {
+      "path": "scripts/Test-ServerCoreIntegration.ps1",
+      "sha256": "0998f65fc3c6043dc235997920ab7bce7b6817238782629ca42e6c0714ef10de",
+      "bytes": 3671
+    },
+    {
+      "path": "scripts/Test-ServerCoreNetwork.py",
+      "sha256": "a95882ccf8f8162ccf1076e94addc51dda0b1f7c1bc791ca69c5829d6521ab6d",
+      "bytes": 2933
+    }
+  ],
+  "removedSources": [
+    {
+      "path": "Server/Game_Server/Job.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "3cfc3d02d7f2784e9797afcbd6ae1d0cbb4c82fb90a2caa684148943cf8cf831"
+    },
+    {
+      "path": "Server/Game_Server/JobQueue.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d"
+    },
+    {
+      "path": "Server/Game_Server/LogUtil.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "f28a30def5f1c60156a417b5d0737a75ffc8002fb46971287563c86f6ecc3018"
+    },
+    {
+      "path": "Server/Game_Server/OverlapEx.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "9a8ff37b27a56ffe0b33442847c5a0af5cd754983faec64bc657dae57d96cdd9"
+    },
+    {
+      "path": "Server/Game_Server/SockAddr.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "4549d7dc0e85160903b9efde64ef46b6ae02a52ad20162eac6d75f1ec204e34a"
+    },
+    {
+      "path": "Server/Game_Server/TCPSocket.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "07443df7decaee18ba96f4cfdf82093de7df8d856f2d1fabcaa23421444acbfb"
+    },
+    {
+      "path": "Server/Lobby_Server/Job.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "3cfc3d02d7f2784e9797afcbd6ae1d0cbb4c82fb90a2caa684148943cf8cf831"
+    },
+    {
+      "path": "Server/Lobby_Server/JobQueue.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "767c147b79a2d6c6488f245d364e406bf927d83e92475247ce92792f71f0bb2d"
+    },
+    {
+      "path": "Server/Lobby_Server/LogUtil.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "6e16f70c5a4a9bbbfd20cd9111762f802bb7297a5142b83129582a1690d00a6e"
+    },
+    {
+      "path": "Server/Lobby_Server/OverlapEx.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "34831a7211608a3257b012122b8b215775adbf027be34a46e5d96ed0c99eb304"
+    },
+    {
+      "path": "Server/Lobby_Server/SockAddr.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "4549d7dc0e85160903b9efde64ef46b6ae02a52ad20162eac6d75f1ec204e34a"
+    },
+    {
+      "path": "Server/Lobby_Server/TCPSocket.cpp",
+      "baseCommit": "86f83a94f76e7218c4cd2f34d992f9d2d02174f1",
+      "beforeSha256": "89c2cdb04e1a7b3714f8d0fd130f96167be2653f603b85eac84deb347b31c00e"
+    }
+  ],
+  "tests": {
+    "Debug": {
+      "coreChecks": {
+        "ok": true,
+        "checks": 93
+      },
+      "protocolAbiEqual": true,
+      "abiStructures": 110,
+      "abiConstants": 106,
+      "integration": {
+        "Configuration": "Debug",
+        "Cases": [
+          {
+            "Passed": true,
+            "Case": "network",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "boss4",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "boss5",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "LobbyServer-missing-resource",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "GameServer-missing-resource",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "GameServer-lobby-offline",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "LobbyServer-bind-conflict",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          }
+        ],
+        "Ok": true,
+        "LocalTest": true,
+        "Database": false
+      },
+      "networkCases": 12,
+      "bossJobs": [
+        4,
+        5
+      ],
+      "participantsPerMatch": 4,
+      "loadCompleteConfirmedForAll": true
+    },
+    "Release": {
+      "coreChecks": {
+        "ok": true,
+        "checks": 93
+      },
+      "protocolAbiEqual": true,
+      "abiStructures": 110,
+      "abiConstants": 106,
+      "integration": {
+        "Configuration": "Release",
+        "Cases": [
+          {
+            "Passed": true,
+            "Case": "network",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "boss4",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "boss5",
+            "Pending": 0,
+            "Leased": 0,
+            "Sockets": 0,
+            "NormalStop": true
+          },
+          {
+            "Passed": true,
+            "Case": "LobbyServer-missing-resource",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "GameServer-missing-resource",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "GameServer-lobby-offline",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          },
+          {
+            "Passed": true,
+            "Case": "LobbyServer-bind-conflict",
+            "Leased": 0,
+            "Sockets": 0,
+            "Pending": 0,
+            "ExpectedExitCode": 1
+          }
+        ],
+        "Ok": true,
+        "LocalTest": true,
+        "Database": false
+      },
+      "networkCases": 12,
+      "bossJobs": [
+        4,
+        5
+      ],
+      "participantsPerMatch": 4,
+      "loadCompleteConfirmedForAll": true
+    }
+  },
+  "additionalVerification": {
+    "clientDebugBuild": "PASS",
+    "debugClientWindowSmoke": "PASS",
+    "releaseServersOnlySmoke": "PASS",
+    "agentEnvironment": "PASS",
+    "compilationDatabaseSources": 226,
+    "compilationDatabaseMissingPaths": 0,
+    "serenaSymbols": {
+      "Server/Game_Server/CServer.cpp": 4,
+      "Server/Lobby_Server/CServer.cpp": 4,
+      "Client/WarOfDimension/WarOfDimension.cpp": 21,
+      "Server/ServerCore/src/Net.cpp": 51
+    }
+  },
+  "warningsObserved": {
+    "build-Servers-Debug.log": [
+      "C4065",
+      "C4101",
+      "C4244",
+      "C4305",
+      "C4309"
+    ],
+    "build-Servers-Release.log": [
+      "C4065",
+      "C4101",
+      "C4244",
+      "C4305",
+      "C4309"
+    ],
+    "build-Client-Debug.log": [
+      "C4244",
+      "C4267",
+      "C4305",
+      "C4996"
+    ]
+  },
+  "warningInterpretation": "기존 앱 경고는 유지. 최신 서버 로그는 증분 빌드이며 전체 경고 목록으로 해석하지 않는다. Core의 경고를 숨기거나 억제하지 않았다.",
+  "diagram": {
+    "delivery": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "specification": {
+      "sha256": "3f02243730bf61e44520b11ad9fffda567519a8dbb9e6e8db0bc1f35ad9f6d9d",
+      "bytes": 2429
+    },
+    "artifact": {
+      "sha256": "bc5c68b60c29f260f998bfa767a602f394f6584daf0330cc2dcb2fa7ff1927f7",
+      "bytes": 707171
+    },
+    "viewportContainment": "PASS: light/dark × 1440x900/2048x1320",
+    "directPngReview": "PASS: 4 images"
+  },
+  "preservedUserSolutionPaths": true,
+  "localTest": true,
+  "databaseVerified": false,
+  "notVerified": [
+    "운영 DB·블록체인",
+    "4개 렌더링 클라이언트 동시 실행",
+    "전투 전체·장시간 부하",
+    "메모리·CPU·처리량 전후 개선량",
+    "NPC/매치/스킬 전체 타이머 수명 재설계"
+  ],
+  "commitCreated": false,
+  "pushed": false
+}

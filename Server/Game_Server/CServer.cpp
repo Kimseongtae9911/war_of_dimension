@@ -1,4 +1,6 @@
 #include "pch.h"
+#include <ServerCore/Session.h>
+#include "Resource.h"
 #include "CServer.h"
 #include "CPacketMgr.h"
 #include "CSkillHandlerFactory.h"
@@ -9,6 +11,7 @@ namespace wod_server {
 	{
 		LogPrinter::PrintMsg("Server Initialize Start");
 		SocketUtil::Startup();
+        m_transportReady = true;
 
 		if (!GameUtil::LoadCoolTime("Resource/SkillCoolTime.txt")) {
 			LogPrinter::PrintMsg("Failed To Load Skill CoolTime");
@@ -90,29 +93,34 @@ namespace wod_server {
 			LogPrinter::PrintMsg("SkillCsvMgr Initialize Fail");
 			return false;
 		}
+        m_skillCsvReady = true;
 		SkillCsvMgr::GetInstance()->Load("DataFile/CSV/skill_info.csv");
 
 		if (!NpcCsvMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("NpcCsvMgr Initialize Fail");
 			return false;
 		}
+        m_npcCsvReady = true;
 		NpcCsvMgr::GetInstance()->Load("DataFile/CSV/npc_info.csv");
 
 		if (!ItemCsvMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("ItemCsvMgr Initialize Fail");
 			return false;
 		}
+        m_itemCsvReady = true;
 		ItemCsvMgr::GetInstance()->Load("DataFile/CSV/item_info.csv");
 
 		if (!CGameMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("GameMgr Initialize Fail");
 			return false;
 		}
+        m_gameReady = true;
 
 		if (!CPacketMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("PacketMgr Initialize Fail");
 			return false;
 		}
+        m_packetReady = true;
 
 		if (!CObjectMgr::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("ObjectMgr Initialize Fail");
@@ -123,11 +131,13 @@ namespace wod_server {
 			LogPrinter::PrintMsg("MatchMgr Initalize Fail");
 			return false;
 		}
+        m_matchReady = true;
 
 		if (!CSkillHandlerFactory::GetInstance()->Initialize()) {
 			LogPrinter::PrintMsg("SkillHandlerFactory Initialize Fail");
 			return false;
 		}
+        m_skillFactoryReady = true;
 
 		LogPrinter::PrintMsg("Server Initialize Finish");
 		return true;
@@ -135,50 +145,39 @@ namespace wod_server {
 
 	bool CServer::Release()
 	{
-		LogPrinter::PrintMsg("Server Release");
-
-		if (!network::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("NetworkMgr Release Fail");
-			return false;
-		}
-		if (!CPacketMgr::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("PacketMgr Release Fail");
-			return false;
-		}
-		if (!CGameMgr::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("GameMgr Release Fail");
-			return false;
-		}
-		if (!CSkillHandlerFactory::GetInstance()->Release()) {
-			LogPrinter::PrintMsg("SkillHandlerFactory Release Fail");
-			return false;
-		}
-
-		SocketUtil::Cleanup();
-		return true;
+        if (!m_transportReady) return true;
+        bool ok = true;
+        ok = network::GetInstance()->Release() && ok;
+        if (std::exchange(m_skillCsvReady, false)) ok = SkillCsvMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_npcCsvReady, false)) ok = NpcCsvMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_itemCsvReady, false)) ok = ItemCsvMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_gameReady, false)) ok = CGameMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_packetReady, false)) ok = CPacketMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_matchReady, false)) ok = CMatchMgr::GetInstance()->Release() && ok;
+        if (std::exchange(m_skillFactoryReady, false)) ok = CSkillHandlerFactory::GetInstance()->Release() && ok;
+        ok = CObjectMgr::GetInstance()->Release() && ok;
+        SocketUtil::Cleanup(); m_transportReady = false; return ok;
 	}
 
 	void CServer::Run()
 	{
-		// Create Worker Thread -> Packet Process(Game Update), 
-		unsigned int thread_num = std::thread::hardware_concurrency() / 2;
-		m_iocpThread.reserve(thread_num);
-		for (unsigned int i = 0; i < thread_num; ++i) {
-			m_iocpThread.emplace_back([this]() { network::GetInstance()->IOCPFunc(); });
-		}
-		
-		// Timer -> Event, Npc
-		std::thread timer{ [this]() {TimerFunc(); } };
+        wod::core::ProcessStopSignal signal;
+        const unsigned int count = (std::max)(1u, std::thread::hardware_concurrency()/2);
+        const auto failure = [](std::exception_ptr error) {
+            try { std::rethrow_exception(error); }
+            catch (const std::exception& detail) { LogPrinter::PrintMsg(std::string("Worker failed: ") + detail.what()); }
+            catch (...) { LogPrinter::PrintMsg("Worker failed: unknown exception"); }
+            wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
+        };
+        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); SocketUtil::Runtime().RequestStop(count); },failure);
+        wod::core::ThreadGroup producers([] { network::GetInstance()->PrepareStop(); },failure);
+        for (unsigned int i=0; i<count; ++i) iocp.Launch([] { network::GetInstance()->IOCPFunc(); });
+        producers.Launch([] { network::GetInstance()->TimerFunc(); });
+        signal.Wait();
+        producers.StopAndJoin(); iocp.StopAndJoin();
+        if (producers.Failed() || iocp.Failed() || network::GetInstance()->WorkerFailed())
+            throw std::runtime_error("server worker failure");
 
-		
-		timer.join();
-		for (unsigned int i = 0; i < thread_num; ++i) {
-			m_iocpThread[i].join();
-		}
 	}
 
-	void CServer::TimerFunc()
-	{
-		network::GetInstance()->TimerFunc();
-	}
 }

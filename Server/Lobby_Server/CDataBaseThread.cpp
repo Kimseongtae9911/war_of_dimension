@@ -20,7 +20,7 @@ namespace wod_server {
 
 	void CDataBaseThread::ThreadFunction()
 	{
-		while (true) {
+		while (!network::GetInstance()->IsStopping()) {
 			DB_EVENT ev;
 			auto current_time = std::chrono::system_clock::now();
 			if (m_timerQueue.try_pop(ev)) {

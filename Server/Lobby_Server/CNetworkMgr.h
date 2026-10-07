@@ -29,6 +29,9 @@ namespace wod_server {
 		bool Release() override;
 
 		void IOCPFunc();
+        void PrepareStop() { m_stopping.store(true); }
+        bool WorkerFailed() const { return m_workerFailed.load(); }
+        bool IsStopping() const { return m_stopping.load(); }
 		void TimerFunc();
 		void DataBaseFunc();
 
@@ -53,7 +56,9 @@ namespace wod_server {
 		void PacketExec(BASE_PACKET* packet);
 
 	private:
-		std::shared_ptr<TCPSocket> m_handle = nullptr;
+		std::atomic_bool m_stopping = false;
+        std::atomic_bool m_workerFailed = false;
+        std::shared_ptr<TCPSocket> m_handle = nullptr;
 		std::shared_ptr<Session> m_gameServer = nullptr;
 		bool m_gameseverConnected = false;
 		std::atomic<int> m_clientNum = 0;
@@ -61,8 +66,8 @@ namespace wod_server {
 		concurrency::concurrent_priority_queue<TIMER_EVENT> m_timerQueue;
 		std::unordered_map<OP_TYPE, std::function<void(int, int, OverlapEx*)>> m_iocpfunc;		
 
-		CDataBaseThread* m_dataBaseThread;		
-		CP2PNetwork* m_p2pNetwork;
+		CDataBaseThread* m_dataBaseThread = nullptr;
+		CP2PNetwork* m_p2pNetwork = nullptr;
 	};
 }
 using network = wod_server::CNetworkMgr;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <ctime>
 
-#include "../Game_Server/protocol.h"
+#include <Protocol/protocol.h>
 
 constexpr int MAX_CLIENT = 3000;
 constexpr int CHANNEL_NUM = (MAX_CLIENT / LOBBY_MAX_CLIENT);

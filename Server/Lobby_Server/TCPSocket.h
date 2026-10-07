@@ -1,46 +1,29 @@
 #pragma once
 #include "SockAddr.h"
-
+#include "SocketUtil.h"
+#include "Resource.h"
+#include <ServerCore/Session.h>
 namespace wod_server {
-	class SockAddr;
-
-	class Session {
-	public:
-		Session(bool sock=false);
-		virtual ~Session() {}
-
-		void Send(void* packet);
-		void Recv();
-
-		OverlapEx& GetOverEx() { return m_over; }
-		const int GetRemainData() const { return m_remainData; }
-		const SOCKET& GetSocket() const { return m_sock; }
-
-		void SetRemainData(const int bytes) { m_remainData = bytes; }
-		void SetSocket(const SOCKET& sock) { m_sock = sock; }
-
-	protected:
-		OverlapEx m_over;
-		SOCKET m_sock;
-		int m_remainData;
-	};
-
-	class TCPSocket : public Session
-	{
-	public:
-		TCPSocket();
-		virtual ~TCPSocket() {}
-
-		void Accept(const SOCKET& socket);
-		int Bind(const SockAddr& addr);
-		int Listen(int backlog = SOMAXCONN);
-
-		const HANDLE& GetHandle() const { return m_iocp; }
-		const SOCKET& GetClientSocket() const { return m_clsock; }
-		void SetClientSocket(const SOCKET& sock) { m_clsock = sock; }
-	private:
-		HANDLE m_iocp;
-		SOCKET m_clsock;
-	};
-
+class Session : public wod::core::BasicSession<OverlapEx> {
+public:
+    explicit Session(bool socket = false) : BasicSession(SocketUtil::Runtime(),
+        [] { return Resource::GetOverObjectFromPool(); },
+        [](OverlapEx* value) { Resource::overExPool.push(value); }, socket) {}
+    void Connect(const std::string& ip) { BasicSession::Connect(ip, LOBBY_PORT); }
+    int GetSocketID() const { return m_socketid; }
+    void SetSocketID(int id) { m_socketid = id; }
+    std::chrono::system_clock::time_point entryTime = std::chrono::system_clock::now();
+private:
+    int m_socketid = -1;
+};
+class TCPSocket : public wod::core::BasicListener<OverlapEx> {
+public:
+    TCPSocket() : BasicListener(SocketUtil::Runtime(),
+        [] { return Resource::GetOverObjectFromPool(); },
+        [](OverlapEx* value) { Resource::overExPool.push(value); }) {}
+    using BasicListener::Accept;
+    void Accept(const std::shared_ptr<Session>& session) {
+        GetOverEx().SetSocketID(session->GetSocketID()); BasicListener::Accept(session->GetSocket());
+    }
+};
 }

@@ -10,8 +10,8 @@ namespace wod_server {
 
 	struct UserDataFromLobby
 	{
-		int id;
-		int matchNum;
+		int id = -1;
+		int matchNum = -1;
 		ModelCustomize model;
 	};
 
