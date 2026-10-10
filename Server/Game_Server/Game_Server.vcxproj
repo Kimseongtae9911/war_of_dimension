@@ -161,8 +161,6 @@
     <ClInclude Include="CStat.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="ItemCsvMgr.h" />
-    <ClInclude Include="Job.h" />
-    <ClInclude Include="JobQueue.h" />
     <ClInclude Include="NpcCsvMgr.h" />
     <ClInclude Include="RandomUtil.h" />
     <ClInclude Include="SkillCsvMgr.h" />
@@ -238,7 +236,6 @@
     <ClInclude Include="CServer.h" />
     <ClInclude Include="GameUtil.h" />
     <ClInclude Include="Interface.h" />
-    <ClInclude Include="LogUtil.h" />
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="NpcInfos.h" />
     <ClInclude Include="OgreAttackHandler.h" />
@@ -252,7 +249,6 @@
     <ClInclude Include="OgreHeavySwingHandler.h" />
     <ClInclude Include="OgreRoarHandler.h" />
     <ClInclude Include="OgreRockThrowHandler.h" />
-    <ClInclude Include="OverlapEx.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProDeleteHandler.h" />
     <ClInclude Include="ProAttackHandler.h" />
@@ -266,10 +262,7 @@
     <ClInclude Include="ProStatMinusHandler.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="ProWhileTrueHandler.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="SkillTimerDefine.h" />
-    <ClInclude Include="SockAddr.h" />
-    <ClInclude Include="SocketUtil.h" />
     <ClInclude Include="Stats.h" />
     <ClInclude Include="SwordManAnkleCutHandler.h" />
     <ClInclude Include="SwordManAttackHandler.h" />
@@ -409,9 +402,7 @@
     <ClCompile Include="ProStatMinusHandler.cpp" />
     <ClCompile Include="ProWhileTrueHandler.cpp" />
     <ClCompile Include="RandomUtil.cpp" />
-    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="SkillCsvMgr.cpp" />
-    <ClCompile Include="SocketUtil.cpp" />
     <ClCompile Include="SwordManAnkleCutHandler.cpp" />
     <ClCompile Include="SwordManAttackHandler.cpp" />
     <ClCompile Include="SwordManAuraBladeHandler.cpp" />

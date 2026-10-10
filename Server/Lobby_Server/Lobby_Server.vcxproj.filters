@@ -82,20 +82,8 @@
     <ClInclude Include="TCPSocket.h">
       <Filter>Socket</Filter>
     </ClInclude>
-    <ClInclude Include="SockAddr.h">
-      <Filter>Socket</Filter>
-    </ClInclude>
-    <ClInclude Include="OverlapEx.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="enum.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketUtil.h">
-      <Filter>Socket</Filter>
-    </ClInclude>
-    <ClInclude Include="LogUtil.h">
-      <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="CMatchMgr.h">
       <Filter>Manager\Match</Filter>
@@ -133,9 +121,6 @@
     <ClInclude Include="CP2PNetwork.h">
       <Filter>BlockChain\P2PNetwork</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
     <ClInclude Include="CTransform.h">
       <Filter>Client\Transform</Filter>
     </ClInclude>
@@ -154,12 +139,6 @@
     <ClInclude Include="CViewList.h">
       <Filter>Client\ViewList</Filter>
     </ClInclude>
-    <ClInclude Include="Job.h">
-      <Filter>Job</Filter>
-    </ClInclude>
-    <ClInclude Include="JobQueue.h">
-      <Filter>Job</Filter>
-    </ClInclude>
     <ClInclude Include="Global.h">
       <Filter>Global</Filter>
     </ClInclude>
@@ -176,9 +155,6 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="SocketUtil.cpp">
-      <Filter>Socket</Filter>
     </ClCompile>
     <ClCompile Include="CMatchMgr.cpp">
       <Filter>Manager\Match</Filter>
@@ -215,9 +191,6 @@
     </ClCompile>
     <ClCompile Include="CP2PNetwork.cpp">
       <Filter>BlockChain\P2PNetwork</Filter>
-    </ClCompile>
-    <ClCompile Include="Resource.cpp">
-      <Filter>Resource</Filter>
     </ClCompile>
     <ClCompile Include="CTransform.cpp">
       <Filter>Client\Transform</Filter>

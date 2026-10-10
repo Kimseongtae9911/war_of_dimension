@@ -43,8 +43,8 @@ class WinsockRuntime
   public:
     WinsockRuntime();
     ~WinsockRuntime();
-    WinsockRuntime(const WinsockRuntime &) = delete;
-    WinsockRuntime &operator=(const WinsockRuntime &) = delete;
+    WinsockRuntime(const WinsockRuntime&) = delete;
+    WinsockRuntime& operator=(const WinsockRuntime&) = delete;
 };
 
 class SockAddr
@@ -53,7 +53,7 @@ class SockAddr
     SockAddr();
     explicit SockAddr(unsigned short _port);
     SockAddr(unsigned int _addr, unsigned short _port);
-    explicit SockAddr(const sockaddr &_addr);
+    explicit SockAddr(const sockaddr& _addr);
 
     const sockaddr *Native() const
     {
@@ -85,15 +85,15 @@ class IoContext
 
     IoContext();
     virtual ~IoContext() = default;
-    IoContext(const IoContext &) = delete;
-    IoContext &operator=(const IoContext &) = delete;
+    IoContext(const IoContext&) = delete;
+    IoContext& operator=(const IoContext&) = delete;
 
-    OVERLAPPED &GetOver()
+    OVERLAPPED& GetOver()
     {
         return m_native.m_over;
     }
 
-    WSABUF &GetWSA()
+    WSABUF& GetWSA()
     {
         return m_buffer;
     }
@@ -121,6 +121,98 @@ class IoContext
     NativeRecord m_native;
     WSABUF m_buffer{};
     char m_bytes[m_Capacity]{};
+};
+
+// 서버별 OP_TYPE 값은 유지하고 공통 native 연산 매핑과 cookie를 공유한다.
+template <class Operation> class TaggedIoContext final : public IoContext
+{
+  public:
+    template <class Packet> void Intialize(Packet *_packet)
+    {
+        CopyPacket(std::span(reinterpret_cast<const char *>(_packet), _packet->size));
+        SetOP(Operation::OP_SEND);
+    }
+
+    void Reset()
+    {
+        IoContext::Reset();
+        m_op = Operation::OP_RECV;
+        m_hasGeneration = false;
+    }
+
+    Operation GetOP() const
+    {
+        return m_op;
+    }
+
+    void SetOP(Operation _op)
+    {
+        m_op = _op;
+    }
+
+    void SetTransportOperation(IoOperation _op)
+    {
+        switch (_op)
+        {
+        case IoOperation::Receive:
+            m_op = Operation::OP_RECV;
+            break;
+        case IoOperation::Send:
+            m_op = Operation::OP_SEND;
+            break;
+        case IoOperation::Accept:
+            m_op = Operation::OP_ACCEPT;
+            break;
+        case IoOperation::Disconnect:
+            m_op = Operation::OP_DISCONNECT;
+            break;
+        default:
+            break;
+        }
+    }
+
+    void SetSessionGeneration(uint64_t _generation)
+    {
+        m_generation = _generation;
+        m_hasGeneration = true;
+    }
+
+    bool HasSessionGeneration() const
+    {
+        return m_hasGeneration;
+    }
+
+    uint64_t GetSessionGeneration() const
+    {
+        return m_generation;
+    }
+
+    int GetSocketID() const
+    {
+        return m_socketID;
+    }
+
+    int GetInfo() const
+    {
+        return m_info;
+    }
+
+    void SetSocketID(int _id)
+    {
+        m_socketID = _id;
+    }
+
+    void SetInfo(int _info)
+    {
+        m_info = _info;
+    }
+
+  private:
+    Operation m_op = Operation::OP_RECV;
+    int m_socketID = -1;
+    int m_info = 0;
+    uint64_t m_generation = 0;
+    bool m_hasGeneration = false;
 };
 
 // 다음 Poll 호출 또는 Completion 파괴까지 해당 연결의 callback 실행권을 보유한다.
@@ -153,20 +245,20 @@ class IocpService
     using SendCall = std::function<int(SOCKET, WSABUF *, OVERLAPPED *)>;
     explicit IocpService(SendCall _sendCall = {});
     ~IocpService();
-    IocpService(const IocpService &) = delete;
-    IocpService &operator=(const IocpService &) = delete;
+    IocpService(const IocpService&) = delete;
+    IocpService& operator=(const IocpService&) = delete;
     SOCKET CreateSocket();
     void Attach(SOCKET _socket, ULONG_PTR _key);
-    void Connect(SOCKET _socket, const std::string &_ip, unsigned short _port);
-    void Bind(SOCKET _socket, const SockAddr &_address);
+    void Connect(SOCKET _socket, const std::string& _ip, unsigned short _port);
+    void Bind(SOCKET _socket, const SockAddr& _address);
     void Listen(SOCKET _socket, int _backlog);
-    bool Receive(SOCKET _socket, IoContext &_context);
-    bool Send(SOCKET _socket, IoContext &_context);
-    bool Accept(SOCKET _listener, SOCKET _socket, IoContext &_context);
-    bool Disconnect(SOCKET _socket, IoContext &_context);
-    bool Post(ULONG_PTR _key, IoContext &_context);
+    bool Receive(SOCKET _socket, IoContext& _context);
+    bool Send(SOCKET _socket, IoContext& _context);
+    bool Accept(SOCKET _listener, SOCKET _socket, IoContext& _context);
+    bool Disconnect(SOCKET _socket, IoContext& _context);
+    bool Post(ULONG_PTR _key, IoContext& _context);
     void Close(SOCKET _socket);
-    bool Poll(Completion &_completion);
+    bool Poll(Completion& _completion);
     void RequestStop(size_t _workers);
     void Drain();
     void Finish();
@@ -176,7 +268,7 @@ class IocpService
         return m_stopping.load();
     }
 
-    const HANDLE &Handle() const
+    const HANDLE& Handle() const
     {
         return m_handle;
     }
@@ -196,12 +288,12 @@ class IocpService
         std::deque<IoContext *> m_sends;
     };
 
-    bool Begin(SOCKET _socket, IoContext &_context, IoOperation _op);
-    void IssueSend(SocketState &_state, IoContext &_context);
-    void Fail(IoContext &_context, DWORD _error);
-    void Complete(IoContext &_context);
+    bool Begin(SOCKET _socket, IoContext& _context, IoOperation _op);
+    void IssueSend(SocketState& _state, IoContext& _context);
+    void Fail(IoContext& _context, DWORD _error);
+    void Complete(IoContext& _context);
     void Wake();
-    SocketState &State(SOCKET _socket);
+    SocketState& State(SOCKET _socket);
     HANDLE m_handle = nullptr;
     mutable std::recursive_mutex m_mutex;
     std::unordered_map<SOCKET, SocketState> m_sockets;
@@ -212,12 +304,21 @@ class IocpService
     SendCall m_sendCall;
 };
 
+// 프로세스 공용 Winsock과 IOCP의 수명을 관리한다.
+class NetworkRuntime
+{
+  public:
+    static void Start();
+    static void Stop();
+    static IocpService& Get();
+};
+
 // 수신된 영역만 분리하며 출력 프레임이 패킷 bytes를 소유한다.
 class FrameDecoder
 {
   public:
     using Frame = std::vector<char>;
-    static bool Extract(char *_buffer, size_t _bytes, size_t &_remain, std::vector<Frame> &_frames);
+    static bool Extract(char *_buffer, size_t _bytes, size_t& _remain, std::vector<Frame>& _frames);
 };
 
 class ProcessStopSignal

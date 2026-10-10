@@ -31,7 +31,7 @@ class ThreadGroup
         StopAndJoin();
     }
 
-    template <class Func> void Launch(Func &&_func)
+    template <class Func> void Launch(Func&& _func)
     {
         m_threads.emplace_back([this, work = std::forward<Func>(_func)]() mutable {
             try
@@ -52,7 +52,7 @@ class ThreadGroup
             return;
 
         m_stop();
-        for (auto &thread : m_threads)
+        for (auto& thread : m_threads)
             if (thread.joinable())
                 thread.join();
 
@@ -95,7 +95,7 @@ template <class Func> class Job final : public IJob
         std::invoke(m_func);
     }
 
-    bool operator<(const Job &_other) const
+    bool operator<(const Job& _other) const
     {
         return m_time > _other.m_time;
     }
@@ -115,7 +115,7 @@ class JobQueue
   public:
     using JobRef = std::shared_ptr<IJob>;
 
-    explicit JobQueue(JobBudget _budget = JobBudget::Snapshot) : m_budget(_budget)
+    explicit JobQueue(JobBudget _budget) : m_budget(_budget)
     {
     }
 
@@ -128,8 +128,8 @@ class JobQueue
     }
 
     template <class Func>
-        requires std::is_invocable_v<std::decay_t<Func> &>
-    void PushJob(Func &&_f)
+        requires std::is_invocable_v<std::decay_t<Func>&>
+    void PushJob(Func&& _f)
     {
         PushJob(std::make_shared<Job<std::decay_t<Func>>>(std::forward<Func>(_f)));
     }
@@ -169,6 +169,120 @@ class JobQueue
     std::mutex m_execute;
 };
 
+// 대상은 producer/worker가 종료할 때까지 살아 있어야 한다.
+class JobTarget
+{
+  public:
+    explicit JobTarget(JobBudget _budget) : m_jobQueue(_budget)
+    {
+    }
+
+    virtual ~JobTarget() = default;
+
+    JobQueue *GetJobQueue()
+    {
+        return &m_jobQueue;
+    }
+
+    bool IsDisconnected() const
+    {
+        return m_isDisconnected.load();
+    }
+
+    void SetDisconnected()
+    {
+        m_isDisconnected = true;
+    }
+
+    void ResetDisconnected()
+    {
+        m_isDisconnected = false;
+    }
+
+    bool TryMarkInQueue()
+    {
+        bool expected = false;
+
+        return m_isEnqueued.compare_exchange_strong(expected, true);
+    }
+
+    void UnmarkInQueue()
+    {
+        m_isEnqueued = false;
+    }
+
+    bool IsInQueue() const
+    {
+        return m_isEnqueued.load();
+    }
+
+    virtual void OnJobQueueDisconnected() = 0;
+
+  private:
+    JobQueue m_jobQueue;
+    std::atomic_bool m_isDisconnected = false;
+    std::atomic_bool m_isEnqueued = false;
+};
+
+class JobScheduler
+{
+  public:
+    void AddSessionQueue(JobTarget *_target)
+    {
+        std::lock_guard lock(m_mutex);
+        if (!m_stopping && _target->TryMarkInQueue())
+        {
+            m_queue.push(_target);
+            m_ready.notify_one();
+        }
+    }
+
+    void Stop()
+    {
+        std::lock_guard lock(m_mutex);
+        m_stopping = true;
+        m_ready.notify_all();
+    }
+
+    void ProcessJob()
+    {
+        for (;;)
+        {
+            JobTarget *target;
+            {
+                std::unique_lock lock(m_mutex);
+                m_ready.wait(lock, [this] {
+                    return m_stopping || !m_queue.empty();
+                });
+                if (m_stopping)
+                    return;
+
+                target = m_queue.top();
+                m_queue.pop();
+            }
+            if (target->IsDisconnected())
+            {
+                target->GetJobQueue()->Clear();
+                target->UnmarkInQueue();
+                target->OnJobQueueDisconnected();
+            }
+            else
+            {
+                target->GetJobQueue()->ProcessJob();
+                target->UnmarkInQueue();
+                if (target->GetJobQueue()->HasJobs() || target->IsDisconnected())
+                    AddSessionQueue(target);
+            }
+        }
+    }
+
+  private:
+    std::mutex m_mutex;
+    std::condition_variable m_ready;
+    std::priority_queue<JobTarget *> m_queue;
+    bool m_stopping = false;
+};
+
 template <class T> class ObjectPool
 {
   public:
@@ -193,7 +307,7 @@ template <class T> class ObjectPool
         return ptr;
     }
 
-    bool try_pop(T *&_ptr)
+    bool try_pop(T *& _ptr)
     {
         std::lock_guard lock(m_mutex);
         if (m_available.empty())

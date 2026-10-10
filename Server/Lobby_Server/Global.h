@@ -1,5 +1,5 @@
 #pragma once
 
 namespace wod_server {
-extern class PacketJobQueue* GPacketJobQueue;
+extern PacketJobQueue* GPacketJobQueue;
 }

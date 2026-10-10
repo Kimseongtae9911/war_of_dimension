@@ -696,3 +696,247 @@ Test-AgentEnvironment -StaticOnly와 compilation database 226개 PASS.
 소스는 마지막 검증 이후 변경되지 않아 빌드·서버 실행을 반복하지 않는다.
 클라이언트·공통 프로토콜·외부 코드·빌드 산출물·로그는 커밋 범위에서 제외한다.
 정확한 메시지와 staged fingerprint는 Git 제외 artifacts에 저장한다.
+
+## 52. 서버에 남은 공통 세션·클라이언트·작업 기반 추출
+
+- [x] 지정 파일·사용처·기존 ServerCore 계약·작업 트리 확인
+- [x] SocketUtil·Session·Listener 및 공통 I/O context 구현을 ServerCore로 이동
+- [x] CClient 공통 수신·disconnect 기반과 다형적 패킷 전달 확장점 적용
+- [x] 로비 작업 스케줄러·큐 상태와 공통 Job 구현 소유권 정리
+- [x] Debug/Release 서버 빌드·Core/ABI·네트워크·실패/종료 회귀 검사
+- [x] 구조 문서·Archify JSON/HTML·정리 근거·실제 결과 갱신
+
+사용자가 지정한 SockAddr·SocketUtil·TCPSocket·CClient·Job·JobQueue와 주변 중복을 검토한다.
+기존 staged 이름·포맷 변경을 보존한다. ServerCore는 서버 콘텐츠·Protocol에 의존하지 않고,
+템플릿으로 I/O context·풀 정책을 주입하며 CClient는 가상 함수로 패킷 전달을 확장한다.
+패킷 ABI·서버 권위·로비 Five/게임 Snapshot budget·세대 검사·종료 순서를 유지한다.
+커밋·push는 수행하지 않는다.
+
+
+완료: Session·Listener·SocketUtil·OverlapEx 공통 구현을 ServerCore로 이동했다.
+CClient는 BasicClient의 공통 Receive/Disconnect를 상속하고 패킷 검증·전달·상태 변경을 가상 함수로 구현한다.
+로비 작업 큐·atomic 등록 상태·스케줄러는 JobTarget/JobScheduler가 소유하며 사용자 정리는 로비 callback에 남겼다.
+SockAddr·Job·LogUtil은 이미 별칭만 있어 유지했다. SocketUtil.cpp 2개와 프로젝트/filter 항목을 제거했다.
+게임 accept 세션 풀은 Resource::m_acceptSessionPool로 이동했다. 같은 이름의 자체 소스 28쌍과 주변 사용처를 검토했다.
+
+검증: Debug/Release 서버·Core·테스트 빌드 PASS. 구성별 Core 114항목·패킷 ABI 110종/106상수 PASS.
+네트워크 12종·4참가자 보스 4/5의 매칭·로딩 완료·첫 NPC 알림과 정상 종료 PASS.
+초기화 실패 4종도 종료 코드 1과 pending/sockets/leased=0 PASS. 신규 테스트 21항목은 수신 확장·세대·거부·큐 재예약·폐기를 포함한다.
+Test-AgentEnvironment -StaticOnly·compilation database 225개·UTF-8·프로젝트/filter 참조·공백 검사 PASS.
+구조도 architecture showcase 9/9(오류·경고 0), 데스크톱 4크기 light/dark containment PASS, PNG 4장 직접 확인.
+일반 텍스트의 줄 끝과 수정 영역 간격만 마지막에 정리했으며, 검증 이후 실행 로직은 바꾸지 않았다.
+
+기존 변환·미사용 변수 등의 컴파일 경고는 유지했다.
+운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하는 미검증이다.
+main 예외 처리·CServer worker 조합은 후속 공통화 후보로 기록했다.
+기존 staged 변경을 보존했고 커밋·push는 수행하지 않았다.
+
+
+## 53. JobQueue 생성자 정책 지정으로 단순화
+
+- [x] 정책 래퍼 타입 제거와 두 서버 JobQueue 별칭 통일
+- [x] JobQueue 생성자 정책 인자 필수화·로비 Five/게임 Snapshot 명시
+- [x] Debug/Release 서버 빌드·기존 Core/ABI 검사·공백 확인
+- [x] 현재 구현 설명과 성능 개선·비교 측정 후속 작업 기록
+
+사용자가 불필요한 정책 래퍼를 제거하고 JobQueue 생성자 인자로 정책을 지정하도록 요청했다.
+로비 CClient의 JobTarget(Five)은 유지하고 Zone(Five)·게임 CMatch(Snapshot)·테스트 큐 정책을 명시했다.
+큐 자료구조·실행 직렬화·처리 개수·패킷 순서·스케줄러 수명은 이번에 바꾸지 않는다.
+현재 구조도의 컴포넌트·호출·자원 수명에 변화가 없어 Archify JSON/HTML은 재생성하지 않는다.
+
+완료: 정책 래퍼와 기본 정책 인자를 제거했다. 두 서버는 같은 JobQueue 타입을 사용하고 모든 생성 위치에서 정책을 전달한다.
+Debug/Release 서버·Core·테스트 빌드 및 각 Core 114항목·ABI 110종/106상수 PASS.
+UTF-8·clang-format·공백 검사 PASS. 기존 컴파일 경고는 유지했다.
+실행 방식이 같아 네트워크/GUI 검사를 반복하지 않았다. 이번에는 성능 측정을 하지 않았으며 커밋·push도 수행하지 않았다.
+
+## 54. JobQueue 성능 측정·개선·동일 조건 비교 (후속 작업, 미착수)
+
+- [ ] 개선 전에 현재 방식의 실행 의미와 기준 소스 snapshot/hash를 고정
+- [ ] 재현 가능한 측정 도구와 입력 시나리오를 준비하고 현재 방식 성능 측정
+- [ ] 측정에서 확인한 병목을 근거로 개선안을 결정·구현하고 기능/동시성 회귀 검사
+- [ ] 기준 측정과 같은 조건으로 개선 후 성능을 측정하고 원시 결과·비교표·판단 근거 기록
+
+현재 구현은 PPL concurrent_priority_queue<shared_ptr<IJob>>에 작업을 저장하고,
+실행 mutex를 잡은 상태에서 Five 또는 Snapshot 개수만큼 callback을 실행한다.
+작업별 shared_ptr/Job 생성 비용, 큐 연산·실행 mutex 경합, size 조회 비용,
+Five/Snapshot의 처리량·긴 작업 점유·대상 간 공정성과 스케줄러 재등록/깨우기 비용을 조사한다.
+shared_ptr 비교로 정렬하므로 FIFO나 예약 시간순 실행은 현재 보장하지 않는다.
+순서·예약 시간·budget·종료 중 폐기 정책은 먼저 계약을 정하고 개선 시 호환 영향을 구분한다.
+
+측정 계획:
+
+- 동일한 Windows/x64 Release·도구 버전·CPU·worker/producer 수·전원 설정·입력 seed를 기록한다.
+  워밍업·측정 시간·반복 횟수와 대상 큐/작업 수·작업 비용·도착 패턴도 전후 동일하게 고정한다.
+- 빈 큐/idle, 단일 producer, 여러 producer의 경합, 순간 burst, 지속 부하,
+  짧은/긴 callback 혼합, 여러 대상 큐, callback 내부 재등록을 포함한다.
+  로비 Five와 게임 Snapshot은 별도로 비교하고 큐 자체 비용과 실제 작업 시간을 분리한다.
+- 처리량(jobs/s), enqueue→실행 시작 지연(p50/p95/p99), 실행 완료 지연,
+  queue depth/최대 대기, CPU 시간·idle CPU, 할당 횟수/bytes·메모리 사용량,
+  대상별 대기·기아 여부를 기록한다. 가능하면 lock 대기·깨우기/재예약 횟수도 수집한다.
+- 단위 측정과 LOCAL_TEST 서버 부하 검사를 나누고, 동일 계측을 전후 사용해 계측 비용을 구분한다.
+  반복 결과의 중앙값·분산과 부하별 tradeoff를 함께 기록하며 결과를 미리 개선으로 단정하지 않는다.
+- 개선 전 기준 결과를 확보한 뒤 자료구조·할당/소유권·batch/budget·잠금 범위를 검토한다.
+  개선 후에도 작업 누락/중복·직렬화·재등록·세대 검사·disconnect 폐기·정상 종료를 검증한다.
+  기존 Core/ABI·네트워크 회귀 결과와 성능 수치를 구분하고 운영 DB·블록체인 검증으로 확대 해석하지 않는다.
+
+현재 단계는 작업 계획만 기록했으며 성능 계측·기준 측정·최적화·개선 후 측정은 실행하지 않았다.
+생성 로그·대용량 원시 결과는 Git 제외 artifacts에 저장하고 재현 명령·요약·소스 hash를 문서에 남긴다.
+
+
+## 55. Resource 공통화·참조 기호 위치 통일
+
+- [x] 양쪽 Resource·풀 사용처·소유권·Serena/compilation database 확인
+- [x] 공통 I/O 자원·세션/소켓 풀 구현을 ServerCore로 이동하고 서버별 구성만 유지
+- [x] ReferenceAlignment: Left 설정·서버 자체 코드의 참조 선언 공백만 변경
+- [x] 자원 구성/반환 검사·Debug/Release 빌드·Core/ABI·통합 회귀
+- [x] 문서·정리 근거·Archify JSON/HTML·실제 결과 갱신
+
+사용자는 Resource 중복 정리와 SocketResource& _other 형태의 참조 기호 위치를 요청했다.
+I/O context 풀 접근은 공통 기반, 세션 shared_ptr/네이티브 소켓 재사용은 타입별 구성으로 분리한다.
+기존 game accept/reuse 풀의 분리·lobby 시간순 소켓 풀·IOCP native 소켓 소유권을 유지한다.
+일반 서버 자체 .h/.cpp의 &/&& 참조 선언 공백만 바꾸며 다른 포맷·이름·실행 로직은 보존한다.
+클라이언트·Shared Protocol·외부 코드는 제외한다. JobQueue 성능 측정 후속 작업은 미착수 상태로 유지한다.
+커밋·push는 수행하지 않는다.
+
+완료: ServerCore/Resource.h에 공통 구현을 두고 양쪽 Resource.h는 구성 별칭만 유지한다.
+Resource.cpp 2개와 프로젝트/filters 등록을 제거했으며 삭제 전 파일은 Git 제외 artifacts에 보존했다.
+참조 선언은 기존 소스 10개 파일의 공백 183곳을 수정했고 C++ 토큰이 동일함을 확인했다.
+새 ResourceTests.cpp는 context 풀 공유/격리·임대 중 Clear 거부·반환 후 재사용,
+accept/reuse 세션 풀 분리·shared_ptr 소유·소켓 시간순 반환 등 12항목을 추가한다.
+Debug/Release 서버 빌드·각 Core 126항목·Protocol ABI 110종/106상수 PASS.
+각 구성에서 네트워크 12종·보스 4/5의 4인 매칭·초기화 실패 4종 PASS.
+모든 통합 시나리오 종료에서 pending/sockets/leased=0을 확인했다.
+에이전트 환경 정적 검사 PASS, compilation database 224개 소스.
+UTF-8·프로젝트/filters 일치·clang-format·공백 검사 PASS.
+Archify architecture showcase 9/9·오류/경고 0, 4크기·light/dark containment PASS 및 PNG 4장 직접 확인.
+기존 형 변환·미사용 변수 경고는 유지했고 운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하는 미검증이다.
+성능 측정·커밋·push는 수행하지 않았다.
+
+## 56. NetworkRuntime 명명·호환 래퍼·별칭 헤더 정리
+
+- [x] TransportHost를 NetworkRuntime으로 변경하고 Start/Stop/Get으로 API 통일
+- [x] SockAddr·NetworkRuntime using 선언을 두 서버 pch.h에 모으고 별칭 전용 헤더 4개 제거
+- [x] 사용처·프로젝트/filters·문서 정리와 Debug/Release 빌드·Core/ABI·서버 회귀
+
+NetworkRuntime 선언은 Winsock·IOCP를 정의하는 Net.h에 두며 Session.h의 서비스 접근도 새 이름을 사용한다.
+단순 전달 Startup/Cleanup/Runtime과 사용처 없는 호환 오류 helper를 제거한다.
+풀 주입·기본 포트·accept ID 기록을 담당하는 어댑터는 유지한다.
+두 서버 pch.h는 현재 PrecompiledHeader=NotUsing인 공통 include 헤더다.
+별칭은 서버 도메인 헤더보다 앞에 선언하고 Core는 서버 pch.h에 의존하지 않는다.
+Archify 지침에 따라 현재 구조도를 대조했다. 표시된 모듈·연결·자원 수명이 동일하고
+변경되는 클래스/호환 API는 구조도에 표시되지 않아 JSON/HTML은 재생성하지 않는다.
+새 evidence JSON은 만들지 않으며 과거 검증 기록은 당시 snapshot으로 보존한다.
+JobQueue 성능 측정·커밋·push는 수행하지 않는다.
+
+완료: NetworkRuntime 선언을 Net.h로 이동하고 두 서버 호출부와 Core의 풀 어댑터를 새 API로 통일했다.
+Startup/Cleanup/Runtime 전달 함수와 사용처 없는 GetLastError/PrintError를 제거했다.
+SockAddr.h·SocketUtil.h 4개, 관련 include·프로젝트/filters 항목을 제거하고 pch.h에 using 선언을 모았다.
+삭제 직전 파일은 artifacts/runtime-cleanup/baseline에 보존했으며 정리 문서에 복구 근거를 기록했다.
+Debug/Release 서버 빌드·각 Core 126항목·ABI 110종/106상수 PASS.
+각 구성의 네트워크 12종·보스 4/5의 4인 매칭·초기화 실패 4종 PASS.
+통합 시나리오 각 7개에서 pending/sockets/leased=0 확인.
+에이전트 환경 정적 검사 PASS, compilation database 224개 소스.
+Core clang-format·UTF-8·프로젝트/filters 및 참조 파일 존재·삭제 include 잔여 없음·문서 링크·git diff --check PASS.
+기존 C4065/C4101/C4244/C4305/C4309 경고는 로그에 유지했다.
+운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하 및 JobQueue 성능 측정은 미검증/미착수다.
+새 evidence JSON·테스트 소스는 추가하지 않았고 커밋·push는 수행하지 않았다.
+
+## 57. 작업·로그·자원 별칭 헤더를 pch.h에 통합
+
+- [x] 두 서버 자체 헤더의 별칭 전용 파일 조사·PacketJobQueue 역할 확인
+- [x] Job/JobQueue/LogUtil/OverlapEx/Resource 별칭을 pch.h로 이동하고 헤더 10개·등록·include 제거
+- [x] 로비 PacketJobQueue 빈 파생 클래스를 JobScheduler 별칭으로 변경·전방 선언 수정
+- [x] Debug/Release 빌드·Core/ABI·통합 회귀·삭제 참조 및 문서 확인
+
+로비 PacketJobQueue는 대상 클라이언트 큐를 선택하는 Core JobScheduler의 기존 이름이다.
+로비 worker는 Five budget·남은 작업 재등록·disconnect 정리를 사용하고,
+게임은 IOCP 타이머의 매치 갱신 경로에서 CMatch의 Snapshot 큐를 처리한다.
+이 실행 모델·동시성·소유권을 유지하고 선언 위치와 불필요한 빈 파생 타입만 정리한다.
+OP_TYPE 정의 → Core 별칭/Resource 구성 → Global.h/도메인 헤더 순서로 의존성을 유지한다.
+함수/클래스와 함께 있는 내부 별칭·TCPSocket 정책 어댑터·프로토콜 forwarding header·외부 코드는 유지한다.
+Archify 지침과 구조도를 대조했으며 표시된 모듈·호출·수명 변화가 없어 JSON/HTML은 재생성하지 않는다.
+삭제 전 파일은 Git 제외 artifacts/alias-cleanup/baseline에 보존하고 정리 문서에 근거를 남긴다.
+새 evidence JSON·테스트 소스·성능 측정·커밋·push는 추가/실행하지 않는다.
+
+완료: 두 서버 자체 헤더 177개를 조사했고 별칭 전용 10개를 제거했다. 남은 자체 헤더 167개에 별칭 전용 파일이 없음을 확인했다.
+기존 전역 IJob/Job 및 wod_server 내부 JobQueue·로그·I/O context·풀 구성의 namespace를 유지했다.
+PacketJobQueue는 로비 pch.h의 JobScheduler 별칭으로 바꾸고 Global.h의 class 지정자를 제거했다.
+Core 구현·예산 정책·세대 검사·풀 소유·worker 종료 순서는 유지했다.
+Debug/Release 서버 빌드·각 Core 126항목·ABI 110종/106상수 PASS.
+각 구성의 네트워크 12종·보스 4/5의 4인 매칭·초기화 실패 4종 PASS.
+각 7개 통합 시나리오에서 pending/sockets/leased=0 확인.
+에이전트 환경 정적 검사 PASS, compilation database 224개 소스.
+UTF-8·pch 선언 순서·프로젝트/filters 일치 및 참조 파일 존재·삭제 include/타입 잔여 없음·문서 링크·git diff --check PASS.
+기존 C4065/C4101/C4244/C4305/C4309 경고는 로그에 유지했다.
+운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하는 미검증이고 JobQueue 성능 측정은 미착수다.
+새 evidence JSON·테스트 소스·커밋·push는 추가/실행하지 않았다.
+
+## 58. GameObject 기반·공통 위치/방향/속도 상태 추출
+
+- [x] GameObject/CMoveObject와 로비 Transform/Physic 상태·동작·사용처 조사
+- [x] Core의 타입 주입 GameObject/MoveObject 및 공통 상태를 추출하고 양쪽에 적용
+- [x] DirectX 충돌 변환·타워/넥서스·로비 이동/시야 및 SetLook 차이 보존
+- [x] 의미 있는 상태/가상 확장/충돌 위임 검사와 Debug/Release·ABI·통합 회귀
+- [x] 구현/정리 문서·Archify JSON/HTML·검증 결과 기록
+
+ObjectPosition·ObjectOrientation·ObjectMotion을 게임 객체와 로비 컴포넌트가 공유한다.
+Core GameObject/MoveObject는 Geometry 타입 정책으로 벡터/box/matrix와 충돌 변환을 주입받는다.
+Core는 DirectX·서버 pch·Protocol·게임 singleton에 의존하지 않는다.
+GameObject.h/cpp의 타워·넥서스는 게임 서버에 유지하며 파일을 통째로 이동하지 않는다.
+로비 SetLook 단순 대입과 게임 SetLook의 right 재계산, vec2 위치 변경 시 높이 보존을 유지한다.
+ID 기본값은 기존 미초기화 상태 대신 -1로 명시한다. 기존의 유효 ID 지정 경로는 유지한다.
+새 evidence JSON·성능 측정·커밋·push는 추가/실행하지 않는다.
+
+완료: Core GameObject.h와 GameObjectTests.cpp를 등록했고 게임 기반 2종 및 로비 컴포넌트 2종에 적용했다.
+DirectX 충돌 변환 문장 토큰은 이전 구현과 동일하며 타워/넥서스의 선언·구현 suffix도 그대로임을 비교했다.
+GameObject.h/cpp는 콘텐츠·충돌 정책이 있어 유지하고 새 별칭 전용 헤더는 만들지 않았다.
+새 검사 14항목: 기본 ID/매치/노드, 위치 높이 보존·3축 대입, 서버별 SetLook,
+속도·객체별 상태 독립, 충돌 정책 인자·출력/미변경 행렬 항목, 가상 함수/소멸 경로.
+Debug/Release 서버 빌드·각 Core 140항목·ABI 110종/106상수 PASS.
+각 구성의 네트워크 12종·보스 4/5의 4인 매칭·초기화 실패 4종 PASS.
+각 7개 통합 시나리오에서 pending/sockets/leased=0 확인.
+에이전트 환경 정적 검사 PASS, compilation database 225개 소스.
+신규 Core/로비 헤더 및 검사 clang-format·UTF-8·프로젝트/filters 일치·참조 파일·문서 링크·git diff --check PASS.
+Archify architecture showcase 9/9·오류/경고 0, 4크기 containment·light/dark PASS, PNG 4장 직접 확인.
+JSON/HTML 해시·byte를 delivery receipt 및 README와 일치시켰고 한국어 본문/영어 고정 Viewer UI를 유지했다.
+기존 C4065/C4101/C4244/C4305/C4309 경고는 로그에 유지했다. 새 GameObject/컴포넌트 헤더와 검사에는 경고가 없었다.
+운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하는 미검증이며 JobQueue 성능 측정도 미착수다.
+추가 evidence JSON·커밋·push는 생성/실행하지 않았다.
+
+## 59. BasicClient를 SessionHandler로 명명 정리
+
+- [x] 클래스·헤더·양쪽 CClient 상속·검사·프로젝트/filters 사용처 갱신
+- [x] 기존 구현과 이름 외 토큰 동일성·삭제 참조·문서 확인
+- [x] Debug/Release 서버 빌드·Core/ABI·환경 정적 검사
+
+BasicClient는 클라이언트 상태를 소유하지 않고 Session의 수신 프레임 처리·disconnect를 조율한다.
+실제 소켓 I/O를 수행하는 BasicSession과 구분해 SessionHandler로 명명한다.
+Client.h는 SessionHandler.h로 이동하며 옛 이름의 별칭/forwarding header를 남기지 않는다.
+소유권·가상 확장점·처리 순서와 동시성 경계는 유지하고 새 테스트 소스는 추가하지 않는다.
+구조도에는 BasicClient/Client.h가 표시되지 않고 모듈·호출·수명 변화가 없어 Archify JSON/HTML은 재생성하지 않는다.
+기존 Core 검사에 수신 분할/연속·검증/전달 실패·세대 검사가 있어 해당 검사를 재실행한다.
+네트워크/매칭 통합은 앞선 GameObject 추출 결과로 보존하고 명명 정리에서는 반복하지 않는다.
+새 evidence JSON·성능 측정·커밋·push는 추가/실행하지 않는다.
+
+완료: SessionHandler.h로 이동하고 클래스·양쪽 CClient 상속·기존 검사 및 프로젝트/filters 참조를 갱신했다.
+이름/경로 치환 외 Core 헤더와 코드 사용처는 변경 전 byte와 일치한다.
+Server 소스·프로젝트에 BasicClient 및 ServerCore/Client.h 참조가 남지 않음을 확인했다.
+Debug/Release 서버 빌드·각 Core 140항목·ABI 110종/106상수 PASS.
+에이전트 환경 정적 검사 PASS, compilation database 225개 소스.
+clang-format·UTF-8·프로젝트/filters 일치·참조 파일 존재·git diff --check PASS.
+기존 C4065/C4101/C4244/C4305/C4309 경고는 유지되며 명명 변경으로 새 경고는 발생하지 않았다.
+네트워크/매칭 통합은 이번 명명 정리에서 재실행하지 않았다. 운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하도 미검증이다.
+JobQueue 성능 측정·추가 evidence JSON·커밋·push는 수행하지 않았다.
+
+## 60. 현재 변경 전체 커밋·push
+
+- [x] 저장소·브랜치·전체 변경과 기존 검증 결과 확인
+- [x] 전체 변경 스테이징·차이 검사·한글 커밋 메시지 및 snapshot 준비
+
+사용자가 현재 변경 전체의 커밋과 push를 요청했다. Git 제외 artifacts·빌드·로그는 포함하지 않는다.
+commit 스킬의 명시된 2단계 절차에 따라 스테이징한 변경과 정확한 메시지를 먼저 제시한다.
+미리보기 승인 후 커밋·origin/main push를 진행하고, 실제 결과는 Git 이력·원격 commit·작업 트리와 완료 보고로 확인한다.
+직전 검증: Debug/Release 서버 빌드·각 Core 140항목·ABI 110종/106상수·환경 정적 검사 PASS.
+GameObject 추출 시 실행한 네트워크 12종·보스 4/5의 4인 매칭·초기화 실패 4종도 양쪽 구성 PASS.
+이후 SessionHandler 명명 정리에서는 Core/ABI·서버 빌드를 재검증했고 통합 검사는 반복하지 않았다.
+기존 C4065/C4101/C4244/C4305/C4309 경고는 유지되며 운영 DB·블록체인·전체 GUI 전투·장시간 부하는 미검증이다.

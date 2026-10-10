@@ -1,12 +1,10 @@
 #include "pch.h"
 #include <ServerCore/Session.h>
-#include "Resource.h"
 #include "CServer.h"
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
 #include "CPacketMgr.h"
 #include "CUserMgr.h"
-#include "SocketUtil.h"
 
 //#define Test
 
@@ -15,7 +13,7 @@ namespace wod_server {
 	bool CServer::Initialize()
 	{
 		LogPrinter::PrintMsg("Server Initialize Start");
-		SocketUtil::Startup();
+		NetworkRuntime::Start();
         m_transportReady = true;
 
 		if (!network::GetInstance()->Initialize()) {
@@ -67,7 +65,7 @@ namespace wod_server {
         if (std::exchange(m_matchReady, false)) ok = match::GetInstance()->Release() && ok;
         if (std::exchange(m_packetReady, false)) ok = CPacketMgr::GetInstance()->Release() && ok;
         ok = CUserMgr::GetInstance()->Release() && ok;
-        SocketUtil::Cleanup(); m_transportReady = false; return ok;
+        NetworkRuntime::Stop(); m_transportReady = false; return ok;
 	}
 
 	void CServer::Run()
@@ -80,7 +78,7 @@ namespace wod_server {
             catch (...) { LogPrinter::PrintMsg("Worker failed: unknown exception"); }
             wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
         };
-        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); SocketUtil::Runtime().RequestStop(count); },failure);
+        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); NetworkRuntime::Get().RequestStop(count); },failure);
         wod::core::ThreadGroup producers([] { network::GetInstance()->PrepareStop(); GPacketJobQueue->Stop(); },failure);
         for (unsigned int i=0; i<count; ++i) iocp.Launch([] { network::GetInstance()->IOCPFunc(); });
         producers.Launch([] { network::GetInstance()->TimerFunc(); });

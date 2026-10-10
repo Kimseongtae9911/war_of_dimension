@@ -1,8 +1,5 @@
 #include "pch.h"
 #include "CUserMgr.h"
-#include "LogUtil.h"
-#include "SocketUtil.h"
-#include "Resource.h"
 
 namespace wod_server {
 	std::unique_ptr<CUserMgr> CUserMgr::m_instance;

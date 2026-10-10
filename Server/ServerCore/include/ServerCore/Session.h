@@ -3,21 +3,14 @@
 
 namespace wod::core
 {
-class TransportHost
-{
-  public:
-    static void Start();
-    static void Stop();
-    static IocpService &Get();
-};
-
 template <class Context> class BasicSession
 {
   public:
+    using ContextType = Context;
     using Acquire = std::function<Context *()>;
     using Return = std::function<void(Context *)>;
 
-    BasicSession(IocpService &_service, Acquire _acquire, Return _release, bool _socket = false) : m_service(_service), m_acquire(std::move(_acquire)), m_release(std::move(_release))
+    BasicSession(IocpService& _service, Acquire _acquire, Return _release, bool _socket = false) : m_service(_service), m_acquire(std::move(_acquire)), m_release(std::move(_release))
     {
         if (_socket)
             m_sock = m_service.CreateSocket();
@@ -61,7 +54,7 @@ template <class Context> class BasicSession
         m_service.Receive(m_sock, m_over);
     }
 
-    bool Decode(size_t _bytes, Context &_over, std::vector<FrameDecoder::Frame> &_frames)
+    bool Decode(size_t _bytes, Context& _over, std::vector<FrameDecoder::Frame>& _frames)
     {
         size_t remain = static_cast<size_t>(m_remainData);
         bool ok = FrameDecoder::Extract(_over.GetSendBuf(), _bytes, remain, _frames);
@@ -70,9 +63,28 @@ template <class Context> class BasicSession
         return ok;
     }
 
-    void Connect(const std::string &_ip, unsigned short _port)
+    void Connect(const std::string& _ip, unsigned short _port)
     {
         m_service.Connect(m_sock, _ip, _port);
+    }
+
+    void Disconnect()
+    {
+        Invalidate();
+        auto *over = m_acquire();
+        bool submitted;
+        try
+        {
+            over->SetTransportOperation(IoOperation::Disconnect);
+            submitted = m_service.Disconnect(m_sock, *over);
+        }
+        catch (...)
+        {
+            m_release(over);
+            throw;
+        }
+        if (!submitted)
+            m_release(over);
     }
 
     void SetSocket(SOCKET _socket)
@@ -90,7 +102,7 @@ template <class Context> class BasicSession
         m_remainData = 0;
     }
 
-    template <class Func> void WithGeneration(uint64_t _generation, Func &&_callback)
+    template <class Func> void WithGeneration(uint64_t _generation, Func&& _callback)
     {
         std::lock_guard lock(m_generationMutex);
         if (_generation == m_generation.load())
@@ -102,12 +114,12 @@ template <class Context> class BasicSession
         return m_generation.load();
     }
 
-    const SOCKET &GetSocket() const
+    const SOCKET& GetSocket() const
     {
         return m_sock;
     }
 
-    Context &GetOverEx()
+    Context& GetOverEx()
     {
         return m_over;
     }
@@ -123,7 +135,7 @@ template <class Context> class BasicSession
     }
 
   protected:
-    IocpService &m_service;
+    IocpService& m_service;
     Acquire m_acquire;
     Return m_release;
     Context m_over;
@@ -138,7 +150,7 @@ template <class Context> class BasicListener : public BasicSession<Context>
   public:
     using Base = BasicSession<Context>;
 
-    BasicListener(IocpService &_service, typename Base::Acquire _acquire, typename Base::Return _release) : Base(_service, std::move(_acquire), std::move(_release), true)
+    BasicListener(IocpService& _service, typename Base::Acquire _acquire, typename Base::Return _release) : Base(_service, std::move(_acquire), std::move(_release), true)
     {
         _service.Attach(this->m_sock, 9999);
         this->m_over.SetTransportOperation(IoOperation::Accept);
@@ -149,11 +161,17 @@ template <class Context> class BasicListener : public BasicSession<Context>
         m_clsock = _socket;
         this->m_over.Reset();
         this->m_over.SetTransportOperation(IoOperation::Accept);
-        // 서버별 cookie는 Reset 전후 보존하는 어댑터에서 지정한다.
+        // Context::Reset은 서버별 accept cookie를 보존한다.
         this->m_service.Accept(this->m_sock, _socket, this->m_over);
     }
 
-    int Bind(const SockAddr &_address)
+    template <class Session> void Accept(const std::shared_ptr<Session>& _session)
+    {
+        this->m_over.SetSocketID(_session->GetSocketID());
+        Accept(_session->GetSocket());
+    }
+
+    int Bind(const SockAddr& _address)
     {
         this->m_service.Bind(this->m_sock, _address);
 
@@ -167,12 +185,12 @@ template <class Context> class BasicListener : public BasicSession<Context>
         return 0;
     }
 
-    const HANDLE &GetHandle() const
+    const HANDLE& GetHandle() const
     {
         return this->m_service.Handle();
     }
 
-    const SOCKET &GetClientSocket() const
+    const SOCKET& GetClientSocket() const
     {
         return m_clsock;
     }
@@ -184,5 +202,61 @@ template <class Context> class BasicListener : public BasicSession<Context>
 
   private:
     SOCKET m_clsock = INVALID_SOCKET;
+};
+
+// Pool 정책만 서버에서 주입한다. 콜백과 세션 메타데이터 구현은 공유한다.
+template <class Context, class Pool, unsigned short Port> class PooledSession : public BasicSession<Context>
+{
+  public:
+    explicit PooledSession(bool _socket = false)
+        : BasicSession<Context>(
+              NetworkRuntime::Get(),
+              [] {
+                  return Pool::GetOverObjectFromPool();
+              },
+              [](Context *_value) {
+                  Pool::m_overExPool.push(_value);
+              },
+              _socket)
+    {
+    }
+
+    using BasicSession<Context>::Connect;
+
+    void Connect(const std::string& _ip)
+    {
+        BasicSession<Context>::Connect(_ip, Port);
+    }
+
+    int GetSocketID() const
+    {
+        return m_socketID;
+    }
+
+    void SetSocketID(int _id)
+    {
+        m_socketID = _id;
+    }
+
+    std::chrono::system_clock::time_point m_entryTime = std::chrono::system_clock::now();
+
+  private:
+    int m_socketID = -1;
+};
+
+template <class Context, class Pool> class PooledListener : public BasicListener<Context>
+{
+  public:
+    PooledListener()
+        : BasicListener<Context>(
+              NetworkRuntime::Get(),
+              [] {
+                  return Pool::GetOverObjectFromPool();
+              },
+              [](Context *_value) {
+                  Pool::m_overExPool.push(_value);
+              })
+    {
+    }
 };
 }

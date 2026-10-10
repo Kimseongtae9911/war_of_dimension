@@ -1,9 +1,7 @@
 #include "pch.h"
 #include <Protocol/Validation.h>
 #include "CClient.h"
-#include "SocketUtil.h"
 #include "CPacketMgr.h"
-#include "Resource.h"
 #include "Stats.h"
 #include "ClientInfos.h"
 
@@ -186,7 +184,6 @@ namespace wod_server {
 		if (m_dir != 0)
 			UpdateBoundingBox();
 
-
 		//Deceleration calculation
 		velocity = m_vel.Length();
 		float deceleration = m_friction * _elapsedTime;
@@ -260,40 +257,46 @@ namespace wod_server {
 		}
 	}
 
-	void CClient::RecvProcess(const DWORD& _bytes, OverlapEx* _overEx)
-	{
+    CClient::SessionRef CClient::GetTransportSession() const
+    {
+        return m_packetSender->GetSession();
+    }
 
-        auto session = m_packetSender->GetSession();
-        const auto generation = session->Generation();
-        std::vector<wod::core::FrameDecoder::Frame> frames;
-        if (!session->Decode(_bytes, *_overEx, frames)) { Disconnect(); return; }
-        for (auto& frame : frames) {
-            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::GameClient)) { Disconnect(); return; }
-            auto* packet = reinterpret_cast<BASE_PACKET*>(frame.data());
-            if (packet->type == CS_LOGIN || packet->type == CS_RTT || packet->type == CS_TEST_INGAME || packet->type == CS_TEST_INGAME2)
-                session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(packet, shared_from_this()); });
-            else {
-                if (m_matchNum < 0 || m_matchNum >= MAX_MATCH) { Disconnect(); return; }
-                auto& match = CMatchMgr::GetInstance()->GetMatch(m_matchNum);
-                match.PushJob([client = shared_from_this(), session, generation, frame = std::move(frame)]() mutable {
-                    session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), client); });
-                });
-            }
+    bool CClient::ValidateFrame(std::span<const char> _frame) const
+    {
+        return wod::protocol::Validate(_frame, wod::protocol::Endpoint::GameClient);
+    }
+
+    bool CClient::DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation)
+    {
+        auto *packet = reinterpret_cast<BASE_PACKET *>(_frame.data());
+        if (packet->type == CS_LOGIN || packet->type == CS_RTT || packet->type == CS_TEST_INGAME || packet->type == CS_TEST_INGAME2)
+        {
+            _session->WithGeneration(_generation, [&] {
+                CPacketMgr::GetInstance()->Packet_Exec(packet, shared_from_this());
+            });
         }
-        session->Recv();
+        else
+        {
+            if (m_matchNum < 0 || m_matchNum >= MAX_MATCH)
+                return false;
 
-	}
+            auto& match = CMatchMgr::GetInstance()->GetMatch(m_matchNum);
+            match.PushJob([client = shared_from_this(), session = _session, generation = _generation, frame = std::move(_frame)]() mutable {
+                session->WithGeneration(generation, [&] {
+                    CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET *>(frame.data()), client);
+                });
+            });
+        }
 
-	void CClient::Disconnect()
-	{
-        auto session = m_packetSender->GetSession();
-        session->Invalidate();
-        auto* over = Resource::GetOverObjectFromPool();
-        over->SetOP(OP_TYPE::OP_DISCONNECT);
-        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::m_overExPool.push(over);
-        std::unique_lock lock(m_stateLock); m_state = CL_STATE::ST_FREE;
+        return true;
+    }
 
-	}
+    void CClient::OnDisconnectRequested()
+    {
+        std::unique_lock lock(m_stateLock);
+        m_state = CL_STATE::ST_FREE;
+    }
 
 	void CClient::ProcessRespawn(TimePoint _now)
 	{
@@ -375,7 +378,6 @@ namespace wod_server {
 		ProcessTeleportCoolTime(now);
 
 		Move(_elapsedTime);
-
 
 		return true;
 	}

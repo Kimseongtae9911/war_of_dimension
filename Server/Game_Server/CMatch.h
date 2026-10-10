@@ -45,7 +45,7 @@ private:
 	std::array<bool, MAX_PLAYER> m_clientReady = { false, false, false, false };
 	std::array<bool, MAX_PLAYER> m_clientLoading = { false, false, false, false };
 	ESceneType m_sceneType = ESceneType::ReadyScene;
-	JobQueue m_jobQueue;
+	JobQueue m_jobQueue{wod::core::JobBudget::Snapshot};
 
 	float m_readyTime = 120.f;
 	TimePoint m_updateTime = {};

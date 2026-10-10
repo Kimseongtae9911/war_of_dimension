@@ -10,6 +10,9 @@
 #include <Protocol/Validation.h>
 
 void DumpAbi();
+int RunExtractionTests();
+int RunResourceTests();
+int RunGameObjectTests();
 using namespace wod::core;
 
 namespace
@@ -98,7 +101,7 @@ void Jobs()
     });
     queue.ProcessJob();
     Check(count == 23, "JobRef and move-only callable");
-    JobQueue snapshot;
+    JobQueue snapshot(JobBudget::Snapshot);
     int executed = 0;
     snapshot.PushJob([&] {
         ++executed;
@@ -119,7 +122,7 @@ void Jobs()
                     ++concurrent;
                 });
         });
-    for (auto &thread : producers)
+    for (auto& thread : producers)
         thread.join();
     std::thread first([&] {
         snapshot.ProcessJob();
@@ -317,7 +320,7 @@ void ThreadLifetimes()
         });
         throw std::runtime_error("partial startup");
     }
-    catch (const std::runtime_error &)
+    catch (const std::runtime_error&)
     {
     }
     Check(exited == 1, "partial thread startup scope cleanup");
@@ -526,7 +529,7 @@ void MultiWorkerDisconnect()
 
     const bool drained = finished == 2;
     service.RequestStop(workers.size());
-    for (auto &worker : workers)
+    for (auto& worker : workers)
         worker.join();
     service.Finish();
     Check(drained && !receive.m_pending && !disconnect.m_pending, "DisconnectEx drains receive across workers");
@@ -560,13 +563,16 @@ int main(int argc, char **argv)
         CanceledQueue();
         GenerationAndValidation();
         MultiWorkerDisconnect();
+        checks += RunExtractionTests();
+        checks += RunResourceTests();
+        checks += RunGameObjectTests();
         for (int i = 0; i < 5; ++i)
             Loopback();
         std::cout << "{\"ok\":true,\"checks\":" << checks << "}\n";
 
         return 0;
     }
-    catch (const std::exception &ex)
+    catch (const std::exception& ex)
     {
         std::cerr << ex.what() << '\n';
 

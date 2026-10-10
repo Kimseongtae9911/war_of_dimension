@@ -12,6 +12,7 @@
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |
 | 현재 구성·연결 | [아키텍처](architecture/OVERVIEW.md) |
 | 서버 공통 기반 구현·종료·회귀 검사 | [ServerCore 구현](architecture/SERVER_CORE.md), [구현 구조도](diagrams/server-core/README.md), [소스·검증 근거](architecture/evidence/server-core-implementation-20261007.json) |
+| 서버 잔여 중복 추출·CClient/GameObject 기반·Job 스케줄러 | [현재 구현](architecture/SERVER_CORE.md#서버에-남은-공통-기반의-추가-추출-2026-10-10), [추가 추출 당시 검증 근거](architecture/evidence/server-core-extraction-20261010.json), [현재 작업·검증](../tasks/todo.md) |
 | 서버 공통화·후속 테스트 도구 계획 | [1단계 ServerCore 구현 계획](architecture/SERVER_CORE_PLAN.md), [설계도·검증 근거](diagrams/server-core-plan/README.md), [중복 코드 조사](architecture/evidence/server-core-audit-20261007.json) |
 | 메시 공유·자원 수명·검증 | [메시 공유 구현](architecture/MESH_SHARING.md), [구조도와 근거](diagrams/mesh-sharing/README.md) |
 | 확정 외형·영웅 선택 파츠 최적화 | [구현·검증·실측](portfolio/HERO_SELECTED_PARTS.md), [로딩 흐름도](diagrams/hero-selection/README.md) |

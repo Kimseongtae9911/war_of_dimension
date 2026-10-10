@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "CObjectMgr.h"
-#include "LogUtil.h"
 #include "TCPSocket.h"
-#include "Resource.h"
 
 namespace wod_server {
 	std::unique_ptr<CObjectMgr> CObjectMgr::m_instance;

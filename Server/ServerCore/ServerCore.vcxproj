@@ -42,9 +42,12 @@
     <ClCompile Include="src/Net.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include/ServerCore/GameObject.h" />
+    <ClInclude Include="include/ServerCore/SessionHandler.h" />
     <ClInclude Include="include/ServerCore/Concurrency.h" />
     <ClInclude Include="include/ServerCore/Diagnostics.h" />
     <ClInclude Include="include/ServerCore/Net.h" />
+    <ClInclude Include="include/ServerCore/Resource.h" />
     <ClInclude Include="include/ServerCore/Session.h" />
   </ItemGroup>
   <ItemGroup>

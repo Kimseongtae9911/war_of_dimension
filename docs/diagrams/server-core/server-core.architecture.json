@@ -1,26 +1,169 @@
 {
   "schema_version": 1,
   "diagram_type": "architecture",
-  "meta": {"title":"ServerCore 공통 기반 구현", "quality_profile":"showcase", "viewBox":[1200,620]},
+  "meta": {
+    "title": "ServerCore 객체·세션·자원 공통 기반",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1200,
+      620
+    ]
+  },
   "components": [
-    {"id":"client-protocol-user","type":"frontend","label":"WarOfDimension","sublabel":"공용 패킷 선언 사용","pos":[60,60],"size":[240,90]},
-    {"id":"packet-contract","type":"messagebus","label":"Shared/Protocol","sublabel":"패킷 ABI · 방향별 검증","pos":[475,60],"size":[250,90]},
-    {"id":"lobby-runtime","type":"backend","label":"Lobby_Server","sublabel":"유저 · 매칭 · DB 어댑터","pos":[60,225],"size":[240,100]},
-    {"id":"game-runtime","type":"backend","label":"Game_Server","sublabel":"매치 · 월드 · NPC 어댑터","pos":[900,225],"size":[240,100]},
-    {"id":"shared-server-runtime","type":"backend","label":"ServerCore","sublabel":"통신 · Job · 풀 · 스레드 수명","tag":"정적 라이브러리","pos":[455,370],"size":[290,110]},
-    {"id":"windows-completion-io","type":"external","label":"Winsock / IOCP","sublabel":"비동기 요청 · 완료 · 취소","pos":[470,525],"size":[260,80]}
+    {
+      "id": "client-protocol-user",
+      "type": "frontend",
+      "label": "WarOfDimension",
+      "sublabel": "공용 패킷 선언 사용",
+      "pos": [
+        60,
+        60
+      ],
+      "size": [
+        240,
+        90
+      ]
+    },
+    {
+      "id": "packet-contract",
+      "type": "messagebus",
+      "label": "Shared/Protocol",
+      "sublabel": "패킷 ABI · 방향별 검증",
+      "pos": [
+        475,
+        60
+      ],
+      "size": [
+        250,
+        90
+      ]
+    },
+    {
+      "id": "lobby-runtime",
+      "type": "backend",
+      "label": "Lobby_Server",
+      "sublabel": "유저 · 이동/시야 · DB 어댑터",
+      "pos": [
+        60,
+        225
+      ],
+      "size": [
+        240,
+        100
+      ]
+    },
+    {
+      "id": "game-runtime",
+      "type": "backend",
+      "label": "Game_Server",
+      "sublabel": "매치 · 충돌 변환 · NPC 어댑터",
+      "pos": [
+        900,
+        225
+      ],
+      "size": [
+        240,
+        100
+      ]
+    },
+    {
+      "id": "shared-server-runtime",
+      "type": "backend",
+      "label": "ServerCore",
+      "sublabel": "객체 기반 · 세션 · Job 스케줄러",
+      "tag": "정적 라이브러리",
+      "pos": [
+        455,
+        370
+      ],
+      "size": [
+        290,
+        110
+      ]
+    },
+    {
+      "id": "windows-completion-io",
+      "type": "external",
+      "label": "Winsock / IOCP",
+      "sublabel": "비동기 요청 · 완료 · 취소",
+      "pos": [
+        470,
+        525
+      ],
+      "size": [
+        260,
+        80
+      ]
+    }
   ],
   "connections": [
-    {"id":"client-contract-use","from":"client-protocol-user","to":"packet-contract","label":"헤더 사용","variant":"dashed"},
-    {"id":"lobby-packet-validation","from":"lobby-runtime","to":"packet-contract","label":"패킷 검증","variant":"dashed"},
-    {"id":"game-packet-validation","from":"game-runtime","to":"packet-contract","label":"패킷 검증","variant":"dashed"},
-    {"id":"lobby-core-reference","from":"lobby-runtime","to":"shared-server-runtime","label":"ProjectReference","variant":"emphasis"},
-    {"id":"game-core-reference","from":"game-runtime","to":"shared-server-runtime","label":"ProjectReference","variant":"emphasis"},
-    {"id":"core-native-io","from":"shared-server-runtime","to":"windows-completion-io","label":"요청 · 완료 처리","labelDy":24}
+    {
+      "id": "client-contract-use",
+      "from": "client-protocol-user",
+      "to": "packet-contract",
+      "label": "헤더 사용",
+      "variant": "dashed"
+    },
+    {
+      "id": "lobby-packet-validation",
+      "from": "lobby-runtime",
+      "to": "packet-contract",
+      "label": "패킷 검증",
+      "variant": "dashed"
+    },
+    {
+      "id": "game-packet-validation",
+      "from": "game-runtime",
+      "to": "packet-contract",
+      "label": "패킷 검증",
+      "variant": "dashed"
+    },
+    {
+      "id": "lobby-core-reference",
+      "from": "lobby-runtime",
+      "to": "shared-server-runtime",
+      "label": "ProjectReference",
+      "variant": "emphasis"
+    },
+    {
+      "id": "game-core-reference",
+      "from": "game-runtime",
+      "to": "shared-server-runtime",
+      "label": "ProjectReference",
+      "variant": "emphasis"
+    },
+    {
+      "id": "core-native-io",
+      "from": "shared-server-runtime",
+      "to": "windows-completion-io",
+      "label": "요청 · 완료 처리",
+      "labelDy": 24
+    }
   ],
   "cards": [
-    {"dot":"cyan","title":"코드 공유","items":["같은 Core 소스를 두 서버에 연결","실행 프로세스와 소켓 풀은 각각 소유"]},
-    {"dot":"emerald","title":"실행 경계","items":["연결별 callback · 이벤트 key별 직렬화","producer 종료 후 IOCP 취소와 join"]},
-    {"dot":"amber","title":"검증 범위","items":["LOCAL_TEST · DB 없는 실행","새 더미 제품과 데이터화는 후속 단계"]}
+    {
+      "dot": "cyan",
+      "title": "코드 공유",
+      "items": [
+        "GameObject·세션·Resource 공통 구현",
+        "서버는 콘텐츠·DirectX 동작을 확장"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "실행 경계",
+      "items": [
+        "로비/게임 위치·방향·속도 상태 공유",
+        "생산자 종료 후 I/O 배출 · 풀 반환 확인"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "검증 범위",
+      "items": [
+        "LOCAL_TEST · DB 없는 실행",
+        "새 더미 제품과 데이터화는 후속 단계"
+      ]
+    }
   ]
 }

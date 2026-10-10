@@ -1,6 +1,5 @@
 #include "pch.h"
 
-#include "JobQueue.h"
 
 namespace wod_server {
 PacketJobQueue* GPacketJobQueue = nullptr;

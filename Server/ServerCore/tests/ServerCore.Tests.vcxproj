@@ -39,6 +39,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameObjectTests.cpp" />
+    <ClCompile Include="ResourceTests.cpp" />
+    <ClCompile Include="ExtractionTests.cpp" />
     <ClCompile Include="CoreTests.cpp" />
     <ClCompile Include="ProtocolAbi.cpp" />
   </ItemGroup>

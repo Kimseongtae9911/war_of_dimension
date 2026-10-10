@@ -50,3 +50,76 @@
 복구 근거는 이전 commit `86f83a94f76e7218c4cd2f34d992f9d2d02174f1`의 같은 경로다.
 이 소스 추출에서 런타임 에셋·외부 라이브러리·원본 저장소는 삭제하거나 수정하지 않았다.
 [구현·검증 기록](../architecture/SERVER_CORE.md)을 참조한다.
+
+
+## 잔여 SocketUtil 구현 제거 (2026-10-10)
+
+Game_Server·Lobby_Server의 `SocketUtil.cpp` 2개를 제거하고 프로젝트/filter 항목도 함께 제거했다.
+두 파일의 동일한 PrintError는 `ServerCore/src/Net.cpp`의 `TransportHost::PrintError`로 대체했다.
+기존 Startup·Cleanup·Runtime·GetLastError도 Core가 제공하며 각 `SocketUtil.h`는 별칭만 남긴다.
+게임 서버의 listener용 세션 풀은 `Resource::m_acceptSessionPool`로 옮겨 사용처를 모두 갱신했다.
+
+복구 근거는 HEAD `c80506cbbe2bd797300194d911521b1f176cc589`의 같은 경로와
+작업 전 staged 이름 변경을 포함한 Git 제외 `artifacts/server-core-extraction-baseline/*-SocketUtil.cpp`다.
+기존 staged 변경을 취소하거나 덮어쓰지 않았고 런타임 에셋·원본 저장소는 수정하지 않았다.
+이번 결과는 [구현 문서](../architecture/SERVER_CORE.md)와 작업 목록에 기록한다.
+
+
+## Resource 구현 공통화 (2026-10-10)
+
+Game_Server·Lobby_Server의 Resource.cpp 2개를 제거하고 두 프로젝트/filter의 compile 항목도 제거했다.
+I/O 객체 풀·획득 함수와 세션/소켓 재사용 풀 구현은 ServerCore/include/ServerCore/Resource.h로 대체했다.
+서버별 Resource.h와 기존 타입 이름은 별칭으로 유지하고 사용처의 Resource:: 접근은 보존했다.
+static 풀은 구성 템플릿의 inline static으로 정의한다. native 소켓 소유와 종료 배출 순서는 유지했다.
+
+복구 근거는 HEAD의 같은 경로 및 이번 작업 시작 시 저장한 Git 제외
+artifacts/resource-refactor/baseline/{Game_Server,Lobby_Server}-Resource.{h,cpp}다.
+실행 에셋·외부 라이브러리·원본 저장소는 삭제하거나 수정하지 않았다.
+구현과 검증 결과는 [ServerCore 구현 문서](../architecture/SERVER_CORE.md)와 작업 목록에 기록한다.
+
+## 별칭 전용 네트워크 헤더 제거 (2026-10-10)
+
+Game_Server·Lobby_Server의 SockAddr.h·SocketUtil.h 총 4개를 제거했다.
+사용처 include와 두 프로젝트/filters의 ClInclude 등록도 함께 제거했다.
+각 서버 pch.h의 `using wod::core::SockAddr;`·`using wod::core::NetworkRuntime;`으로 대체한다.
+옛 SocketUtil 이름은 유지하지 않고 호출부를 NetworkRuntime::Start/Stop/Get으로 변경했다.
+Core의 NetworkRuntime 선언은 Net.h에 있으며 소켓·IOCP 소유와 종료 순서는 동일하다.
+
+삭제 직전 헤더는 Git 제외 artifacts/runtime-cleanup/baseline/Server/{Game_Server,Lobby_Server}/에 보존했다.
+Git HEAD의 같은 경로도 복구 근거다. 외부 코드·실행 에셋·원본 저장소는 수정하지 않았다.
+앞선 SocketUtil.cpp 정리 항목의 TransportHost·호환 helper는 당시 상태를 설명하는 기록이며,
+이번 후속 정리에서는 새 이름으로 통일하고 사용처 없는 helper를 제거했다.
+
+## 작업·로그·자원 별칭 헤더 통합 (2026-10-10)
+
+Game_Server·Lobby_Server의 Job.h·JobQueue.h·LogUtil.h·OverlapEx.h·Resource.h 총 10개를 제거했다.
+두 서버 자체 헤더 전체의 using 선언을 조사했으며, 별칭만 있는 파일의 선언은 pch.h로 모았다.
+로비 JobQueue.h의 PacketJobQueue는 추가 동작 없는 빈 파생 클래스여서 Core JobScheduler의 별칭으로 대체했다.
+Global.h의 class 전방 선언과 프로젝트/filters 등록·소스 include를 함께 정리했다.
+Job/JobQueue budget·작업 처리 경로·context 매핑·풀 구성과 소켓/세션 소유권은 유지한다.
+
+삭제 직전 파일은 Git 제외 artifacts/alias-cleanup/baseline/Server/{Game_Server,Lobby_Server}/에 보존했다.
+Git HEAD의 같은 경로도 복구 근거다. 이전 정리 항목의 Resource.h 등은 당시 상태를 설명한다.
+MathUtil·CsvLoader·CNetworkMgr 등의 함수/클래스와 함께 있는 별칭, TCPSocket 정책 어댑터와
+기존 Protocol 경로의 forwarding header는 유지했다. 외부 코드·실행 에셋·원본 저장소는 수정하지 않았다.
+
+## GameObject 공통 기반 추출 (2026-10-10)
+
+Game_Server/GameObject.h의 CGameObject·CMoveObject 기반과 로비 Transform/Physic의 겹치는 상태를
+ServerCore/include/ServerCore/GameObject.h로 옮겼다. 이번에는 파일을 삭제하지 않았다.
+게임 GameObject.h/cpp에는 타입/충돌 정책·타워/넥서스 콘텐츠가 남고 로비에는 이동/시야 규칙이 남는다.
+삭제된 기존 클래스 본문·중복 멤버/접근 함수는 Core 템플릿과 상속으로 대체한다.
+GameObject.cpp의 DirectX 충돌 변환 본문은 정책 함수로 옮기고 문장 토큰 동일성을 확인한다.
+작업 직전 파일은 Git 제외 artifacts/game-object-extraction/baseline에 보존했다.
+기존 Git HEAD도 복구 근거이며 외부 코드·에셋·원본 저장소는 수정하지 않았다.
+
+## 세션 처리 기반 명명 정리 (2026-10-10)
+
+ServerCore/include/ServerCore/Client.h를 SessionHandler.h로 옮기고 BasicClient를 SessionHandler로 변경했다.
+클라이언트 상태 없이 세션의 수신 프레임 검증·전달과 연결 종료를 조율하는 역할을 이름에 반영했다.
+두 서버 CClient·기존 검사·프로젝트/filters·현재 구현 문서의 참조를 갱신했다.
+옛 이름의 별칭/forwarding header는 남기지 않았으며 처리 순서·가상 확장점·소유권은 유지했다.
+
+이전 Client.h는 이번 대화에서 추가한 미커밋 파일이므로 복구 근거는 Git 제외
+artifacts/session-handler-rename/baseline/Server/ServerCore/include/ServerCore/Client.h다.
+동일 baseline에 변경 직전 사용처도 보존했다. 외부 코드·에셋·원본 저장소는 수정하지 않았다.

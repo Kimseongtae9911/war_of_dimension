@@ -3,11 +3,11 @@
 #include "CItem.h"
 #include "CPacketSender.h"
 #include "CStatus.h"
+#include <ServerCore/SessionHandler.h>
 
 namespace wod_server {
 
-	class JobQueue;
-	class CClient : public CMoveObject, public std::enable_shared_from_this<CClient>
+	class CClient : public CMoveObject, public std::enable_shared_from_this<CClient>, public wod::core::SessionHandler<Session>
 	{
 	public:
 		CClient();
@@ -80,15 +80,17 @@ namespace wod_server {
 		void Teleport(float _elapsedTime);
 		void Damage(int _power, int _critical, DAMAGE_TYPE _type, int _objectID);
 
-		void RecvProcess(const DWORD& _bytes, OverlapEx* _over_ex);
-		void Disconnect();
-
 		std::shared_mutex m_stateLock;
 		std::mutex m_statLock;
 
 		bool Update(float _elapsedTime) override;
 
 	private:
+		SessionRef GetTransportSession() const override;
+		bool ValidateFrame(std::span<const char> _frame) const override;
+		bool DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation) override;
+		void OnDisconnectRequested() override;
+
 		//Defensive Functions
 		bool NoDefensive(int _damage, int _id);
 		bool Reflect(int _damage, int _id);

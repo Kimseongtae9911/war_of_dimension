@@ -75,6 +75,7 @@ Visual Studio의 다중 프로젝트 실행은 프로세스 시작 순서를 지
 
 확정된 이름 규칙은 [공통 작업 지침](../../AGENTS.md)을 따른다.
 클래스 멤버는 `m_count`, 함수 인자는 `_count`처럼 구분한다.
+참조 기호는 `SocketResource& _other`·`Func&& _func`처럼 타입에 붙이며 `.clang-format`의 `ReferenceAlignment: Left`로 유지한다.
 함수 인자에 `_` 접두어를 사용할 때는 첫 글자를 소문자로 쓰고 `__`를 포함하지 않는다.
 예약 식별자의 범위는 [C++ 표준 초안](https://eel.is/c++draft/lex.name#4)을 참조한다.
 
@@ -96,6 +97,12 @@ CSV 데이터 구조체는 필드 이름을 `boost::pfr::names_as_array`로 읽�
 ServerCore 공용 헤더는 Core 프로젝트의 `Header Files`에서 확인한다.
 테스트 소스는 별도 `ServerCore.Tests` 프로젝트에 표시한다.
 두 프로젝트의 `Development`에는 공통 포맷 설정을 연결했다.
+
+서버 `pch.h`는 현재 미리 컴파일하지 않는 공통 include 헤더다.
+`SockAddr`·`NetworkRuntime`·Job/JobQueue·LogPrinter·OverlapEx·Resource 구성의 using 선언은 여기에 모으며 별칭 전용 헤더는 두지 않는다.
+OP_TYPE 정의 뒤에 별칭을 선언하고 Global.h·도메인 헤더는 그 뒤에 포함한다.
+로비의 PacketJobQueue는 Core JobScheduler 별칭이며 게임의 매치별 큐와 실행 경로가 다르다.
+Core의 네트워크 수명 API는 `NetworkRuntime::Start/Stop/Get`을 사용한다.
 
 ## 메시 공유 검증
 

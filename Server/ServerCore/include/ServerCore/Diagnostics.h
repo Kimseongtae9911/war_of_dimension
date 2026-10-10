@@ -27,13 +27,13 @@ class LogPrinter
   public:
     inline static std::mutex m_printlock;
 
-    template <class T> static void PrintMsg(const T &_msg)
+    template <class T> static void PrintMsg(const T& _msg)
     {
         std::lock_guard lock(m_printlock);
         std::cerr << _msg << '\n';
     }
 
-    template <class T> static void PrintMsg(const std::string &_prefix, const T &_msg)
+    template <class T> static void PrintMsg(const std::string& _prefix, const T& _msg)
     {
         std::lock_guard lock(m_printlock);
         std::cerr << _prefix << _msg << '\n';

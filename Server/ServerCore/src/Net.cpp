@@ -1,6 +1,5 @@
 #include <ServerCore/Net.h>
 #include <ServerCore/Diagnostics.h>
-#include <ServerCore/Session.h>
 #include <algorithm>
 #include <cstring>
 #include <limits>
@@ -9,39 +8,39 @@ namespace wod::core
 {
 namespace
 {
-std::unique_ptr<WinsockRuntime> hostWinsock;
-std::unique_ptr<IocpService> hostTransport;
+std::unique_ptr<WinsockRuntime> runtimeWinsock;
+std::unique_ptr<IocpService> runtimeService;
 }
 
-void TransportHost::Start()
+void NetworkRuntime::Start()
 {
-    if (hostTransport)
+    if (runtimeService)
         return;
 
-    hostWinsock = std::make_unique<WinsockRuntime>();
+    runtimeWinsock = std::make_unique<WinsockRuntime>();
     try
     {
-        hostTransport = std::make_unique<IocpService>();
+        runtimeService = std::make_unique<IocpService>();
     }
     catch (...)
     {
-        hostWinsock.reset();
+        runtimeWinsock.reset();
         throw;
     }
 }
 
-void TransportHost::Stop()
+void NetworkRuntime::Stop()
 {
-    hostTransport.reset();
-    hostWinsock.reset();
+    runtimeService.reset();
+    runtimeWinsock.reset();
 }
 
-IocpService &TransportHost::Get()
+IocpService& NetworkRuntime::Get()
 {
-    if (!hostTransport)
-        throw std::logic_error("transport not started");
+    if (!runtimeService)
+        throw std::logic_error("network runtime not started");
 
-    return *hostTransport;
+    return *runtimeService;
 }
 
 SocketError::SocketError(const char *_operation, int _code) : std::runtime_error(std::string(_operation) + ": " + std::to_string(_code)), m_code(_code)
@@ -76,7 +75,7 @@ SockAddr::SockAddr(unsigned int _addr, unsigned short _port)
     m_address.sin_port = htons(_port);
 }
 
-SockAddr::SockAddr(const sockaddr &_addr)
+SockAddr::SockAddr(const sockaddr& _addr)
 {
     std::memcpy(&m_address, &_addr, sizeof(m_address));
 }
@@ -174,7 +173,7 @@ SOCKET IocpService::CreateSocket()
     return socket;
 }
 
-IocpService::SocketState &IocpService::State(SOCKET _socket)
+IocpService::SocketState& IocpService::State(SOCKET _socket)
 {
     auto found = m_sockets.find(_socket);
     if (found == m_sockets.end())
@@ -186,7 +185,7 @@ IocpService::SocketState &IocpService::State(SOCKET _socket)
 void IocpService::Attach(SOCKET _socket, ULONG_PTR _key)
 {
     std::lock_guard lock(m_mutex);
-    auto &state = State(_socket);
+    auto& state = State(_socket);
     if (state.m_attached)
     {
         if (state.m_key != _key)
@@ -202,7 +201,7 @@ void IocpService::Attach(SOCKET _socket, ULONG_PTR _key)
     state.m_attached = true;
 }
 
-void IocpService::Connect(SOCKET _socket, const std::string &_ip, unsigned short _port)
+void IocpService::Connect(SOCKET _socket, const std::string& _ip, unsigned short _port)
 {
     sockaddr_in address{};
     address.sin_family = AF_INET;
@@ -214,7 +213,7 @@ void IocpService::Connect(SOCKET _socket, const std::string &_ip, unsigned short
         throw SocketError("WSAConnect", WSAGetLastError());
 }
 
-void IocpService::Bind(SOCKET _socket, const SockAddr &_address)
+void IocpService::Bind(SOCKET _socket, const SockAddr& _address)
 {
     if (bind(_socket, _address.Native(), sizeof(sockaddr_in)) == SOCKET_ERROR)
         throw SocketError("bind", WSAGetLastError());
@@ -226,9 +225,9 @@ void IocpService::Listen(SOCKET _socket, int _backlog)
         throw SocketError("listen", WSAGetLastError());
 }
 
-bool IocpService::Begin(SOCKET _socket, IoContext &_context, IoOperation _op)
+bool IocpService::Begin(SOCKET _socket, IoContext& _context, IoOperation _op)
 {
-    auto &state = State(_socket);
+    auto& state = State(_socket);
     if (m_stopping || state.m_socket == INVALID_SOCKET || _context.m_pending.exchange(true))
         return false;
 
@@ -245,14 +244,14 @@ bool IocpService::Begin(SOCKET _socket, IoContext &_context, IoOperation _op)
     return true;
 }
 
-void IocpService::Fail(IoContext &_context, DWORD _error)
+void IocpService::Fail(IoContext& _context, DWORD _error)
 {
     _context.m_error = _error;
     if (!PostQueuedCompletionStatus(m_handle, 0, _context.m_key, &_context.GetOver()))
         throw SocketError("post failed I/O", GetLastError());
 }
 
-bool IocpService::Receive(SOCKET _socket, IoContext &_context)
+bool IocpService::Receive(SOCKET _socket, IoContext& _context)
 {
     std::lock_guard lock(m_mutex);
     if (State(_socket).m_disconnecting || !Begin(_socket, _context, IoOperation::Receive))
@@ -269,7 +268,7 @@ bool IocpService::Receive(SOCKET _socket, IoContext &_context)
     return true;
 }
 
-void IocpService::IssueSend(SocketState &_state, IoContext &_context)
+void IocpService::IssueSend(SocketState& _state, IoContext& _context)
 {
     _context.GetOver() = {};
     _context.GetWSA().buf = _context.GetSendBuf() + _context.m_offset;
@@ -282,10 +281,10 @@ void IocpService::IssueSend(SocketState &_state, IoContext &_context)
     }
 }
 
-bool IocpService::Send(SOCKET _socket, IoContext &_context)
+bool IocpService::Send(SOCKET _socket, IoContext& _context)
 {
     std::lock_guard lock(m_mutex);
-    auto &state = State(_socket);
+    auto& state = State(_socket);
     if (state.m_disconnecting || !Begin(_socket, _context, IoOperation::Send))
         return false;
 
@@ -296,7 +295,7 @@ bool IocpService::Send(SOCKET _socket, IoContext &_context)
     return true;
 }
 
-bool IocpService::Accept(SOCKET _listener, SOCKET _socket, IoContext &_context)
+bool IocpService::Accept(SOCKET _listener, SOCKET _socket, IoContext& _context)
 {
     std::lock_guard lock(m_mutex);
     // AcceptEx 완료 key는 listener의 key다. 피연결 socket은 별도로 소유한다.
@@ -315,10 +314,10 @@ bool IocpService::Accept(SOCKET _listener, SOCKET _socket, IoContext &_context)
     return true;
 }
 
-bool IocpService::Disconnect(SOCKET _socket, IoContext &_context)
+bool IocpService::Disconnect(SOCKET _socket, IoContext& _context)
 {
     std::lock_guard lock(m_mutex);
-    auto &state = State(_socket);
+    auto& state = State(_socket);
     if (state.m_disconnecting || !Begin(_socket, _context, IoOperation::Disconnect))
         return false;
 
@@ -348,7 +347,7 @@ bool IocpService::Disconnect(SOCKET _socket, IoContext &_context)
     return true;
 }
 
-bool IocpService::Post(ULONG_PTR _key, IoContext &_context)
+bool IocpService::Post(ULONG_PTR _key, IoContext& _context)
 {
     std::lock_guard lock(m_mutex);
     if (m_stopping || _context.m_pending.exchange(true))
@@ -366,11 +365,11 @@ bool IocpService::Post(ULONG_PTR _key, IoContext &_context)
     return true;
 }
 
-void IocpService::Complete(IoContext &_context)
+void IocpService::Complete(IoContext& _context)
 {
     if (_context.m_socket != INVALID_SOCKET)
     {
-        auto &state = State(_context.m_socket);
+        auto& state = State(_context.m_socket);
         --state.m_pending;
         if (_context.m_operation == IoOperation::Disconnect)
             state.m_disconnecting = false;
@@ -389,7 +388,7 @@ void IocpService::Complete(IoContext &_context)
         Wake();
 }
 
-bool IocpService::Poll(Completion &_completion)
+bool IocpService::Poll(Completion& _completion)
 {
     _completion.Clear();
     for (;;)
@@ -420,7 +419,7 @@ bool IocpService::Poll(Completion &_completion)
         else
         {
             std::lock_guard lock(m_mutex);
-            auto &slot = m_appDispatch[key];
+            auto& slot = m_appDispatch[key];
             if (!slot)
                 slot = std::make_shared<std::recursive_mutex>();
 
@@ -438,7 +437,7 @@ bool IocpService::Poll(Completion &_completion)
 
         if (context->m_operation == IoOperation::Send)
         {
-            auto &state = State(context->m_socket);
+            auto& state = State(context->m_socket);
             if (!error && (!bytes || bytes > context->m_length - context->m_offset))
                 error = WSAECONNRESET;
 
@@ -502,7 +501,7 @@ void IocpService::Wake()
 void IocpService::Close(SOCKET _socket)
 {
     std::lock_guard lock(m_mutex);
-    auto &state = State(_socket);
+    auto& state = State(_socket);
     if (state.m_socket != INVALID_SOCKET)
     {
         CancelIoEx(reinterpret_cast<HANDLE>(_socket), nullptr);
@@ -530,7 +529,7 @@ void IocpService::RequestStop(size_t _workers)
         return;
     }
 
-    for (auto &[socket, state] : m_sockets)
+    for (auto& [socket, state] : m_sockets)
         Close(socket);
     if (m_pending == 0)
         Wake();
@@ -551,7 +550,7 @@ void IocpService::Finish()
     if (m_pending != 0)
         throw std::logic_error("finish with pending I/O");
 
-    for (auto &[socket, state] : m_sockets)
+    for (auto& [socket, state] : m_sockets)
         if (state.m_socket != INVALID_SOCKET)
             closesocket(socket);
 
@@ -563,14 +562,14 @@ NetworkStats IocpService::Stats() const
 {
     std::lock_guard lock(m_mutex);
     uint64_t count = 0;
-    for (const auto &[socket, state] : m_sockets)
+    for (const auto& [socket, state] : m_sockets)
         if (state.m_socket != INVALID_SOCKET)
             ++count;
 
     return {m_pending.load(), m_received.load(), m_sent.load(), m_errors.load(), count};
 }
 
-bool FrameDecoder::Extract(char *_buffer, size_t _bytes, size_t &_remain, std::vector<Frame> &_frames)
+bool FrameDecoder::Extract(char *_buffer, size_t _bytes, size_t& _remain, std::vector<Frame>& _frames)
 {
     if (_remain > 255 || _bytes > IoContext::m_Capacity - _remain)
     {

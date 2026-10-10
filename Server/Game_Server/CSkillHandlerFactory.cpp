@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "CSkillHandlerFactory.h"
-#include "LogUtil.h"
 
 constexpr int HANDLER_NUM = 5;
 constexpr int SKILL_START_NUM = 48;

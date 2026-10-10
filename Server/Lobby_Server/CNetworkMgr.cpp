@@ -2,9 +2,7 @@
 #include <Protocol/Validation.h>
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
-#include "SocketUtil.h"
 #include "TCPSocket.h"
-#include "Resource.h"
 
 namespace wod_server {
 	std::unique_ptr<CNetworkMgr> CNetworkMgr::m_instance;
@@ -32,12 +30,12 @@ namespace wod_server {
 
 		// Make Socket Pool
 		for (int i = 0; i < MAX_SOCKET; ++i) {
-			SOCKET s = SocketUtil::Runtime().CreateSocket();
+			SOCKET s = NetworkRuntime::Get().CreateSocket();
 			Resource::m_socketpool.push(s);
 
 			//Register socket to iocp, Create Client Objects
 			int id = static_cast<int>(s);
-			SocketUtil::Runtime().Attach(s, id);
+			NetworkRuntime::Get().Attach(s, id);
 			CUserMgr::GetInstance()->MakeClientObject(id);
 		}
 
@@ -64,14 +62,14 @@ namespace wod_server {
 	bool CNetworkMgr::Release()
 	{
         m_stopping.store(true);
-        SocketUtil::Runtime().RequestStop(1);
+        NetworkRuntime::Get().RequestStop(1);
         wod::core::Completion completion;
-        while (SocketUtil::Runtime().Stats().m_pending && SocketUtil::Runtime().Poll(completion)) {
+        while (NetworkRuntime::Get().Stats().m_pending && NetworkRuntime::Get().Poll(completion)) {
             auto op = completion.m_context->m_operation;
             if (op == wod::core::IoOperation::Send || op == wod::core::IoOperation::Disconnect || op == wod::core::IoOperation::AppEvent)
                 Resource::m_overExPool.push(static_cast<OverlapEx*>(completion.m_context));
         }
-        SocketUtil::Runtime().Finish();
+        NetworkRuntime::Get().Finish();
         LogPrinter::PrintMsg("ServerCore stop pending=0 sockets=0 leased=" + std::to_string(Resource::m_overExPool.Leased()));
         Resource::m_overExPool.Clear();
         SocketResource socket;
@@ -89,10 +87,10 @@ namespace wod_server {
 
         try {
         wod::core::Completion completion;
-        while (SocketUtil::Runtime().Poll(completion)) {
+        while (NetworkRuntime::Get().Poll(completion)) {
             auto* over = static_cast<OverlapEx*>(completion.m_context);
             const auto operation = over->m_operation;
-            if (m_stopping.load() || SocketUtil::Runtime().IsStopping()) {
+            if (m_stopping.load() || NetworkRuntime::Get().IsStopping()) {
                 if (operation == wod::core::IoOperation::Send || operation == wod::core::IoOperation::Disconnect || operation == wod::core::IoOperation::AppEvent)
                     Resource::m_overExPool.push(over);
                 continue;
@@ -166,7 +164,7 @@ namespace wod_server {
 		m_gameServer->SetRemainData(0);
 		m_gameServer->SetSocket(m_handle->GetClientSocket());
 
-		SocketUtil::Runtime().Attach(m_handle->GetClientSocket(), static_cast<int>(m_gameServer->GetSocket()));
+		NetworkRuntime::Get().Attach(m_handle->GetClientSocket(), static_cast<int>(m_gameServer->GetSocket()));
 		m_gameServer->Recv();
 		m_handle->GetOverEx().ResetOver();
 		m_handle->GetOverEx().SetOP(OP_TYPE::OP_ACCEPT);
@@ -202,8 +200,8 @@ namespace wod_server {
 		if (Resource::m_socketpool.try_pop(socketResource))
 			m_handle->Accept(socketResource.m_socket);
 		else {
-			SOCKET s = SocketUtil::Runtime().CreateSocket();
-			SocketUtil::Runtime().Attach(s, static_cast<int>(s));
+			SOCKET s = NetworkRuntime::Get().CreateSocket();
+			NetworkRuntime::Get().Attach(s, static_cast<int>(s));
 			m_handle->Accept(s);
 		}
 	}
@@ -211,11 +209,11 @@ namespace wod_server {
 	void CNetworkMgr::Recv(int _id, int _bytes, OverlapEx* _overEx)
 	{
 
-        if (_id != m_gameServer->GetSocket()) { CUserMgr::GetInstance()->GetClient(_id)->RecvPacket(_bytes, _overEx); return; }
+        if (_id != m_gameServer->GetSocket()) { CUserMgr::GetInstance()->GetClient(_id)->Receive(_bytes, _overEx); return; }
         std::vector<wod::core::FrameDecoder::Frame> frames;
-        if (!m_gameServer->Decode(_bytes, *_overEx, frames)) { LogPrinter::PrintMsg("Invalid game frame"); SocketUtil::Runtime().Close(m_gameServer->GetSocket()); return; }
+        if (!m_gameServer->Decode(_bytes, *_overEx, frames)) { LogPrinter::PrintMsg("Invalid game frame"); NetworkRuntime::Get().Close(m_gameServer->GetSocket()); return; }
         for (auto& frame : frames) {
-            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::GameToLobby)) { LogPrinter::PrintMsg("Invalid game packet"); SocketUtil::Runtime().Close(m_gameServer->GetSocket()); return; }
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::GameToLobby)) { LogPrinter::PrintMsg("Invalid game packet"); NetworkRuntime::Get().Close(m_gameServer->GetSocket()); return; }
             PacketExec(reinterpret_cast<BASE_PACKET*>(frame.data()));
         }
         m_gameServer->Recv();

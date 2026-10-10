@@ -17,6 +17,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include/ServerCore/GameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/ServerCore/SessionHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include/ServerCore/Concurrency.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -24,6 +30,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include/ServerCore/Net.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/ServerCore/Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include/ServerCore/Session.h">

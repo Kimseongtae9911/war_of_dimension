@@ -1,9 +1,11 @@
-﻿#pragma once
+#pragma once
 #include <unordered_set>
 #include "CPacketSender.h"
 #include "CTransform.h"
 #include "CPhysic.h"
 #include "CViewList.h"
+#include <ServerCore/SessionHandler.h>
+#include <ServerCore/Concurrency.h>
 
 namespace wod_server {
 
@@ -17,17 +19,14 @@ namespace wod_server {
 		}
 	};
 
-	class JobQueue;
-	class CClient : public std::enable_shared_from_this<CClient>
+	class CClient : public std::enable_shared_from_this<CClient>, public wod::core::SessionHandler<Session>, public wod::core::JobTarget
 	{
 	public:
 		CClient();
 		~CClient();
 
 		void Initialize(const SOCKET& _socket);
-		void Disconnect();
 
-		void RecvPacket(int _recvBytes, OverlapEx* _overEx);
 		void Move();
 		bool Reset();
 
@@ -47,17 +46,6 @@ namespace wod_server {
 		CPhysic* GetPhysics() { return m_physics; }
 		CViewList* GetViewList() { return m_viewList; }
 
-		bool IsDisconnected() const { return m_isDisconnected; }
-		void SetDisconnected() { m_isDisconnected.store(true); }
-		bool TryMarkInQueue()
-		{
-			bool expected = false;
-			return m_isEnqueued.compare_exchange_strong(expected, true);
-		}
-		void UnmarkInQueue() { m_isEnqueued.store(false); }
-		bool IsInQueue() const { return m_isEnqueued.load(); }
-		JobQueue* GetJobQueue() { return m_jobQueue; }
-
 		void SetState(CL_STATE _st) { m_state = _st; }
 		void SetUpdateTime() { m_updateTime = std::chrono::system_clock::now(); }
 		void SetPlayerInfo(const PlayerInfo& _info) { m_playerInfo = _info; }
@@ -75,6 +63,12 @@ namespace wod_server {
 		std::shared_mutex m_stateLock;
 
 	private:
+		SessionRef GetTransportSession() const override;
+		bool ValidateFrame(std::span<const char> _frame) const override;
+		bool DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation) override;
+		void OnReceiveComplete(size_t _frames) override;
+		void OnJobQueueDisconnected() override;
+
 		std::unique_ptr<CPacketSender> m_packetSender;
 
 		CL_STATE m_state;
@@ -98,9 +92,5 @@ namespace wod_server {
 		//P2P
 		std::string m_ipAddress;
 		bool m_isFullNode = false;
-
-		std::atomic_bool m_isDisconnected = false;
-		std::atomic_bool m_isEnqueued = false;
-		JobQueue* m_jobQueue;
 	};
 }

@@ -1,8 +1,5 @@
 #include "pch.h"
 #include <Protocol/Validation.h>
-#include "SockAddr.h"
-#include "SocketUtil.h"
-#include "Resource.h"
 #include "ClientInfos.h"
 #include "NpcInfos.h"
 #include "CMatch.h"
@@ -36,9 +33,9 @@ namespace wod_server {
 			for (int i = 0; i < MAX_SOCKET; ++i) {
 				std::shared_ptr<Session> s = std::make_shared<Session>(true);
 				s->SetSocketID(i);
-				SocketUtil::m_socketpool.push(s);
+				Resource::m_acceptSessionPool.push(s);
 
-				SocketUtil::Runtime().Attach(s->GetSocket(), i);
+				NetworkRuntime::Get().Attach(s->GetSocket(), i);
 
 				CObjectMgr::GetInstance()->MakeClientObject(i);
 			}
@@ -56,14 +53,14 @@ namespace wod_server {
 #endif
 
 			m_LobbyServer->Connect(m_lobbyIP);	// Connect To Lobby Server
-			SocketUtil::Runtime().Attach(m_LobbyServer->GetSocket(), LOBBY_SERVER_ID);
+			NetworkRuntime::Get().Attach(m_LobbyServer->GetSocket(), LOBBY_SERVER_ID);
 			m_LobbyServer->Recv();
 
 			m_handle->Bind(SockAddr(GAME_PORT));
 			m_handle->Listen();
 
 			std::shared_ptr<Session> session;
-			SocketUtil::m_socketpool.try_pop(session);
+			Resource::m_acceptSessionPool.try_pop(session);
 			m_handle->Accept(session);
 
 			m_clientnum = 0;
@@ -79,19 +76,19 @@ namespace wod_server {
 	bool CNetworkMgr::Release()
 	{
         m_stopping.store(true);
-        SocketUtil::Runtime().RequestStop(1);
+        NetworkRuntime::Get().RequestStop(1);
         wod::core::Completion completion;
-        while (SocketUtil::Runtime().Stats().m_pending && SocketUtil::Runtime().Poll(completion)) {
+        while (NetworkRuntime::Get().Stats().m_pending && NetworkRuntime::Get().Poll(completion)) {
             auto op = completion.m_context->m_operation;
             if (op == wod::core::IoOperation::Send || op == wod::core::IoOperation::Disconnect || op == wod::core::IoOperation::AppEvent)
                 Resource::m_overExPool.push(static_cast<OverlapEx*>(completion.m_context));
         }
-        SocketUtil::Runtime().Finish();
+        NetworkRuntime::Get().Finish();
         LogPrinter::PrintMsg("ServerCore stop pending=0 sockets=0 leased=" + std::to_string(Resource::m_overExPool.Leased()));
         Resource::m_overExPool.Clear();
         delete m_skillTimer; m_skillTimer = nullptr;
         std::shared_ptr<Session> session;
-        while(SocketUtil::m_socketpool.try_pop(session)) {}
+        while(Resource::m_acceptSessionPool.try_pop(session)) {}
         while(Resource::m_sessionPool.try_pop(session)) {}
         m_LobbyServer.reset();
         m_handle.reset(); return true;
@@ -102,10 +99,10 @@ namespace wod_server {
 
         try {
         wod::core::Completion completion;
-        while (SocketUtil::Runtime().Poll(completion)) {
+        while (NetworkRuntime::Get().Poll(completion)) {
             auto* over = static_cast<OverlapEx*>(completion.m_context);
             const auto operation = over->m_operation;
-            if (m_stopping.load() || SocketUtil::Runtime().IsStopping()) {
+            if (m_stopping.load() || NetworkRuntime::Get().IsStopping()) {
                 if (operation == wod::core::IoOperation::Send || operation == wod::core::IoOperation::Disconnect || operation == wod::core::IoOperation::AppEvent)
                     Resource::m_overExPool.push(over);
                 continue;
@@ -186,28 +183,28 @@ namespace wod_server {
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_CONNECT_UPDATE);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_READY_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_READY_UPDATE);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_LOADING_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_LOADING_UPDATE);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_MATCH_UPDATE:
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_UPDATE);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_STAT_CHANGE:
@@ -231,7 +228,7 @@ namespace wod_server {
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_FINISH);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_HEALTHMANA_CHANGE:
@@ -241,7 +238,7 @@ namespace wod_server {
                     ov->SetSessionGeneration(_ev.m_sessionGeneration);
 					ov->SetSocketID(_ev.m_changeMaxHp);
 					ov->SetInfo(_ev.m_changeMaxMp);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				case EVENT_TYPE::EV_NPC_ACTIVE:
@@ -249,7 +246,7 @@ namespace wod_server {
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_NPC_ACTIVE);
                     ov->SetSocketID(_ev.m_targetID);
-					if (!SocketUtil::Runtime().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
+					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
 				}
@@ -268,10 +265,10 @@ namespace wod_server {
 		}
 		m_handle->GetOverEx().ResetOver();
 		std::shared_ptr<Session> session;
-		if (SocketUtil::m_socketpool.try_pop(session))
+		if (Resource::m_acceptSessionPool.try_pop(session))
 			m_handle->Accept(session);
 		else {
-			while (false == SocketUtil::m_socketpool.try_pop(session)) {
+			while (false == Resource::m_acceptSessionPool.try_pop(session)) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 			m_handle->Accept(session);
@@ -283,12 +280,12 @@ namespace wod_server {
 
         if (_id != LOBBY_SERVER_ID) {
             int client = CObjectMgr::GetInstance()->GetUserIDFromSocket(_id);
-            CObjectMgr::GetInstance()->GetClient(client)->RecvProcess(_bytes, _overEx); return;
+            CObjectMgr::GetInstance()->GetClient(client)->Receive(_bytes, _overEx); return;
         }
         std::vector<wod::core::FrameDecoder::Frame> frames;
-        if (!m_LobbyServer->Decode(_bytes, *_overEx, frames)) { LogPrinter::PrintMsg("Invalid lobby frame"); SocketUtil::Runtime().Close(m_LobbyServer->GetSocket()); return; }
+        if (!m_LobbyServer->Decode(_bytes, *_overEx, frames)) { LogPrinter::PrintMsg("Invalid lobby frame"); NetworkRuntime::Get().Close(m_LobbyServer->GetSocket()); return; }
         for (auto& frame : frames) {
-            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyToGame)) { LogPrinter::PrintMsg("Invalid lobby packet"); SocketUtil::Runtime().Close(m_LobbyServer->GetSocket()); return; }
+            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyToGame)) { LogPrinter::PrintMsg("Invalid lobby packet"); NetworkRuntime::Get().Close(m_LobbyServer->GetSocket()); return; }
             Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()));
         }
         m_LobbyServer->Recv();

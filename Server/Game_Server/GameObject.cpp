@@ -10,14 +10,14 @@ namespace wod_server {
 	constexpr int TOWER_INIT_HP = 1000;
 	constexpr int NEXUS_INIT_HP = 3000;
 
-	void CMoveObject::UpdateBoundingBox()
-	{
-		m_worldMatrix._11 = m_right.m_x; m_worldMatrix._12 = m_right.m_y; m_worldMatrix._13 = m_right.m_z;
-		m_worldMatrix._31 = m_look.m_x; m_worldMatrix._32 = m_look.m_y; m_worldMatrix._33 = m_look.m_z;
-		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
+    void GameObjectGeometry::UpdateBoundingBox(const Vector3& _right, const Vector3& _look, const Vector3& _pos, Matrix& _world, const BoundingBox& _initial, BoundingBox& _result)
+    {
+        _world._11 = _right.m_x; _world._12 = _right.m_y; _world._13 = _right.m_z;
+        _world._31 = _look.m_x; _world._32 = _look.m_y; _world._33 = _look.m_z;
+        _world._41 = _pos.m_x; _world._42 = _pos.m_y; _world._43 = _pos.m_z;
 
-		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
-	}
+        _initial.Transform(_result, DirectX::XMLoadFloat4x4(&_world));
+    }
 
 	CTower::CTower(int _matchNum, int _id)
 	{

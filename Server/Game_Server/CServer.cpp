@@ -1,16 +1,14 @@
 #include "pch.h"
 #include <ServerCore/Session.h>
-#include "Resource.h"
 #include "CServer.h"
 #include "CPacketMgr.h"
 #include "CSkillHandlerFactory.h"
-#include "SocketUtil.h"
 
 namespace wod_server {
 	bool CServer::Initialize()
 	{
 		LogPrinter::PrintMsg("Server Initialize Start");
-		SocketUtil::Startup();
+		NetworkRuntime::Start();
         m_transportReady = true;
 
 		if (!GameUtil::LoadCoolTime("Resource/SkillCoolTime.txt")) {
@@ -156,7 +154,7 @@ namespace wod_server {
         if (std::exchange(m_matchReady, false)) ok = CMatchMgr::GetInstance()->Release() && ok;
         if (std::exchange(m_skillFactoryReady, false)) ok = CSkillHandlerFactory::GetInstance()->Release() && ok;
         ok = CObjectMgr::GetInstance()->Release() && ok;
-        SocketUtil::Cleanup(); m_transportReady = false; return ok;
+        NetworkRuntime::Stop(); m_transportReady = false; return ok;
 	}
 
 	void CServer::Run()
@@ -169,7 +167,7 @@ namespace wod_server {
             catch (...) { LogPrinter::PrintMsg("Worker failed: unknown exception"); }
             wod::core::ProcessStopSignal::Request(GetCurrentProcessId());
         };
-        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); SocketUtil::Runtime().RequestStop(count); },failure);
+        wod::core::ThreadGroup iocp([&] { network::GetInstance()->PrepareStop(); NetworkRuntime::Get().RequestStop(count); },failure);
         wod::core::ThreadGroup producers([] { network::GetInstance()->PrepareStop(); },failure);
         for (unsigned int i=0; i<count; ++i) iocp.Launch([] { network::GetInstance()->IOCPFunc(); });
         producers.Launch([] { network::GetInstance()->TimerFunc(); });

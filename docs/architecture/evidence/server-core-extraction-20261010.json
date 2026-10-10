@@ -1,0 +1,617 @@
+{
+  "date": "2026-10-10",
+  "status": "구현·검증 완료",
+  "scope": "서버에 남은 공통 세션·CClient 수신/disconnect·Job 스케줄러·I/O context 추출",
+  "baselineHead": "c80506cbbe2bd797300194d911521b1f176cc589",
+  "preserved": "기존 staged 변경 보존, 커밋·push 미실행",
+  "coreTypes": {
+    "Client.h": [
+      "BasicClient"
+    ],
+    "Session.h": [
+      "TransportHost",
+      "BasicSession",
+      "BasicListener",
+      "PooledSession",
+      "PooledListener"
+    ],
+    "Net.h": [
+      "TaggedIoContext"
+    ],
+    "Concurrency.h": [
+      "JobQueue",
+      "JobTarget",
+      "JobScheduler"
+    ]
+  },
+  "verification": {
+    "Debug": {
+      "build": "PASS",
+      "coreChecks": 114,
+      "protocolStructs": 110,
+      "protocolConstants": 106,
+      "networkCases": 12,
+      "integration": {
+        "LocalTest": true,
+        "Cases": [
+          {
+            "Case": "network",
+            "Passed": true,
+            "Pending": 0,
+            "Sockets": 0,
+            "NormalStop": true,
+            "Leased": 0
+          },
+          {
+            "Case": "boss4",
+            "Passed": true,
+            "Pending": 0,
+            "Sockets": 0,
+            "NormalStop": true,
+            "Leased": 0
+          },
+          {
+            "Case": "boss5",
+            "Passed": true,
+            "Pending": 0,
+            "Sockets": 0,
+            "NormalStop": true,
+            "Leased": 0
+          },
+          {
+            "Case": "LobbyServer-missing-resource",
+            "Passed": true,
+            "ExpectedExitCode": 1,
+            "Pending": 0,
+            "Sockets": 0,
+            "Leased": 0
+          },
+          {
+            "Case": "GameServer-missing-resource",
+            "Passed": true,
+            "ExpectedExitCode": 1,
+            "Pending": 0,
+            "Sockets": 0,
+            "Leased": 0
+          },
+          {
+            "Case": "GameServer-lobby-offline",
+            "Passed": true,
+            "ExpectedExitCode": 1,
+            "Pending": 0,
+            "Sockets": 0,
+            "Leased": 0
+          },
+          {
+            "Case": "LobbyServer-bind-conflict",
+            "Passed": true,
+            "ExpectedExitCode": 1,
+            "Pending": 0,
+            "Sockets": 0,
+            "Leased": 0
+          }
+        ],
+        "Ok": true,
+        "Database": false,
+        "Configuration": "Debug"
+      }
+    },
+    "Release": {
+      "build": "PASS",
+      "coreChecks": 114,
+      "protocolStructs": 110,
+      "protocolConstants": 106,
+      "networkCases": 12,
+      "integration": {
+        "LocalTest": true,
+        "Database": false,
+        "Cases": [
+          {
+            "NormalStop": true,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "network",
+            "Passed": true,
+            "Sockets": 0
+          },
+          {
+            "NormalStop": true,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "boss4",
+            "Passed": true,
+            "Sockets": 0
+          },
+          {
+            "NormalStop": true,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "boss5",
+            "Passed": true,
+            "Sockets": 0
+          },
+          {
+            "Sockets": 0,
+            "ExpectedExitCode": 1,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "LobbyServer-missing-resource",
+            "Passed": true
+          },
+          {
+            "Sockets": 0,
+            "ExpectedExitCode": 1,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "GameServer-missing-resource",
+            "Passed": true
+          },
+          {
+            "Sockets": 0,
+            "ExpectedExitCode": 1,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "GameServer-lobby-offline",
+            "Passed": true
+          },
+          {
+            "Sockets": 0,
+            "ExpectedExitCode": 1,
+            "Leased": 0,
+            "Pending": 0,
+            "Case": "LobbyServer-bind-conflict",
+            "Passed": true
+          }
+        ],
+        "Ok": true,
+        "Configuration": "Release"
+      }
+    }
+  },
+  "agentEnvironment": {
+    "staticOnly": "PASS",
+    "compilationDatabaseSources": 225
+  },
+  "diagram": {
+    "type": "architecture",
+    "showcaseChecks": "9/9",
+    "errors": 0,
+    "warnings": 0,
+    "viewportSizes": [
+      "1440x900",
+      "1600x1000",
+      "1920x1080",
+      "2048x1320"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "visualReview": "PNG 4장 직접 확인",
+    "receipt": "../../diagrams/server-core/delivery-receipt.json"
+  },
+  "limitations": [
+    "LOCAL_TEST·DB 없는 실행",
+    "운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하 미검증",
+    "기존 변환·미사용 변수 경고 유지",
+    "main 예외 처리·CServer worker 조합 공통화는 후속 후보"
+  ],
+  "commands": [
+    "./scripts/Build.ps1 -Module Servers -Configuration Debug",
+    "./scripts/Build.ps1 -Module Servers -Configuration Release",
+    "./scripts/Test-ServerCore.ps1 -Configuration <Debug|Release>",
+    "./scripts/Test-ServerCoreIntegration.ps1 -Configuration <Debug|Release> -Python <python.exe>",
+    "./scripts/Test-AgentEnvironment.ps1 -StaticOnly"
+  ],
+  "sourceHashes": {
+    "Server/Game_Server/CClient.cpp": "1f970a98676e5fb15238db0b99d28179f0862e6d74ac298efc79767b618f8573",
+    "Server/Game_Server/CClient.h": "7fc09256141d902f0fcceea3b2adfdcbc4edefb841424130d00aa15b17680f24",
+    "Server/Game_Server/CNetworkMgr.cpp": "3aedee473d1e4992084a58a08ee4affd6fee819aa6d7931e4b3dfc73f55bbfa8",
+    "Server/Game_Server/Game_Server.vcxproj": "0ef3b124f20c9f3b966fce028962710e48bfc03d84cd5670d2a63efa9d3975c3",
+    "Server/Game_Server/Game_Server.vcxproj.filters": "d9f7c80ddf66acc44875474ecaae56fbc9729e418fc6bccddab8829760e88bb7",
+    "Server/Game_Server/JobQueue.h": "5313ea6ca74728ac5add041f7f12aa9faf2a63dd1f9aa7651a66c91e59ee12cb",
+    "Server/Game_Server/OverlapEx.h": "38e37adbdfff9b356de48f07bdc2cb6a78dbd7eaacb10c84c7f0a54fb184ed67",
+    "Server/Game_Server/Resource.cpp": "cd2e54facf75094672070d08959dfe999d7469ba361e056cc2cbb57202f0ca4c",
+    "Server/Game_Server/Resource.h": "0e58ecc3770efa7da915f267c68361273ed6aae93ba7b9ddabf7393f4d0f1fe3",
+    "Server/Game_Server/SocketUtil.h": "477164b639dc8077bcb48a3f2a69636be203e8d2b4c613e9cb24fb6cef2b52de",
+    "Server/Game_Server/TCPSocket.h": "9e0e0e018144d5efc0f1f61c1a351f90d8aebd330c0b6af1b0b25e2c26df9f9d",
+    "Server/Lobby_Server/CClient.cpp": "223192a3fbd649c8ccfe6b3997de35f52e514a767476032fa50c3615fb0e5df5",
+    "Server/Lobby_Server/CClient.h": "a1d1cb55eb5bdbb32ee9062cc48fcf22d4d93ca67da5fbea3d39fee46e965f17",
+    "Server/Lobby_Server/CNetworkMgr.cpp": "ade672077b0c816c939740a5bab195ae47a3b1ec9113e2b2f3c1fcc432d7bb23",
+    "Server/Lobby_Server/JobQueue.h": "1dde31d302a83a1cdcfdc43c245a541400691bb0f3f268b25c06feb07a65b0ce",
+    "Server/Lobby_Server/Lobby_Server.vcxproj": "4d070909532082dad11ce1119d078e8511284cc98632d3f792b238309e46d908",
+    "Server/Lobby_Server/Lobby_Server.vcxproj.filters": "6f3bb03f1697c63290836d571b7363788a17bc9f5d213042cd6d702e4c0775be",
+    "Server/Lobby_Server/OverlapEx.h": "38e37adbdfff9b356de48f07bdc2cb6a78dbd7eaacb10c84c7f0a54fb184ed67",
+    "Server/Lobby_Server/SocketUtil.h": "477164b639dc8077bcb48a3f2a69636be203e8d2b4c613e9cb24fb6cef2b52de",
+    "Server/Lobby_Server/TCPSocket.h": "9e0e0e018144d5efc0f1f61c1a351f90d8aebd330c0b6af1b0b25e2c26df9f9d",
+    "Server/ServerCore/include/ServerCore/Client.h": "61137bfab51408256158f72c0b7ab9b84b07075439c31be44ebfc2667660ebc5",
+    "Server/ServerCore/include/ServerCore/Concurrency.h": "cad73eaab8643268ed5c988b9e56f512c843388609c3ba2c9552450b21c06853",
+    "Server/ServerCore/include/ServerCore/Net.h": "32e33d356fbbf4dcf3550236d63185a2cb790c6eb6676b52dea07b22567b4208",
+    "Server/ServerCore/include/ServerCore/Session.h": "ee122eb3d801d2c53178f20c0979c2e74198d01918bb7d0168d5d7b5db6a3df1",
+    "Server/ServerCore/ServerCore.vcxproj": "535f3dcc1584279271b1d1e46df1c75c9c566106dfb7fd60d880594c1f55a698",
+    "Server/ServerCore/ServerCore.vcxproj.filters": "1e009b94909260a894e4d26bc57af74442376f14b8c154db87e4400169292282",
+    "Server/ServerCore/src/Net.cpp": "6f9a9773b18baae27ca5a43fda5ea0243119c05c008f32227f65273f9c9728db",
+    "Server/ServerCore/tests/CoreTests.cpp": "036cf841dc2e591a333e94e0d8b023de152e5dae8ca63d14d38422a2d5fdc345",
+    "Server/ServerCore/tests/ExtractionTests.cpp": "83e9adf0a97d74ea44b5bb5d95ce337b020678059c2772080c36ad8c4f99e7cc",
+    "Server/ServerCore/tests/ServerCore.Tests.vcxproj": "df226510c684196967427a8e1f3cac799081dee3a7473d94e2a65f917fa5833f",
+    "Server/ServerCore/tests/ServerCore.Tests.vcxproj.filters": "620f7405c6118e2dc66427985a7a88a92b6ba479ac97c81451113f053d59ad04"
+  },
+  "followup": {
+    "date": "2026-10-10",
+    "change": "JobQueue 생성자 정책 인자를 필수로 지정하고 정책 래퍼 제거",
+    "verification": {
+      "Debug": {
+        "serverBuild": "PASS",
+        "coreChecks": 114,
+        "protocolStructs": 110,
+        "protocolConstants": 106
+      },
+      "Release": {
+        "serverBuild": "PASS",
+        "coreChecks": 114,
+        "protocolStructs": 110,
+        "protocolConstants": 106
+      }
+    },
+    "performance": "개선 전·후 비교 측정은 tasks/todo.md 후속 작업, 아직 미측정",
+    "verificationNotes": "네트워크·매칭·초기화 실패 검사는 래퍼 제거 전 추출 단계의 결과이며 이번 생성자 정리에서는 재실행하지 않음. 성능 측정은 미착수.",
+    "sourceHashes": {
+      "Server/ServerCore/include/ServerCore/Concurrency.h": "120c8003be513e5793ea5388fca3f0a8fddc9916f58af7c2bb9e13dc6fead46c",
+      "Server/Lobby_Server/JobQueue.h": "a22bac8aad8da424e9dadc8cc97ea9418b52011f7dec545bf2f9d715b3b729b6",
+      "Server/Lobby_Server/Zone.h": "966dc1de9eb7a1e77f4ac86398d78be1b37329f2055864f53ceb63ea3d3beb6c",
+      "Server/Game_Server/CMatch.h": "91554ef2a6ab11be0d5cf2a179fe5cae6fdc3d48425bb3ac207a1db4f0700136",
+      "Server/ServerCore/tests/CoreTests.cpp": "704eb76e7f2771fd378c240124d6a24a78cb1be08bdc9e8a572dc385209a8c81",
+      "Server/ServerCore/tests/ExtractionTests.cpp": "2f75f15beede966cae9d0d9d23d80a9232e03aeb8743444023f429bb24993058"
+    },
+    "baselineHashNote": "최상위 sourceHashes는 최초 추출 당시, followup.sourceHashes는 생성자 정책 정리 이후 snapshot이다."
+  },
+  "resourceFollowup": {
+    "date": "2026-10-10",
+    "status": "구현·검증 완료",
+    "coreTypes": [
+      "IoResources",
+      "SessionPool",
+      "SocketResource",
+      "SocketPool",
+      "SessionResources",
+      "SocketResources"
+    ],
+    "removed": [
+      "Server/Game_Server/Resource.cpp",
+      "Server/Lobby_Server/Resource.cpp"
+    ],
+    "referenceAlignment": {
+      "style": "ReferenceAlignment: Left",
+      "files": 10,
+      "whitespaceEdits": 183,
+      "tokensUnchanged": true,
+      "scope": "서버 자체 코드, 클라이언트/Shared/외부 코드 제외"
+    },
+    "diagram": {
+      "type": "architecture",
+      "checks": "9/9",
+      "errors": 0,
+      "warnings": 0,
+      "containment": "4크기·light/dark PASS",
+      "visualReview": "PNG 4장 직접 확인",
+      "specification": {
+        "sha256": "95f67dbb6361457c76bc347e6a42db62af7a52e2852eac366c1b6702ae3a7fcb",
+        "bytes": 3714
+      },
+      "artifact": {
+        "sha256": "e79d58585551037123bacc9e1cf30fec58b93a8feef1e7bf84c71859c21aab3f",
+        "bytes": 707276
+      }
+    },
+    "verification": {
+      "Debug": {
+        "serverBuild": "PASS",
+        "coreChecks": 126,
+        "protocolStructs": 110,
+        "protocolConstants": 106,
+        "integration": {
+          "Cases": [
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "network",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "boss4",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "boss5",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "LobbyServer-missing-resource",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "GameServer-missing-resource",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "GameServer-lobby-offline",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "LobbyServer-bind-conflict",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            }
+          ],
+          "LocalTest": true,
+          "Database": false,
+          "Configuration": "Debug",
+          "Ok": true
+        },
+        "network": {
+          "ok": true,
+          "cases": [
+            {
+              "port": 8910,
+              "case": "zero",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "one",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "unknown",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "wrong-size",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "zero",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "one",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "unknown",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "wrong-size",
+              "rejected": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 0,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 1,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 2,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 3,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "Release": {
+        "serverBuild": "PASS",
+        "coreChecks": 126,
+        "protocolStructs": 110,
+        "protocolConstants": 106,
+        "integration": {
+          "Cases": [
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "network",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "boss4",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "boss5",
+              "Pending": 0,
+              "NormalStop": true,
+              "Leased": 0
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "LobbyServer-missing-resource",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "GameServer-missing-resource",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "GameServer-lobby-offline",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            },
+            {
+              "Passed": true,
+              "Sockets": 0,
+              "Case": "LobbyServer-bind-conflict",
+              "Pending": 0,
+              "Leased": 0,
+              "ExpectedExitCode": 1
+            }
+          ],
+          "LocalTest": true,
+          "Database": false,
+          "Configuration": "Release",
+          "Ok": true
+        },
+        "network": {
+          "ok": true,
+          "cases": [
+            {
+              "port": 8910,
+              "case": "zero",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "one",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "unknown",
+              "rejected": true
+            },
+            {
+              "port": 8910,
+              "case": "wrong-size",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "zero",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "one",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "unknown",
+              "rejected": true
+            },
+            {
+              "port": 8911,
+              "case": "wrong-size",
+              "rejected": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 0,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 1,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 2,
+              "passed": true
+            },
+            {
+              "case": "batch12+split-transition",
+              "repeat": 3,
+              "passed": true
+            }
+          ]
+        }
+      }
+    },
+    "sourceHashes": {
+      ".clang-format": "6b599a6bfa05725cbf9a80d0febb4e29a27c408c04604ad868a63e88cdab92af",
+      "AGENTS.md": "6152abd565fdb8273ca49b71a18c5b2479fb36f65137a88d5af66fe4220da0e4",
+      "Server/Game_Server/CClient.cpp": "c6d5adffa5aae99c282fdebeed178d563d5d3f4b0e7da3c02cad3662d2fde8f9",
+      "Server/Game_Server/Game_Server.vcxproj": "72fe122c9736a15c0f43a7e6f12f9bbdb60ee3e78797dcbf0132cfbb1b91daee",
+      "Server/Game_Server/Game_Server.vcxproj.filters": "62e3466dbf3db2d9c65022e7fca4323555774e7221398ed806614092bc2c45b3",
+      "Server/Game_Server/Resource.h": "260a90f8487851de61e834d975121f99006312e126514c9f3b46988e0310d9bb",
+      "Server/Lobby_Server/CClient.cpp": "f2eab9fb8e97d94a6d611d48d4d900c50c0a7a581cf894020efaa0d169b96f81",
+      "Server/Lobby_Server/Lobby_Server.vcxproj": "1be8603117030df20df5f5d156e9ba5a6be5201205a5461760fba9cc4d410952",
+      "Server/Lobby_Server/Lobby_Server.vcxproj.filters": "6649c9ee0d8ed430875cc2882842836955c3b65c5120e6e18d818059387c915c",
+      "Server/Lobby_Server/Resource.h": "d70601bd818d5cd44d4cdbac2f7b51a72a80645b199d45cfd2d485c0c31e0411",
+      "Server/ServerCore/ServerCore.vcxproj": "1a4a9faffe1ef182bd9fcf18e7796d41f2aa1b74f48decf9411d2dd498807d9b",
+      "Server/ServerCore/ServerCore.vcxproj.filters": "a3ac03b80d3bb24285711aa29383effd3cbae5c0adf09b119fc5242ca89b2d95",
+      "Server/ServerCore/include/ServerCore/Client.h": "b7a762712204a2fd2cf8240fba122d73538d061952ca5c99bbd8949ea87d4606",
+      "Server/ServerCore/include/ServerCore/Concurrency.h": "09304f206b0dc0e3645e0c5fed74cf19b41b8bfb4421b0b09eb3f7c3aa492601",
+      "Server/ServerCore/include/ServerCore/Diagnostics.h": "bf2cff2a33b1a27ab363c6db957cc01638b9a3fef89073f50895e7cb6925d8fe",
+      "Server/ServerCore/include/ServerCore/Net.h": "9f8767750e58dece390425187f060efa65bbe4e79158e9afdb30fffcb1b24d8a",
+      "Server/ServerCore/include/ServerCore/Resource.h": "820d5968eb4f0dc61780c18d93e2d377f69f37aa4d923a2a8b077a3254d1398c",
+      "Server/ServerCore/include/ServerCore/Session.h": "60849488619413e5e2aaf87c7594ea83112fc1524c2faf1f12b4598030e7ba0e",
+      "Server/ServerCore/src/Net.cpp": "8bf2fbcdf908d59fb79051396a003ea86605f11e411233439cf643b1b88e7ae3",
+      "Server/ServerCore/tests/CoreTests.cpp": "500c1c7b11a30df0efefeee89024ad20f5b869ec8314968bba223f3b91056594",
+      "Server/ServerCore/tests/ExtractionTests.cpp": "9efcb2aeba6cc11d85246fadf275ba556f699ef26df6c4a46eacb924b692b128",
+      "Server/ServerCore/tests/ResourceTests.cpp": "586c70d7977f3c1232bcf0e573c64baa78a8c44751bb8d366e024948e25c4f5d",
+      "Server/ServerCore/tests/ServerCore.Tests.vcxproj": "492a7205fd6b8f8e28f9be38bb8b73e0bd344a80d2f8aa20756864b8d90d1d14",
+      "Server/ServerCore/tests/ServerCore.Tests.vcxproj.filters": "e4eb586182827884772bfc28fb0eaf0c325369269cace6b20b46ded98cc83c46"
+    },
+    "agentEnvironment": {
+      "staticOnly": "PASS",
+      "compilationDatabaseSources": 224
+    },
+    "limitations": [
+      "LOCAL_TEST·DB 없는 실행",
+      "운영 DB·블록체인·실제 GUI 전투 전체·장시간 부하 미검증",
+      "기존 변환·미사용 변수 경고 유지",
+      "JobQueue 개선 전·후 성능 측정 미착수",
+      "커밋·push 미실행"
+    ],
+    "baselineHashNote": "최상위 sourceHashes와 followup.sourceHashes는 이전 단계 snapshot이다. resourceFollowup.sourceHashes가 Resource 공통화·참조 선언 정리 이후 snapshot이다."
+  }
+}

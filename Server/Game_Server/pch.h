@@ -40,16 +40,37 @@
 
 #include <boost/pfr.hpp>
 
+#include <ServerCore/Net.h>
+#include <ServerCore/Concurrency.h>
+#include <ServerCore/Diagnostics.h>
+#include <ServerCore/Resource.h>
+#include "enum.h"
+
+using IJob = wod::core::IJob;
+template <class Func> using Job = wod::core::Job<Func>;
+
+namespace wod_server
+{
+using wod::core::SockAddr;
+using wod::core::NetworkRuntime;
+using wod::core::LogPrinter;
+using IJobQueue = wod::core::JobQueue;
+using JobQueue = wod::core::JobQueue;
+using OverlapEx = wod::core::TaggedIoContext<OP_TYPE>;
+
+class Session;
+using CSessionPool = wod::core::SessionPool<Session>;
+using Resource = wod::core::SessionResources<OverlapEx, Session>;
+}
+
 #include "Global.h"
 
 #include "CommonConstants.h"
 #include "Interface.h"
 #include "tableEnum.h"
 #include "tabledata.h"
-#include "enum.h"
 
 #include "MathUtil.h"
-#include "LogUtil.h"
 #include "RandomUtil.h"
 #include "TimeUtil.h"
 #include "GameUtil.h"
@@ -58,10 +79,6 @@
 #include "NpcCsvMgr.h"
 #include "ItemCsvMgr.h"
 #include "SkillTimerDefine.h"
-#include "OverlapEx.h"
-
-#include "Job.h"
-#include "JobQueue.h"
 
 #include "GameObject.h"
 #include "CClient.h"

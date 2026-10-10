@@ -3,20 +3,15 @@
 #include "CNetworkMgr.h"
 #include "CPacketMgr.h"
 #include "CUserMgr.h"
-#include "SocketUtil.h"
-#include "Resource.h"
 
 namespace wod_server {
 
-	CClient::CClient()
+	CClient::CClient() : JobTarget(wod::core::JobBudget::Five)
 	{
 		m_packetSender = std::make_unique<CPacketSender>();
 		m_transform = new CTransform();
 		m_physics = new CPhysic();
 		m_viewList = new CViewList(this);
-
-		m_jobQueue = new JobQueue();
-
 
 		m_playerInfo.m_model = { 0, 1, 0, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 1,
 		1 , 0, 1 , 3 , 2 , 2 , 2 , 2 , 1 , 1 , 1 , 1 , 1 };
@@ -27,13 +22,12 @@ namespace wod_server {
 		delete m_transform;
 		delete m_physics;
 		delete m_viewList;
-		delete m_jobQueue;
 	}
 
 	void CClient::Initialize(const SOCKET& _socket)
 	{
 		m_packetSender->Initailize(_socket);
-        m_isDisconnected.store(false);
+        ResetDisconnected();
 		m_socketID = static_cast<int>(_socket);
 
 		m_stateLock.lock();
@@ -45,23 +39,37 @@ namespace wod_server {
 		GameUtil::RegisterClientToSection(m_sectionX, m_sectionZ, static_cast<int>(_socket));
 	}
 
-	void CClient::RecvPacket(int _recvBytes, OverlapEx* _overEx)
-	{
+    CClient::SessionRef CClient::GetTransportSession() const
+    {
+        return m_packetSender->GetSession();
+    }
 
-        auto session = m_packetSender->GetSession();
-        const auto generation = session->Generation();
-        std::vector<wod::core::FrameDecoder::Frame> frames;
-        if (!session->Decode(_recvBytes, *_overEx, frames)) { Disconnect(); return; }
-        for (auto& frame : frames) {
-            if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyClient)) { Disconnect(); return; }
-            m_jobQueue->PushJob([this, session, generation, frame = std::move(frame)]() mutable {
-                session->WithGeneration(generation, [&] { CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), this); });
+    bool CClient::ValidateFrame(std::span<const char> _frame) const
+    {
+        return wod::protocol::Validate(_frame, wod::protocol::Endpoint::LobbyClient);
+    }
+
+    bool CClient::DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation)
+    {
+        GetJobQueue()->PushJob([this, session = _session, generation = _generation, frame = std::move(_frame)]() mutable {
+            session->WithGeneration(generation, [&] {
+                CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET *>(frame.data()), this);
             });
-        }
-        session->Recv();
-        if (!frames.empty()) GPacketJobQueue->AddSessionQueue(this);
+        });
 
-	}
+        return true;
+    }
+
+    void CClient::OnReceiveComplete(size_t _frames)
+    {
+        if (_frames)
+            GPacketJobQueue->AddSessionQueue(this);
+    }
+
+    void CClient::OnJobQueueDisconnected()
+    {
+        CUserMgr::GetInstance()->ClientReset(GetSocketID());
+    }
 
 	void CClient::Move()
 	{
@@ -111,7 +119,7 @@ namespace wod_server {
 
 			m_socketID = -1;
             m_packetSender->GetSession()->Invalidate();
-            m_jobQueue->Clear();
+            GetJobQueue()->Clear();
 			m_packetSender->Reset();
 			m_transform->Reset();
 			m_id = -1;
@@ -138,18 +146,9 @@ namespace wod_server {
 
 		if (m_transform->GetDir() != 0)
 		{
-			m_jobQueue->PushJob([this, _isDummy]() {	ProcessUpdate(_isDummy); });
+			GetJobQueue()->PushJob([this, _isDummy]() {	ProcessUpdate(_isDummy); });
 			GPacketJobQueue->AddSessionQueue(this);
 		}
 	}
 
-	void CClient::Disconnect()
-	{
-        auto session = m_packetSender->GetSession();
-        session->Invalidate();
-        auto* over = Resource::GetOverObjectFromPool();
-        over->SetOP(OP_TYPE::OP_DISCONNECT);
-        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::m_overExPool.push(over);
-
-	}
 }

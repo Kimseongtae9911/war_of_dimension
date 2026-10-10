@@ -30,11 +30,31 @@
 constexpr int MAX_CLIENT = 3000;
 constexpr int CHANNEL_NUM = (MAX_CLIENT / LOBBY_MAX_CLIENT);
 
+#include <ServerCore/Net.h>
+#include <ServerCore/Concurrency.h>
+#include <ServerCore/Diagnostics.h>
+#include <ServerCore/Resource.h>
+#include "enum.h"
+
+using IJob = wod::core::IJob;
+template <class Func> using Job = wod::core::Job<Func>;
+
+namespace wod_server
+{
+using wod::core::SockAddr;
+using wod::core::NetworkRuntime;
+using wod::core::LogPrinter;
+using IJobQueue = wod::core::JobQueue;
+using JobQueue = wod::core::JobQueue;
+using OverlapEx = wod::core::TaggedIoContext<OP_TYPE>;
+using PacketJobQueue = wod::core::JobScheduler;
+using SocketResource = wod::core::SocketResource;
+using CSocketPool = wod::core::SocketPool;
+using Resource = wod::core::SocketResources<OverlapEx>;
+}
+
 #include "Global.h"
 
-#include "enum.h"
-#include "OverlapEx.h"
-#include "LogUtil.h"
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
 #include "../Game_Server/Interface.h"
@@ -43,8 +63,6 @@ constexpr int CHANNEL_NUM = (MAX_CLIENT / LOBBY_MAX_CLIENT);
 
 #include "CClient.h"
 #include "CUserMgr.h"
-#include "Job.h"
-#include "JobQueue.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")

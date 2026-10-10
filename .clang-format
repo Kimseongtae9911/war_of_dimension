@@ -1,6 +1,7 @@
 BasedOnStyle: Microsoft
 IndentWidth: 4
 UseTab: Never
+ReferenceAlignment: Left
 ColumnLimit: 250
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never

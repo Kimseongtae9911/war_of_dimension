@@ -9,6 +9,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameObjectTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractionTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CoreTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

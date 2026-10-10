@@ -164,20 +164,13 @@
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="CViewList.h" />
     <ClInclude Include="Global.h" />
-    <ClInclude Include="Job.h" />
-    <ClInclude Include="JobQueue.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="CServer.h" />
     <ClInclude Include="CUserMgr.h" />
     <ClInclude Include="enum.h" />
     <ClInclude Include="GameUtil.h" />
     <ClInclude Include="HashUtil.h" />
-    <ClInclude Include="LogUtil.h" />
-    <ClInclude Include="OverlapEx.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SHA256.h" />
-    <ClInclude Include="SockAddr.h" />
-    <ClInclude Include="SocketUtil.h" />
     <ClInclude Include="TCPSocket.h" />
     <ClInclude Include="Zone.h" />
     <ClInclude Include="ZoneManager.h" />
@@ -198,14 +191,12 @@
     <ClCompile Include="CTransform.cpp" />
     <ClCompile Include="CViewList.cpp" />
     <ClCompile Include="Global.cpp" />
-    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="CServer.cpp" />
     <ClCompile Include="CUserMgr.cpp" />
     <ClCompile Include="GameUtil.cpp" />
     <ClCompile Include="HashUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SHA256.cpp" />
-    <ClCompile Include="SocketUtil.cpp" />
     <ClCompile Include="Zone.cpp" />
     <ClCompile Include="ZoneManager.cpp" />
   </ItemGroup>
