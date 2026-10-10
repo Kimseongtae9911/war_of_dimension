@@ -10,9 +10,9 @@ namespace wod_server {
 
 	struct UserDataFromLobby
 	{
-		int id = -1;
-		int matchNum = -1;
-		ModelCustomize model;
+		int m_id = -1;
+		int m_matchNum = -1;
+		ModelCustomize m_model;
 	};
 
 	class CObjectMgr : public TSingleton<CObjectMgr>
@@ -21,24 +21,24 @@ namespace wod_server {
 		bool Initialize() override;
 		bool Release() override;
 
-		void MakeClientObject(int key) { m_clients.insert({ key, std::make_shared<CClient>() }); }
-		void DisconnectClient(int key);
-		bool InitializeClient(const SOCKET& socket, int socketID);
+		void MakeClientObject(int _key) { m_clients.insert({ _key, std::make_shared<CClient>() }); }
+		void DisconnectClient(int _key);
+		bool InitializeClient(const SOCKET& _socket, int _socketID);
 
-		void RegisterClientToServer(char name[NAME_SIZE], int id, int matchNum, const ModelCustomize& model);
-		void RemoveClientFromServer(int socketID);
-		void RemoveClientFromServerByID(int id);
+		void RegisterClientToServer(char _name[NAME_SIZE], int _id, int _matchNum, const ModelCustomize& _model);
+		void RemoveClientFromServer(int _socketID);
+		void RemoveClientFromServerByID(int _id);
 
-		int GetUserIDFromSocket(int socketID) { infolock[socketID].lock_shared(); int clid = m_idInfo[socketID]; infolock[socketID].unlock_shared(); return clid; }
-		const UserDataFromLobby GetUserData(const std::string& name);
+		int GetUserIDFromSocket(int _socketID) { m_infolock[_socketID].lock_shared(); int clid = m_idInfo[_socketID]; m_infolock[_socketID].unlock_shared(); return clid; }
+		const UserDataFromLobby GetUserData(const std::string& _name);
 
-		const std::shared_ptr<CClient> GetClient(int index) const { return m_clients.at(index); }
-		const std::shared_ptr<CNpc> GetNpc(int matchNum, int index) const { return m_npcs[matchNum][index]; }
+		const std::shared_ptr<CClient> GetClient(int _index) const { return m_clients.at(_index); }
+		const std::shared_ptr<CNpc> GetNpc(int _matchNum, int _index) const { return m_npcs[_matchNum][_index]; }
 
 	public:
-		std::shared_mutex namelock;
-		std::array<std::shared_mutex, MAX_SOCKET> infolock;
-		
+		std::shared_mutex m_namelock;
+		std::array<std::shared_mutex, MAX_SOCKET> m_infolock;
+
 	private:
 		concurrency::concurrent_unordered_map<int, std::shared_ptr<CClient>> m_clients;
 		std::array<std::array<std::shared_ptr<CNpc>, MAX_MINION + MONSTER_NUM>, MAX_MATCH> m_npcs;

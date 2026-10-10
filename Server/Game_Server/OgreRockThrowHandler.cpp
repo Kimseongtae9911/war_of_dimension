@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    OgreRockThrowHandler::OgreRockThrowHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
-    {        
+    OgreRockThrowHandler::OgreRockThrowHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
+    {
         m_type = EPlayerSkill::OgreRockThrow;
         SetSkillInfo();
     }
 
-    CSkillHandler* OgreRockThrowHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreRockThrowHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreRockThrowHandler(client);
-    }  
+        return new OgreRockThrowHandler(_client);
+    }
 }

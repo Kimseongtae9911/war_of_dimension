@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		ProReleaseHandler() {}
-		ProReleaseHandler(std::shared_ptr<CClient> client);
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		ProReleaseHandler(std::shared_ptr<CClient> _client);
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

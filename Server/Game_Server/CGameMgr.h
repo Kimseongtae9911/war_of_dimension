@@ -23,37 +23,37 @@
 
 namespace wod_server {
 	class CTowerAttack;
-	class CClient; 
+	class CClient;
 	class CTower;
 	class CNexus;
 
 	struct GameData
 	{
-		float readyTime = 120.f;
-		float gameTime = 0.f;
-		std::chrono::system_clock::time_point lastTime;
+		float m_readyTime = 120.f;
+		float m_gameTime = 0.f;
+		std::chrono::system_clock::time_point m_lastTime;
 
-		bool nexusAttackPossible = false;
+		bool m_nexusAttackPossible = false;
 
 		//Teleport, Magnetic Fence
-		bool teleport = false;
-		bool fence = true;
-		int gameOver = -1;
+		bool m_teleport = false;
+		bool m_fence = true;
+		int m_gameOver = -1;
 
 		void Reset() {
-			readyTime = 120.0f;
-			gameTime = 0.f;
-			nexusAttackPossible = false;
-			teleport = false;
-			fence = true;
-			gameOver = -1;
+			m_readyTime = 120.0f;
+			m_gameTime = 0.f;
+			m_nexusAttackPossible = false;
+			m_teleport = false;
+			m_fence = true;
+			m_gameOver = -1;
 		}
 	};
 
 	struct ShopInfo
 	{
-		int level = 0;
-		int currentPrice = 10;
+		int m_level = 0;
+		int m_currentPrice = 10;
 	};
 
 	class CGameMgr : public TSingleton<CGameMgr>
@@ -61,78 +61,78 @@ namespace wod_server {
 	public:
 		bool Initialize() override;
 		bool Release() override;
-		void Reset(int match);
+		void Reset(int _match);
 
-		bool UpdateReadyData(int match, float elapsedTime);
-		float UpdateGameData(int match);
-		int GetHeroRespawnTime(int match);
+		bool UpdateReadyData(int _match, float _elapsedTime);
+		float UpdateGameData(int _match);
+		int GetHeroRespawnTime(int _match);
 
-		void SkillAutoSelect(int match);
-		bool CheckCoolTime(std::shared_ptr<CClient> client, char type);
+		void SkillAutoSelect(int _match);
+		bool CheckCoolTime(std::shared_ptr<CClient> _client, char _type);
 
-		float GetGameTime(int match) { return m_gameData[match]->gameTime; }
-		std::chrono::system_clock::time_point GetLastTime(int match) { return  m_gameData[match]->lastTime; }
-		void SetLastTime(int match) { m_gameData[match]->lastTime = TimeUtil::CurTime(); }
+		float GetGameTime(int _match) { return m_gameData[_match]->m_gameTime; }
+		std::chrono::system_clock::time_point GetLastTime(int _match) { return  m_gameData[_match]->m_lastTime; }
+		void SetLastTime(int _match) { m_gameData[_match]->m_lastTime = TimeUtil::CurTime(); }
 
-		void SetTeleport(int match, bool tp) { m_gameData[match]->teleport = tp; }
-		bool GetTeleport(int match) const { return m_gameData[match]->teleport; }
-		void SetFence(int match, bool fence) { m_gameData[match]->fence = fence; }
-		bool GetFence(int match) const { return m_gameData[match]->fence; }
-		void SetNexusAttackPossible(int match, bool possible) { m_gameData[match]->nexusAttackPossible = possible; }
-		bool GetNexusAttackPossible(int match) { return m_gameData[match]->nexusAttackPossible; }
-		void SetPathNum(int match, int path) { m_pathNums[match] = path; }
-		int GetPathNum(int match) const { return m_pathNums[match]; }
+		void SetTeleport(int _match, bool _tp) { m_gameData[_match]->m_teleport = _tp; }
+		bool GetTeleport(int _match) const { return m_gameData[_match]->m_teleport; }
+		void SetFence(int _match, bool _fence) { m_gameData[_match]->m_fence = _fence; }
+		bool GetFence(int _match) const { return m_gameData[_match]->m_fence; }
+		void SetNexusAttackPossible(int _match, bool _possible) { m_gameData[_match]->m_nexusAttackPossible = _possible; }
+		bool GetNexusAttackPossible(int _match) { return m_gameData[_match]->m_nexusAttackPossible; }
+		void SetPathNum(int _match, int _path) { m_pathNums[_match] = _path; }
+		int GetPathNum(int _match) const { return m_pathNums[_match]; }
 
-		int IsGameOver(int match) const { return m_gameData[match]->gameOver; }
-		void GameOver(int match, bool heroWin) { m_gameData[match]->gameOver = static_cast<int>(heroWin); }
+		int IsGameOver(int _match) const { return m_gameData[_match]->m_gameOver; }
+		void GameOver(int _match, bool _heroWin) { m_gameData[_match]->m_gameOver = static_cast<int>(_heroWin); }
 
-		void ActiveTower(bool active, int match, int index);
-		void TowerAttack(int match, int targetID, const vec3& pos);
-		CTower* GetTower(int match, int index) { return m_towers[match][index]; }
-		CNexus* GetNexus(int match) const { return m_nexus[match]; }
+		void ActiveTower(bool _active, int _match, int _index);
+		void TowerAttack(int _match, int _targetID, const vec3& _pos);
+		CTower* GetTower(int _match, int _index) { return m_towers[_match][_index]; }
+		CNexus* GetNexus(int _match) const { return m_nexus[_match]; }
 
-		void BuyStat(int match, int index) { m_shopStatLevel[match][index].level++; }
-		int GetStatLevel(int match, int index) { return m_shopStatLevel[match][index].level; }
-		void SetCurrentPrice(int match, int index, int price) { m_shopStatLevel[match][index].currentPrice = price; }
-		int GetCurrentPrice(int match, int index) const { return m_shopStatLevel[match][index].currentPrice; }
+		void BuyStat(int _match, int _index) { m_shopStatLevel[_match][_index].m_level++; }
+		int GetStatLevel(int _match, int _index) { return m_shopStatLevel[_match][_index].m_level; }
+		void SetCurrentPrice(int _match, int _index, int _price) { m_shopStatLevel[_match][_index].m_currentPrice = _price; }
+		int GetCurrentPrice(int _match, int _index) const { return m_shopStatLevel[_match][_index].m_currentPrice; }
 
 		//Wizard Skill
-		int WizardAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int MagicMissle(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int MagicEye(int matchNum, const vec3& pos, const vec3& look);
-		void MagicEye(int matchNum, int id);
-		int EnergyBall(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int BigBang(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
+		int WizardAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int MagicMissle(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int MagicEye(int _matchNum, const vec3& _pos, const vec3& _look);
+		void MagicEye(int _matchNum, int _id);
+		int EnergyBall(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int BigBang(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
 
 		//Sworman Skill
-		int AuraBlade(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int JudgeMentSword(int matchNum, const vec3& pos, int power, int critical, int target, int clientID);
-		int ProtectedArea(int matchNum, const vec3& pos, const int power, int clientID);
-		void ProtectedArea(int matchNum, int id);
+		int AuraBlade(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int JudgeMentSword(int _matchNum, const vec3& _pos, int _power, int _critical, int _target, int _clientID);
+		int ProtectedArea(int _matchNum, const vec3& _pos, const int _power, int _clientID);
+		void ProtectedArea(int _matchNum, int _id);
 
 		//Archer Skill
-		int ArcherAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int StickyArrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int PhoenixArrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int PenetraitingShot(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int ArcherMultipleShot(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
+		int ArcherAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int StickyArrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int PhoenixArrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int PenetraitingShot(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int ArcherMultipleShot(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
 
 		//Fighter Skill
-		int FireBall(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
+		int FireBall(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
 
 		//Ogre Skill
-		int RockThrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int DimensionCrush(int matchNum, const vec3& pos, int power, int critical, int clientID);
-		void DimensionCrush(int matchNum, int id);
-		void OgreCharging(int matchNum, int id);
+		int RockThrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int DimensionCrush(int _matchNum, const vec3& _pos, int _power, int _critical, int _clientID);
+		void DimensionCrush(int _matchNum, int _id);
+		void OgreCharging(int _matchNum, int _id);
 
 		//Programmer Skill
-		int ProAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		int ReturnZero(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID);
-		void WhileTrue(bool active, int matchNum) { m_proWhileTrue[matchNum] = active; }
-		bool GetWhileTrue(int matchNum) { return m_proWhileTrue[matchNum]; }
-		int HelloWorld(int matchNum, const vec3& pos, int clientID, const std::vector<int>& ids);
-		void HelloWorld(int matchNum, int id);
+		int ProAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		int ReturnZero(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID);
+		void WhileTrue(bool _active, int _matchNum) { m_proWhileTrue[_matchNum] = _active; }
+		bool GetWhileTrue(int _matchNum) { return m_proWhileTrue[_matchNum]; }
+		int HelloWorld(int _matchNum, const vec3& _pos, int _clientID, const std::vector<int>& _ids);
+		void HelloWorld(int _matchNum, int _id);
 
 	private:
 		//Time, Teleport, Fence
@@ -140,7 +140,7 @@ namespace wod_server {
 
 		//Path
 		std::array<int, MAX_MATCH> m_pathNums;
-		
+
 		//Tower
 		std::array<std::array<CTower*, PATH_NUM>, MAX_MATCH> m_towers;
 		std::array<std::array<CTowerAttack*, PATH_NUM>, MAX_MATCH> m_towerAttack;
@@ -168,7 +168,7 @@ namespace wod_server {
 		std::array<std::array<CFireBall*, MAX_SKILL_OBJECT>, MAX_MATCH> m_figtherFireBall;
 
 		std::array<std::array<CRockThrow*, MAX_SKILL_OBJECT>, MAX_MATCH> m_ogreRockThrow;
-		std::array<std::array<CDimensionCrush*, MAX_SKILL_OBJECT>, MAX_MATCH> m_ogreDimensionCrush; 
+		std::array<std::array<CDimensionCrush*, MAX_SKILL_OBJECT>, MAX_MATCH> m_ogreDimensionCrush;
 		std::array<CCharging*, MAX_MATCH> m_ogreCharging;
 
 		std::array<std::array<CProAttack*, MAX_SKILL_OBJECT>, MAX_MATCH> m_proAttacks;

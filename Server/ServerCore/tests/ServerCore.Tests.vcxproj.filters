@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{A231E0C3-E488-5455-9F6F-EB76A92D34DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Development">
+      <UniqueIdentifier>{F7C95220-CC91-5889-B883-B7912A7C5DE9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CoreTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocolAbi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../.clang-format">
+      <Filter>Development</Filter>
+    </None>
+  </ItemGroup>
+</Project>

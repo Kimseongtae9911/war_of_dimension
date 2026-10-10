@@ -7,7 +7,7 @@ namespace wod_server {
 	int CSkillHandler::SkillDamage()
 	{
 		CStat stat = m_client->GetStatus()->GetStat();
-		return static_cast<int>(stat.strength * m_strengthRatio + stat.magic * m_magicRatio);
+		return static_cast<int>(stat.m_strength * m_strengthRatio + stat.m_magic * m_magicRatio);
 	}
 
 	void CSkillHandler::SetSkillInfo()
@@ -18,14 +18,14 @@ namespace wod_server {
 			LogPrinter::PrintMsg("SkillCsv is null");
 			return;
 		}
-		m_strengthRatio = skillCsv->strengthRatio;
-		m_castingTime = skillCsv->castingTime;
-		m_startPosOffset = skillCsv->posOffset;
+		m_strengthRatio = skillCsv->m_strengthRatio;
+		m_castingTime = skillCsv->m_castingTime;
+		m_startPosOffset = skillCsv->m_posOffset;
 	}
 
 	void CAttackSkillHandler::Handle()
 	{
 		network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(m_client->GetID(), SkillUseTime(), m_type, SkillStartPos(), SkillDamage(), 0, {}));
 	}
-	
+
 }

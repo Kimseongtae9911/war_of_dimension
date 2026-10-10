@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    FighterDodgeHandler::FighterDodgeHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    FighterDodgeHandler::FighterDodgeHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::FighterDodge;
     }
 
-    CSkillHandler* FighterDodgeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterDodgeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterDodgeHandler(client);
+        return new FighterDodgeHandler(_client);
     }
 
     void FighterDodgeHandler::Handle()

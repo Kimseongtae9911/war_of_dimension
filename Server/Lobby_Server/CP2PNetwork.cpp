@@ -14,30 +14,30 @@ namespace wod_server {
 	{
 	}
 
-	void CP2PNetwork::RegisterPortNum(const std::string& ip, int portNum)
+	void CP2PNetwork::RegisterPortNum(const std::string& _ip, int _portNum)
 	{
 		m_peerInfoLock.lock();
-		if (!m_peerInfos.contains(ip)) {
+		if (!m_peerInfos.contains(_ip)) {
 			LogPrinter::PrintMsg("No Peer Info");
 		}
 		else {
-			m_peerInfos[ip] = portNum;
+			m_peerInfos[_ip] = _portNum;
 		}
 		m_peerInfoLock.unlock();
 	}
 
-	void CP2PNetwork::RegisterPeer(int id, const std::string& clientAddress)
+	void CP2PNetwork::RegisterPeer(int _id, const std::string& _clientAddress)
 	{
 		m_peerInfoLock.lock();
-		m_peerInfos.insert({ std::string(clientAddress), 0 });
+		m_peerInfos.insert({ std::string(_clientAddress), 0 });
 		m_peerInfoLock.unlock();
-		CUserMgr::GetInstance()->GetClient(id)->SetIP(std::string(clientAddress));
+		CUserMgr::GetInstance()->GetClient(_id)->SetIP(std::string(_clientAddress));
 	}
 
-	void CP2PNetwork::InsertTransaction(const TransactionData& transactionData)
+	void CP2PNetwork::InsertTransaction(const TransactionData& _transactionData)
 	{
 		m_transactionLock.lock();
-		m_transactions.push_back(transactionData);
+		m_transactions.push_back(_transactionData);
 
 		if (m_transactions.size() == 7) {
 			//int validatorID = SelectValidator();
@@ -68,32 +68,32 @@ namespace wod_server {
 		m_transactionLock.unlock();
 	}
 
-	void CP2PNetwork::SetValidatorIDs(std::vector<std::pair<std::string, int>> validatorIDs)
+	void CP2PNetwork::SetValidatorIDs(std::vector<std::pair<std::string, int>> _validatorIDs)
 	{
-		if (validatorIDs.empty())
+		if (_validatorIDs.empty())
 			return;
 
 		m_validatorIDLock.lock();
 		m_validatorIDs.clear();
-		m_validatorIDs = std::move(validatorIDs);
+		m_validatorIDs = std::move(_validatorIDs);
 		m_validatorIDLock.unlock();
 	}
 
 	int CP2PNetwork::SelectValidator()
 	{
 		SetValidatorIDs(network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetValidatorIDs());
-		
+
 		std::unordered_map<int, std::pair<std::string, int>> onlineValidators;
 		int totalStakedTokens = 0;
 
 		for (const auto& [key, client] : CUserMgr::GetInstance()->GetAllClient()) {
-			client->stateLock.lock_shared();
+			client->m_stateLock.lock_shared();
 			if (client->GetState() != CL_STATE::ST_LOBBY) {
-				client->stateLock.unlock_shared();
+				client->m_stateLock.unlock_shared();
 				continue;
 			}
 			else {
-				client->stateLock.unlock_shared();
+				client->m_stateLock.unlock_shared();
 
 				for (const auto& validatorInfo : m_validatorIDs) {
 					if (validatorInfo.first == client->GetName()) {

@@ -8,10 +8,10 @@ namespace wod_server {
 		CHelloWorld();
 		~CHelloWorld() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
-		void SetMatchNum(int matchNum) { m_matchNum = matchNum; }
-		void SetArea(const std::vector<int>& ids);
+		void SetMatchNum(int _matchNum) { m_matchNum = _matchNum; }
+		void SetArea(const std::vector<int>& _ids);
 
 	private:
 		int m_matchNum = -1;

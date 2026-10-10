@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CBlock.h"
 
-CBlock::CBlock(const std::vector<TransactionData>& transactions, int version, const std::string& prevHash)
+CBlock::CBlock(const std::vector<TransactionData>& _transactions, int _version, const std::string& _prevHash)
 {
 	std::time_t t = time(nullptr);
 	std::tm time;
@@ -11,27 +11,27 @@ CBlock::CBlock(const std::vector<TransactionData>& transactions, int version, co
 	std::puts(buffer);
 
 	m_timeStamp = std::string(buffer);
-	m_version = version;
-	m_prevHash = prevHash;
+	m_version = _version;
+	m_prevHash = _prevHash;
 	m_validatorID = LOBBY_PORT;
 	for (int i = 0; i < 7; ++i) {
-		std::string tx = std::string(transactions[i].name, 10) + std::to_string(transactions[i].token) + std::string(transactions[i].time, 20);
+		std::string tx = std::string(_transactions[i].name, 10) + std::to_string(_transactions[i].token) + std::string(_transactions[i].time, 20);
 		m_transactions.push_back(SHA256::Encrpyt(tx));
 	}
 	CalculateMerkleRoot();
 	CalculateHash();
 }
 
-CBlock::CBlock(const std::string& hash, int version, const std::string& timeStamp, const std::string& prevHash, const std::string& merkleRoot, int validatorID, std::vector<std::string>& transactions)
+CBlock::CBlock(const std::string& _hash, int _version, const std::string& _timeStamp, const std::string& _prevHash, const std::string& _merkleRoot, int _validatorID, std::vector<std::string>& _transactions)
 {
-	m_hash = hash;
-	m_version = version;
-	m_timeStamp = timeStamp;
-	m_prevHash = prevHash;
-	m_merkleRoot = merkleRoot;
-	m_validatorID = validatorID;
+	m_hash = _hash;
+	m_version = _version;
+	m_timeStamp = _timeStamp;
+	m_prevHash = _prevHash;
+	m_merkleRoot = _merkleRoot;
+	m_validatorID = _validatorID;
 
-	m_transactions = std::move(transactions);
+	m_transactions = std::move(_transactions);
 }
 
 void CBlock::CreateGenesisBlock()
@@ -51,31 +51,31 @@ void CBlock::CreateGenesisBlock()
 	CalculateHash();
 }
 
-bool CBlock::CreateBlock(const std::string& blockData)
+bool CBlock::CreateBlock(const std::string& _blockData)
 {
-	if (sizeof(blockData) != BLOCK_SIZE) {
+	if (sizeof(_blockData) != BLOCK_SIZE) {
 		return false;
 	}
 
-	m_hash = blockData.substr(0, SHA256::HASHSIZE);
-	m_version = *reinterpret_cast<const int*>(blockData.data() + SHA256::HASHSIZE);
-	m_timeStamp = blockData.substr(36, 20);
-	m_prevHash = blockData.substr(56, SHA256::HASHSIZE);
-	m_merkleRoot = blockData.substr(88, SHA256::HASHSIZE);
-	m_validatorID = *reinterpret_cast<const int*>(blockData.data() + 120);
+	m_hash = _blockData.substr(0, SHA256::m_HASHSIZE);
+	m_version = *reinterpret_cast<const int*>(_blockData.data() + SHA256::m_HASHSIZE);
+	m_timeStamp = _blockData.substr(36, 20);
+	m_prevHash = _blockData.substr(56, SHA256::m_HASHSIZE);
+	m_merkleRoot = _blockData.substr(88, SHA256::m_HASHSIZE);
+	m_validatorID = *reinterpret_cast<const int*>(_blockData.data() + 120);
 
 	if (!m_transactions.empty())
 		m_transactions.clear();
 
 	for (int i = 0; i < 7; ++i) {
-		std::string tx = blockData.substr(124 + i * SHA256::HASHSIZE, SHA256::HASHSIZE);
+		std::string tx = _blockData.substr(124 + i * SHA256::m_HASHSIZE, SHA256::m_HASHSIZE);
 		m_transactions.push_back(tx);
 	}
 
 	return true;
 }
 
-bool CBlock::CheckBlockValidity(const std::string& prevBlockHash, int validatorID)
+bool CBlock::CheckBlockValidity(const std::string& _prevBlockHash, int _validatorID)
 {
 	//Calculate Hash
 	if (m_hash != SHA256::Encrpyt(std::to_string(m_version) + m_timeStamp + m_prevHash + m_merkleRoot + std::to_string(m_validatorID))) {
@@ -83,7 +83,7 @@ bool CBlock::CheckBlockValidity(const std::string& prevBlockHash, int validatorI
 	}
 
 	//Check Previous Block
-	if (m_prevHash != prevBlockHash)
+	if (m_prevHash != _prevBlockHash)
 		return false;
 
 	//Check Merkle Root
@@ -109,7 +109,7 @@ bool CBlock::CheckBlockValidity(const std::string& prevBlockHash, int validatorI
 	}
 
 	//Check Validator ID
-	if (m_validatorID != validatorID)
+	if (m_validatorID != _validatorID)
 		return false;
 
 	return true;

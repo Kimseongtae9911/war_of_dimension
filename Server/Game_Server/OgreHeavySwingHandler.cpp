@@ -3,14 +3,14 @@
 
 namespace wod_server {
 
-    OgreHeavySwingHandler::OgreHeavySwingHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    OgreHeavySwingHandler::OgreHeavySwingHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::OgreHeavySwing;
         SetSkillInfo();
     }
 
-    CSkillHandler* OgreHeavySwingHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreHeavySwingHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreHeavySwingHandler(client);
+        return new OgreHeavySwingHandler(_client);
     }
 }

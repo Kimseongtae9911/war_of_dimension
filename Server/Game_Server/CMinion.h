@@ -8,10 +8,10 @@ namespace wod_server {
 		~CMinion();
 
 		void Initialize(uint8_t _posIndex) override;
-		void SetPath(int path) { m_path = path; m_pathCount = 0; }
+		void SetPath(int _path) { m_path = _path; m_pathCount = 0; }
 
-		bool Update(float elapsedTime) override;
-		void Move(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
+		void Move(float _elapsedTime) override;
 		void Reset() override;
 		void Respawn(int _currTime) override;
 		void Heal() override {}
@@ -20,7 +20,7 @@ namespace wod_server {
 
 	private:
 		void ReturnToPath() override;
-		void MoveToStructure(float elapsedTime);
+		void MoveToStructure(float _elapsedTime);
 
 	private:
 		int m_path;

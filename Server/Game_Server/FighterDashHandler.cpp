@@ -5,23 +5,23 @@
 #include "GameUtil.h"
 
 namespace wod_server {
-    CSkillHandler* FighterDashHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterDashHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterDashHandler(client);
+        return new FighterDashHandler(_client);
     }
 
     void FighterDashHandler::Handle()
     {
 		auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::FighterDash);
 		vec3 pos = m_client->GetPos();
-		vec3 shift = m_client->GetLook() * skillCsv->skillRadius;
+		vec3 shift = m_client->GetLook() * skillCsv->m_skillRadius;
 
 		while (true) {
 			float height;
 			int curNode;
 			if (GameUtil::MapCollision(pos + shift, height, curNode, true)) {
 				pos += shift;
-				pos.y = height;
+				pos.m_y = height;
 				m_client->SetPos(pos);
 				m_client->SetCurNode(curNode);
 

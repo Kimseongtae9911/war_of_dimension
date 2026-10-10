@@ -2,12 +2,12 @@
 #include "CsvLoader.h"
 
 namespace wod_server {
-    void CsvLoader::Load(const std::string& filename)
+    void CsvLoader::Load(const std::string& _filename)
     {
-        const auto& csvData = ReadCsv(filename);
+        const auto& csvData = ReadCsv(_filename);
 
         if (csvData.empty()) {
-            LogPrinter::PrintMsg("Failed To Load " + filename);
+            LogPrinter::PrintMsg("Failed To Load " + _filename);
             exit(0);
         }
 
@@ -15,15 +15,15 @@ namespace wod_server {
         LoadData(csvData, headerMap);
     }
 
-    void CsvLoader::LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader)
+    void CsvLoader::LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader)
     {
     }
 
-    std::vector<std::vector<std::string>> CsvLoader::ReadCsv(const std::string& filename)
+    std::vector<std::vector<std::string>> CsvLoader::ReadCsv(const std::string& _filename)
     {
-        std::ifstream file(filename);
+        std::ifstream file(_filename);
         if (!file.is_open()) {
-            LogPrinter::PrintMsg("Failed To Open " + filename);
+            LogPrinter::PrintMsg("Failed To Open " + _filename);
             exit(0);
         }
 
@@ -43,11 +43,11 @@ namespace wod_server {
         return data;
     }
 
-    std::unordered_map<std::string, int> CsvLoader::CreateHeaderMap(const std::vector<std::string>& csvHeader)
+    std::unordered_map<std::string, int> CsvLoader::CreateHeaderMap(const std::vector<std::string>& _csvHeader)
     {
         std::unordered_map<std::string, int> headerMap;
-        for (auto i = 0; i < csvHeader.size(); ++i) {
-            std::string cleanedHeader = csvHeader[i];
+        for (auto i = 0; i < _csvHeader.size(); ++i) {
+            std::string cleanedHeader = _csvHeader[i];
 
             size_t openParenPos;
             while ((openParenPos = cleanedHeader.find('(')) != std::string::npos) {

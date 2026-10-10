@@ -8,8 +8,8 @@ namespace wod_server {
 		~CTransform() {}
 
 		void Reset();
-		void Move(const vec3& shift, float height);
-		bool CheckDistance(const vec3& pos);
+		void Move(const vec3& _shift, float _height);
+		bool CheckDistance(const vec3& _pos);
 
 		const vec3& GetLook() { return m_look; }
 		const vec3& GetUp() { return m_up; }
@@ -17,11 +17,11 @@ namespace wod_server {
 		char GetDir() const { return m_dir; }
 		const vec3& GetPos() const { return m_pos; }
 
-		void SetDir(char dir) { m_dir = dir; }
-		void SetLook(const vec3& look) { m_look = look; }
-		void SetRight(const vec3& right) { m_right = right; }
-		void SetPos(const float x, const float y, const float z) { m_pos.x = x, m_pos.y = y, m_pos.z = z; }
-		void SetPos(const vec3& pos) { m_pos = pos; }
+		void SetDir(char _dir) { m_dir = _dir; }
+		void SetLook(const vec3& _look) { m_look = _look; }
+		void SetRight(const vec3& _right) { m_right = _right; }
+		void SetPos(const float _x, const float _y, const float _z) { m_pos.m_x = _x, m_pos.m_y = _y, m_pos.m_z = _z; }
+		void SetPos(const vec3& _pos) { m_pos = _pos; }
 
 	private:
 		char m_dir = 0;

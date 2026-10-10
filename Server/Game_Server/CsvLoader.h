@@ -10,58 +10,58 @@ namespace wod_server {
 		CsvLoader() {}
 		~CsvLoader() {}
 
-		void Load(const std::string& filename);
-		virtual void LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader);
+		void Load(const std::string& _filename);
+		virtual void LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader);
 
 	protected:
-		TCsvData ReadCsv(const std::string& filename);
-		TCsvHeaderMap CreateHeaderMap(const std::vector<std::string>& csvHeader);
+		TCsvData ReadCsv(const std::string& _filename);
+		TCsvHeaderMap CreateHeaderMap(const std::vector<std::string>& _csvHeader);
 
 		template<class T>
-		void AssignValue(T& field, const std::string& value);
+		void AssignValue(T& _field, const std::string& _value);
 
 		template<class T>
-		T CreateStructFromCSV(const std::vector<std::string>& row, const TCsvHeaderMap& headerMap);
+		T CreateStructFromCSV(const std::vector<std::string>& _row, const TCsvHeaderMap& _headerMap);
 	};
 
 	template<class T>
-	inline void CsvLoader::AssignValue(T& field, const std::string& value)
+	inline void CsvLoader::AssignValue(T& _field, const std::string& _value)
 	{
 		try {
 			if constexpr (std::is_same_v<T, int> || std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>) {
-				field = std::stoi(value);
+				_field = std::stoi(_value);
 			}
 			else if constexpr (std::is_same_v<T, double>) {
-				field = std::stod(value);
+				_field = std::stod(_value);
 			}
 			else if constexpr (std::is_same_v<T, float>) {
-				field = std::stof(value);
+				_field = std::stof(_value);
 			}
 			else if constexpr (std::is_same_v<T, std::string>) {
-				field = value;
+				_field = _value;
 			}
 			else if constexpr (std::is_same_v<T, EPlayerSkill>) {
-				field = StringToEnum<EPlayerSkill>(value);
+				_field = StringToEnum<EPlayerSkill>(_value);
 			}
 			else if constexpr (std::is_same_v<T, ENpcType>) {
-				field = StringToEnum<ENpcType>(value);
+				_field = StringToEnum<ENpcType>(_value);
 			}
 		}
 		catch (const std::exception& ex) {
-			LogPrinter::PrintMsg("Wrong Value: " + value);
+			LogPrinter::PrintMsg("Wrong Value: " + _value);
 		}
 	}
 
 	template<class T>
-	inline T CsvLoader::CreateStructFromCSV(const std::vector<std::string>& row, const TCsvHeaderMap& headerMap)
+	inline T CsvLoader::CreateStructFromCSV(const std::vector<std::string>& _row, const TCsvHeaderMap& _headerMap)
 	{
 		T dataStruct;
 		constexpr auto fieldNames = boost::pfr::names_as_array<T>();
-		boost::pfr::for_each_field(dataStruct, [&row, &headerMap, &fieldNames, this](auto& field, size_t index) {
-			std::string fieldName(fieldNames[index]);
-			auto it = headerMap.find(fieldName);
-			if (it != headerMap.end()) {
-				AssignValue(field, row[it->second]);
+		boost::pfr::for_each_field(dataStruct, [&_row, &_headerMap, &fieldNames, this](auto& _field, size_t _index) {
+			std::string fieldName(fieldNames[_index]);
+			auto it = _headerMap.find(fieldName);
+			if (it != _headerMap.end()) {
+				AssignValue(_field, _row[it->second]);
 			}
 			});
 		return dataStruct;

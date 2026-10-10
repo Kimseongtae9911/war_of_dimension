@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    FighterWildAttackHandler::FighterWildAttackHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
-    {        
+    FighterWildAttackHandler::FighterWildAttackHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
+    {
         m_type = EPlayerSkill::FighterWildAttack;
         SetSkillInfo();
     }
 
-    CSkillHandler* FighterWildAttackHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterWildAttackHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterWildAttackHandler(client);
+        return new FighterWildAttackHandler(_client);
     }
 
     void FighterWildAttackHandler::Handle()

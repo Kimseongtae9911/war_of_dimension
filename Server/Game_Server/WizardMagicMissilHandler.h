@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		WizardMagicMissilHandler() {}
-		WizardMagicMissilHandler(std::shared_ptr<CClient> client);
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		WizardMagicMissilHandler(std::shared_ptr<CClient> _client);
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

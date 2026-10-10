@@ -8,7 +8,7 @@ namespace wod_server {
 		CMagicEye();
 		~CMagicEye() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 		void ResetCheckTime() { m_lastCheckTime = TimeUtil::CurTime(); }
 
 	private:

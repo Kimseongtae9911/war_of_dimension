@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    WizardMagicEyeHandler::WizardMagicEyeHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    WizardMagicEyeHandler::WizardMagicEyeHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::WizardMagicEye;
         SetSkillInfo();
     }
 
-    CSkillHandler* WizardMagicEyeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* WizardMagicEyeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new WizardMagicEyeHandler(client);
+        return new WizardMagicEyeHandler(_client);
     }
 }

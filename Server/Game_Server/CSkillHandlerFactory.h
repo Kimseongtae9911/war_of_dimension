@@ -81,7 +81,7 @@
 #include "OgreRockThrowHandler.h"
 
 namespace wod_server {
-	
+
 	class CSkillHandler;
 	class CClient;
 
@@ -91,9 +91,9 @@ namespace wod_server {
 		bool Initialize() override;
 		bool Release() override;
 
-		void Handle(int skillNum, std::shared_ptr<CClient> client);
+		void Handle(int _skillNum, std::shared_ptr<CClient> _client);
 
-		void RegisterHandler(int skillNum, CSkillHandler* handler) { m_handlerPool[skillNum].push(handler); }
+		void RegisterHandler(int _skillNum, CSkillHandler* _handler) { m_handlerPool[_skillNum].push(_handler); }
 
 	private:
 		std::unordered_map<int, CSkillHandler*> m_handlers;

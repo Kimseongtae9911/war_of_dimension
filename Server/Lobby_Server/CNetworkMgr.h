@@ -12,13 +12,13 @@ namespace wod_server {
 
 	enum class EVENT_TYPE { None };
 	struct TIMER_EVENT {
-		int objID = -1;
-		std::chrono::system_clock::time_point wakeUpTime = {};
-		EVENT_TYPE eventID = EVENT_TYPE::None;
-		int targetID = -1;
-		constexpr bool operator < (const TIMER_EVENT& L) const
+		int m_objID = -1;
+		std::chrono::system_clock::time_point m_wakeUpTime = {};
+		EVENT_TYPE m_eventID = EVENT_TYPE::None;
+		int m_targetID = -1;
+		constexpr bool operator < (const TIMER_EVENT& _l) const
 		{
-			return (wakeUpTime > L.wakeUpTime);
+			return (m_wakeUpTime > _l.m_wakeUpTime);
 		}
 	};
 
@@ -39,21 +39,21 @@ namespace wod_server {
 		CDataBaseThread* GetDataBaseThread() const { return m_dataBaseThread; }
 		CP2PNetwork* GetP2PNetwork() const { return m_p2pNetwork; }
 
-		void RegisterEvent(const TIMER_EVENT& ev) { m_timerQueue.push(ev); }		
+		void RegisterEvent(const TIMER_EVENT& _ev) { m_timerQueue.push(_ev); }
 
 		const std::shared_ptr<Session> GetGameServer() const { return m_gameServer; }
 
-		std::string gameIP;
+		std::string m_gameIP;
 
 	private:
 		//IOCP Func
-		void ServerConnect(int id, int bytes, OverlapEx* over_ex);
-		void Accept(int id, int bytes, OverlapEx* over_ex);
-		void Recv(int id, int bytes, OverlapEx* over_ex);
-		void Send(int id, int bytes, OverlapEx* over_ex);
-		void Disconnect(int id, int bytes, OverlapEx* over_ex);
+		void ServerConnect(int _id, int _bytes, OverlapEx* _over_ex);
+		void Accept(int _id, int _bytes, OverlapEx* _over_ex);
+		void Recv(int _id, int _bytes, OverlapEx* _over_ex);
+		void Send(int _id, int _bytes, OverlapEx* _over_ex);
+		void Disconnect(int _id, int _bytes, OverlapEx* _over_ex);
 
-		void PacketExec(BASE_PACKET* packet);
+		void PacketExec(BASE_PACKET* _packet);
 
 	private:
 		std::atomic_bool m_stopping = false;
@@ -64,7 +64,7 @@ namespace wod_server {
 		std::atomic<int> m_clientNum = 0;
 
 		concurrency::concurrent_priority_queue<TIMER_EVENT> m_timerQueue;
-		std::unordered_map<OP_TYPE, std::function<void(int, int, OverlapEx*)>> m_iocpfunc;		
+		std::unordered_map<OP_TYPE, std::function<void(int, int, OverlapEx*)>> m_iocpfunc;
 
 		CDataBaseThread* m_dataBaseThread = nullptr;
 		CP2PNetwork* m_p2pNetwork = nullptr;

@@ -25,10 +25,10 @@ namespace wod_server {
                 m_towers[i][j]->SetPos(TOWER_POS[j]);
             }
         }
-        
+
         for (int i = 0; i < m_towerAttack.size(); ++i) {
             for (int j = 0; j < m_towerAttack[i].size(); ++j) {
-                m_towerAttack[i][j] = new CTowerAttack(); 
+                m_towerAttack[i][j] = new CTowerAttack();
                 m_towerAttack[i][j]->SetMatchNum(i);
                 m_towerAttack[i][j]->SetID(j);
             }
@@ -202,72 +202,72 @@ namespace wod_server {
         return true;
     }
 
-    void CGameMgr::Reset(int match)
+    void CGameMgr::Reset(int _match)
     {
-        m_gameData[match]->Reset();
+        m_gameData[_match]->Reset();
 
         for (int i = 0; i < m_shopStatLevel[0].size(); ++i) {
-            m_shopStatLevel[match][i].currentPrice = 10;
-            m_shopStatLevel[match][i].level = 0;
+            m_shopStatLevel[_match][i].m_currentPrice = 10;
+            m_shopStatLevel[_match][i].m_level = 0;
         }
 
         for (int i = 0; i < PATH_NUM; ++i) {
-            m_towers[match][i]->Reset();
-            m_towerAttack[match][i]->active = false;
+            m_towers[_match][i]->Reset();
+            m_towerAttack[_match][i]->m_active = false;
         }
-        m_nexus[match]->Reset();
+        m_nexus[_match]->Reset();
 
         //Skill
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            m_wizardAttacks[match][i]->active = false;
-            m_wizardMissiles[match][i]->active = false;
-            m_wizardMagicEyes[match][i]->active = false;
-            m_wizardEnergyBalls[match][i]->active = false;
-            m_wizardBigBang[match][i]->active = false;
-            m_swordManAuraBlade[match][i]->active = false;
-            m_swordManJudgementSword[match][i]->active = false;
-            m_swordManProtectedArea[match][i]->active = false;
-            m_archerAttacks[match][i]->active = false;
-            m_archerStickyArrows[match][i]->active = false;
-            m_archerPhoenixArrows[match][i]->active = false;
-            m_archerPenetraitingShot[match][i]->active = false;
-            m_figtherFireBall[match][i]->active = false;
-            m_ogreRockThrow[match][i]->active = false;
-            m_ogreDimensionCrush[match][i]->active = false;
-            m_proReturnZero[match][i]->active = false;
-            m_proHelloWorld[match][i]->active = false;
-            m_proAttacks[match][i]->active = false;
+            m_wizardAttacks[_match][i]->m_active = false;
+            m_wizardMissiles[_match][i]->m_active = false;
+            m_wizardMagicEyes[_match][i]->m_active = false;
+            m_wizardEnergyBalls[_match][i]->m_active = false;
+            m_wizardBigBang[_match][i]->m_active = false;
+            m_swordManAuraBlade[_match][i]->m_active = false;
+            m_swordManJudgementSword[_match][i]->m_active = false;
+            m_swordManProtectedArea[_match][i]->m_active = false;
+            m_archerAttacks[_match][i]->m_active = false;
+            m_archerStickyArrows[_match][i]->m_active = false;
+            m_archerPhoenixArrows[_match][i]->m_active = false;
+            m_archerPenetraitingShot[_match][i]->m_active = false;
+            m_figtherFireBall[_match][i]->m_active = false;
+            m_ogreRockThrow[_match][i]->m_active = false;
+            m_ogreDimensionCrush[_match][i]->m_active = false;
+            m_proReturnZero[_match][i]->m_active = false;
+            m_proHelloWorld[_match][i]->m_active = false;
+            m_proAttacks[_match][i]->m_active = false;
         }
         for (int i = 0; i < MAX_SKILL_OBJECT * 5; ++i) {
-            m_archerMultipleShot[match][i]->active = false;
+            m_archerMultipleShot[_match][i]->m_active = false;
         }
-        m_ogreCharging[match]->active = false;
-        m_proWhileTrue[match] = false;
-        m_skillMutex[match].lock();
-        m_activeSkills[match].clear();
-        m_skillMutex[match].unlock();
+        m_ogreCharging[_match]->m_active = false;
+        m_proWhileTrue[_match] = false;
+        m_skillMutex[_match].lock();
+        m_activeSkills[_match].clear();
+        m_skillMutex[_match].unlock();
     }
 
-    float CGameMgr::UpdateGameData(int match)
+    float CGameMgr::UpdateGameData(int _match)
     {
         //Time Update
-        float elapsedTime = TimeUtil::CalElapsedTime(m_gameData[match]->lastTime);
-        m_gameData[match]->lastTime = TimeUtil::CurTime();
-        m_gameData[match]->gameTime += elapsedTime;
+        float elapsedTime = TimeUtil::CalElapsedTime(m_gameData[_match]->m_lastTime);
+        m_gameData[_match]->m_lastTime = TimeUtil::CurTime();
+        m_gameData[_match]->m_gameTime += elapsedTime;
 
         //Tower Update
-        for (int i = 0; i < m_towers[match].size(); ++i) {
-            m_towers[match][i]->Update(match);
+        for (int i = 0; i < m_towers[_match].size(); ++i) {
+            m_towers[_match][i]->Update(_match);
         }
-        for (int i = 0; i < m_towerAttack[match].size(); ++i) {
-            m_towerAttack[match][i]->Update(elapsedTime);
+        for (int i = 0; i < m_towerAttack[_match].size(); ++i) {
+            m_towerAttack[_match][i]->Update(elapsedTime);
         }
 
         std::vector<CGameObject*> activeSkills;
         std::vector<CGameObject*> updatedSkills;
-        m_skillMutex[match].lock();
-        activeSkills = m_activeSkills[match];
-        m_skillMutex[match].unlock();
+        m_skillMutex[_match].lock();
+        activeSkills = m_activeSkills[_match];
+        m_skillMutex[_match].unlock();
         for (CGameObject* skill : activeSkills)
         {
             if (skill->Update(elapsedTime))
@@ -275,48 +275,48 @@ namespace wod_server {
         }
 
         {
-            std::lock_guard<std::mutex> lock(m_skillMutex[match]);
-            m_activeSkills[match] = std::move(updatedSkills);
+            std::lock_guard<std::mutex> lock(m_skillMutex[_match]);
+            m_activeSkills[_match] = std::move(updatedSkills);
         }
 
         //Send Time
         for (int i = 0; i < MAX_PLAYER; ++i) {
-            if (CMatchMgr::GetInstance()->GetMatchPlayers(match)[i] == -1)
+            if (CMatchMgr::GetInstance()->GetMatchPlayers(_match)[i] == -1)
                 continue;
-            CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[i])->GetPacketSender()->SendGameTimePacket(static_cast<int>(::ceil(m_gameData[match]->gameTime)), 1);
+            CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[i])->GetPacketSender()->SendGameTimePacket(static_cast<int>(::ceil(m_gameData[_match]->m_gameTime)), 1);
         }
 
         //Check Fence Activation
-        if (m_gameData[match]->fence && IsFloatEqual(::floor(m_gameData[match]->gameTime), 180.f)) {
-            m_gameData[match]->fence = false;
+        if (m_gameData[_match]->m_fence && IsFloatEqual(::floor(m_gameData[_match]->m_gameTime), 180.f)) {
+            m_gameData[_match]->m_fence = false;
         }
 
         return elapsedTime;
     }
 
-    int CGameMgr::GetHeroRespawnTime(int match)
+    int CGameMgr::GetHeroRespawnTime(int _match)
     {
         int respawnTime = ClientInfos::HERO_INIT_RESPAWN_TIME; // add time from calculation by game time
 
         return respawnTime;
     }
 
-    void CGameMgr::SkillAutoSelect(int match)
+    void CGameMgr::SkillAutoSelect(int _match)
     {
         int playerSkill = PLAYER_SKILL / 4;
         int bossSkill = BOSS_SKILL / 2;
         for (int i = 0; i < MAX_PLAYER; ++i) {
-            std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[i]);
+            std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[i]);
 
             const int bossJob = client->GetPlayerJob() >= MAX_JOB ? client->GetPlayerJob() - MAX_JOB : client->GetPlayerJob();
-            for (int j = 1; j < MAX_SKILL + 1; ++j) {               
+            for (int j = 1; j < MAX_SKILL + 1; ++j) {
                 if (client->GetSkillNum(j) == 0) {
                     if (j == MAX_SKILL) { //Ultimate
                         if (i == 3) {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM);
                             }
                             client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, bossSkill + bossJob * BOSS_SKILL_NUM + BOSS_SKILL_NUM);
 
@@ -326,7 +326,7 @@ namespace wod_server {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, playerSkill + client->GetPlayerJob() * PLAYER_SKILL_NUM + PLAYER_SKILL_NUM - 1);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, playerSkill + client->GetPlayerJob() * PLAYER_SKILL_NUM + PLAYER_SKILL_NUM - 1);
                             }
                             client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, playerSkill + client->GetPlayerJob() * PLAYER_SKILL_NUM + PLAYER_SKILL_NUM - 1);
 
@@ -345,7 +345,7 @@ namespace wod_server {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill + 1);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill + 1);
                             }
                             client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill + 1);
                             client->SetSkillNum(j, skill - (21 - 96 - 1));
@@ -361,7 +361,7 @@ namespace wod_server {
                             for (int k = 0; k < MAX_PLAYER; ++k) {
                                 if (i == k)
                                     continue;
-                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill);
+                                CObjectMgr::GetInstance()->GetClient(CMatchMgr::GetInstance()->GetMatchPlayers(_match)[k])->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill);
                             }
                             client->GetPacketSender()->SendSelectSkillPacket(i, j - 1, skill);
                            client->SetSkillNum(j, skill);
@@ -372,41 +372,41 @@ namespace wod_server {
         }
     }
 
-    bool CGameMgr::CheckCoolTime(std::shared_ptr<CClient> client, char type)
+    bool CGameMgr::CheckCoolTime(std::shared_ptr<CClient> _client, char _type)
     {
-        if (client->GetUsingSkill()) {
+        if (_client->GetUsingSkill()) {
             std::cout << "Using Skill" << std::endl;
             return false;
         }
 
-        int skillCoolTime = client->GetSkillCoolTime(static_cast<int>(type) - 1);
-        if (client->GetStatus()->coolTimeBuff == COOLTIME_BUFF::OVERLOAD)
+        int skillCoolTime = _client->GetSkillCoolTime(static_cast<int>(_type) - 1);
+        if (_client->GetStatus()->m_coolTimeBuff == COOLTIME_BUFF::OVERLOAD)
             skillCoolTime = static_cast<int>(skillCoolTime * 0.5f);
-        if (!client->GetUsingSkill() && std::chrono::duration_cast<std::chrono::seconds>(TimeUtil::CurTime() - client->GetSkillLastUsedTime(static_cast<int>(type) - 1)).count() >= skillCoolTime) {
+        if (!_client->GetUsingSkill() && std::chrono::duration_cast<std::chrono::seconds>(TimeUtil::CurTime() - _client->GetSkillLastUsedTime(static_cast<int>(_type) - 1)).count() >= skillCoolTime) {
             return true;
         }
         std::cout << "Skill CoolTime" << std::endl;
         return false;
     }
 
-    void CGameMgr::ActiveTower(bool active, int match, int index)
+    void CGameMgr::ActiveTower(bool _active, int _match, int _index)
     {
-        m_towers[match][index]->active = active;
+        m_towers[_match][_index]->m_active = _active;
     }
 
-    void CGameMgr::TowerAttack(int match, int targetID, const vec3& pos)
+    void CGameMgr::TowerAttack(int _match, int _targetID, const vec3& _pos)
     {
-        for (int i = 0; i < m_towerAttack[match].size(); ++i) {
-            if (!m_towerAttack[match][i]->active) {
-                m_towerAttack[match][i]->SetTarget(targetID);
-                m_towerAttack[match][i]->SetPos(pos);
-                m_towerAttack[match][i]->active = true;
+        for (int i = 0; i < m_towerAttack[_match].size(); ++i) {
+            if (!m_towerAttack[_match][i]->m_active) {
+                m_towerAttack[_match][i]->SetTarget(_targetID);
+                m_towerAttack[_match][i]->SetPos(_pos);
+                m_towerAttack[_match][i]->m_active = true;
 
-                auto clients = CMatchMgr::GetInstance()->GetMatchPlayers(match);
+                auto clients = CMatchMgr::GetInstance()->GetMatchPlayers(_match);
                 for (int j = 0; j < MAX_PLAYER; ++j) {
                     if (-1 == clients[j])
                         continue;
-                    CObjectMgr::GetInstance()->GetClient(clients[j])->GetPacketSender()->SendTowerAttackAddPacket(i, pos);
+                    CObjectMgr::GetInstance()->GetClient(clients[j])->GetPacketSender()->SendTowerAttackAddPacket(i, _pos);
                 }
 
                 break;
@@ -414,67 +414,67 @@ namespace wod_server {
         }
     }
 
-    int CGameMgr::WizardAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::WizardAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_wizardAttacks[matchNum][i]->active) {
-                m_wizardAttacks[matchNum][i]->active = true;
-                m_wizardAttacks[matchNum][i]->SetPos(pos);
-                m_wizardAttacks[matchNum][i]->SetLook(look);
-                m_wizardAttacks[matchNum][i]->SetPower(power);
-                m_wizardAttacks[matchNum][i]->SetCritical(critical);
-                m_wizardAttacks[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_wizardAttacks[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_wizardAttacks[_matchNum][i]->m_active) {
+                m_wizardAttacks[_matchNum][i]->m_active = true;
+                m_wizardAttacks[_matchNum][i]->SetPos(_pos);
+                m_wizardAttacks[_matchNum][i]->SetLook(_look);
+                m_wizardAttacks[_matchNum][i]->SetPower(_power);
+                m_wizardAttacks[_matchNum][i]->SetCritical(_critical);
+                m_wizardAttacks[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_wizardAttacks[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::MagicMissle(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::MagicMissle(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_wizardMissiles[matchNum][i]->active) {
-                m_wizardMissiles[matchNum][i]->active = true;
-                m_wizardMissiles[matchNum][i]->SetPos(pos);
-                m_wizardMissiles[matchNum][i]->SetLook(look);
-                m_wizardMissiles[matchNum][i]->SetPower(power);
-                m_wizardMissiles[matchNum][i]->SetCritical(critical);
-                m_wizardMissiles[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_wizardMissiles[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_wizardMissiles[_matchNum][i]->m_active) {
+                m_wizardMissiles[_matchNum][i]->m_active = true;
+                m_wizardMissiles[_matchNum][i]->SetPos(_pos);
+                m_wizardMissiles[_matchNum][i]->SetLook(_look);
+                m_wizardMissiles[_matchNum][i]->SetPower(_power);
+                m_wizardMissiles[_matchNum][i]->SetCritical(_critical);
+                m_wizardMissiles[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_wizardMissiles[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::MagicEye(int matchNum, const vec3& pos, const vec3& look)
+    int CGameMgr::MagicEye(int _matchNum, const vec3& _pos, const vec3& _look)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_wizardMagicEyes[matchNum][i]->active) {
-                m_wizardMagicEyes[matchNum][i]->active = true;
-                m_wizardMagicEyes[matchNum][i]->SetPos(pos);
-                m_wizardMagicEyes[matchNum][i]->SetLook(look);
-                m_wizardMagicEyes[matchNum][i]->ResetCheckTime();
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_wizardMagicEyes[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_wizardMagicEyes[_matchNum][i]->m_active) {
+                m_wizardMagicEyes[_matchNum][i]->m_active = true;
+                m_wizardMagicEyes[_matchNum][i]->SetPos(_pos);
+                m_wizardMagicEyes[_matchNum][i]->SetLook(_look);
+                m_wizardMagicEyes[_matchNum][i]->ResetCheckTime();
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_wizardMagicEyes[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    void CGameMgr::MagicEye(int matchNum, int id)
+    void CGameMgr::MagicEye(int _matchNum, int _id)
     {
-        if (m_wizardMagicEyes[matchNum][id]->active) {
-            m_wizardMagicEyes[matchNum][id]->active = false;
+        if (m_wizardMagicEyes[_matchNum][_id]->m_active) {
+            m_wizardMagicEyes[_matchNum][_id]->m_active = false;
 
-            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
                 if (-1 == id)
                     continue;
 
@@ -483,181 +483,181 @@ namespace wod_server {
         }
     }
 
-    int CGameMgr::EnergyBall(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::EnergyBall(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_wizardEnergyBalls[matchNum][i]->active) {
-                m_wizardEnergyBalls[matchNum][i]->active = true;
-                m_wizardEnergyBalls[matchNum][i]->SetPos(pos);
-                m_wizardEnergyBalls[matchNum][i]->SetLook(look);
-                m_wizardEnergyBalls[matchNum][i]->SetPower(power);
-                m_wizardEnergyBalls[matchNum][i]->SetCritical(critical);
-                m_wizardEnergyBalls[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_wizardEnergyBalls[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_wizardEnergyBalls[_matchNum][i]->m_active) {
+                m_wizardEnergyBalls[_matchNum][i]->m_active = true;
+                m_wizardEnergyBalls[_matchNum][i]->SetPos(_pos);
+                m_wizardEnergyBalls[_matchNum][i]->SetLook(_look);
+                m_wizardEnergyBalls[_matchNum][i]->SetPower(_power);
+                m_wizardEnergyBalls[_matchNum][i]->SetCritical(_critical);
+                m_wizardEnergyBalls[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_wizardEnergyBalls[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::BigBang(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::BigBang(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_wizardBigBang[matchNum][i]->active) {
-                m_wizardBigBang[matchNum][i]->active = true;
-                m_wizardBigBang[matchNum][i]->SetPos(pos);
-                m_wizardBigBang[matchNum][i]->SetLook(look);
-                m_wizardBigBang[matchNum][i]->SetPower(power);
-                m_wizardBigBang[matchNum][i]->SetCritical(critical);
-                m_wizardBigBang[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_wizardBigBang[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
-                return i;
-            }
-        }
-        return 0;
-    }
-    
-    int CGameMgr::AuraBlade(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
-    {
-        for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_swordManAuraBlade[matchNum][i]->active) {
-                m_swordManAuraBlade[matchNum][i]->active = true;
-                m_swordManAuraBlade[matchNum][i]->SetPos(pos);
-                m_swordManAuraBlade[matchNum][i]->SetLook(look);
-                m_swordManAuraBlade[matchNum][i]->SetPower(power);
-                m_swordManAuraBlade[matchNum][i]->SetCritical(critical);
-                m_swordManAuraBlade[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_swordManAuraBlade[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_wizardBigBang[_matchNum][i]->m_active) {
+                m_wizardBigBang[_matchNum][i]->m_active = true;
+                m_wizardBigBang[_matchNum][i]->SetPos(_pos);
+                m_wizardBigBang[_matchNum][i]->SetLook(_look);
+                m_wizardBigBang[_matchNum][i]->SetPower(_power);
+                m_wizardBigBang[_matchNum][i]->SetCritical(_critical);
+                m_wizardBigBang[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_wizardBigBang[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::JudgeMentSword(int matchNum, const vec3& pos, int power, int critical, int target, int clientID)
+    int CGameMgr::AuraBlade(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_swordManJudgementSword[matchNum][i]->active) {
-                m_swordManJudgementSword[matchNum][i]->active = true;
-                m_swordManJudgementSword[matchNum][i]->SetPos(pos);
-                m_swordManJudgementSword[matchNum][i]->SetPower(power);
-                m_swordManJudgementSword[matchNum][i]->SetTargetID(target);
-                m_swordManJudgementSword[matchNum][i]->SetCritical(critical);
-                m_swordManJudgementSword[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_swordManJudgementSword[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_swordManAuraBlade[_matchNum][i]->m_active) {
+                m_swordManAuraBlade[_matchNum][i]->m_active = true;
+                m_swordManAuraBlade[_matchNum][i]->SetPos(_pos);
+                m_swordManAuraBlade[_matchNum][i]->SetLook(_look);
+                m_swordManAuraBlade[_matchNum][i]->SetPower(_power);
+                m_swordManAuraBlade[_matchNum][i]->SetCritical(_critical);
+                m_swordManAuraBlade[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_swordManAuraBlade[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::ProtectedArea(int matchNum, const vec3& pos, const int power, int clientID)
+    int CGameMgr::JudgeMentSword(int _matchNum, const vec3& _pos, int _power, int _critical, int _target, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_swordManProtectedArea[matchNum][i]->active) {
-                m_swordManProtectedArea[matchNum][i]->active = true;
-                m_swordManProtectedArea[matchNum][i]->SetPos(pos);
-                m_swordManProtectedArea[matchNum][i]->SetDefensePower(power);
-                m_swordManProtectedArea[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_swordManProtectedArea[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_swordManJudgementSword[_matchNum][i]->m_active) {
+                m_swordManJudgementSword[_matchNum][i]->m_active = true;
+                m_swordManJudgementSword[_matchNum][i]->SetPos(_pos);
+                m_swordManJudgementSword[_matchNum][i]->SetPower(_power);
+                m_swordManJudgementSword[_matchNum][i]->SetTargetID(_target);
+                m_swordManJudgementSword[_matchNum][i]->SetCritical(_critical);
+                m_swordManJudgementSword[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_swordManJudgementSword[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    void CGameMgr::ProtectedArea(int matchNum, int objectID)
+    int CGameMgr::ProtectedArea(int _matchNum, const vec3& _pos, const int _power, int _clientID)
     {
-        if (m_swordManProtectedArea[matchNum][objectID]->active) {                       
-            m_swordManProtectedArea[matchNum][objectID]->active = false;
-            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+        for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
+            if (!m_swordManProtectedArea[_matchNum][i]->m_active) {
+                m_swordManProtectedArea[_matchNum][i]->m_active = true;
+                m_swordManProtectedArea[_matchNum][i]->SetPos(_pos);
+                m_swordManProtectedArea[_matchNum][i]->SetDefensePower(_power);
+                m_swordManProtectedArea[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_swordManProtectedArea[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    void CGameMgr::ProtectedArea(int _matchNum, int _objectID)
+    {
+        if (m_swordManProtectedArea[_matchNum][_objectID]->m_active) {
+            m_swordManProtectedArea[_matchNum][_objectID]->m_active = false;
+            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
                 if (id == -1)
                     continue;
-                CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_PROTECTED_AREA);
+                CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(_objectID, SKILL_TYPE::SWORDMAN_PROTECTED_AREA);
             }
         }
     }
 
-    int CGameMgr::ArcherAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::ArcherAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_archerAttacks[matchNum][i]->active) {
-                m_archerAttacks[matchNum][i]->active = true;
-                m_archerAttacks[matchNum][i]->SetPos(pos);
-                m_archerAttacks[matchNum][i]->SetLook(look);
-                m_archerAttacks[matchNum][i]->SetPower(power);
-                m_archerAttacks[matchNum][i]->SetCritical(critical);
-                m_archerAttacks[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_archerAttacks[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_archerAttacks[_matchNum][i]->m_active) {
+                m_archerAttacks[_matchNum][i]->m_active = true;
+                m_archerAttacks[_matchNum][i]->SetPos(_pos);
+                m_archerAttacks[_matchNum][i]->SetLook(_look);
+                m_archerAttacks[_matchNum][i]->SetPower(_power);
+                m_archerAttacks[_matchNum][i]->SetCritical(_critical);
+                m_archerAttacks[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_archerAttacks[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::StickyArrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::StickyArrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_archerStickyArrows[matchNum][i]->active) {
-                m_archerStickyArrows[matchNum][i]->active = true;
-                m_archerStickyArrows[matchNum][i]->SetPos(pos);
-                m_archerStickyArrows[matchNum][i]->SetLook(look);
-                m_archerStickyArrows[matchNum][i]->SetPower(power);
-                m_archerStickyArrows[matchNum][i]->SetCritical(critical);
-                m_archerStickyArrows[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_archerStickyArrows[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_archerStickyArrows[_matchNum][i]->m_active) {
+                m_archerStickyArrows[_matchNum][i]->m_active = true;
+                m_archerStickyArrows[_matchNum][i]->SetPos(_pos);
+                m_archerStickyArrows[_matchNum][i]->SetLook(_look);
+                m_archerStickyArrows[_matchNum][i]->SetPower(_power);
+                m_archerStickyArrows[_matchNum][i]->SetCritical(_critical);
+                m_archerStickyArrows[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_archerStickyArrows[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::PhoenixArrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::PhoenixArrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_archerPhoenixArrows[matchNum][i]->active) {
-                m_archerPhoenixArrows[matchNum][i]->active = true;
-                m_archerPhoenixArrows[matchNum][i]->SetPos(pos);
-                m_archerPhoenixArrows[matchNum][i]->SetLook(look);
-                m_archerPhoenixArrows[matchNum][i]->SetPower(power);
-                m_archerPhoenixArrows[matchNum][i]->SetCritical(critical);
-                m_archerPhoenixArrows[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_archerPhoenixArrows[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_archerPhoenixArrows[_matchNum][i]->m_active) {
+                m_archerPhoenixArrows[_matchNum][i]->m_active = true;
+                m_archerPhoenixArrows[_matchNum][i]->SetPos(_pos);
+                m_archerPhoenixArrows[_matchNum][i]->SetLook(_look);
+                m_archerPhoenixArrows[_matchNum][i]->SetPower(_power);
+                m_archerPhoenixArrows[_matchNum][i]->SetCritical(_critical);
+                m_archerPhoenixArrows[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_archerPhoenixArrows[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::PenetraitingShot(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::PenetraitingShot(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_archerPenetraitingShot[matchNum][i]->active) {
-                m_archerPenetraitingShot[matchNum][i]->active = true;
-                m_archerPenetraitingShot[matchNum][i]->SetPos(pos);
-                m_archerPenetraitingShot[matchNum][i]->SetLook(look);
-                m_archerPenetraitingShot[matchNum][i]->SetPower(power);
-                m_archerPenetraitingShot[matchNum][i]->SetCritical(critical);
-                m_archerPenetraitingShot[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_archerPenetraitingShot[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_archerPenetraitingShot[_matchNum][i]->m_active) {
+                m_archerPenetraitingShot[_matchNum][i]->m_active = true;
+                m_archerPenetraitingShot[_matchNum][i]->SetPos(_pos);
+                m_archerPenetraitingShot[_matchNum][i]->SetLook(_look);
+                m_archerPenetraitingShot[_matchNum][i]->SetPower(_power);
+                m_archerPenetraitingShot[_matchNum][i]->SetCritical(_critical);
+                m_archerPenetraitingShot[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_archerPenetraitingShot[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
@@ -665,7 +665,7 @@ namespace wod_server {
         return 0;
     }
 
-    int CGameMgr::ArcherMultipleShot(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::ArcherMultipleShot(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         float angleIncrement = 20.0f;
         int numArrows = 5;
@@ -676,24 +676,24 @@ namespace wod_server {
         for (int i = 0; i < MAX_SKILL_OBJECT * 5; ++i) {
             float angle = startAngle + angleIncrement * count;
             float radians = angle * (DirectX::XM_PI / 180.0f);
-            vec3 rotatedLook = vec3(look.x * cos(radians) + look.z * sin(radians), look.y, look.z * cos(radians) - look.x * sin(radians));
+            vec3 rotatedLook = vec3(_look.m_x * cos(radians) + _look.m_z * sin(radians), _look.m_y, _look.m_z * cos(radians) - _look.m_x * sin(radians));
 
-            if (!m_archerMultipleShot[matchNum][i]->active) {
-                m_archerMultipleShot[matchNum][i]->active = true;
-                m_archerMultipleShot[matchNum][i]->SetPos(pos);
-                m_archerMultipleShot[matchNum][i]->SetLook(vec3::Normalize(rotatedLook));
-                m_archerMultipleShot[matchNum][i]->SetPower(power);
-                m_archerMultipleShot[matchNum][i]->SetCritical(critical);
-                m_archerMultipleShot[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_archerMultipleShot[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_archerMultipleShot[_matchNum][i]->m_active) {
+                m_archerMultipleShot[_matchNum][i]->m_active = true;
+                m_archerMultipleShot[_matchNum][i]->SetPos(_pos);
+                m_archerMultipleShot[_matchNum][i]->SetLook(vec3::Normalize(rotatedLook));
+                m_archerMultipleShot[_matchNum][i]->SetPower(_power);
+                m_archerMultipleShot[_matchNum][i]->SetCritical(_critical);
+                m_archerMultipleShot[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_archerMultipleShot[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 count++;
 
-                for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+                for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
                     if (-1 == id)
                         continue;
-                    CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(i, SKILL_TYPE::ARCHER_MULTIPLE_SHOT, pos, vec3::Normalize(rotatedLook));
+                    CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(i, SKILL_TYPE::ARCHER_MULTIPLE_SHOT, _pos, vec3::Normalize(rotatedLook));
                 }
                 if (count >= 5)
                     break;
@@ -703,19 +703,19 @@ namespace wod_server {
         return 0;
     }
 
-    int CGameMgr::FireBall(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::FireBall(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_figtherFireBall[matchNum][i]->active) {
-                m_figtherFireBall[matchNum][i]->active = true;
-                m_figtherFireBall[matchNum][i]->SetPos(pos);
-                m_figtherFireBall[matchNum][i]->SetLook(look);
-                m_figtherFireBall[matchNum][i]->SetPower(power);
-                m_figtherFireBall[matchNum][i]->SetCritical(critical);
-                m_figtherFireBall[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_figtherFireBall[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_figtherFireBall[_matchNum][i]->m_active) {
+                m_figtherFireBall[_matchNum][i]->m_active = true;
+                m_figtherFireBall[_matchNum][i]->SetPos(_pos);
+                m_figtherFireBall[_matchNum][i]->SetLook(_look);
+                m_figtherFireBall[_matchNum][i]->SetPower(_power);
+                m_figtherFireBall[_matchNum][i]->SetCritical(_critical);
+                m_figtherFireBall[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_figtherFireBall[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
@@ -723,19 +723,19 @@ namespace wod_server {
         return 0;
     }
 
-    int CGameMgr::RockThrow(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::RockThrow(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_ogreRockThrow[matchNum][i]->active) {
-                m_ogreRockThrow[matchNum][i]->active = true;
-                m_ogreRockThrow[matchNum][i]->SetPos(pos);
-                m_ogreRockThrow[matchNum][i]->SetLook(look);
-                m_ogreRockThrow[matchNum][i]->SetPower(power);
-                m_ogreRockThrow[matchNum][i]->SetCritical(critical);
-                m_ogreRockThrow[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_ogreRockThrow[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_ogreRockThrow[_matchNum][i]->m_active) {
+                m_ogreRockThrow[_matchNum][i]->m_active = true;
+                m_ogreRockThrow[_matchNum][i]->SetPos(_pos);
+                m_ogreRockThrow[_matchNum][i]->SetLook(_look);
+                m_ogreRockThrow[_matchNum][i]->SetPower(_power);
+                m_ogreRockThrow[_matchNum][i]->SetCritical(_critical);
+                m_ogreRockThrow[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_ogreRockThrow[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
@@ -743,79 +743,79 @@ namespace wod_server {
         return 0;
     }
 
-    int CGameMgr::DimensionCrush(int matchNum, const vec3& pos, int power, int critical, int clientID)
+    int CGameMgr::DimensionCrush(int _matchNum, const vec3& _pos, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_ogreDimensionCrush[matchNum][i]->active) {
-                m_ogreDimensionCrush[matchNum][i]->active = true;
-                m_ogreDimensionCrush[matchNum][i]->SetPos(pos);
-                m_ogreDimensionCrush[matchNum][i]->SetPower(power);
-                m_ogreDimensionCrush[matchNum][i]->SetCritical(critical);
-                m_ogreDimensionCrush[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_ogreDimensionCrush[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_ogreDimensionCrush[_matchNum][i]->m_active) {
+                m_ogreDimensionCrush[_matchNum][i]->m_active = true;
+                m_ogreDimensionCrush[_matchNum][i]->SetPos(_pos);
+                m_ogreDimensionCrush[_matchNum][i]->SetPower(_power);
+                m_ogreDimensionCrush[_matchNum][i]->SetCritical(_critical);
+                m_ogreDimensionCrush[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_ogreDimensionCrush[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    void CGameMgr::DimensionCrush(int matchNum, int id)
+    void CGameMgr::DimensionCrush(int _matchNum, int _id)
     {
-        if (m_ogreDimensionCrush[matchNum][id]->active) {
-            m_ogreDimensionCrush[matchNum][id]->active = false;
-            for (int clientID : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+        if (m_ogreDimensionCrush[_matchNum][_id]->m_active) {
+            m_ogreDimensionCrush[_matchNum][_id]->m_active = false;
+            for (int clientID : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
                 if (clientID == -1)
                     continue;
-                CObjectMgr::GetInstance()->GetClient(clientID)->GetPacketSender()->SendRemoveSkillObjectPacket(id, SKILL_TYPE::OGRE_DIMENSION_CRUSH);
+                CObjectMgr::GetInstance()->GetClient(clientID)->GetPacketSender()->SendRemoveSkillObjectPacket(_id, SKILL_TYPE::OGRE_DIMENSION_CRUSH);
             }
         }
     }
 
-    void CGameMgr::OgreCharging(int matchNum, int id)
+    void CGameMgr::OgreCharging(int _matchNum, int _id)
     {
-        m_ogreCharging[matchNum]->active = true;
-        m_ogreCharging[matchNum]->SetClientID(id);
-        m_ogreCharging[matchNum]->SetLook(CObjectMgr::GetInstance()->GetClient(id)->GetLook());
-        m_skillMutex[matchNum].lock();
-        m_activeSkills[matchNum].push_back(m_ogreCharging[matchNum]);
-        m_skillMutex[matchNum].unlock();
+        m_ogreCharging[_matchNum]->m_active = true;
+        m_ogreCharging[_matchNum]->SetClientID(_id);
+        m_ogreCharging[_matchNum]->SetLook(CObjectMgr::GetInstance()->GetClient(_id)->GetLook());
+        m_skillMutex[_matchNum].lock();
+        m_activeSkills[_matchNum].push_back(m_ogreCharging[_matchNum]);
+        m_skillMutex[_matchNum].unlock();
     }
 
-    int CGameMgr::ProAttack(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::ProAttack(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_proAttacks[matchNum][i]->active) {
-                m_proAttacks[matchNum][i]->active = true;
-                m_proAttacks[matchNum][i]->SetPos(pos);
-                m_proAttacks[matchNum][i]->SetLook(look);
-                m_proAttacks[matchNum][i]->SetPower(power);
-                m_proAttacks[matchNum][i]->SetCritical(critical);
-                m_proAttacks[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_proAttacks[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_proAttacks[_matchNum][i]->m_active) {
+                m_proAttacks[_matchNum][i]->m_active = true;
+                m_proAttacks[_matchNum][i]->SetPos(_pos);
+                m_proAttacks[_matchNum][i]->SetLook(_look);
+                m_proAttacks[_matchNum][i]->SetPower(_power);
+                m_proAttacks[_matchNum][i]->SetCritical(_critical);
+                m_proAttacks[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_proAttacks[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    int CGameMgr::ReturnZero(int matchNum, const vec3& pos, const vec3& look, int power, int critical, int clientID)
+    int CGameMgr::ReturnZero(int _matchNum, const vec3& _pos, const vec3& _look, int _power, int _critical, int _clientID)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_proReturnZero[matchNum][i]->active) {
-                m_proReturnZero[matchNum][i]->active = true;
-                m_proReturnZero[matchNum][i]->SetPos(pos);
-                m_proReturnZero[matchNum][i]->SetStartPos(pos);
-                m_proReturnZero[matchNum][i]->SetLook(look);
-                m_proReturnZero[matchNum][i]->SetPower(power);
-                m_proReturnZero[matchNum][i]->SetCritical(critical);
-                m_proReturnZero[matchNum][i]->SetClientID(clientID);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_proReturnZero[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_proReturnZero[_matchNum][i]->m_active) {
+                m_proReturnZero[_matchNum][i]->m_active = true;
+                m_proReturnZero[_matchNum][i]->SetPos(_pos);
+                m_proReturnZero[_matchNum][i]->SetStartPos(_pos);
+                m_proReturnZero[_matchNum][i]->SetLook(_look);
+                m_proReturnZero[_matchNum][i]->SetPower(_power);
+                m_proReturnZero[_matchNum][i]->SetCritical(_critical);
+                m_proReturnZero[_matchNum][i]->SetClientID(_clientID);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_proReturnZero[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
@@ -823,31 +823,31 @@ namespace wod_server {
         return 0;
     }
 
-    int CGameMgr::HelloWorld(int matchNum, const vec3& pos, int clientID, const std::vector<int>& ids)
+    int CGameMgr::HelloWorld(int _matchNum, const vec3& _pos, int _clientID, const std::vector<int>& _ids)
     {
         for (int i = 0; i < MAX_SKILL_OBJECT; ++i) {
-            if (!m_proHelloWorld[matchNum][i]->active) {
-                m_proHelloWorld[matchNum][i]->active = true;
-                m_proHelloWorld[matchNum][i]->SetPos(pos);
-                m_proHelloWorld[matchNum][i]->SetClientID(clientID);
-                m_proHelloWorld[matchNum][i]->SetArea(ids);
-                m_skillMutex[matchNum].lock();
-                m_activeSkills[matchNum].push_back(m_proHelloWorld[matchNum][i]);
-                m_skillMutex[matchNum].unlock();
+            if (!m_proHelloWorld[_matchNum][i]->m_active) {
+                m_proHelloWorld[_matchNum][i]->m_active = true;
+                m_proHelloWorld[_matchNum][i]->SetPos(_pos);
+                m_proHelloWorld[_matchNum][i]->SetClientID(_clientID);
+                m_proHelloWorld[_matchNum][i]->SetArea(_ids);
+                m_skillMutex[_matchNum].lock();
+                m_activeSkills[_matchNum].push_back(m_proHelloWorld[_matchNum][i]);
+                m_skillMutex[_matchNum].unlock();
                 return i;
             }
         }
         return 0;
     }
 
-    void CGameMgr::HelloWorld(int matchNum, int objectID)
+    void CGameMgr::HelloWorld(int _matchNum, int _objectID)
     {
-        if (m_proHelloWorld[matchNum][objectID]->active) {
-            m_proHelloWorld[matchNum][objectID]->active = false;
-            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+        if (m_proHelloWorld[_matchNum][_objectID]->m_active) {
+            m_proHelloWorld[_matchNum][_objectID]->m_active = false;
+            for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
                 if (id == -1)
                     continue;
-                CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(objectID, SKILL_TYPE::PRO_HELLO_WORLD);
+                CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(_objectID, SKILL_TYPE::PRO_HELLO_WORLD);
             }
         }
     }

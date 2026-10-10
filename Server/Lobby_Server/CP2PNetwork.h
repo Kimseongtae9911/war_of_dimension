@@ -11,11 +11,11 @@ namespace wod_server {
 
 		std::unordered_map<std::string, int> GetPeerInfos() { m_peerInfoLock.lock(); auto temp = m_peerInfos; m_peerInfoLock.unlock(); return temp; }
 
-		void RegisterPortNum(const std::string& ip, int portNum);
-		void RegisterPeer(int id, const std::string& clientAddress);
+		void RegisterPortNum(const std::string& _ip, int _portNum);
+		void RegisterPeer(int _id, const std::string& _clientAddress);
 
-		void InsertTransaction(const TransactionData& transactionData);
-		void SetValidatorIDs(std::vector<std::pair<std::string, int>> validatorIDs);
+		void InsertTransaction(const TransactionData& _transactionData);
+		void SetValidatorIDs(std::vector<std::pair<std::string, int>> _validatorIDs);
 		int SelectValidator();
 
 	private:

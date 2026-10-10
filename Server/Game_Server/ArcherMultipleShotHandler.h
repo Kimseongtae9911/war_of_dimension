@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherMultipleShotHandler() {}
-		ArcherMultipleShotHandler(std::shared_ptr<CClient> client);
+		ArcherMultipleShotHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

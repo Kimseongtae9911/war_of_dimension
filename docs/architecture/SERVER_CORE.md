@@ -13,13 +13,14 @@
 ```text
 Server/ServerCore/
 ├─ ServerCore.vcxproj                 공통 정적 라이브러리
+├─ ServerCore.vcxproj.filters         소스·헤더·개발 설정 표시
 ├─ include/ServerCore/
 │  ├─ Net.h                          소켓·IOCP·프레임·종료 신호
 │  ├─ Session.h                      세션·listener·세대 검사
 │  ├─ Concurrency.h                  Job·작업 큐·객체 풀·스레드 그룹
 │  └─ Diagnostics.h                  로그·프로세스 오류 진단
 ├─ src/Net.cpp                      공통 네트워크 구현
-└─ tests/                            공통 기능·패킷 ABI 검사
+└─ tests/                            별도 ServerCore.Tests 프로젝트·filters
 Shared/Protocol/
 ├─ protocol.h                       기존 wire 선언
 ├─ Validation.h                     방향별 크기·필드 검사
@@ -34,6 +35,16 @@ scripts/
 기존 세 실행 프로젝트의 경로를 보존했다.
 Core는 x64 Debug/Release, C++20, v145로 빌드한다.
 런타임은 서버와 동일한 `/MDd`·`/MD`를 사용한다.
+
+공용 헤더 4개를 `ClInclude`에 등록했다.
+Core와 테스트의 `.filters`에서 소스·헤더·개발 설정을 구분한다.
+테스트 소스 2개는 `ServerCore.Tests` 프로젝트에서 표시한다.
+
+Core 구현·헤더·테스트 7개에 함수 간격·다중 행 `if`·분기/`while` 뒤 빈 줄·마지막 `return` 분리를 적용했다.
+연결된 `if`·`else if`·`else`의 본문은 한 문장이어도 중괄호로 감쌌다.
+루트 `.clang-format`과 `AGENTS.md`를 포맷 기준으로 사용한다.
+멤버는 `m_`, 함수 인자는 `_` 접두어로 구분한다.
+기존 동작·패킷 계약·소유권은 유지했다. 이전 소스 해시는 1단계 구현 검증 당시의 기록이다.
 
 | 영역 | 공통 구현 | 서버에 남은 책임 |
 |---|---|---|

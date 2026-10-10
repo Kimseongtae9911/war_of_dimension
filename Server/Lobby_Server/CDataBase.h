@@ -11,48 +11,48 @@ namespace wod_server {
 		CDataBase();
 		~CDataBase();
 
-		bool Connect(const std::wstring& database);
+		bool Connect(const std::wstring& _database);
 		void Disconnect();
 
-		bool GetPlayerInfo(const std::string& id, const std::string& password, PlayerInfo& playerInfo);
-		bool CheckIdExists(const std::string& id);
-		bool CheckPassword(const std::string& id, const std::string& password);
-		bool SignUp(const std::string& id, const std::string& password);
-		std::vector<AuctionInfo> GetAuctionInfo(int pageNum);
+		bool GetPlayerInfo(const std::string& _id, const std::string& _password, PlayerInfo& _playerInfo);
+		bool CheckIdExists(const std::string& _id);
+		bool CheckPassword(const std::string& _id, const std::string& _password);
+		bool SignUp(const std::string& _id, const std::string& _password);
+		std::vector<AuctionInfo> GetAuctionInfo(int _pageNum);
 		int GetAuctionPartsNum();
-		bool GetPlayerCustomizeParts(const std::string& id, std::vector<std::tuple<short, short, short>>& customizeParts);
-		std::vector<std::string> GetPlayersByShopType(short shopType);
+		bool GetPlayerCustomizeParts(const std::string& _id, std::vector<std::tuple<short, short, short>>& _customizeParts);
+		std::vector<std::string> GetPlayersByShopType(short _shopType);
 
-		bool SavePlayerInfo(const std::string& id, const PlayerInfo& playerInfo);
-		bool SaveToken(const std::string& id, int token);
-		bool SaveShopBuyInfo(const std::string& id, const int shopType, const int shopNum);
-		bool RegisterAuction(const std::string& id, const int shopType, const int shopNum, const int buyPrice, const std::string& deadline);
-		bool BuyAuction(const std::string& seller, const std::string& myID, short type, short num, unsigned short price);
+		bool SavePlayerInfo(const std::string& _id, const PlayerInfo& _playerInfo);
+		bool SaveToken(const std::string& _id, int _token);
+		bool SaveShopBuyInfo(const std::string& _id, const int _shopType, const int _shopNum);
+		bool RegisterAuction(const std::string& _id, const int _shopType, const int _shopNum, const int _buyPrice, const std::string& _deadline);
+		bool BuyAuction(const std::string& _seller, const std::string& _myID, short _type, short _num, unsigned short _price);
 
 		std::vector<std::pair<std::string, int>> GetValidatorIDs();
-		bool StakeTokens(const std::string& id, int tokenNum, unsigned short stakeDays);
-		bool ChangeNodeType(const std::string& id, bool fullNode);
-		bool GetFullNodeInfo(const std::string& id, bool& fullNode);
-		bool GetStakedTokenData(const std::string& id, int& stakedToken, int& stakedDays, int& dayCount);
+		bool StakeTokens(const std::string& _id, int _tokenNum, unsigned short _stakeDays);
+		bool ChangeNodeType(const std::string& _id, bool _fullNode);
+		bool GetFullNodeInfo(const std::string& _id, bool& _fullNode);
+		bool GetStakedTokenData(const std::string& _id, int& _stakedToken, int& _stakedDays, int& _dayCount);
 
 	private:
-		void Show_Error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode);
+		void Show_Error(SQLHANDLE _hHandle, SQLSMALLINT _hType, RETCODE _retCode);
 
-		bool AllocStatementHandle(SQLHSTMT& hstmt);
-		void FreeStatementHandle(SQLHSTMT hstmt);
+		bool AllocStatementHandle(SQLHSTMT& _hstmt);
+		void FreeStatementHandle(SQLHSTMT _hstmt);
 
 		template<typename T>
-		bool BindParameter(SQLHSTMT hstmt, int index, const T& value);
+		bool BindParameter(SQLHSTMT _hstmt, int _index, const T& _value);
 
 		template<typename T, typename... Args>
-		void BindParameters(SQLHSTMT hstmt, int index, const T& first, const Args&... rest);
-		void BindParameters(SQLHSTMT hstmt, int index) {} // Base case
+		void BindParameters(SQLHSTMT _hstmt, int _index, const T& _first, const Args&... _rest);
+		void BindParameters(SQLHSTMT _hstmt, int _index) {} // Base case
 
 		template<typename... Args>
-		bool ExecuteSP(STORED_PROCEDURE sp, const Args&... args);
+		bool ExecuteSP(STORED_PROCEDURE _sp, const Args&... _args);
 
 		template<typename... Args>
-		bool ExecuteSP(SQLHSTMT& hstmt, STORED_PROCEDURE sp, const Args&... args);
+		bool ExecuteSP(SQLHSTMT& _hstmt, STORED_PROCEDURE _sp, const Args&... _args);
 
 	private:
 		SQLHENV m_henv;
@@ -62,63 +62,63 @@ namespace wod_server {
 	};
 
 	template<typename T>
-	bool CDataBase::BindParameter(SQLHSTMT hstmt, int index, const T& value)
+	bool CDataBase::BindParameter(SQLHSTMT _hstmt, int _index, const T& _value)
 	{
 		// Generic template, should be specialized
 		return false;
 	}
 
 	template<>
-	inline bool CDataBase::BindParameter<std::string>(SQLHSTMT hstmt, int index, const std::string& value)
+	inline bool CDataBase::BindParameter<std::string>(SQLHSTMT _hstmt, int _index, const std::string& _value)
 	{
-		SQLRETURN ret = SQLBindParameter(hstmt, index, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, value.length(), 0, (SQLPOINTER)value.c_str(), value.length(), NULL);
+		SQLRETURN ret = SQLBindParameter(_hstmt, _index, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, _value.length(), 0, (SQLPOINTER)_value.c_str(), _value.length(), NULL);
 		return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
 	}
 
 	template<>
-	inline bool CDataBase::BindParameter<int>(SQLHSTMT hstmt, int index, const int& value)
+	inline bool CDataBase::BindParameter<int>(SQLHSTMT _hstmt, int _index, const int& _value)
 	{
-		SQLRETURN ret = SQLBindParameter(hstmt, index, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLPOINTER)&value, 0, NULL);
+		SQLRETURN ret = SQLBindParameter(_hstmt, _index, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLPOINTER)&_value, 0, NULL);
 		return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
 	}
 
 	template<>
-	inline bool CDataBase::BindParameter<short>(SQLHSTMT hstmt, int index, const short& value)
+	inline bool CDataBase::BindParameter<short>(SQLHSTMT _hstmt, int _index, const short& _value)
 	{
-		SQLRETURN ret = SQLBindParameter(hstmt, index, SQL_PARAM_INPUT, SQL_C_SHORT, SQL_SMALLINT, 0, 0, (SQLPOINTER)&value, 0, NULL);
+		SQLRETURN ret = SQLBindParameter(_hstmt, _index, SQL_PARAM_INPUT, SQL_C_SHORT, SQL_SMALLINT, 0, 0, (SQLPOINTER)&_value, 0, NULL);
 		return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
 	}
 
 	template<>
-	inline bool CDataBase::BindParameter<unsigned short>(SQLHSTMT hstmt, int index, const unsigned short& value)
+	inline bool CDataBase::BindParameter<unsigned short>(SQLHSTMT _hstmt, int _index, const unsigned short& _value)
 	{
-		SQLRETURN ret = SQLBindParameter(hstmt, index, SQL_PARAM_INPUT, SQL_C_SHORT, SQL_SMALLINT, 0, 0, (SQLPOINTER)&value, 0, NULL);
+		SQLRETURN ret = SQLBindParameter(_hstmt, _index, SQL_PARAM_INPUT, SQL_C_SHORT, SQL_SMALLINT, 0, 0, (SQLPOINTER)&_value, 0, NULL);
 		return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
 	}
 
 	template<>
-	inline bool CDataBase::BindParameter<bool>(SQLHSTMT hstmt, int index, const bool& value)
+	inline bool CDataBase::BindParameter<bool>(SQLHSTMT _hstmt, int _index, const bool& _value)
 	{
-		SQLRETURN ret = SQLBindParameter(hstmt, index, SQL_PARAM_INPUT, SQL_C_BIT, SQL_BIT, 0, 0, (SQLPOINTER)&value, 0, NULL);
+		SQLRETURN ret = SQLBindParameter(_hstmt, _index, SQL_PARAM_INPUT, SQL_C_BIT, SQL_BIT, 0, 0, (SQLPOINTER)&_value, 0, NULL);
 		return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
 	}
 
 	template<typename T, typename... Args>
-	void CDataBase::BindParameters(SQLHSTMT hstmt, int index, const T& first, const Args&... rest)
+	void CDataBase::BindParameters(SQLHSTMT _hstmt, int _index, const T& _first, const Args&... _rest)
 	{
-		if (BindParameter(hstmt, index, first)) {
-			BindParameters(hstmt, ++index, rest...);
+		if (BindParameter(_hstmt, _index, _first)) {
+			BindParameters(_hstmt, ++_index, _rest...);
 		}
 	}
 
 	template<typename... Args>
-	inline bool CDataBase::ExecuteSP(STORED_PROCEDURE sp, const Args&... args)
+	inline bool CDataBase::ExecuteSP(STORED_PROCEDURE _sp, const Args&... _args)
 	{
 		SQLHSTMT hstmt;
 		if (!AllocStatementHandle(hstmt))
 			return false;
 
-		if (!ExecuteSP(hstmt, sp, args...)) {
+		if (!ExecuteSP(hstmt, _sp, _args...)) {
 			FreeStatementHandle(hstmt);
 			return false;
 		}
@@ -128,30 +128,30 @@ namespace wod_server {
 	}
 
 	template<typename... Args>
-	bool CDataBase::ExecuteSP(SQLHSTMT& hstmt, STORED_PROCEDURE sp, const Args&... args)
+	bool CDataBase::ExecuteSP(SQLHSTMT& _hstmt, STORED_PROCEDURE _sp, const Args&... _args)
 	{
-		std::wstring spName = m_spMap.at(sp);
+		std::wstring spName = m_spMap.at(_sp);
 		std::wstring query = L"EXEC " + spName;
-		if constexpr (sizeof...(args) > 0) {
+		if constexpr (sizeof...(_args) > 0) {
 			query += L" ?";
-			for (int i = 1; i < sizeof...(args); ++i) {
+			for (int i = 1; i < sizeof...(_args); ++i) {
 				query += L", ?";
 			}
 		}
 
-		SQLRETURN ret = SQLPrepare(hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLPrepare(_hstmt, (SQLWCHAR*)query.c_str(), SQL_NTS);
 		if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-			Show_Error(hstmt, SQL_HANDLE_STMT, ret);
+			Show_Error(_hstmt, SQL_HANDLE_STMT, ret);
 			return false;
 		}
 
-		if constexpr (sizeof...(args) > 0) {
-			BindParameters(hstmt, 1, args...);
+		if constexpr (sizeof...(_args) > 0) {
+			BindParameters(_hstmt, 1, _args...);
 		}
 
-		ret = SQLExecute(hstmt);
+		ret = SQLExecute(_hstmt);
 		if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-			Show_Error(hstmt, SQL_HANDLE_STMT, ret);
+			Show_Error(_hstmt, SQL_HANDLE_STMT, ret);
 			return false;
 		}
 

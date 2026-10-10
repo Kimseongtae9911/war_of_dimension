@@ -163,8 +163,8 @@ namespace wod_server {
 	{
         wod::core::ProcessStopSignal signal;
         const unsigned int count = (std::max)(1u, std::thread::hardware_concurrency()/2);
-        const auto failure = [](std::exception_ptr error) {
-            try { std::rethrow_exception(error); }
+        const auto failure = [](std::exception_ptr _error) {
+            try { std::rethrow_exception(_error); }
             catch (const std::exception& detail) { LogPrinter::PrintMsg(std::string("Worker failed: ") + detail.what()); }
             catch (...) { LogPrinter::PrintMsg("Worker failed: unknown exception"); }
             wod::core::ProcessStopSignal::Request(GetCurrentProcessId());

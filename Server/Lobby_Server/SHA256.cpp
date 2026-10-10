@@ -2,39 +2,39 @@
 #include "SHA256.h"
 #include "HashUtil.h"
 
-std::array<unsigned char, SHA256::BLOCKSIZE * 2> SHA256::m_buffer;
+std::array<unsigned char, SHA256::m_BLOCKSIZE * 2> SHA256::m_buffer;
 int SHA256::m_bufferIndex;
 unsigned int SHA256::m_length;
 std::array<unsigned int, 8> SHA256::m_chain;
 constexpr std::array<unsigned int, 64> SHA256::m_k;
 
-void SHA256::Update(const unsigned char* data, unsigned int length)
+void SHA256::Update(const unsigned char* _data, unsigned int _length)
 {
-	unsigned int temp = BLOCKSIZE - m_bufferIndex;
-	unsigned int remaining = length < temp ? length : temp;
-	std::memcpy(&m_buffer[m_bufferIndex], data, remaining);
-	if (m_bufferIndex + length < BLOCKSIZE) {
-		m_bufferIndex += length;
+	unsigned int temp = m_BLOCKSIZE - m_bufferIndex;
+	unsigned int remaining = _length < temp ? _length : temp;
+	std::memcpy(&m_buffer[m_bufferIndex], _data, remaining);
+	if (m_bufferIndex + _length < m_BLOCKSIZE) {
+		m_bufferIndex += _length;
 		return;
 	}
-	unsigned int number = (length - remaining) / BLOCKSIZE;
-	const unsigned char* message = data + remaining;
+	unsigned int number = (_length - remaining) / m_BLOCKSIZE;
+	const unsigned char* message = _data + remaining;
 	ProcessBlock(m_buffer.data(), 1);
 	ProcessBlock(message, number);
-	remaining = (length - remaining) % BLOCKSIZE;
+	remaining = (_length - remaining) % m_BLOCKSIZE;
 	std::memcpy(m_buffer.data(), &message[number << 6], remaining);
 	m_bufferIndex = remaining;
 	m_length += (number + 1) << 6;
 }
 
-void SHA256::ProcessBlock(const unsigned char* message, int number)
+void SHA256::ProcessBlock(const unsigned char* _message, int _number)
 {
 	unsigned int w[64];
 	unsigned int chains[8] = {};
 	const unsigned char* tempMessage;
 
-	for (size_t j = 0; j < number; ++j) {
-		tempMessage = message + (j << 6);
+	for (size_t j = 0; j < _number; ++j) {
+		tempMessage = _message + (j << 6);
 		for (int i = 0; i < 16; ++i) {
 			w[i] = (static_cast<unsigned int>(tempMessage[(i << 2) + 3])) | (static_cast<unsigned int>(tempMessage[(i << 2) + 2]) << 8) | (static_cast<unsigned int>(tempMessage[(i << 2) + 1]) << 16) | (static_cast<unsigned int>(tempMessage[i << 2]) << 24);
 		}
@@ -49,7 +49,7 @@ void SHA256::ProcessBlock(const unsigned char* message, int number)
 			chains[i] = m_chain[i];
 		}
 
-		for (int i = 0; i < BLOCKSIZE; ++i) {
+		for (int i = 0; i < m_BLOCKSIZE; ++i) {
 			unsigned int T1 = chains[7] + (RightRotate(chains[4], 6) ^ RightRotate(chains[4], 11) ^ RightRotate(chains[4], 25)) + Ch(chains[4], chains[5], chains[6]) + m_k[i] + w[i];
 			unsigned int T2 = (RightRotate(chains[0], 2) ^ RightRotate(chains[0], 13) ^ RightRotate(chains[0], 22)) + Maj(chains[0], chains[1], chains[2]);
 			chains[7] = chains[6];
@@ -68,9 +68,9 @@ void SHA256::ProcessBlock(const unsigned char* message, int number)
 	}
 }
 
-void SHA256::Finalize(unsigned char* output)
+void SHA256::Finalize(unsigned char* _output)
 {
-	unsigned int number = (1 + ((BLOCKSIZE - 9) < (m_bufferIndex % BLOCKSIZE)));
+	unsigned int number = (1 + ((m_BLOCKSIZE - 9) < (m_bufferIndex % m_BLOCKSIZE)));
 	unsigned int tempBl = (m_length + m_bufferIndex) << 3;
 	unsigned int tempLen = number << 6;
 	memset(m_buffer.data() + m_bufferIndex, 0, tempLen - static_cast<unsigned int>(m_bufferIndex));
@@ -83,21 +83,21 @@ void SHA256::Finalize(unsigned char* output)
 	ProcessBlock(m_buffer.data(), number);
 	for (int i = 0; i < 8; ++i) {
 		for (int j = 3; j >= 0; --j) {
-			*(&output[i << 2] + j) = static_cast<unsigned char>(RightShift(m_chain[i], (3 - j) * 8));
+			*(&_output[i << 2] + j) = static_cast<unsigned char>(RightShift(m_chain[i], (3 - j) * 8));
 		}
 	}
 }
 
-std::string SHA256::Encrpyt(std::string data)
+std::string SHA256::Encrpyt(std::string _data)
 {
-	unsigned char output[HASHSIZE];
-	memset(output, 0, HASHSIZE);
+	unsigned char output[m_HASHSIZE];
+	memset(output, 0, m_HASHSIZE);
 
 	Reset();
-	Update(reinterpret_cast<const unsigned char*>(data.c_str()), static_cast<unsigned int>(data.length()));
+	Update(reinterpret_cast<const unsigned char*>(_data.c_str()), static_cast<unsigned int>(_data.length()));
 	Finalize(output);
 
-	return HashUtil::UCharBinToString(output, HASHSIZE);
+	return HashUtil::UCharBinToString(output, m_HASHSIZE);
 }
 
 void SHA256::Reset()

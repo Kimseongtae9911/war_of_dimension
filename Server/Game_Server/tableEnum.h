@@ -1,9 +1,9 @@
 #pragma once
 
 template<class T>
-T StringToEnum(const std::string& str)
+T StringToEnum(const std::string& _str)
 {
-    return static_cast<T>(std::stoi(str));
+    return static_cast<T>(std::stoi(_str));
 }
 
 enum class EItemType : uint8_t
@@ -24,10 +24,10 @@ enum class EItemType : uint8_t
 };
 
 template<>
-EItemType StringToEnum(const std::string& str) {
+EItemType StringToEnum(const std::string& _str) {
     static std::unordered_map<std::string, EItemType> enumMap = {
     {"HealHp", EItemType::HealHp}, {"HealMp", EItemType::HealMp}, {"MaxHp", EItemType::MaxHp}, {"MaxMp", EItemType::MaxMp}, {"StrengthIncrease", EItemType::StrengthIncrease}, {"MagicIncrease", EItemType::MagicIncrease}, {"DefenseIncrease", EItemType::DefenseIncrease}, {"RegistIncrease", EItemType::RegistIncrease}, {"SpeedIncrease", EItemType::SpeedIncrease}, {"TenacityIncrease", EItemType::TenacityIncrease}, {"CriticalIncrease", EItemType::CriticalIncrease},     };
-    auto it = enumMap.find(str);
+    auto it = enumMap.find(_str);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -50,10 +50,10 @@ enum class ENpcType : uint16_t
 };
 
 template<>
-ENpcType StringToEnum(const std::string& str) {
+ENpcType StringToEnum(const std::string& _str) {
     static std::unordered_map<std::string, ENpcType> enumMap = {
     {"Minion", ENpcType::Minion}, {"RedDragon", ENpcType::RedDragon}, {"GreenDragon", ENpcType::GreenDragon}, {"Golem", ENpcType::Golem}, {"Bear", ENpcType::Bear}, {"Minotaur", ENpcType::Minotaur}, {"Chest", ENpcType::Chest}, {"Beholder", ENpcType::Beholder},     };
-    auto it = enumMap.find(str);
+    auto it = enumMap.find(_str);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -147,10 +147,10 @@ enum class EPlayerSkill : uint16_t
 };
 
 template<>
-EPlayerSkill StringToEnum(const std::string& str) {
+EPlayerSkill StringToEnum(const std::string& _str) {
     static std::unordered_map<std::string, EPlayerSkill> enumMap = {
     {"ArcherAttack", EPlayerSkill::ArcherAttack}, {"ArcherBackStep", EPlayerSkill::ArcherBackStep}, {"ArcherDodge", EPlayerSkill::ArcherDodge}, {"ArcherMultipleShot", EPlayerSkill::ArcherMultipleShot}, {"ArcherVault", EPlayerSkill::ArcherVault}, {"ArcherVitalPoint", EPlayerSkill::ArcherVitalPoint}, {"ArcherPenetraitingShot", EPlayerSkill::ArcherPenetraitingShot}, {"ArcherStickyArrow", EPlayerSkill::ArcherStickyArrow}, {"ArcherHunterEyes", EPlayerSkill::ArcherHunterEyes}, {"ArcherWindStep", EPlayerSkill::ArcherWindStep}, {"ArcherArrowRain", EPlayerSkill::ArcherArrowRain}, {"ArcherPhoenixArrow", EPlayerSkill::ArcherPhoenixArrow}, {"ArcherStormArrow", EPlayerSkill::ArcherStormArrow}, {"FighterAttack", EPlayerSkill::FighterAttack}, {"FighterDash", EPlayerSkill::FighterDash}, {"FighterDodge", EPlayerSkill::FighterDodge}, {"FighterSpinKick", EPlayerSkill::FighterSpinKick}, {"FighterWildAttack", EPlayerSkill::FighterWildAttack}, {"FighterDragonFist", EPlayerSkill::FighterDragonFist}, {"FighterMeditation", EPlayerSkill::FighterMeditation}, {"FighterPointBlood", EPlayerSkill::FighterPointBlood}, {"FighterIndestructible", EPlayerSkill::FighterIndestructible}, {"FighterWindKick", EPlayerSkill::FighterWindKick}, {"FighterCounter", EPlayerSkill::FighterCounter}, {"FighterFireBall", EPlayerSkill::FighterFireBall}, {"FighterRisingDragon", EPlayerSkill::FighterRisingDragon}, {"SwordManAttack", EPlayerSkill::SwordManAttack}, {"SwordManDodge", EPlayerSkill::SwordManDodge}, {"SwordManRun", EPlayerSkill::SwordManRun}, {"SwordManHeavySlash", EPlayerSkill::SwordManHeavySlash}, {"SwordManShieldBash", EPlayerSkill::SwordManShieldBash}, {"SwordManWarCry", EPlayerSkill::SwordManWarCry}, {"SwordManDefensiveStance", EPlayerSkill::SwordManDefensiveStance}, {"SwordManBerserk", EPlayerSkill::SwordManBerserk}, {"SwordManAuraBlade", EPlayerSkill::SwordManAuraBlade}, {"SwordManHellBlade", EPlayerSkill::SwordManHellBlade}, {"SwordManJudgementSword", EPlayerSkill::SwordManJudgementSword}, {"SwordManProtectedArea", EPlayerSkill::SwordManProtectedArea}, {"SwordManAnkleCut", EPlayerSkill::SwordManAnkleCut}, {"WizardAttack", EPlayerSkill::WizardAttack}, {"WizardTeleport", EPlayerSkill::WizardTeleport}, {"WizardBlink", EPlayerSkill::WizardBlink}, {"WizardBodyStrength", EPlayerSkill::WizardBodyStrength}, {"WizardEnchant", EPlayerSkill::WizardEnchant}, {"WizardEarthImpact", EPlayerSkill::WizardEarthImpact}, {"WizardMagicMissile", EPlayerSkill::WizardMagicMissile}, {"WizardEnergyBall", EPlayerSkill::WizardEnergyBall}, {"WizardMagicEye", EPlayerSkill::WizardMagicEye}, {"WizardDarknessRay", EPlayerSkill::WizardDarknessRay}, {"WizardReflect", EPlayerSkill::WizardReflect}, {"WizardBigBang", EPlayerSkill::WizardBigBang}, {"WizardBigBangContinue", EPlayerSkill::WizardBigBangContinue}, {"WizardOverload", EPlayerSkill::WizardOverload}, {"OgreAttack", EPlayerSkill::OgreAttack}, {"OgreHeavySwing", EPlayerSkill::OgreHeavySwing}, {"OgreCrunch", EPlayerSkill::OgreCrunch}, {"OgreCharging", EPlayerSkill::OgreCharging}, {"OgreRoar", EPlayerSkill::OgreRoar}, {"OgreGluttony", EPlayerSkill::OgreGluttony}, {"OgreEndure", EPlayerSkill::OgreEndure}, {"OgreRockThrow", EPlayerSkill::OgreRockThrow}, {"OgreDimensionPunch", EPlayerSkill::OgreDimensionPunch}, {"OgreButting", EPlayerSkill::OgreButting}, {"OgreDimensionCrush", EPlayerSkill::OgreDimensionCrush}, {"ProgrammerAttack", EPlayerSkill::ProgrammerAttack}, {"ProgrammerMove", EPlayerSkill::ProgrammerMove}, {"ProgrammerPointer", EPlayerSkill::ProgrammerPointer}, {"ProgrammerPlusStats", EPlayerSkill::ProgrammerPlusStats}, {"ProgrammerMinusStats", EPlayerSkill::ProgrammerMinusStats}, {"ProgrammerRelease", EPlayerSkill::ProgrammerRelease}, {"ProgrammerDelete", EPlayerSkill::ProgrammerDelete}, {"ProgrammerReturn0", EPlayerSkill::ProgrammerReturn0}, {"ProgrammerLaser", EPlayerSkill::ProgrammerLaser}, {"ProgrammerWhileTrue", EPlayerSkill::ProgrammerWhileTrue}, {"ProgrammerHelloWorld", EPlayerSkill::ProgrammerHelloWorld}, {"Burn", EPlayerSkill::Burn}, {"Stun", EPlayerSkill::Stun}, {"MemoryLeak", EPlayerSkill::MemoryLeak}, {"Silence", EPlayerSkill::Silence},     };
-    auto it = enumMap.find(str);
+    auto it = enumMap.find(_str);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -176,10 +176,10 @@ enum class EDebuffType : uint8_t
 };
 
 template<>
-EDebuffType StringToEnum(const std::string& str) {
+EDebuffType StringToEnum(const std::string& _str) {
     static std::unordered_map<std::string, EDebuffType> enumMap = {
     {"Slow", EDebuffType::Slow}, {"Burn", EDebuffType::Burn}, {"Silence", EDebuffType::Silence}, {"Stun", EDebuffType::Stun}, {"Poison", EDebuffType::Poison}, {"MemoryLeak", EDebuffType::MemoryLeak}, {"ArmorDecrease", EDebuffType::ArmorDecrease}, {"UtilDecrease", EDebuffType::UtilDecrease}, {"MaxHpDecreasePercent", EDebuffType::MaxHpDecreasePercent}, {"Bleed", EDebuffType::Bleed}, {"StatDecrease", EDebuffType::StatDecrease},     };
-    auto it = enumMap.find(str);
+    auto it = enumMap.find(_str);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -203,10 +203,10 @@ enum class EBuffType : uint8_t
 };
 
 template<>
-EBuffType StringToEnum(const std::string& str) {
+EBuffType StringToEnum(const std::string& _str) {
     static std::unordered_map<std::string, EBuffType> enumMap = {
     {"CriticalIncrease", EBuffType::CriticalIncrease}, {"SpeedIncrease", EBuffType::SpeedIncrease}, {"AttackIncrease", EBuffType::AttackIncrease}, {"UtilIncrease", EBuffType::UtilIncrease}, {"Reflect", EBuffType::Reflect}, {"DefenseIncrease", EBuffType::DefenseIncrease}, {"StrengthIncrease", EBuffType::StrengthIncrease}, {"Cooltime", EBuffType::Cooltime}, {"StatIncrease", EBuffType::StatIncrease},     };
-    auto it = enumMap.find(str);
+    auto it = enumMap.find(_str);
     if (it != enumMap.end()) {
         return it->second;
     } else {

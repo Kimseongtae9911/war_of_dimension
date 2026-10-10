@@ -2,9 +2,9 @@
 #include "OgreChargingHandler.h"
 
 namespace wod_server {
-    CSkillHandler* OgreChargingHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreChargingHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreChargingHandler(client);
+        return new OgreChargingHandler(_client);
     }
 
     void OgreChargingHandler::Handle()

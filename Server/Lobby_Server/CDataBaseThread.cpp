@@ -24,19 +24,19 @@ namespace wod_server {
 			DB_EVENT ev;
 			auto current_time = std::chrono::system_clock::now();
 			if (m_timerQueue.try_pop(ev)) {
-				if (ev.wakeUpTime > current_time) {
+				if (ev.m_wakeUpTime > current_time) {
 					m_timerQueue.push(ev);
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 					continue;
 				}
-				switch (ev.eventID) {
+				switch (ev.m_eventID) {
 				case DB_EVENT_TYPE::EV_SAVE_INFO:
-					if (m_dataBase->SavePlayerInfo(ev.id, ev.playerInfo)) {
+					if (m_dataBase->SavePlayerInfo(ev.m_id, ev.m_playerInfo)) {
 						LogPrinter::PrintMsg("Saved Player Info");
 					}
 					break;
 				case DB_EVENT_TYPE::EV_SHOP_BUY:
-					if (m_dataBase->SaveShopBuyInfo(ev.id, ev.shopType, ev.shopNum)) {
+					if (m_dataBase->SaveShopBuyInfo(ev.m_id, ev.m_shopType, ev.m_shopNum)) {
 						LogPrinter::PrintMsg("Saved Shop Buy Info");
 					}
 					break;
@@ -49,27 +49,27 @@ namespace wod_server {
 					localtime_s(&localTime, &futureTime);
 					deadLine << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
 
-					if (m_dataBase->RegisterAuction(ev.id, ev.shopType, ev.shopNum, ev.buyPrice, deadLine.str())) {
+					if (m_dataBase->RegisterAuction(ev.m_id, ev.m_shopType, ev.m_shopNum, ev.m_buyPrice, deadLine.str())) {
 						LogPrinter::PrintMsg("Register Auction");
 					}
 					break;
 				}
 				case DB_EVENT_TYPE::EV_SAVE_TOKEN: {
-					if (m_dataBase->SaveToken(ev.id, ev.buyPrice)) {
+					if (m_dataBase->SaveToken(ev.m_id, ev.m_buyPrice)) {
 						LogPrinter::PrintMsg("Saved Token");
 					}
 					break;
 				}
 				case DB_EVENT_TYPE::EV_BUY_AUCTION: {
-					if (m_dataBase->BuyAuction(ev.sellerID, ev.id, ev.shopType, ev.shopNum, ev.buyPrice)) {
+					if (m_dataBase->BuyAuction(ev.m_sellerID, ev.m_id, ev.m_shopType, ev.m_shopNum, ev.m_buyPrice)) {
 						LogPrinter::PrintMsg("Buy Auction");
 					}
 					break;
 				}
 
 				}
-				
-				
+
+
 				continue;
 			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));

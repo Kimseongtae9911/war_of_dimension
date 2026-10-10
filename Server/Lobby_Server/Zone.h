@@ -2,7 +2,7 @@
 
 namespace wod_server {
 	// 채널 하나를 Zone으로 구성
-	class Zone 
+	class Zone
 	{
 	public:
 		Zone() = default;
@@ -13,7 +13,7 @@ namespace wod_server {
 
 		ZONE_STATE Update();
 
-		void AddJob(std::shared_ptr<IJob> job) { m_jobQueue.PushJob(std::move(job)); }
+		void AddJob(std::shared_ptr<IJob> _job) { m_jobQueue.PushJob(std::move(_job)); }
 
 	private:
 		std::vector<CClient*> m_clients; // Zone에 속한 클라이언트들

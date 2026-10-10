@@ -9,14 +9,14 @@ namespace wod_server {
 	{
 	public:
 		CSkillHandler() {}
-		CSkillHandler(std::shared_ptr<CClient> client) { m_client = client; }
+		CSkillHandler(std::shared_ptr<CClient> _client) { m_client = _client; }
 		~CSkillHandler() {}
 
-		virtual CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) = 0;
+		virtual CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) = 0;
 
 		virtual void Handle() override {};
 
-		void SetClient(std::shared_ptr<CClient> client) { m_client = client; }
+		void SetClient(std::shared_ptr<CClient> _client) { m_client = _client; }
 
 	protected:
 		std::chrono::time_point<std::chrono::system_clock> SkillUseTime() { return TimeUtil::PassedTimeMSec(m_castingTime); }
@@ -26,7 +26,7 @@ namespace wod_server {
 
 	protected:
 		std::shared_ptr<CClient> m_client;
-		
+
 		int m_castingTime = 0;
 		float m_strengthRatio = 0.f;
 		float m_magicRatio = 0.f;
@@ -39,7 +39,7 @@ namespace wod_server {
 	{
 	public:
 		CAttackSkillHandler() {}
-		CAttackSkillHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
+		CAttackSkillHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
 
 		virtual void Handle() override;
 	};

@@ -22,26 +22,26 @@ namespace wod_server {
 	{
 	}
 
-	void CNpc::Chase(float elapsedTime)
+	void CNpc::Chase(float _elapsedTime)
 	{
 		if (m_attack) {
 			LookTarget();
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 			return;
 		}
 
 		if (!m_chasePath.empty()) {
 			Node* nextNode = m_chasePath.top();
 
-			vec3 centroid = vec3( (nextNode->triangle.v1.x + nextNode->triangle.v2.x + nextNode->triangle.v3.x) / 3.0f,
-								  (nextNode->triangle.v1.y + nextNode->triangle.v2.y + nextNode->triangle.v3.y) / 3.0f,
-								  (nextNode->triangle.v1.z + nextNode->triangle.v2.z + nextNode->triangle.v3.z) / 3.0f);
+			vec3 centroid = vec3( (nextNode->m_triangle.m_v1.m_x + nextNode->m_triangle.m_v2.m_x + nextNode->m_triangle.m_v3.m_x) / 3.0f,
+								  (nextNode->m_triangle.m_v1.m_y + nextNode->m_triangle.m_v2.m_y + nextNode->m_triangle.m_v3.m_y) / 3.0f,
+								  (nextNode->m_triangle.m_v1.m_z + nextNode->m_triangle.m_v2.m_z + nextNode->m_triangle.m_v3.m_z) / 3.0f);
 
-			m_targetPos.x = centroid.x;
-			m_targetPos.z = centroid.z;
+			m_targetPos.m_x = centroid.m_x;
+			m_targetPos.m_z = centroid.m_z;
 			LookTarget();
 
-			if (IsFloatEqual(m_pos.x, m_targetPos.x, 1.0f) && IsFloatEqual(m_pos.z, m_targetPos.z, 1.0f)) {
+			if (IsFloatEqual(m_pos.m_x, m_targetPos.m_x, 1.0f) && IsFloatEqual(m_pos.m_z, m_targetPos.m_z, 1.0f)) {
 				m_chasePath.pop();
 			}
 		}
@@ -49,20 +49,20 @@ namespace wod_server {
 			if (m_targetClientID == -1)
 				return;
 			vec3 clientPos = CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetPos();
-			m_targetPos.x = clientPos.x;
-			m_targetPos.z = clientPos.z;
+			m_targetPos.m_x = clientPos.m_x;
+			m_targetPos.m_z = clientPos.m_z;
 			LookTarget();
 		}
 
 		if (m_rotate)
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 
-		Move(elapsedTime);
+		Move(_elapsedTime);
 	}
 
-	void CNpc::Attack(float elapsedTime)
+	void CNpc::Attack(float _elapsedTime)
 	{
-		if (!active)
+		if (!m_active)
 			return;
 
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - m_attackTime) < std::chrono::milliseconds(m_npcCsv->AttackCooltime) || m_attack) {
@@ -70,7 +70,7 @@ namespace wod_server {
 		}
 		else {
 			LookTarget();
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 			m_attack = true;
 			m_attackTime = std::chrono::system_clock::now().time_since_epoch();
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -80,15 +80,15 @@ namespace wod_server {
 			}
 			CObjectMgr::GetInstance()->GetClient(m_targetClientID)->Damage(m_power, 0, DAMAGE_TYPE::STRENGTH, m_id);
 
-			if (CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetStatus()->healthMana.GetCurHp() <= 0)
+			if (CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetStatus()->m_healthMana.GetCurHp() <= 0)
 				m_state = NPC_STATE::ST_RETURN;
 		}
 	}
 
-	void CNpc::Rotate(float elapsedTime)
+	void CNpc::Rotate(float _elapsedTime)
 	{
 		if (m_look != m_targetLook) {
-			vec3 newLook = vec3::Normalize(vec3::Lerp(m_look, m_targetLook, m_rotateSpeed * elapsedTime));
+			vec3 newLook = vec3::Normalize(vec3::Lerp(m_look, m_targetLook, m_rotateSpeed * _elapsedTime));
 
 			if (newLook.Dot(m_targetLook) >= 1.0f - FLT_EPSILON) {
 				m_look = m_targetLook;
@@ -101,14 +101,14 @@ namespace wod_server {
 		}
 	}
 
-	bool CNpc::Damaged(int clientID, int power, DAMAGE_TYPE type, bool updateTarget)
+	bool CNpc::Damaged(int _clientID, int _power, DAMAGE_TYPE _type, bool _updateTarget)
 	{
 		m_hpLock.lock();
-		m_curHp -= power;
+		m_curHp -= _power;
 		//Remove Npc
 		if (m_curHp <= 0) {
 			m_hpLock.unlock();
-			active = false;
+			m_active = false;
 			m_state = NPC_STATE::ST_IDLE;
 			m_attack = false;
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -134,9 +134,9 @@ namespace wod_server {
 
 	void CNpc::LookTarget()
 	{
-		vec3 target = { m_targetPos.x, 0.0f, m_targetPos.z };
+		vec3 target = { m_targetPos.m_x, 0.0f, m_targetPos.m_z };
 		m_targetLook = target - m_pos;
-		m_targetLook.y = 0.f;
+		m_targetLook.m_y = 0.f;
 		m_targetLook = vec3::Normalize(m_targetLook);
 
 		if (m_look != m_targetLook)
@@ -145,18 +145,18 @@ namespace wod_server {
 
 	void CNpc::UpdateBoundingBox()
 	{
-		m_worldMatrix._11 = m_right.x; m_worldMatrix._12 = m_right.y; m_worldMatrix._13 = m_right.z;
-		m_worldMatrix._31 = m_targetLook.x; m_worldMatrix._32 = m_targetLook.y; m_worldMatrix._33 = m_targetLook.z;
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._11 = m_right.m_x; m_worldMatrix._12 = m_right.m_y; m_worldMatrix._13 = m_right.m_z;
+		m_worldMatrix._31 = m_targetLook.m_x; m_worldMatrix._32 = m_targetLook.m_y; m_worldMatrix._33 = m_targetLook.m_z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		if (-1 == m_targetClientID) {
-			m_worldMatrix._31 = m_look.x; m_worldMatrix._32 = m_look.y; m_worldMatrix._33 = m_look.z;
+			m_worldMatrix._31 = m_look.m_x; m_worldMatrix._32 = m_look.m_y; m_worldMatrix._33 = m_look.m_z;
 		}
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}
 
-	bool CNpc::Astar(Node* startNode, Node* endNode)
+	bool CNpc::Astar(Node* _startNode, Node* _endNode)
 	{
 		while (!m_chasePath.empty()) {
 			m_chasePath.pop();
@@ -164,26 +164,26 @@ namespace wod_server {
 
 		std::unordered_set<Node*> visitedNodes;
 
-		std::priority_queue < PathNode*, std::vector<PathNode*>, decltype([](const PathNode* a, const PathNode* b) {
-			return a->fScore > b->fScore;
+		std::priority_queue < PathNode*, std::vector<PathNode*>, decltype([](const PathNode* _a, const PathNode* _b) {
+			return _a->m_fScore > _b->m_fScore;
 			})> openSet;
 
-		openSet.push(new PathNode(startNode, 0.0f, CalculateHeuristic(startNode, endNode)));
+		openSet.push(new PathNode(_startNode, 0.0f, CalculateHeuristic(_startNode, _endNode)));
 
 		std::unordered_map<Node*, Node*> cameFrom;
 		std::unordered_map<Node*, float> gScore;
 
-		gScore[startNode] = 0.0f;
+		gScore[_startNode] = 0.0f;
 
 		while (!openSet.empty())
 		{
 			PathNode* currentPathNode = openSet.top();
-			Node* currentNode = currentPathNode->node;
+			Node* currentNode = currentPathNode->m_node;
 			openSet.pop();
 
-			if (currentNode == endNode) {
+			if (currentNode == _endNode) {
 				Node* pathNode = currentNode;
-				while (pathNode != nullptr) {					
+				while (pathNode != nullptr) {
 					m_chasePath.push(pathNode);
 					pathNode = cameFrom[pathNode];
 				}
@@ -197,7 +197,7 @@ namespace wod_server {
 
 			visitedNodes.insert(currentNode);
 
-			for (Node* adjacentNode : currentNode->adjacentNodes) {
+			for (Node* adjacentNode : currentNode->m_adjacentNodes) {
 				if (visitedNodes.contains(adjacentNode))
 					continue;
 
@@ -206,7 +206,7 @@ namespace wod_server {
 				if (tempGScore < gScore[adjacentNode]) {
 					cameFrom[adjacentNode] = currentNode;
 					gScore[adjacentNode] = tempGScore;
-					float fScore = tempGScore + CalculateHeuristic(adjacentNode, endNode);
+					float fScore = tempGScore + CalculateHeuristic(adjacentNode, _endNode);
 					openSet.push(new PathNode(adjacentNode, tempGScore, fScore));
 				}
 			}
@@ -216,15 +216,15 @@ namespace wod_server {
 		return false;
 	}
 
-	float CNpc::CalculateHeuristic(Node* node, Node* endNode)
+	float CNpc::CalculateHeuristic(Node* _node, Node* _endNode)
 	{
-		vec3 centroid1 = vec3((node->triangle.v1.x + node->triangle.v2.x + node->triangle.v3.x) / 3.0f, 
-							  (node->triangle.v1.y + node->triangle.v2.y + node->triangle.v3.y) / 3.0f, 
-							  (node->triangle.v1.z + node->triangle.v2.z + node->triangle.v3.z) / 3.0f );
+		vec3 centroid1 = vec3((_node->m_triangle.m_v1.m_x + _node->m_triangle.m_v2.m_x + _node->m_triangle.m_v3.m_x) / 3.0f,
+							  (_node->m_triangle.m_v1.m_y + _node->m_triangle.m_v2.m_y + _node->m_triangle.m_v3.m_y) / 3.0f,
+							  (_node->m_triangle.m_v1.m_z + _node->m_triangle.m_v2.m_z + _node->m_triangle.m_v3.m_z) / 3.0f );
 
-		vec3 centroid2 = vec3((endNode->triangle.v1.x + endNode->triangle.v2.x + endNode->triangle.v3.x) / 3.0f,
-							  (endNode->triangle.v1.y + endNode->triangle.v2.y + endNode->triangle.v3.y) / 3.0f,
-							  (endNode->triangle.v1.z + endNode->triangle.v2.z + endNode->triangle.v3.z) / 3.0f);
+		vec3 centroid2 = vec3((_endNode->m_triangle.m_v1.m_x + _endNode->m_triangle.m_v2.m_x + _endNode->m_triangle.m_v3.m_x) / 3.0f,
+							  (_endNode->m_triangle.m_v1.m_y + _endNode->m_triangle.m_v2.m_y + _endNode->m_triangle.m_v3.m_y) / 3.0f,
+							  (_endNode->m_triangle.m_v1.m_z + _endNode->m_triangle.m_v2.m_z + _endNode->m_triangle.m_v3.m_z) / 3.0f);
 
 
 		float distance = centroid1.Magnitude(centroid2);

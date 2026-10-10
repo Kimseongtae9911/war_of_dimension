@@ -13,13 +13,13 @@ namespace wod_server {
 		CSkillTimer();
 		~CSkillTimer();
 
-		void PushEvent(const SKILL_EVENT& ev) { m_timerQueue.push(ev); }
+		void PushEvent(const SKILL_EVENT& _ev) { m_timerQueue.push(_ev); }
 
 		void Run();
 
 	private:
 		concurrency::concurrent_priority_queue<SKILL_EVENT> m_timerQueue;
-		std::unordered_map<EPlayerSkill, std::function<void(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)>> m_skillFunc;
+		std::unordered_map<EPlayerSkill, std::function<void(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)>> m_skillFunc;
 
 		CArcherTimer* m_archerTimer;
 		CFigtherTimer* m_fighterTimer;
@@ -29,10 +29,10 @@ namespace wod_server {
 		CProTimer* m_proTimer;
 
 	private:
-		void Burn(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue);
-		void MemoryLeak(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue);
-		void Silence(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue);
-		void Stun(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue);
+		void Burn(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue);
+		void MemoryLeak(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue);
+		void Silence(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue);
+		void Stun(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue);
 	};
 
 }

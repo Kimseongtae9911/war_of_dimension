@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		WizardDarknessRayHandler() {}
-		WizardDarknessRayHandler(std::shared_ptr<CClient> client);
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		WizardDarknessRayHandler(std::shared_ptr<CClient> _client);
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

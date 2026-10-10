@@ -3,9 +3,9 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    CSkillHandler* SwordManDodgeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* SwordManDodgeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new SwordManDodgeHandler(client);
+        return new SwordManDodgeHandler(_client);
     }
 
     void SwordManDodgeHandler::Handle()

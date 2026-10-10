@@ -3,10 +3,10 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    CSkillHandler* FighterMeditationHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterMeditationHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
         m_type = EPlayerSkill::FighterMeditation;
-        return new FighterMeditationHandler(client);
+        return new FighterMeditationHandler(_client);
     }
 
     void FighterMeditationHandler::Handle()

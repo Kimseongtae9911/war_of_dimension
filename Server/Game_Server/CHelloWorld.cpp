@@ -15,9 +15,9 @@ namespace wod_server {
 	{
 	}
 
-	bool CHelloWorld::Update(float elapsedTime)
+	bool CHelloWorld::Update(float _elapsedTime)
 	{
-		if (!active) {
+		if (!m_active) {
 			m_area.clear();
 			return false;
 		}
@@ -25,7 +25,7 @@ namespace wod_server {
 		std::array<int, MAX_PLAYER> clientIDs = CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum);
 		for (int id : m_area) {
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(id);
-			if (DistanceXZ(client->GetPos(), m_pos) > m_skillCsv->skillRadius) {
+			if (DistanceXZ(client->GetPos(), m_pos) > m_skillCsv->m_skillRadius) {
 				client->SetPos(m_pos);
 				for (int clid : clientIDs) {
 					if (-1 == clid)
@@ -38,7 +38,7 @@ namespace wod_server {
 		for (int i = 0; i < MAX_PLAYER - 1; ++i) {
 			if (-1 == clientIDs[i] || m_area.contains(clientIDs[i]))
 				continue;
-			if (DistanceXZ(CObjectMgr::GetInstance()->GetClient(clientIDs[i])->GetPos(), m_pos) < m_skillCsv->skillRadius) {
+			if (DistanceXZ(CObjectMgr::GetInstance()->GetClient(clientIDs[i])->GetPos(), m_pos) < m_skillCsv->m_skillRadius) {
 				m_area.insert(clientIDs[i]);
 			}
 		}
@@ -46,9 +46,9 @@ namespace wod_server {
 		return true;
 	}
 
-	void CHelloWorld::SetArea(const std::vector<int>& ids)
+	void CHelloWorld::SetArea(const std::vector<int>& _ids)
 	{
-		for (int id : ids) {
+		for (int id : _ids) {
 			m_area.insert(id);
 		}
 	}

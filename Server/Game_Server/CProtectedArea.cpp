@@ -15,9 +15,9 @@ namespace wod_server {
 	{
 	}
 
-	bool CProtectedArea::Update(float elapsedTime)
-	{		
-		if (!active) {
+	bool CProtectedArea::Update(float _elapsedTime)
+	{
+		if (!m_active) {
 			m_areaLock.lock();
 			if (!m_area.empty()) {
 				std::unordered_set<int> tempArea = m_area;
@@ -25,7 +25,7 @@ namespace wod_server {
 				for (int id : tempArea) {
 					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(id);
 					CStat stat = client->GetStatus()->GetStat();
-					stat.armor -= m_defensePower;
+					stat.m_armor -= m_defensePower;
 					client->GetStatus()->SetStat(stat);
 				}
 				m_areaLock.lock();
@@ -43,7 +43,7 @@ namespace wod_server {
 			if (clientIDs[i] == -1)
 				continue;
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientIDs[i]);
-			if (DistanceXZ(client->GetPos(), m_pos) < m_skillCsv->buffInfo[EBuffType::DefenseIncrease].buffDistance) {
+			if (DistanceXZ(client->GetPos(), m_pos) < m_skillCsv->m_buffInfo[EBuffType::DefenseIncrease].m_buffDistance) {
 				//Inside Protected Area
 				m_areaLock.lock();
 				if (!m_area.contains(clientIDs[i])) {
@@ -52,7 +52,7 @@ namespace wod_server {
 					m_areaLock.unlock();
 
 					CStat stat = client->GetStatus()->GetStat();
-					stat.armor += m_defensePower;
+					stat.m_armor += m_defensePower;
 					client->GetStatus()->SetStat(stat);
 				}
 				else
@@ -66,7 +66,7 @@ namespace wod_server {
 					m_area.erase(clientIDs[i]);
 					m_areaLock.unlock();
 					CStat stat = client->GetStatus()->GetStat();
-					stat.armor -= m_defensePower;
+					stat.m_armor -= m_defensePower;
 					client->GetStatus()->SetStat(stat);
 				}
 				else

@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    ArcherMultipleShotHandler::ArcherMultipleShotHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
-    {        
+    ArcherMultipleShotHandler::ArcherMultipleShotHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
+    {
         m_type = EPlayerSkill::ArcherMultipleShot;
         SetSkillInfo();
     }
 
-    CSkillHandler* ArcherMultipleShotHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ArcherMultipleShotHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ArcherMultipleShotHandler(client);
+        return new ArcherMultipleShotHandler(_client);
     }
 }

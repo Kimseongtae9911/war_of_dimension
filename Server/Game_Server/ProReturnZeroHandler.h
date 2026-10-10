@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		ProReturnZeroHandler() {}
-		ProReturnZeroHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		ProReturnZeroHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

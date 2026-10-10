@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherPenetraitingShotHandler() {}
-		ArcherPenetraitingShotHandler(std::shared_ptr<CClient> client);
+		ArcherPenetraitingShotHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

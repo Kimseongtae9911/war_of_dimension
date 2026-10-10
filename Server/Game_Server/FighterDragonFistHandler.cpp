@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    FighterDragonFistHandler::FighterDragonFistHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    FighterDragonFistHandler::FighterDragonFistHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::FighterDragonFist;
         SetSkillInfo();
     }
 
-    CSkillHandler* FighterDragonFistHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterDragonFistHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterDragonFistHandler(client);
+        return new FighterDragonFistHandler(_client);
     }
 
     void FighterDragonFistHandler::Handle()

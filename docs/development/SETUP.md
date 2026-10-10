@@ -71,6 +71,32 @@ Visual Studio의 다중 프로젝트 실행은 프로세스 시작 순서를 지
 
 프로필 형식과 solution filter 동작은 [Microsoft 다중 시작 프로젝트 문서](https://learn.microsoft.com/en-us/visualstudio/ide/how-to-set-multiple-startup-projects?view=visualstudio)와 [solution filter 문서](https://learn.microsoft.com/en-us/visualstudio/msbuild/solution-filters?view=visualstudio)를 따른다.
 
+## C++ 이름 규칙
+
+확정된 이름 규칙은 [공통 작업 지침](../../AGENTS.md)을 따른다.
+클래스 멤버는 `m_count`, 함수 인자는 `_count`처럼 구분한다.
+함수 인자에 `_` 접두어를 사용할 때는 첫 글자를 소문자로 쓰고 `__`를 포함하지 않는다.
+예약 식별자의 범위는 [C++ 표준 초안](https://eel.is/c++draft/lex.name#4)을 참조한다.
+
+기존 ServerCore·로비 서버·게임 서버의 멤버·함수 인자에도 규칙을 적용했다.
+정적 멤버와 서버 내부 상태 구조체의 필드도 `m_`로 구분한다.
+클라이언트·공통 프로토콜·외부 코드는 변경하지 않았다.
+CSV 데이터 구조체는 필드 이름을 `boost::pfr::names_as_array`로 읽어 열과 연결하므로 기존 필드 이름을 유지한다.
+지역 변수·함수·타입·전역 상수는 이번 변경 대상에서 제외했다.
+
+## C++ 코드 포맷
+
+저장소 루트의 `.clang-format`을 사용한다.
+긴 식·인자 목록의 줄 나눔 기준은 250자다.
+함수 간격·`if`·마지막 `return`의 규칙은 [공통 작업 지침](../../AGENTS.md)을 따른다.
+`if`·`else if`·`else` 묶음과 `while` 뒤, 마지막 `return` 앞의 빈 줄은 편집할 때 함께 유지한다.
+연결된 `if`·`else if`·`else`의 본문은 한 문장이어도 중괄호로 감싼다.
+외부 코드·바이너리 에셋은 일괄 포맷 대상에서 제외한다.
+
+ServerCore 공용 헤더는 Core 프로젝트의 `Header Files`에서 확인한다.
+테스트 소스는 별도 `ServerCore.Tests` 프로젝트에 표시한다.
+두 프로젝트의 `Development`에는 공통 포맷 설정을 연결했다.
+
 ## 메시 공유 검증
 
 ```powershell

@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    ArcherStickyArrowHandler::ArcherStickyArrowHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    ArcherStickyArrowHandler::ArcherStickyArrowHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::ArcherStickyArrow;
         SetSkillInfo();
     }
 
-    CSkillHandler* ArcherStickyArrowHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ArcherStickyArrowHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ArcherStickyArrowHandler(client);
+        return new ArcherStickyArrowHandler(_client);
     }
 }

@@ -4,14 +4,14 @@
 #include "GameUtil.h"
 
 namespace wod_server {
-    OgreButtingHandler::OgreButtingHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    OgreButtingHandler::OgreButtingHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::OgreButting;
         SetSkillInfo();
     }
 
-    CSkillHandler* OgreButtingHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreButtingHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreButtingHandler(client);
+        return new OgreButtingHandler(_client);
     }
 }

@@ -7,14 +7,14 @@ namespace wod_server {
 	public:
 		virtual bool Initialize() abstract;
 		virtual bool Release() abstract;
-		
+
 		static T* GetInstance() {
 			if (!m_instance)
 				m_instance.reset(new T());
 			return m_instance.get();
 		}
 
-		void DestroyInstance() {		
+		void DestroyInstance() {
 			if (m_instance)
 				m_instance.reset(nullptr);
 		}
@@ -40,14 +40,14 @@ namespace wod_server {
 	class ISkillObject abstract
 	{
 	public:
-		volatile bool active = false;
+		volatile bool m_active = false;
 
-		void SetObjectType(SKILL_TYPE type) { m_type = type; }
+		void SetObjectType(SKILL_TYPE _type) { m_type = _type; }
 
-		void SetPower(int power) { m_power = power; }
+		void SetPower(int _power) { m_power = _power; }
 		int GetPower() const { return m_power; }
-		void SetCritical(int critical) { m_critical = critical; }
-		void SetClientID(int id) { m_clientID = id; }
+		void SetCritical(int _critical) { m_critical = _critical; }
+		void SetClientID(int _id) { m_clientID = _id; }
 		int GetClientID() const { return m_clientID; }
 
 	protected:

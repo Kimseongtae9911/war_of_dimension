@@ -17,11 +17,11 @@ namespace wod_server {
 		return true;
 	}
 
-	void SkillCsvMgr::LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader)
+	void SkillCsvMgr::LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader)
 	{
 		tabledata::SkillInfo skillInfo;
-		for (auto i = 2; i < datas.size(); ++i) {
-			skillInfo = CreateStructFromCSV<tabledata::SkillInfo>(datas[i], csvHeader);
+		for (auto i = 2; i < _datas.size(); ++i) {
+			skillInfo = CreateStructFromCSV<tabledata::SkillInfo>(_datas[i], _csvHeader);
 			m_skillCsvMap.emplace(skillInfo.Type, new SkillCsv(skillInfo));
 		}
 	}

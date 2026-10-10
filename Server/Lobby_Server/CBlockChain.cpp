@@ -11,11 +11,11 @@ CBlockChain::~CBlockChain()
 {
 }
 
-void CBlockChain::AddBlock(CBlock* newBlock)
+void CBlockChain::AddBlock(CBlock* _newBlock)
 {
 	//newBlock->SetPrevHash(m_chain.back()->GetPrevHash());
 
-	m_chain.push_back(newBlock);
+	m_chain.push_back(_newBlock);
 }
 
 void CBlockChain::DeleteLastBlock()
@@ -41,10 +41,10 @@ bool CBlockChain::CheckChainValidity()
 	return true;
 }
 
-bool CBlockChain::LoadChainData(const std::string& filename)
+bool CBlockChain::LoadChainData(const std::string& _filename)
 {
-	std::ifstream inputFile(filename);
-	if (inputFile.fail()) {	
+	std::ifstream inputFile(_filename);
+	if (inputFile.fail()) {
 		return false;
 	}
 
@@ -149,9 +149,9 @@ void CBlockChain::CreateGenesisBlock()
 	SaveChainDataToHTML("BlockChain/HHS.html");
 }
 
-void CBlockChain::SaveChainDataToHTML(const std::string& filename) const
+void CBlockChain::SaveChainDataToHTML(const std::string& _filename) const
 {
-	std::ofstream outFile(filename);
+	std::ofstream outFile(_filename);
 
 	if (outFile.fail()) {
 		return;

@@ -12,15 +12,15 @@ namespace wod_server {
 		if (nullptr == npcCsv)
 			return;
 
-        if (_posIndex >= npcCsv->respawnPos.size() || _posIndex >= npcCsv->respawnLook.size())
+        if (_posIndex >= npcCsv->m_respawnPos.size() || _posIndex >= npcCsv->m_respawnLook.size())
             throw std::out_of_range("NPC spawn index");
 
-		uint32_t maxHp = static_cast<uint32_t>(npcCsv->BaseHp) + static_cast<uint32_t>((CGameMgr::GetInstance()->GetGameTime(m_matchNum) / TimeUtil::Min) * npcCsv->HpIncrease);
+		uint32_t maxHp = static_cast<uint32_t>(npcCsv->BaseHp) + static_cast<uint32_t>((CGameMgr::GetInstance()->GetGameTime(m_matchNum) / TimeUtil::m_Min) * npcCsv->HpIncrease);
 		const auto monster = static_cast<CMonster*>(CObjectMgr::GetInstance()->GetNpc(m_matchNum, monsterId).get());
 
 		monster->InitializeHp(maxHp);
-		monster->SetInitPos(npcCsv->respawnPos[_posIndex]);
-		monster->SetInitLook(npcCsv->respawnLook[_posIndex]);
+		monster->SetInitPos(npcCsv->m_respawnPos[_posIndex]);
+		monster->SetInitLook(npcCsv->m_respawnLook[_posIndex]);
 		monster->SetPower(npcCsv->BaseAttack);
 		monster->SetRespawnNum(_posIndex);
 
@@ -31,14 +31,14 @@ namespace wod_server {
 			CObjectMgr::GetInstance()->GetClient(clId)->GetPacketSender()->SendAddNpcPacket(monsterId, monster->GetPos(), monster->GetLook(), monster->GetRight(), NPC_TYPE::UNIQUE_DRAGON);
 			CObjectMgr::GetInstance()->GetClient(clId)->GetPacketSender()->SendNpcStatChangePacket(monsterId, monster->GetMaxHp(), monster->GetCurHp());
 		}
-		monster->active = true;		
+		monster->m_active = true;
 	}
 
-	bool CMonster::Update(float elapsedTime)
+	bool CMonster::Update(float _elapsedTime)
 	{
 		if (NPC_STATE::ST_CHASE == m_state) {
 			LookTarget();
-			Chase(elapsedTime);
+			Chase(_elapsedTime);
 
 			if (DistanceXZ(m_pos, m_initPos) > m_chaseDistance) {
 				m_state = NPC_STATE::ST_RETURN;
@@ -49,7 +49,7 @@ namespace wod_server {
 			}
 		}
 		else if (NPC_STATE::ST_RETURN == m_state) {
-			ReturnPos(elapsedTime);
+			ReturnPos(_elapsedTime);
 			if (DistanceXZ(m_pos, m_initPos) < 0.1f) {
 				m_pos = m_initPos;
 				SetLook(m_initLook);
@@ -62,7 +62,7 @@ namespace wod_server {
 			}
 		}
 		else if (NPC_STATE::ST_ATTACK == m_state) {
-			Attack(elapsedTime);
+			Attack(_elapsedTime);
 			if (-1 == m_targetClientID)
 				return true;
 			if (DistanceXZ(m_pos, CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetPos()) > m_attackDistance) {
@@ -76,10 +76,10 @@ namespace wod_server {
 		return true;
 	}
 
-	void CMonster::Chase(float elapsedTime)
+	void CMonster::Chase(float _elapsedTime)
 	{
 		if (m_attack) {
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 			return;
 		}
 		else {
@@ -89,22 +89,22 @@ namespace wod_server {
 				return;
 			}
 			vec3 clientPos = CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetPos();
-			m_targetPos.x = clientPos.x;
-			m_targetPos.z = clientPos.z;
+			m_targetPos.m_x = clientPos.m_x;
+			m_targetPos.m_z = clientPos.m_z;
 			LookTarget();
 		}
 
 		if (m_rotate)
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 
-		Move(elapsedTime);
+		Move(_elapsedTime);
 	}
 
-	bool CMonster::Damaged(int clientID, int power, DAMAGE_TYPE type, bool updateTarget)
+	bool CMonster::Damaged(int _clientID, int _power, DAMAGE_TYPE _type, bool _updateTarget)
 	{
-		if (CNpc::Damaged(clientID, power, type, updateTarget)) {
+		if (CNpc::Damaged(_clientID, _power, _type, _updateTarget)) {
 			//Respawn
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_clientID);
 			network::GetInstance()->RegisterTimerEvent({ m_id, TimeUtil::PassedTimeMSec(m_respawnTime), EVENT_TYPE::EV_NPC_ACTIVE, m_matchNum });
 			m_state = NPC_STATE::ST_IDLE;
 
@@ -119,21 +119,21 @@ namespace wod_server {
 			}
 			client->GetPacketSender()->SendGoldPacket(client->GetMatchId(), increasedGold);
 
-			if (m_npcCsv->BuffInfos.size() != 0) {
-				RegisterKillBuff(clientID);
+			if (m_npcCsv->m_BuffInfos.size() != 0) {
+				RegisterKillBuff(_clientID);
 			}
 
 			return true;
 		}
-		else if (updateTarget) {
-			SetTargetClientID(clientID);
+		else if (_updateTarget) {
+			SetTargetClientID(_clientID);
 			m_state = NPC_STATE::ST_CHASE;
 		}
 
 		return false;
 	}
 
-	void CMonster::ReturnPos(float elapsedTime)
+	void CMonster::ReturnPos(float _elapsedTime)
 	{
 		if (m_attack) {
 			m_attack = false;
@@ -141,27 +141,27 @@ namespace wod_server {
 
 		else {
 			vec3 clientPos = CObjectMgr::GetInstance()->GetClient(m_targetClientID)->GetPos();
-			m_targetPos.x = m_initPos.x;
-			m_targetPos.z = m_initPos.z;
+			m_targetPos.m_x = m_initPos.m_x;
+			m_targetPos.m_z = m_initPos.m_z;
 			LookTarget();
 		}
 
 		if (m_rotate)
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 
-		Move(elapsedTime);
+		Move(_elapsedTime);
 	}
 
 	void CMonster::Respawn(int _currTime)
 	{
 		InitializeHp(static_cast<int>(m_npcCsv->BaseHp) + _currTime * m_npcCsv->HpIncrease);
-		SetPos(m_npcCsv->respawnPos[m_respawnNum]);
-		SetLook(vec3::Normalize(m_npcCsv->respawnLook[m_respawnNum]));
+		SetPos(m_npcCsv->m_respawnPos[m_respawnNum]);
+		SetLook(vec3::Normalize(m_npcCsv->m_respawnLook[m_respawnNum]));
 		SetPower(m_npcCsv->BaseAttack + _currTime * m_npcCsv->AttackIncrease);
 
 		SetTargetClientID(-1);
 		SetState(NPC_STATE::ST_IDLE);
-		active = true;
+		m_active = true;
 
 
 		for (int clID : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -193,8 +193,8 @@ namespace wod_server {
 
 		m_lastHealTime = TimeUtil::CurTime();
 
-		m_initBoundingBox.Center = { GameUtil::GetMonsterInitBB(m_npcType)->offset.x, GameUtil::GetMonsterInitBB(m_npcType)->offset.y,GameUtil::GetMonsterInitBB(m_npcType)->offset.z };
-		m_initBoundingBox.Extents = { GameUtil::GetMonsterInitBB(m_npcType)->extent.x, GameUtil::GetMonsterInitBB(m_npcType)->extent.y, GameUtil::GetMonsterInitBB(m_npcType)->extent.z };
+		m_initBoundingBox.Center = { GameUtil::GetMonsterInitBB(m_npcType)->m_offset.m_x, GameUtil::GetMonsterInitBB(m_npcType)->m_offset.m_y,GameUtil::GetMonsterInitBB(m_npcType)->m_offset.m_z };
+		m_initBoundingBox.Extents = { GameUtil::GetMonsterInitBB(m_npcType)->m_extent.m_x, GameUtil::GetMonsterInitBB(m_npcType)->m_extent.m_y, GameUtil::GetMonsterInitBB(m_npcType)->m_extent.m_z };
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 		DirectX::XMMATRIX mtxScale = DirectX::XMMatrixScaling(npcCsv->Scale, npcCsv->Scale, npcCsv->Scale);
@@ -202,57 +202,57 @@ namespace wod_server {
 		m_worldMatrix._21 = 0.f; m_worldMatrix._22 = 1.f; m_worldMatrix._23 = 0.f;
 	}
 
-	void CMonster::RegisterKillBuff(int clientID)
+	void CMonster::RegisterKillBuff(int _clientID)
 	{
-		const auto attackBuff = m_npcCsv->BuffInfos.find(EBuffType::AttackIncrease);
-		const auto defenseBuff = m_npcCsv->BuffInfos.find(EBuffType::DefenseIncrease);
-		const auto speedBuff = m_npcCsv->BuffInfos.find(EBuffType::SpeedIncrease);
-		const auto utilBuff = m_npcCsv->BuffInfos.find(EBuffType::UtilIncrease);
+		const auto attackBuff = m_npcCsv->m_BuffInfos.find(EBuffType::AttackIncrease);
+		const auto defenseBuff = m_npcCsv->m_BuffInfos.find(EBuffType::DefenseIncrease);
+		const auto speedBuff = m_npcCsv->m_BuffInfos.find(EBuffType::SpeedIncrease);
+		const auto utilBuff = m_npcCsv->m_BuffInfos.find(EBuffType::UtilIncrease);
 
 		uint8_t attackValue = 0;
 		uint8_t defenseValue = 0;
 		float speedValue = 0.f;
 		uint8_t utilValue = 0;
 		uint16_t buffDuration = 0;
-		if (attackBuff != m_npcCsv->BuffInfos.end()) {
-			attackValue = static_cast<uint8_t>(attackBuff->second.buffValue);
-			buffDuration = attackBuff->second.buffDuration;
+		if (attackBuff != m_npcCsv->m_BuffInfos.end()) {
+			attackValue = static_cast<uint8_t>(attackBuff->second.m_buffValue);
+			buffDuration = attackBuff->second.m_buffDuration;
 		}
-		if (defenseBuff != m_npcCsv->BuffInfos.end()) {
-			defenseValue = static_cast<uint8_t>(defenseBuff->second.buffValue);
-			buffDuration = defenseBuff->second.buffDuration;
+		if (defenseBuff != m_npcCsv->m_BuffInfos.end()) {
+			defenseValue = static_cast<uint8_t>(defenseBuff->second.m_buffValue);
+			buffDuration = defenseBuff->second.m_buffDuration;
 		}
-		if (speedBuff != m_npcCsv->BuffInfos.end()) {
-			speedValue = static_cast<uint8_t>(speedBuff->second.buffValue);
-			buffDuration = speedBuff->second.buffDuration;
+		if (speedBuff != m_npcCsv->m_BuffInfos.end()) {
+			speedValue = static_cast<uint8_t>(speedBuff->second.m_buffValue);
+			buffDuration = speedBuff->second.m_buffDuration;
 		}
-		if (utilBuff != m_npcCsv->BuffInfos.end()) {
-			utilValue = static_cast<uint8_t>(utilBuff->second.buffValue);
-			buffDuration = utilBuff->second.buffDuration;
+		if (utilBuff != m_npcCsv->m_BuffInfos.end()) {
+			utilValue = static_cast<uint8_t>(utilBuff->second.m_buffValue);
+			buffDuration = utilBuff->second.m_buffDuration;
 		}
 
 
 		//Player Buff
 		CStat changeStat(0);
-		changeStat.strength = attackValue;
-		changeStat.magic = attackValue;
-		changeStat.armor = defenseValue;
-		changeStat.regist = defenseValue;
-		changeStat.speed = speedValue;
-		changeStat.endure = utilValue;
-		changeStat.critical = utilValue;
+		changeStat.m_strength = attackValue;
+		changeStat.m_magic = attackValue;
+		changeStat.m_armor = defenseValue;
+		changeStat.m_regist = defenseValue;
+		changeStat.m_speed = speedValue;
+		changeStat.m_endure = utilValue;
+		changeStat.m_critical = utilValue;
 
-		auto client = CObjectMgr::GetInstance()->GetClient(clientID);
+		auto client = CObjectMgr::GetInstance()->GetClient(_clientID);
 		auto SetClientBuff = [this, &changeStat, &buffDuration](uint8_t _attackValue, uint8_t _defenseValue, float _speedValue, uint8_t _utilValue, int _clientID) {
 			auto client = CObjectMgr::GetInstance()->GetClient(_clientID);
 			CStat stat = client->GetStatus()->GetStat();
-			stat.strength += _attackValue;
-			stat.magic += _attackValue;
-			stat.armor += _defenseValue;
-			stat.regist += _defenseValue;
-			stat.speed += _speedValue;
-			stat.endure += _utilValue;
-			stat.critical += _utilValue;
+			stat.m_strength += _attackValue;
+			stat.m_magic += _attackValue;
+			stat.m_armor += _defenseValue;
+			stat.m_regist += _defenseValue;
+			stat.m_speed += _speedValue;
+			stat.m_endure += _utilValue;
+			stat.m_critical += _utilValue;
 			client->GetStatus()->SetStat(stat);
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 				if (-1 == id)
@@ -265,7 +265,7 @@ namespace wod_server {
 		};
 
 		if (client->GetMatchId() == 3) {
-			SetClientBuff(attackValue, defenseValue, speedValue, utilValue, clientID);
+			SetClientBuff(attackValue, defenseValue, speedValue, utilValue, _clientID);
 		}
 		else {
 			//Heros
@@ -277,25 +277,25 @@ namespace wod_server {
 		}
 	}
 
-	void CMonster::Move(float elapsedTime)
+	void CMonster::Move(float _elapsedTime)
 	{
 		vec3 shift = { 0, 0, 0 };
 		shift = vec3::Add(shift, m_targetLook, MINON_SPEED * m_speed);
 		m_vel += shift;
 
-		float velocity = sqrtf(m_vel.x * m_vel.x + m_vel.z * m_vel.z);
+		float velocity = sqrtf(m_vel.m_x * m_vel.m_x + m_vel.m_z * m_vel.m_z);
 		if (velocity > m_maxVelXZ) {
-			m_vel.x *= (m_maxVelXZ / velocity);
-			m_vel.z *= (m_maxVelXZ / velocity);
+			m_vel.m_x *= (m_maxVelXZ / velocity);
+			m_vel.m_z *= (m_maxVelXZ / velocity);
 		}
 
-		shift = m_vel * elapsedTime;
+		shift = m_vel * _elapsedTime;
 
 		float height;
 		if (GameUtil::NpcCollisionCheck(m_id, m_matchNum, shift)) {
 			if (GameUtil::MapCollision(m_pos, shift, height, m_curNode)) {
 				m_pos += shift;
-				m_pos.y = height;
+				m_pos.m_y = height;
 				UpdateBoundingBox();
 
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -317,7 +317,7 @@ namespace wod_server {
 		}
 
 		velocity = m_vel.Length();
-		float deceleration = m_friction * elapsedTime;
+		float deceleration = m_friction * _elapsedTime;
 		if (deceleration > velocity)
 			deceleration = velocity;
 		m_vel = vec3::Add(m_vel, vec3::Normalize(m_vel * -deceleration));
@@ -339,7 +339,7 @@ namespace wod_server {
 		}
 
 		if ((m_state == NPC_STATE::ST_RETURN || m_state == NPC_STATE::ST_IDLE) && m_curHp < m_maxHp) {
-			Heal();	// healCoolTime üũ m_npcCsv->HealCooltime			
+			Heal();	// healCoolTime üũ m_npcCsv->HealCooltime
 		}
 
 	}
@@ -351,7 +351,7 @@ namespace wod_server {
 		__super::SetMonsterInfo();
 	}
 
-	bool CUniqueRed::Update(float elapsedTime)
+	bool CUniqueRed::Update(float _elapsedTime)
 	{
 		if (NPC_STATE::ST_CHASE == m_state) {
 			m_state = NPC_STATE::ST_ATTACK;
@@ -362,18 +362,18 @@ namespace wod_server {
 				return true;
 			}
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(m_targetClientID);
-			m_targetPos.x = client->GetPos().x;
-			m_targetPos.z = client->GetPos().z;
+			m_targetPos.m_x = client->GetPos().m_x;
+			m_targetPos.m_z = client->GetPos().m_z;
 			LookTarget();
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 			UpdateBoundingBox();
 			if (DistanceXZ(client->GetPos(), m_pos) < m_attackDistance) {
-				Attack(elapsedTime);
+				Attack(_elapsedTime);
 			}
 			else {
 				m_state = NPC_STATE::ST_IDLE;
-				m_targetPos.x = m_initLook.x;
-				m_targetPos.z = m_initLook.z;
+				m_targetPos.m_x = m_initLook.m_x;
+				m_targetPos.m_z = m_initLook.m_z;
 			}
 
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -385,7 +385,7 @@ namespace wod_server {
 
 		else {
 			LookTarget();
-			Rotate(elapsedTime);
+			Rotate(_elapsedTime);
 			UpdateBoundingBox();
 			if (TimeUtil::CurTime() - m_lastHealTime > std::chrono::milliseconds(m_npcCsv->HealCooltime)) {
 				m_lastHealTime = TimeUtil::CurTime();
@@ -412,10 +412,10 @@ namespace wod_server {
 		return true;
 	}
 
-	bool CUniqueRed::Damaged(int clientID, int power, DAMAGE_TYPE type, bool updateTarget)
+	bool CUniqueRed::Damaged(int _clientID, int _power, DAMAGE_TYPE _type, bool _updateTarget)
 	{
-		if (CMonster::Damaged(clientID, power, type, updateTarget)) {
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientID);
+		if (CMonster::Damaged(_clientID, _power, _type, _updateTarget)) {
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_clientID);
 
 			//Teleport Activation Check
 			if (!CGameMgr::GetInstance()->GetTeleport(m_matchNum)) {

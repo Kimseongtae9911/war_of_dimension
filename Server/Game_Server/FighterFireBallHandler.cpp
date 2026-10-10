@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    FighterFireBallHandler::FighterFireBallHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    FighterFireBallHandler::FighterFireBallHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::FighterFireBall;
         SetSkillInfo();
     }
 
-    CSkillHandler* FighterFireBallHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterFireBallHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterFireBallHandler(client);
+        return new FighterFireBallHandler(_client);
     }
 }

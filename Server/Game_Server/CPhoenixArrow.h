@@ -8,7 +8,7 @@ namespace wod_server {
 		CPhoenixArrow();
 		~CPhoenixArrow() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
 	private:
 		void UpdateBoundingBox() override;

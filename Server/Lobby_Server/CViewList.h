@@ -8,19 +8,19 @@ namespace wod_server {
 	{
 	public:
 		CViewList() {}
-		CViewList(CClient* client);
+		CViewList(CClient* _client);
 		~CViewList() {}
 
-		void CheckViewList(int channel, int socketID, int id);
+		void CheckViewList(int _channel, int _socketID, int _id);
 		void ClearViewList();
-		void AddToView(int id, int socketNum, const vec3& look, const vec3& right, const ModelCustomize& model, CPacketSender* sendTarget);
-		void DeleteFromView(int id, int socketNum, CPacketSender* sendTarget);
+		void AddToView(int _id, int _socketNum, const vec3& _look, const vec3& _right, const ModelCustomize& _model, CPacketSender* _sendTarget);
+		void DeleteFromView(int _id, int _socketNum, CPacketSender* _sendTarget);
 		std::unordered_set<int> GetView();
 
-		std::shared_mutex viewLock;
+		std::shared_mutex m_viewLock;
 
 	private:
-		bool CheckViewList(int id);
+		bool CheckViewList(int _id);
 
 	private:
 		std::unordered_set<int> m_viewList;

@@ -6,9 +6,9 @@
 #include "CMatchMgr.h"
 
 namespace wod_server {
-    CSkillHandler* ProPointerHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ProPointerHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ProPointerHandler(client);
+        return new ProPointerHandler(_client);
     }
 
     void ProPointerHandler::Handle()
@@ -29,7 +29,7 @@ namespace wod_server {
         }
 
         if(targetID != -1)
-            network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(m_client->GetID(), TimeUtil::PassedTimeMSec(skillCsv->castingTime), EPlayerSkill::ProgrammerPointer, {}, 0, 0, {}, targetID));
+            network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(m_client->GetID(), TimeUtil::PassedTimeMSec(skillCsv->m_castingTime), EPlayerSkill::ProgrammerPointer, {}, 0, 0, {}, targetID));
     }
 
 }

@@ -12,21 +12,21 @@ namespace wod_server {
 
 	void CMoveObject::UpdateBoundingBox()
 	{
-		m_worldMatrix._11 = m_right.x; m_worldMatrix._12 = m_right.y; m_worldMatrix._13 = m_right.z;
-		m_worldMatrix._31 = m_look.x; m_worldMatrix._32 = m_look.y; m_worldMatrix._33 = m_look.z;
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._11 = m_right.m_x; m_worldMatrix._12 = m_right.m_y; m_worldMatrix._13 = m_right.m_z;
+		m_worldMatrix._31 = m_look.m_x; m_worldMatrix._32 = m_look.m_y; m_worldMatrix._33 = m_look.m_z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}
 
-	CTower::CTower(int matchNum, int id)
+	CTower::CTower(int _matchNum, int _id)
 	{
 		m_maxHp = m_curHp = TOWER_INIT_HP;
 		//m_maxHp = m_curHp = 1;
-		m_matchNum = matchNum;
-		m_id = id;
+		m_matchNum = _matchNum;
+		m_id = _id;
 		m_targetID = -1;
-		active = false;
+		m_active = false;
 		m_broken = false;
 		m_lastAttackTime = TimeUtil::CurTime();
 	}
@@ -35,9 +35,9 @@ namespace wod_server {
 	{
 	}
 
-	void CTower::Update(int matchNum)
+	void CTower::Update(int _matchNum)
 	{
-		if (!active)
+		if (!m_active)
 			return;
 		if (std::chrono::duration_cast<std::chrono::seconds>(TimeUtil::CurTime() - m_lastAttackTime) <= std::chrono::seconds(TOWER_COOLTIME))
 			return;
@@ -52,8 +52,8 @@ namespace wod_server {
 			}
 			else {
 				//Target is Minion
-				target = CObjectMgr::GetInstance()->GetNpc(matchNum, m_targetID - NPC_ID);
-				targetRemoved = !reinterpret_cast<CNpc*>(target.get())->active;
+				target = CObjectMgr::GetInstance()->GetNpc(_matchNum, m_targetID - NPC_ID);
+				targetRemoved = !reinterpret_cast<CNpc*>(target.get())->m_active;
 			}
 			if (targetRemoved) {
 				//Target removed
@@ -65,7 +65,7 @@ namespace wod_server {
 			}
 			else {
 				//Target still in range
-				CGameMgr::GetInstance()->TowerAttack(matchNum, m_targetID, m_pos);
+				CGameMgr::GetInstance()->TowerAttack(_matchNum, m_targetID, m_pos);
 				m_lastAttackTime = TimeUtil::CurTime();
 				return;
 			}
@@ -76,31 +76,31 @@ namespace wod_server {
 			std::shared_ptr<CClient> boss = CObjectMgr::GetInstance()->GetClient(bossID);
 			if (DistanceXZ(m_pos, boss->GetPos()) <= TOWER_RANGE) {
 				m_targetID = boss->GetID();
-				CGameMgr::GetInstance()->TowerAttack(matchNum, m_targetID, m_pos);
+				CGameMgr::GetInstance()->TowerAttack(_matchNum, m_targetID, m_pos);
 				m_lastAttackTime = TimeUtil::CurTime();
 				return;
 			}
 		}
 
 		for (int i = 0; i < MAX_MINION; ++i) {
-			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-			if (!npc->active)
+			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+			if (!npc->m_active)
 				continue;
 
 			//Attack target
 			if (DistanceXZ(m_pos, npc->GetPos()) <= TOWER_RANGE) {
 				m_targetID = npc->GetID();
-				CGameMgr::GetInstance()->TowerAttack(matchNum, m_targetID, m_pos);
+				CGameMgr::GetInstance()->TowerAttack(_matchNum, m_targetID, m_pos);
 				m_lastAttackTime = TimeUtil::CurTime();
 				break;
 			}
 		}
 	}
 
-	void CTower::Damage(int damage)
+	void CTower::Damage(int _damage)
 	{
 		m_hpLock.lock();
-		m_curHp -= damage;
+		m_curHp -= _damage;
 		m_hpLock.unlock();
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
@@ -111,7 +111,7 @@ namespace wod_server {
 
 		if (m_curHp <= 0) {
 			m_broken = true;
-			active = false;
+			m_active = false;
 
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 				if (-1 == id)
@@ -128,33 +128,33 @@ namespace wod_server {
 	{
 		m_maxHp = m_curHp = TOWER_INIT_HP;
 		m_targetID = -1;
-		active = false;
+		m_active = false;
 		m_broken = false;
 		m_lastAttackTime = TimeUtil::CurTime();
 		if (m_id == 3)
-			active = true;
+			m_active = true;
 	}
 
 
 	CTowerAttack::CTowerAttack()
 	{
-		active = false;
+		m_active = false;
 		m_targetID = -1;
 		m_vel = {TOWER_ATTACK_SPEED, TOWER_ATTACK_SPEED , TOWER_ATTACK_SPEED };
 
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
 		m_initBoundingBox.Extents = { 0.5f, 0.5f, 0.5f };
-		
+
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
 
 	CTowerAttack::~CTowerAttack()
 	{
 	}
-	
-	bool CTowerAttack::Update(float elapsedTime)
+
+	bool CTowerAttack::Update(float _elapsedTime)
 	{
-		if (!active || -1 == m_targetID)
+		if (!m_active || -1 == m_targetID)
 			return false;
 
 		UpdateBoundingBox();
@@ -169,7 +169,7 @@ namespace wod_server {
 			if (m_boundingBox.Intersects(target->GetBoundingBox())) {
 				remove = true;
 				reinterpret_cast<CClient*>(target.get())->Damage((TOWER_INIT_POWER + static_cast<int>(CGameMgr::GetInstance()->GetGameTime(m_matchNum) / 60) * TOWER_POWER_INCREASE), 0, DAMAGE_TYPE::STRENGTH, 0);
-				if (reinterpret_cast<CClient*>(target.get())->GetStatus()->healthMana.GetCurHp() <= 0) {
+				if (reinterpret_cast<CClient*>(target.get())->GetStatus()->m_healthMana.GetCurHp() <= 0) {
 					m_targetID = -1;
 				}
 			}
@@ -186,10 +186,10 @@ namespace wod_server {
 		}
 
 		m_look = vec3::Normalize(target->GetPos() - m_pos);
-		m_pos += (m_look * m_vel * elapsedTime);
+		m_pos += (m_look * m_vel * _elapsedTime);
 
 		if (remove) {
-			active = false;
+			m_active = false;
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (-1 == clientIDs[i])
 					continue;
@@ -210,25 +210,25 @@ namespace wod_server {
 
 	void CTowerAttack::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}
 
-	CNexus::CNexus(int matchNum)
+	CNexus::CNexus(int _matchNum)
 	{
 		m_maxHp = m_curHp = NEXUS_INIT_HP;
 		m_pos = { -123.2651f, 3.700449f, -127.6417f };
-		m_matchNum = matchNum;
+		m_matchNum = _matchNum;
 	}
 
-	void CNexus::Damage(int damage)
+	void CNexus::Damage(int _damage)
 	{
 		if (!CGameMgr::GetInstance()->GetNexusAttackPossible(m_matchNum))
 			return;
 
 		m_hpLock.lock();
-		m_curHp -= damage;
+		m_curHp -= _damage;
 		m_hpLock.unlock();
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {

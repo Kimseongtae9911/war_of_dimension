@@ -13,10 +13,10 @@ namespace wod_server {
 	{
 		const auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::ArcherPhoenixArrow);
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = DirectX::XMFLOAT3(skillCsv->extent.x, skillCsv->extent.y, skillCsv->extent.z);
+		m_initBoundingBox.Extents = DirectX::XMFLOAT3(skillCsv->m_extent.m_x, skillCsv->m_extent.m_y, skillCsv->m_extent.m_z);
 
-		m_burnDebuff = skillCsv->debuffInfo.find(EDebuffType::Burn)->second;
-		m_maxVelXZ = skillCsv->speed;
+		m_burnDebuff = skillCsv->m_debuffInfo.find(EDebuffType::Burn)->second;
+		m_maxVelXZ = skillCsv->m_speed;
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -25,13 +25,13 @@ namespace wod_server {
 	{
 	}
 
-	bool CPhoenixArrow::Update(float elapsedTime)
+	bool CPhoenixArrow::Update(float _elapsedTime)
 	{
-		if (!active) {
+		if (!m_active) {
 			return false;
 		}
 
-		m_pos += m_look * m_maxVelXZ * elapsedTime;
+		m_pos += m_look * m_maxVelXZ * _elapsedTime;
 		UpdateBoundingBox();
 
 		if (GameUtil::SkillMapCollision(m_boundingBox)) {
@@ -40,7 +40,7 @@ namespace wod_server {
 					continue;
 				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(m_id, m_type);
 			}
-			active = false;
+			m_active = false;
 			return false;
 		}
 		else {
@@ -49,18 +49,18 @@ namespace wod_server {
 				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(bossID);
 				if (client->GetBoundingBox().Intersects(m_boundingBox)) {
 					client->Damage(m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID);
-					network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(bossID, TimeUtil::PassedTimeMSec(m_burnDebuff.debuffDuration), EPlayerSkill::Burn, vec3(), static_cast<int>(m_power * m_burnDebuff.debuffValue), 0, {}, m_clientID));
+					network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(bossID, TimeUtil::PassedTimeMSec(m_burnDebuff.m_debuffDuration), EPlayerSkill::Burn, vec3(), static_cast<int>(m_power * m_burnDebuff.m_debuffValue), 0, {}, m_clientID));
 				}
 			}
 
 			for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 				std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(m_matchNum, i);
-				if (!npc->active)
+				if (!npc->m_active)
 					continue;
 				if (npc->GetBoundingBox().Intersects(m_boundingBox)) {
 					npc->Damaged(m_clientID, m_power, DAMAGE_TYPE::MAGIC);
 
-					network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(npc->GetID(), TimeUtil::PassedTimeMSec(m_burnDebuff.debuffDuration), EPlayerSkill::Burn, vec3(static_cast<float>(m_matchNum), 0, 0), static_cast<int>(m_power * m_burnDebuff.debuffValue), 0, {}, m_clientID));
+					network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(npc->GetID(), TimeUtil::PassedTimeMSec(m_burnDebuff.m_debuffDuration), EPlayerSkill::Burn, vec3(static_cast<float>(m_matchNum), 0, 0), static_cast<int>(m_power * m_burnDebuff.m_debuffValue), 0, {}, m_clientID));
 				}
 			}
 
@@ -77,7 +77,7 @@ namespace wod_server {
 
 	void CPhoenixArrow::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}

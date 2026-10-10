@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    ProSCLHandler::ProSCLHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    ProSCLHandler::ProSCLHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::ProgrammerLaser;
         SetSkillInfo();
     }
 
-    CSkillHandler* ProSCLHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ProSCLHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ProSCLHandler(client);
+        return new ProSCLHandler(_client);
     }
 
 }

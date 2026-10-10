@@ -1,12 +1,12 @@
 #pragma once
 
 struct MatchInfo {
-    int id;
-    unsigned int register_time;
+    int m_id;
+    unsigned int m_register_time;
 
-    constexpr bool operator < (const MatchInfo& L) const
+    constexpr bool operator < (const MatchInfo& _l) const
     {
-        return (register_time > L.register_time);
+        return (m_register_time > _l.m_register_time);
     }
 };
 
@@ -18,10 +18,10 @@ namespace wod_server {
         bool Initialize() override;
         bool Release() override;
 
-        void IncreaseMatchPlayers(char character) { m_players[character]++; }
-        void DecreaseMatchPlayers(char character) { m_players[character]--; }
+        void IncreaseMatchPlayers(char _character) { m_players[_character]++; }
+        void DecreaseMatchPlayers(char _character) { m_players[_character]--; }
 
-        void RegisterToQue(int id, char character, unsigned int time);
+        void RegisterToQue(int _id, char _character, unsigned int _time);
 
         const bool GetMatch() const;
         const int GetMatchPlayer();

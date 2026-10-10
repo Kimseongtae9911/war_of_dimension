@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherDodgeHandler() {}
-		ArcherDodgeHandler(std::shared_ptr<CClient> client);
+		ArcherDodgeHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

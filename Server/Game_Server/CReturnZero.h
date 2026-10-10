@@ -9,9 +9,9 @@ namespace wod_server {
 		CReturnZero();
 		~CReturnZero() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
-		void SetStartPos(const vec3& pos) { m_startPos = pos; }
+		void SetStartPos(const vec3& _pos) { m_startPos = _pos; }
 
 	private:
 		void UpdateBoundingBox() override;

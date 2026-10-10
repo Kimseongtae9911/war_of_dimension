@@ -10,14 +10,14 @@ namespace wod_server {
 		virtual ~CGameObject() {};
 
 		const vec3& GetPos() const { return m_pos; }
-		void SetPos(const float x, const float y, const float z) { m_pos.x = x, m_pos.y = y, m_pos.z = z; }
-		void SetPos(const vec3& pos) { m_pos = pos; }
-		void SetPos(const vec2& pos) { m_pos.x = pos.x; m_pos.z = pos.z; }
+		void SetPos(const float _x, const float _y, const float _z) { m_pos.m_x = _x, m_pos.m_y = _y, m_pos.m_z = _z; }
+		void SetPos(const vec3& _pos) { m_pos = _pos; }
+		void SetPos(const vec2& _pos) { m_pos.m_x = _pos.m_x; m_pos.m_z = _pos.m_z; }
 
 		const int GetID() const { return m_id; }
-		void SetID(const int id) { m_id = id; }
+		void SetID(const int _id) { m_id = _id; }
 
-		virtual bool Update(float elapsedTime) { return true; }
+		virtual bool Update(float _elapsedTime) { return true; }
 
 		const DirectX::BoundingOrientedBox& GetBoundingBox() const { return m_boundingBox; }
 		const DirectX::XMFLOAT4X4& GetWorldMatrix() const { return m_worldMatrix; }
@@ -36,26 +36,26 @@ namespace wod_server {
 	{
 	public:
 		CMoveObject() {};
-		virtual ~CMoveObject() {};		
+		virtual ~CMoveObject() {};
 
 		char GetDir() const { return m_dir; }
-		void SetDir(const char dir) { m_dir = dir; }
+		void SetDir(const char _dir) { m_dir = _dir; }
 
 		const vec3& GetLook() const { return m_look; }
 		const vec3& GetUp() const { return m_up; }
 		const vec3& GetRight() const { return m_right; }
-		void SetLook(const vec3& look) { m_look = look; m_right = vec3::Normalize(m_up.Cross(m_look)); }
-		void SetRight(const vec3& right) { m_right = right; }
+		void SetLook(const vec3& _look) { m_look = _look; m_right = vec3::Normalize(m_up.Cross(m_look)); }
+		void SetRight(const vec3& _right) { m_right = _right; }
 
 		const vec3& GetVelocity() const { return m_vel; }
-		void SetVelocity(const vec3& v) { m_vel = v; }
+		void SetVelocity(const vec3& _v) { m_vel = _v; }
 
 		int GetMatchNum() const { return m_matchNum; }
 		int GetCurNode() const { return m_curNode; }
-		void SetMatchNum(const int num) { m_matchNum = num; }
-		void SetCurNode(int num) { m_curNode = num; }
+		void SetMatchNum(const int _num) { m_matchNum = _num; }
+		void SetCurNode(int _num) { m_curNode = _num; }
 
-		virtual void Move(float elapsedTime) {};
+		virtual void Move(float _elapsedTime) {};
 		virtual void UpdateBoundingBox();
 
 	protected:
@@ -79,11 +79,11 @@ namespace wod_server {
 		CTowerAttack();
 		virtual ~CTowerAttack();
 
-		bool Update(float elapsedTime);
+		bool Update(float _elapsedTime);
 
-		void SetTarget(int id) { m_targetID = id; }
+		void SetTarget(int _id) { m_targetID = _id; }
 
-		std::atomic_bool active;
+		std::atomic_bool m_active;
 
 	private:
 		void UpdateBoundingBox() override;
@@ -113,17 +113,17 @@ namespace wod_server {
 	class CTower : public CStaticObject
 	{
 	public:
-		CTower(int matchNum, int id);
+		CTower(int _matchNum, int _id);
 		virtual ~CTower();
 
-		void Update(int matchNum);
-		void Damage(int damage);
+		void Update(int _matchNum);
+		void Damage(int _damage);
 
-		void SetTargetID(int id) { m_targetID = id; }
+		void SetTargetID(int _id) { m_targetID = _id; }
 		int GetTargetID() const { return m_targetID; }
 		bool GetBroken() const { return m_broken; }
 
-		std::atomic_bool active;
+		std::atomic_bool m_active;
 
 		virtual void Reset();
 
@@ -136,10 +136,10 @@ namespace wod_server {
 	class CNexus : public CStaticObject
 	{
 	public:
-		CNexus(int matchNum);
+		CNexus(int _matchNum);
 		virtual ~CNexus() {};
 
-		void Damage(int damage);
+		void Damage(int _damage);
 
 		virtual void Reset();
 	};

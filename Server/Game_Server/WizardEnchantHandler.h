@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		WizardEnchantHandler() {}
-		WizardEnchantHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		WizardEnchantHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

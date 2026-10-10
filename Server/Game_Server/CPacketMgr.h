@@ -10,45 +10,45 @@ namespace wod_server {
 		virtual bool Initialize() override;
 		virtual bool Release() override;
 
-		void Packet_Exec(BASE_PACKET* packet, std::shared_ptr<CClient> client);
+		void Packet_Exec(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 	private:
 		//ReadyScene
-		void LoginPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void SkillSelectPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void ReadyPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void JobSelectPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void ChatPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void StatSelectPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void LoadCompletePacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
+		void LoginPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void SkillSelectPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void ReadyPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void JobSelectPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void ChatPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void StatSelectPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void LoadCompletePacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 		//GameScene
-		void MovePacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);		
-		void RotatePacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void SkillPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void SkillFinishPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void JumpPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void TeleportPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void TowerActivatePacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void MinionPathPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void NpcAttackFinishPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void BuyItemPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void BuyStatPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void UseItemPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void DebugGoldPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void RTTPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
+		void MovePacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void RotatePacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void SkillPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void SkillFinishPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void JumpPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void TeleportPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void TowerActivatePacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void MinionPathPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void NpcAttackFinishPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void BuyItemPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void BuyStatPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void UseItemPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void DebugGoldPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void RTTPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
 
-		void TestIngamePacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
-		void TestIngamePacket2(BASE_PACKET* packet, std::shared_ptr<CClient> client);
+		void TestIngamePacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
+		void TestIngamePacket2(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 		//Dummy
-		void DummyClientPacket(BASE_PACKET* packet, std::shared_ptr<CClient> client);
+		void DummyClientPacket(BASE_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 	private:
 		std::unordered_map<char, std::function<void(BASE_PACKET*, std::shared_ptr<CClient>)>> m_packetfunc;
 
 		//Test
-		bool testOnce = false;
+		bool m_testOnce = false;
 
 		//Dummy
 		std::atomic_int m_matchNum = 0;

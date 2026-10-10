@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    OgreDimensionCrushHandler::OgreDimensionCrushHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    OgreDimensionCrushHandler::OgreDimensionCrushHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::OgreDimensionCrush;
         SetSkillInfo();
     }
 
-    CSkillHandler* OgreDimensionCrushHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreDimensionCrushHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreDimensionCrushHandler(client);
+        return new OgreDimensionCrushHandler(_client);
     }
 }

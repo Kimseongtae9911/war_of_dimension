@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		ProAttackHandler() {}
-		ProAttackHandler(std::shared_ptr<CClient> client);
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		ProAttackHandler(std::shared_ptr<CClient> _client);
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

@@ -4,15 +4,15 @@
 #include "GameUtil.h"
 
 namespace wod_server {
-    SwordManJudgementSwordHandler::SwordManJudgementSwordHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    SwordManJudgementSwordHandler::SwordManJudgementSwordHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::SwordManJudgementSword;
         SetSkillInfo();
     }
 
-    CSkillHandler* SwordManJudgementSwordHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* SwordManJudgementSwordHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new SwordManJudgementSwordHandler(client);
+        return new SwordManJudgementSwordHandler(_client);
     }
 
     void SwordManJudgementSwordHandler::Handle()

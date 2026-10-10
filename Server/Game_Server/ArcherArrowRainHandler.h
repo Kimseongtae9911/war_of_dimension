@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherArrowRainHandler() {}
-		ArcherArrowRainHandler(std::shared_ptr<CClient> client);
+		ArcherArrowRainHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

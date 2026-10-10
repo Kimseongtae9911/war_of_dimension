@@ -6,11 +6,11 @@ namespace wod_server {
 
 	class CSessionPool {
 	public:
-		void push(const std::shared_ptr<Session>& session);
-		bool try_pop(std::shared_ptr<Session>& session);
+		void push(const std::shared_ptr<Session>& _session);
+		bool try_pop(std::shared_ptr<Session>& _session);
 
 	private:
-		concurrency::concurrent_priority_queue<std::shared_ptr<Session>> sessionPool;
+		concurrency::concurrent_priority_queue<std::shared_ptr<Session>> m_sessionPool;
 	};
 
 	class Resource
@@ -18,8 +18,8 @@ namespace wod_server {
 	public:
 		static OverlapEx* GetOverObjectFromPool();
 
-		static CSessionPool sessionPool;
-		static wod::core::ObjectPool<OverlapEx> overExPool;
+		static CSessionPool m_sessionPool;
+		static wod::core::ObjectPool<OverlapEx> m_overExPool;
 	};
 
 }

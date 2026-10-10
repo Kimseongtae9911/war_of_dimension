@@ -2,14 +2,14 @@
 #include "CStatus.h"
 
 namespace wod_server {
-	CStatus::CStatus() 
+	CStatus::CStatus()
 	{
 		m_stats = {};
-		defensiveBuff = DEFENSIVE_BUFF::NONE;
-		damageBuff = DAMAGE_BUFF::NONE;
-		coolTimeBuff = COOLTIME_BUFF::NONE;
+		m_defensiveBuff = DEFENSIVE_BUFF::NONE;
+		m_damageBuff = DAMAGE_BUFF::NONE;
+		m_coolTimeBuff = COOLTIME_BUFF::NONE;
 	}
-	
+
 	CStatus::~CStatus()
 	{
 

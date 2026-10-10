@@ -2,18 +2,18 @@
 #include "ArcherVitalPointHandler.h"
 
 namespace wod_server {
-    ArcherVitalPointHandler::ArcherVitalPointHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    ArcherVitalPointHandler::ArcherVitalPointHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
     }
 
-    CSkillHandler* ArcherVitalPointHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ArcherVitalPointHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ArcherVitalPointHandler(client);
+        return new ArcherVitalPointHandler(_client);
     }
 
     void ArcherVitalPointHandler::Handle()
     {
-        
+
     }
 
 }

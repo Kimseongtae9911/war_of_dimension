@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    FighterWindKickHandler::FighterWindKickHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
-    {        
+    FighterWindKickHandler::FighterWindKickHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
+    {
         m_type = EPlayerSkill::FighterWindKick;
         SetSkillInfo();
     }
 
-    CSkillHandler* FighterWindKickHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* FighterWindKickHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new FighterWindKickHandler(client);
+        return new FighterWindKickHandler(_client);
     }
 
     void FighterWindKickHandler::Handle()

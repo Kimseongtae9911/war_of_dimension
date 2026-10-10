@@ -6,9 +6,9 @@
 
 namespace wod_server {
 
-	CSkillHandler* WizardBlinkHandler::CreateHandler(std::shared_ptr<CClient> client)
+	CSkillHandler* WizardBlinkHandler::CreateHandler(std::shared_ptr<CClient> _client)
 	{
-		return new WizardBlinkHandler(client);
+		return new WizardBlinkHandler(_client);
 	}
 
 	void WizardBlinkHandler::Handle()
@@ -16,21 +16,21 @@ namespace wod_server {
 		auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::WizardBlink);
 
 		vec3 pos = m_client->GetPos();
-		vec3 shift = m_client->GetLook() * skillCsv->skillRadius;
+		vec3 shift = m_client->GetLook() * skillCsv->m_skillRadius;
 
 		while (true) {
 			float height;
 			int curNode;
 			if (GameUtil::MapCollision(pos + shift, height, curNode, true)) {
 				pos += shift;
-				pos.y = height;
+				pos.m_y = height;
 				m_client->SetPos(pos);
 				m_client->SetCurNode(curNode);
-				
+
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_client->GetMatchNum())) {
 					if (id == -1)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMovePacket(m_client->GetMatchId(), 
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMovePacket(m_client->GetMatchId(),
 						m_client->GetPos(), m_client->GetDir());
 				}
 

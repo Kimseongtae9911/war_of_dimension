@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		WizardEarthImpactHandler() {}
-		WizardEarthImpactHandler(std::shared_ptr<CClient> client);
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		WizardEarthImpactHandler(std::shared_ptr<CClient> _client);
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

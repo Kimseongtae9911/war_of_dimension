@@ -2,82 +2,82 @@
 namespace wod_server {
     struct NpcCsv : public tabledata::NpcInfo
     {
-        NpcCsv(const tabledata::NpcInfo& npcInfo) {
-            Type = npcInfo.Type;
-            RespawnTime = npcInfo.RespawnTime;
-            BaseHp = npcInfo.BaseHp;
-            HpIncrease = npcInfo.HpIncrease;
-            BaseAttack = npcInfo.BaseAttack;
-            AttackIncrease = npcInfo.AttackIncrease;
-            AttackDistance = npcInfo.AttackDistance;
-            AttackCooltime = npcInfo.AttackCooltime;
-            GoldReward = npcInfo.GoldReward;
-            HealCooltime = npcInfo.HealCooltime;
-            HealPercent = npcInfo.HealPercent;
-            Speed = npcInfo.Speed;
-            RotateSpeed = npcInfo.RotateSpeed;
-            ChaseDistance = npcInfo.ChaseDistance;
-            ChaseMaxDistance = npcInfo.ChaseMaxDistance;
-            Scale = npcInfo.Scale;
+        NpcCsv(const tabledata::NpcInfo& _npcInfo) {
+            Type = _npcInfo.Type;
+            RespawnTime = _npcInfo.RespawnTime;
+            BaseHp = _npcInfo.BaseHp;
+            HpIncrease = _npcInfo.HpIncrease;
+            BaseAttack = _npcInfo.BaseAttack;
+            AttackIncrease = _npcInfo.AttackIncrease;
+            AttackDistance = _npcInfo.AttackDistance;
+            AttackCooltime = _npcInfo.AttackCooltime;
+            GoldReward = _npcInfo.GoldReward;
+            HealCooltime = _npcInfo.HealCooltime;
+            HealPercent = _npcInfo.HealPercent;
+            Speed = _npcInfo.Speed;
+            RotateSpeed = _npcInfo.RotateSpeed;
+            ChaseDistance = _npcInfo.ChaseDistance;
+            ChaseMaxDistance = _npcInfo.ChaseMaxDistance;
+            Scale = _npcInfo.Scale;
 
-            if (npcInfo.BuffType != "NULL") {
-                std::istringstream issBuffType(npcInfo.BuffType);
-                std::istringstream issBuffValue(npcInfo.BuffValue);
-                std::istringstream issBuffDuration(npcInfo.BuffDuration);
+            if (_npcInfo.BuffType != "NULL") {
+                std::istringstream issBuffType(_npcInfo.BuffType);
+                std::istringstream issBuffValue(_npcInfo.BuffValue);
+                std::istringstream issBuffDuration(_npcInfo.BuffDuration);
 
                 std::string tokenBuffType, tokenBuffValue, tokenBuffDuration;
                 while (std::getline(issBuffType, tokenBuffType, ';') &&
                     std::getline(issBuffValue, tokenBuffValue, ';') &&
                     std::getline(issBuffDuration, tokenBuffDuration, ';')) {
                     BuffInfo info;
-                    info.buffType = StringToEnum<EBuffType>(tokenBuffType);
-                    info.buffValue = std::stof(tokenBuffValue);
-                    info.buffDuration = static_cast<uint16_t>(std::stoi(tokenBuffDuration));
-                    BuffInfos.emplace(info.buffType, info);
+                    info.m_buffType = StringToEnum<EBuffType>(tokenBuffType);
+                    info.m_buffValue = std::stof(tokenBuffValue);
+                    info.m_buffDuration = static_cast<uint16_t>(std::stoi(tokenBuffDuration));
+                    m_BuffInfos.emplace(info.m_buffType, info);
                 }
             }
 
-            if (npcInfo.RespawnPos != "NULL") {
+            if (_npcInfo.RespawnPos != "NULL") {
                 int8_t cnt = 0;
-                std::istringstream issRespawnPos(npcInfo.RespawnPos);
+                std::istringstream issRespawnPos(_npcInfo.RespawnPos);
                 std::string tokenRespawnPos;
                 vec3 tempPos;
                 while (std::getline(issRespawnPos, tokenRespawnPos, ';')) {
                     if (cnt == 0)
-                        tempPos.x = std::stof(tokenRespawnPos);
+                        tempPos.m_x = std::stof(tokenRespawnPos);
                     else if(cnt == 1)
-                        tempPos.y = std::stof(tokenRespawnPos);
+                        tempPos.m_y = std::stof(tokenRespawnPos);
                     else
-                        tempPos.z = std::stof(tokenRespawnPos);
+                        tempPos.m_z = std::stof(tokenRespawnPos);
                     if (++cnt % 3 == 0) {
-                        respawnPos.push_back(tempPos);
+                        m_respawnPos.push_back(tempPos);
                         cnt = 0;
                     }
                 }
             }
 
-            if (npcInfo.RespawnLook != "NULL") {
+            if (_npcInfo.RespawnLook != "NULL") {
                 int8_t cnt = 0;
-                std::istringstream issRespawnLook(npcInfo.RespawnLook);
+                std::istringstream issRespawnLook(_npcInfo.RespawnLook);
                 std::string tokenRespawnLook;
                 vec3 tempLook;
                 while (std::getline(issRespawnLook, tokenRespawnLook, ';')) {
                     if (cnt == 0)
-                        tempLook.x = std::stof(tokenRespawnLook);
+                        tempLook.m_x = std::stof(tokenRespawnLook);
                     else if (cnt == 1)
-                        tempLook.y = std::stof(tokenRespawnLook);
+                        tempLook.m_y = std::stof(tokenRespawnLook);
                     else
-                        tempLook.z = std::stof(tokenRespawnLook);
+                        tempLook.m_z = std::stof(tokenRespawnLook);
                     if (++cnt % 3 == 0) {
-                        respawnLook.push_back(tempLook);
+                        m_respawnLook.push_back(tempLook);
                         cnt = 0;
                     }
                 }
             }
         }
-        std::vector<vec3> respawnPos;
-        std::vector<vec3> respawnLook;
-        std::map<EBuffType, BuffInfo> BuffInfos;
+        std::vector<vec3> m_respawnPos;
+        std::vector<vec3> m_respawnLook;
+        std::map<EBuffType, BuffInfo> m_BuffInfos;
     };
 
 	class NpcCsvMgr : public CsvLoader, public TSingleton<NpcCsvMgr>
@@ -86,9 +86,9 @@ namespace wod_server {
         bool Initialize() override;
         bool Release() override;
 
-        void LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader) override;
-        NpcCsv* GetNpcCsv(ENpcType type) const {
-            auto iter = m_npcCsvMap.find(type);
+        void LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader) override;
+        NpcCsv* GetNpcCsv(ENpcType _type) const {
+            auto iter = m_npcCsvMap.find(_type);
             if (iter == m_npcCsvMap.end()) {
                 return nullptr;
             }

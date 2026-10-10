@@ -14,11 +14,11 @@ namespace wod_server {
 		m_transform = new CTransform();
 		m_physics = new CPhysic();
 		m_viewList = new CViewList(this);
-		
+
 		m_jobQueue = new JobQueue();
 
 
-		m_playerInfo.model = { 0, 1, 0, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 1,
+		m_playerInfo.m_model = { 0, 1, 0, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 1,
 		1 , 0, 1 , 3 , 2 , 2 , 2 , 2 , 1 , 1 , 1 , 1 , 1 };
 	}
 
@@ -30,28 +30,28 @@ namespace wod_server {
 		delete m_jobQueue;
 	}
 
-	void CClient::Initialize(const SOCKET& socket)
+	void CClient::Initialize(const SOCKET& _socket)
 	{
-		m_packetSender->Initailize(socket);
+		m_packetSender->Initailize(_socket);
         m_isDisconnected.store(false);
-		m_socketID = static_cast<int>(socket);
+		m_socketID = static_cast<int>(_socket);
 
-		stateLock.lock();
+		m_stateLock.lock();
 		m_state = CL_STATE::ST_ALLOC;
-		stateLock.unlock();
+		m_stateLock.unlock();
 
-		m_sectionX = static_cast<int>((m_transform->GetPos().x + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM));
-		m_sectionZ = static_cast<int>((m_transform->GetPos().z + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM));
-		GameUtil::RegisterClientToSection(m_sectionX, m_sectionZ, static_cast<int>(socket));
+		m_sectionX = static_cast<int>((m_transform->GetPos().m_x + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM));
+		m_sectionZ = static_cast<int>((m_transform->GetPos().m_z + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM));
+		GameUtil::RegisterClientToSection(m_sectionX, m_sectionZ, static_cast<int>(_socket));
 	}
 
-	void CClient::RecvPacket(int recvBytes, OverlapEx* overEx)
+	void CClient::RecvPacket(int _recvBytes, OverlapEx* _overEx)
 	{
 
         auto session = m_packetSender->GetSession();
         const auto generation = session->Generation();
         std::vector<wod::core::FrameDecoder::Frame> frames;
-        if (!session->Decode(recvBytes, *overEx, frames)) { Disconnect(); return; }
+        if (!session->Decode(_recvBytes, *_overEx, frames)) { Disconnect(); return; }
         for (auto& frame : frames) {
             if (!wod::protocol::Validate(frame, wod::protocol::Endpoint::LobbyClient)) { Disconnect(); return; }
             m_jobQueue->PushJob([this, session, generation, frame = std::move(frame)]() mutable {
@@ -87,8 +87,8 @@ namespace wod_server {
 		m_physics->Deceleration(elapsedTime);
 
 		//Update Section
-		int sectionX = static_cast<int>((newPos.x + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM));
-		int sectionZ = static_cast<int>((newPos.z + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM));
+		int sectionX = static_cast<int>((newPos.m_x + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM));
+		int sectionZ = static_cast<int>((newPos.m_z + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM));
 		if (m_sectionX != sectionX || m_sectionZ != sectionZ) {
 			int beforeX = m_sectionX;
 			int beforeZ = m_sectionZ;
@@ -103,9 +103,9 @@ namespace wod_server {
 	bool CClient::Reset()
 	{
 		try {
-			stateLock.lock();
+			m_stateLock.lock();
 			m_state = CL_STATE::ST_FREE;
-			stateLock.unlock();
+			m_stateLock.unlock();
 
 			m_viewList->ClearViewList();
 
@@ -120,7 +120,7 @@ namespace wod_server {
 			m_updateTime = std::chrono::system_clock::now();
 			memset(m_name, 0, sizeof(m_name));
 
-			Resource::socketpool.push(m_packetSender->GetSession()->GetSocket());
+			Resource::m_socketpool.push(m_packetSender->GetSession()->GetSocket());
 		}
 		catch (std::exception ex) {
 			LogPrinter::PrintMsg(ex.what());
@@ -129,16 +129,16 @@ namespace wod_server {
 		return true;
 	}
 
-	void CClient::ProcessUpdate(bool isDummy)
+	void CClient::ProcessUpdate(bool _isDummy)
 	{
 		Move();
 
-		if (isDummy)
+		if (_isDummy)
 			m_packetSender->SendDummyMovePacket(m_id, m_transform->GetPos(), m_transform->GetDir());
 
 		if (m_transform->GetDir() != 0)
 		{
-			m_jobQueue->PushJob([this, isDummy]() {	ProcessUpdate(isDummy); });
+			m_jobQueue->PushJob([this, _isDummy]() {	ProcessUpdate(_isDummy); });
 			GPacketJobQueue->AddSessionQueue(this);
 		}
 	}
@@ -149,7 +149,7 @@ namespace wod_server {
         session->Invalidate();
         auto* over = Resource::GetOverObjectFromPool();
         over->SetOP(OP_TYPE::OP_DISCONNECT);
-        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::overExPool.push(over);
+        if (!SocketUtil::Runtime().Disconnect(session->GetSocket(), *over)) Resource::m_overExPool.push(over);
 
 	}
 }

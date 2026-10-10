@@ -8,17 +8,17 @@ namespace wod_server {
 		bool Initialize() override;
 		bool Release() override;
 
-		void MakeClientObject(int key) { m_clients.insert({ key, new CClient }); }
-		void InitializeClient(int index);
-		void DisconnectClient(int key);
-		void ClientReset(int index);
+		void MakeClientObject(int _key) { m_clients.insert({ _key, new CClient }); }
+		void InitializeClient(int _index);
+		void DisconnectClient(int _key);
+		void ClientReset(int _index);
 
-		void RegisterClientToChannel(CClient* client);
-		bool ChangeChannel(int curChannel, int changeChannel, CClient* client);
+		void RegisterClientToChannel(CClient* _client);
+		bool ChangeChannel(int _curChannel, int _changeChannel, CClient* _client);
 
-		CClient* GetClient(int id) { return m_clients.at(id); }
+		CClient* GetClient(int _id) { return m_clients.at(_id); }
 		const concurrency::concurrent_unordered_map<int, CClient*>& GetAllClient() const { return m_clients; }
-		std::array<CClient*, LOBBY_MAX_CLIENT> GetChannelClients(int channel) { m_channelLock.lock(); std::array<CClient*, LOBBY_MAX_CLIENT> temp = m_channelClient[channel]; m_channelLock.unlock(); return temp; }
+		std::array<CClient*, LOBBY_MAX_CLIENT> GetChannelClients(int _channel) { m_channelLock.lock(); std::array<CClient*, LOBBY_MAX_CLIENT> temp = m_channelClient[_channel]; m_channelLock.unlock(); return temp; }
 
 	private:
 		concurrency::concurrent_unordered_map<int, CClient*> m_clients;

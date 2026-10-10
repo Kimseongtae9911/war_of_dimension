@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherVitalPointHandler() {}
-		ArcherVitalPointHandler(std::shared_ptr<CClient> client);
+		ArcherVitalPointHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

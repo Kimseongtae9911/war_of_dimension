@@ -14,14 +14,14 @@ namespace wod_server {
     class ItemCsvMgr : public CsvLoader, public TSingleton<ItemCsvMgr>
     {
     public:
-        static std::map<ITEMKIND, EItemType> ITEMKINDToEItemType;   // 기존 클라이언트 코드와 대응될 수 있도록 임시로 사용
+        static std::map<ITEMKIND, EItemType> m_ITEMKINDToEItemType;   // 기존 클라이언트 코드와 대응될 수 있도록 임시로 사용
     public:
         bool Initialize() override;
         bool Release() override;
 
-        void LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader) override;
-        ItemCsv* GetItemCsv(EItemType type) const {
-            auto iter = m_itemCsvMap.find(type);
+        void LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader) override;
+        ItemCsv* GetItemCsv(EItemType _type) const {
+            auto iter = m_itemCsvMap.find(_type);
             if (iter == m_itemCsvMap.end()) {
                 return nullptr;
             }

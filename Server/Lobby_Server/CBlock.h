@@ -8,8 +8,8 @@ class CBlock
 {
 public:
 	CBlock() {}
-	CBlock(const std::vector<TransactionData>& transactions, int version, const std::string& prevHash);
-	CBlock(const std::string& hash, int version, const std::string& timeStamp, const std::string& prevHash, const std::string& merkleRoot, int validatorID, std::vector<std::string>& transactions);
+	CBlock(const std::vector<TransactionData>& _transactions, int _version, const std::string& _prevHash);
+	CBlock(const std::string& _hash, int _version, const std::string& _timeStamp, const std::string& _prevHash, const std::string& _merkleRoot, int _validatorID, std::vector<std::string>& _transactions);
 	~CBlock() {}
 
 	void CreateGenesisBlock();
@@ -30,10 +30,10 @@ public:
 		m_merkleRoot = SHA256::Encrpyt(txs);
 	}
 
-	bool CreateBlock(const std::string& blockData);
-	bool CheckBlockValidity(const std::string& prevBlockHash, int validatorID);
+	bool CreateBlock(const std::string& _blockData);
+	bool CheckBlockValidity(const std::string& _prevBlockHash, int _validatorID);
 
-	void SetPrevHash(const std::string& prevHash) { m_prevHash = prevHash; }
+	void SetPrevHash(const std::string& _prevHash) { m_prevHash = _prevHash; }
 
 	const std::string& GetHash() const { return m_hash; }
 	int GetVersion() const { return m_version; }

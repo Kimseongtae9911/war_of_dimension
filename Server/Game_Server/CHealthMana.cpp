@@ -2,18 +2,18 @@
 #include "CHealthMana.h"
 
 namespace wod_server {
-	bool CHealthMana::Damage(int damage, int critical, int armor, int regist, DAMAGE_TYPE type)
+	bool CHealthMana::Damage(int _damage, int _critical, int _armor, int _regist, DAMAGE_TYPE _type)
 	{
 		int calculatedDamage = 0;
-		if (type == DAMAGE_TYPE::STRENGTH) {
-			calculatedDamage = static_cast<int>(damage * static_cast<float>((100.f / (100.f + armor))));
+		if (_type == DAMAGE_TYPE::STRENGTH) {
+			calculatedDamage = static_cast<int>(_damage * static_cast<float>((100.f / (100.f + _armor))));
 		}
 		else {
-			calculatedDamage = static_cast<int>(damage * static_cast<float>((100.f / (100.f + regist))));
+			calculatedDamage = static_cast<int>(_damage * static_cast<float>((100.f / (100.f + _regist))));
 		}
 
-		if (critical > 0) {
-			if (*RandomUtil::GenerateUniqueRandomNumbers(0, 99, 1).begin() < critical) {
+		if (_critical > 0) {
+			if (*RandomUtil::GenerateUniqueRandomNumbers(0, 99, 1).begin() < _critical) {
 				calculatedDamage = static_cast<int>(calculatedDamage * 1.5f);
 			}
 		}

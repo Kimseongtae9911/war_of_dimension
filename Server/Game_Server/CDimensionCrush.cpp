@@ -16,9 +16,9 @@ namespace wod_server {
 	{
 	}
 
-	bool CDimensionCrush::Update(float elapsedTime)
+	bool CDimensionCrush::Update(float _elapsedTime)
 	{
-		if (!active) {
+		if (!m_active) {
 			m_areaLock.lock();
 			if (!m_area.empty()) {
 				std::unordered_set<int> tempArea = m_area;
@@ -28,10 +28,10 @@ namespace wod_server {
 						continue;
 					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(id);
 					CStat stat = client->GetStatus()->GetStat();
-					
-					stat.speed += m_skillCsv->debuffInfo[EDebuffType::Slow].debuffValue;
+
+					stat.m_speed += m_skillCsv->m_debuffInfo[EDebuffType::Slow].m_debuffValue;
 					client->GetStatus()->SetStat(stat);
-					client->GetStatus()->skillBuff = SKILL_BUFF::NONE;
+					client->GetStatus()->m_skillBuff = SKILL_BUFF::NONE;
 
 					for (int playerID : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 						if (playerID == -1)
@@ -58,16 +58,16 @@ namespace wod_server {
 			if (-1 == clientIDs[i])
 				continue;
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientIDs[i]);
-			if (DistanceXZ(client->GetPos(), m_pos) < m_skillCsv->extraParam1) {
+			if (DistanceXZ(client->GetPos(), m_pos) < m_skillCsv->m_extraParam1) {
 				//Inside Dimension Crush
 				m_areaLock.lock();
 				if (!m_area.contains(clientIDs[i])) {
 					m_areaLock.unlock();
 					//Came Into Dimension Crush this frame
 					CStat stat = client->GetStatus()->GetStat();
-					stat.speed -= m_skillCsv->debuffInfo[EDebuffType::Slow].debuffValue;
+					stat.m_speed -= m_skillCsv->m_debuffInfo[EDebuffType::Slow].m_debuffValue;
 					client->GetStatus()->SetStat(stat);
-					client->GetStatus()->skillBuff = SKILL_BUFF::SILENCE;
+					client->GetStatus()->m_skillBuff = SKILL_BUFF::SILENCE;
 					client->Damage(m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID);
 
 					for (int j = 0; j < MAX_PLAYER; ++j) {
@@ -79,13 +79,13 @@ namespace wod_server {
 					}
 
 					m_area.insert(clientIDs[i]);
-					
+
 					m_lastDamageTime.insert({ clientIDs[i], TimeUtil::CurTime() });
 				}
 				else {
 					m_areaLock.unlock();
 					//Was in Dimension Crush prev frame
-					if (TimeUtil::CurTime() - m_lastDamageTime[client->GetID()] > std::chrono::milliseconds(m_skillCsv->damageCycleTime)) {
+					if (TimeUtil::CurTime() - m_lastDamageTime[client->GetID()] > std::chrono::milliseconds(m_skillCsv->m_damageCycleTime)) {
 						client->Damage(m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID);
 						m_lastDamageTime[client->GetID()] = TimeUtil::CurTime();
 					}
@@ -98,9 +98,9 @@ namespace wod_server {
 					m_areaLock.unlock();
 					//Went out of Dimension Crush this frame
 					CStat stat = client->GetStatus()->GetStat();
-					stat.speed += m_skillCsv->debuffInfo[EDebuffType::Slow].debuffValue;
+					stat.m_speed += m_skillCsv->m_debuffInfo[EDebuffType::Slow].m_debuffValue;
 					client->GetStatus()->SetStat(stat);
-					client->GetStatus()->skillBuff = SKILL_BUFF::NONE;
+					client->GetStatus()->m_skillBuff = SKILL_BUFF::NONE;
 					for (int j = 0; j < MAX_PLAYER; ++j) {
 						if (clientIDs[j] == -1)
 							continue;
@@ -121,13 +121,13 @@ namespace wod_server {
 
 		for (int i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i) {
 			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(m_matchNum, i);
-			if (!npc->active)
+			if (!npc->m_active)
 				continue;
-			if (DistanceXZ(npc->GetPos(), m_pos) < m_skillCsv->extraParam1) {
+			if (DistanceXZ(npc->GetPos(), m_pos) < m_skillCsv->m_extraParam1) {
 				m_areaLock.lock();
 				if (m_area.contains(npc->GetID())) {
 					m_areaLock.unlock();
-					if (TimeUtil::CurTime() - m_lastDamageTime[npc->GetID()] > std::chrono::milliseconds(m_skillCsv->damageCycleTime)) {
+					if (TimeUtil::CurTime() - m_lastDamageTime[npc->GetID()] > std::chrono::milliseconds(m_skillCsv->m_damageCycleTime)) {
 						npc->Damaged(m_clientID, m_power, DAMAGE_TYPE::MAGIC, false);
 						m_lastDamageTime[npc->GetID()] = TimeUtil::CurTime();
 					}

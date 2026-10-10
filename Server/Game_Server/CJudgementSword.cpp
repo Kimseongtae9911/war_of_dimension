@@ -13,7 +13,7 @@ namespace wod_server {
 	{
 		m_skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManJudgementSword);
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = { m_skillCsv->extent.x,m_skillCsv->extent.y,m_skillCsv->extent.z };
+		m_initBoundingBox.Extents = { m_skillCsv->m_extent.m_x,m_skillCsv->m_extent.m_y,m_skillCsv->m_extent.m_z };
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -22,15 +22,15 @@ namespace wod_server {
 	{
 	}
 
-	bool CJudgementSword::Update(float elapsedTime)
+	bool CJudgementSword::Update(float _elapsedTime)
 	{
-		if (!active)
+		if (!m_active)
 			return false;
 
 		if (m_targetID >= NPC_ID) {
 			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(m_matchNum, m_targetID - NPC_ID);
-			m_pos.x = npc->GetPos().x; m_pos.z = npc->GetPos().z;
-			m_pos.y -= m_skillCsv->speed * elapsedTime;
+			m_pos.m_x = npc->GetPos().m_x; m_pos.m_z = npc->GetPos().m_z;
+			m_pos.m_y -= m_skillCsv->m_speed * _elapsedTime;
 			UpdateBoundingBox();
 
 			if (npc->GetBoundingBox().Intersects(m_boundingBox)) {
@@ -40,7 +40,7 @@ namespace wod_server {
 						continue;
 					npc->Damaged(m_clientID, m_power, DAMAGE_TYPE::MAGIC);
 				}
-				active = false;
+				m_active = false;
 				return false;
 			}
 			else {
@@ -53,15 +53,15 @@ namespace wod_server {
 		}
 		else {
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(m_targetID);
-			m_pos.x = client->GetPos().x; m_pos.z = client->GetPos().z;
-			m_pos.y -= m_skillCsv->speed * elapsedTime;
+			m_pos.m_x = client->GetPos().m_x; m_pos.m_z = client->GetPos().m_z;
+			m_pos.m_y -= m_skillCsv->m_speed * _elapsedTime;
 			UpdateBoundingBox();
 
 			if (client->GetBoundingBox().Intersects(m_boundingBox)) {
 				network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(m_id, TimeUtil::PassedTimeMSec(1000), EPlayerSkill::SwordManJudgementSword, {}, m_matchNum, 2, {}, static_cast<int>(m_type)));
 
 				client->Damage(m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID);
-				active = false;
+				m_active = false;
 				return false;
 			}
 			else {
@@ -79,7 +79,7 @@ namespace wod_server {
 
 	void CJudgementSword::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}

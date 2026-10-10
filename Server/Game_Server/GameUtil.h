@@ -2,8 +2,8 @@
 
 namespace wod_server {
 	struct InitBoundingBox {
-		vec3 offset;
-		vec3 extent;
+		vec3 m_offset;
+		vec3 m_extent;
 	};
 
 	class GameUtil
@@ -11,43 +11,43 @@ namespace wod_server {
 	public:
 		~GameUtil();
 
-		static bool LoadCoolTime(std::string filename);
-		static bool LoadManaConsumption(std::string filename);
-		static bool LoadNaviMesh(std::string filename);
-		static bool LoadHeightMesh(std::string filename);
-		static bool LoadMap(std::string filename);
-		static bool LoadPlayerBB(std::string filename, int type);
-		static bool LoadMinionBB(std::string filename);
-		static bool LoadFenceBB(std::string filename);
-		static bool LoadMinionPath(std::string filename, int pathNum);
+		static bool LoadCoolTime(std::string _filename);
+		static bool LoadManaConsumption(std::string _filename);
+		static bool LoadNaviMesh(std::string _filename);
+		static bool LoadHeightMesh(std::string _filename);
+		static bool LoadMap(std::string _filename);
+		static bool LoadPlayerBB(std::string _filename, int _type);
+		static bool LoadMinionBB(std::string _filename);
+		static bool LoadFenceBB(std::string _filename);
+		static bool LoadMinionPath(std::string _filename, int _pathNum);
 		static bool LoadMonsterBB();
 		static bool LoadTowerBB();
-		static bool LoadNexusBB(const std::string& filename);
+		static bool LoadNexusBB(const std::string& _filename);
 
-		static int GetCoolTime(int characterNum, int skillNum);
-		static int GetMpConsumption(int characterNum, int skillNum);
-		
+		static int GetCoolTime(int _characterNum, int _skillNum);
+		static int GetMpConsumption(int _characterNum, int _skillNum);
+
 		static const DirectX::BoundingOrientedBox& GetNexusBB() { return m_nexusBB; }
-		static const DirectX::BoundingOrientedBox& GetTowerBB(int index) { return m_towerBBs[index]; }
+		static const DirectX::BoundingOrientedBox& GetTowerBB(int _index) { return m_towerBBs[_index]; }
 
-		static bool MapCollision(const vec3& pos, float& height, int& nodeNum);
-		static bool MapCollision(const vec3& pos, vec3& shift, float& height, int& nodeNum);
-		static bool MapCollision(const vec3& pos, float& height, int& nodeNum, bool skill);
-		static bool FenceCollision(const DirectX::BoundingOrientedBox box, const vec3& shift);
-		static bool ClientCollisionCheck(int id, const vec3& shift);
-		static bool NpcCollisionCheck(int id, int matchNum, const vec3& shift);
-		static void UpdateSection(int id, int matchNum, int beforeX, int beforeZ, int sectionX, int sectionZ);
+		static bool MapCollision(const vec3& _pos, float& _height, int& _nodeNum);
+		static bool MapCollision(const vec3& _pos, vec3& _shift, float& _height, int& _nodeNum);
+		static bool MapCollision(const vec3& _pos, float& _height, int& _nodeNum, bool _skill);
+		static bool FenceCollision(const DirectX::BoundingOrientedBox _box, const vec3& _shift);
+		static bool ClientCollisionCheck(int _id, const vec3& _shift);
+		static bool NpcCollisionCheck(int _id, int _matchNum, const vec3& _shift);
+		static void UpdateSection(int _id, int _matchNum, int _beforeX, int _beforeZ, int _sectionX, int _sectionZ);
 
-		static bool HeroSkillCollisionCheck(const DirectX::BoundingOrientedBox box, int matchNum, int power, int critical, DAMAGE_TYPE type, int clientID, bool projectile = true);
-		static bool BossSkillCollisionCheck(const DirectX::BoundingOrientedBox box, int matchNum, int power, int critical, DAMAGE_TYPE type, int clientID, bool projectile = true);
-		static bool SkillMapCollision(const DirectX::BoundingOrientedBox skillBox);	//Skill - Map Collision Check
+		static bool HeroSkillCollisionCheck(const DirectX::BoundingOrientedBox _box, int _matchNum, int _power, int _critical, DAMAGE_TYPE _type, int _clientID, bool _projectile = true);
+		static bool BossSkillCollisionCheck(const DirectX::BoundingOrientedBox _box, int _matchNum, int _power, int _critical, DAMAGE_TYPE _type, int _clientID, bool _projectile = true);
+		static bool SkillMapCollision(const DirectX::BoundingOrientedBox _skillBox);	//Skill - Map Collision Check
 
-		static DirectX::BoundingOrientedBox GenerateShortRangeBox(const vec3& pos, const vec3& look, const vec3& extent, const vec3& scale, const DirectX::XMFLOAT4X4& world);
+		static DirectX::BoundingOrientedBox GenerateShortRangeBox(const vec3& _pos, const vec3& _look, const vec3& _extent, const vec3& _scale, const DirectX::XMFLOAT4X4& _world);
 
-		static bool CheckJumpCollision(const vec3& pos, int& jumpNum);
-		static const vec3 GetJumpPos(int jumpNum, float time);
+		static bool CheckJumpCollision(const vec3& _pos, int& _jumpNum);
+		static const vec3 GetJumpPos(int _jumpNum, float _time);
 
-		static bool CheckTeleportCollision(const vec3& pos, int& teleport);
+		static bool CheckTeleportCollision(const vec3& _pos, int& _teleport);
 
 		static const InitBoundingBox& GetPlayerInitBB() { return m_playerInitBB; }
 		static const InitBoundingBox& GetBossPlayerInitBB() { return m_bossPlayerInitBB; }
@@ -63,16 +63,16 @@ namespace wod_server {
 			return it->second;
 		}
 
-		static Node* GetNode(int index) { return m_naviMesh[index]; }
+		static Node* GetNode(int _index) { return m_naviMesh[_index]; }
 
-		static std::array<std::vector<Vector2>, PATH_NUM> minionPaths;
+		static std::array<std::vector<Vector2>, PATH_NUM> m_minionPaths;
 
-		static bool GetSlidingVector(const vec3& pos, const vec3& shift, int nodeNum, vec3& slidingVector);
-		static int FindEdgeAdjacentToPosition(const vec3& pos, const Triangle& triangle);
-		static float DistanceToEdgeSquared(const vec3& point, const vec3& edgeStart, const vec3& edgeEnd);
+		static bool GetSlidingVector(const vec3& _pos, const vec3& _shift, int _nodeNum, vec3& _slidingVector);
+		static int FindEdgeAdjacentToPosition(const vec3& _pos, const Triangle& _triangle);
+		static float DistanceToEdgeSquared(const vec3& _point, const vec3& _edgeStart, const vec3& _edgeEnd);
 
 	private:
-		static bool CheckTriangleAdjacent(const Triangle& triangle1, const Triangle& triangle2);
+		static bool CheckTriangleAdjacent(const Triangle& _triangle1, const Triangle& _triangle2);
 
 		static std::array<std::unordered_map<int, int>, MAX_ROLE> m_playerSkillCoolTimes;	//0: archer, fighter, swordman, wizard, ogre, programmer
 		static std::array<std::unordered_map<int, int>, MAX_ROLE> m_playerManaConsumption;	//0: archer, fighter, swordman, wizard, ogre, programmer

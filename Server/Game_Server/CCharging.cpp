@@ -13,7 +13,7 @@ namespace wod_server {
 	{
 		m_skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::OgreCharging);
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = { GameUtil::GetBossPlayerInitBB().extent.x, GameUtil::GetBossPlayerInitBB().extent.y, GameUtil::GetBossPlayerInitBB().extent.z };
+		m_initBoundingBox.Extents = { GameUtil::GetBossPlayerInitBB().m_extent.m_x, GameUtil::GetBossPlayerInitBB().m_extent.m_y, GameUtil::GetBossPlayerInitBB().m_extent.m_z };
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -22,22 +22,22 @@ namespace wod_server {
 	{
 	}
 
-	bool CCharging::Update(float elapsedTime)
+	bool CCharging::Update(float _elapsedTime)
 	{
-		if (!active) {
+		if (!m_active) {
 			Reset();
 			return false;
 		}
 
 		std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(m_clientID);
-		vec3 newPos = client->GetPos() + m_look * (m_skillCsv->speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().speed)) * elapsedTime;
+		vec3 newPos = client->GetPos() + m_look * (m_skillCsv->m_speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().m_speed)) * _elapsedTime;
 		float height;
 		int curNode;
 		if (GameUtil::MapCollision(newPos, height, curNode)) {
-			newPos.y = height;
+			newPos.m_y = height;
 			client->SetPos(newPos);
 			client->SetCurNode(curNode);
-			m_pos += m_look * (m_skillCsv->speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().speed)) * elapsedTime;
+			m_pos += m_look * (m_skillCsv->m_speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().m_speed)) * _elapsedTime;
 
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())) {
 				if (id == -1)
@@ -51,7 +51,7 @@ namespace wod_server {
 			return false;
 		}
 
-		DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(client->GetPos(), client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, m_skillCsv->posOffset }, client->GetWorldMatrix());
+		DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(client->GetPos(), client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, m_skillCsv->m_posOffset }, client->GetWorldMatrix());
 
 		UpdateBoundingBox();
 
@@ -62,9 +62,9 @@ namespace wod_server {
 			std::shared_ptr<CClient> hero = CObjectMgr::GetInstance()->GetClient(clientIDs[i]);
 			if (!m_collideObjects.contains(clientIDs[i])) {
 				if (hero->GetBoundingBox().Intersects(box)) {
-					hero->Damage(static_cast<int>(client->GetStatus()->GetStat().strength * m_skillCsv->strengthRatio), m_critical, DAMAGE_TYPE::STRENGTH, client->GetID());
-					hero->GetStatus()->skillBuff = SKILL_BUFF::STUN;
-					auto stunTime = m_skillCsv->debuffInfo[EDebuffType::Stun].debuffDuration;
+					hero->Damage(static_cast<int>(client->GetStatus()->GetStat().m_strength * m_skillCsv->m_strengthRatio), m_critical, DAMAGE_TYPE::STRENGTH, client->GetID());
+					hero->GetStatus()->m_skillBuff = SKILL_BUFF::STUN;
+					auto stunTime = m_skillCsv->m_debuffInfo[EDebuffType::Stun].m_debuffDuration;
 					network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(hero->GetID(), TimeUtil::PassedTimeMSec(stunTime), EPlayerSkill::Stun, {}, 0, 0, {}));
 					m_collideObjects.insert(clientIDs[i]);
 
@@ -79,10 +79,10 @@ namespace wod_server {
 
 		for (int i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i) {
 			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), i);
-			if (!npc->active)
+			if (!npc->m_active)
 				continue;
 			if (npc->GetBoundingBox().Intersects(box)) {
-				npc->Damaged(client->GetID(), static_cast<int>(client->GetStatus()->GetStat().strength * m_skillCsv->strengthRatio), DAMAGE_TYPE::STRENGTH);
+				npc->Damaged(client->GetID(), static_cast<int>(client->GetStatus()->GetStat().m_strength * m_skillCsv->m_strengthRatio), DAMAGE_TYPE::STRENGTH);
 				npc->SetTargetClientID(client->GetID());
 				npc->SetState(NPC_STATE::ST_CHASE);
 
@@ -98,7 +98,7 @@ namespace wod_server {
 
 	void CCharging::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}
@@ -107,7 +107,7 @@ namespace wod_server {
 	{
 		if (!m_collideObjects.empty()) {
 			for (int id : m_collideObjects) {
-				CObjectMgr::GetInstance()->GetClient(id)->GetStatus()->skillBuff = SKILL_BUFF::NONE;
+				CObjectMgr::GetInstance()->GetClient(id)->GetStatus()->m_skillBuff = SKILL_BUFF::NONE;
 			}
 			m_collideObjects.clear();
 		}

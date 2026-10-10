@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		SwordManDefensiveStanceHandler() {}
-		SwordManDefensiveStanceHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		SwordManDefensiveStanceHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

@@ -12,9 +12,9 @@ namespace wod_server {
 	CReturnZero::CReturnZero()
 	{
 		m_skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::ProgrammerReturn0);
-		m_memoryLeak = m_skillCsv->debuffInfo[EDebuffType::MemoryLeak];
+		m_memoryLeak = m_skillCsv->m_debuffInfo[EDebuffType::MemoryLeak];
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = { m_skillCsv->extent.x, m_skillCsv->extent.y, m_skillCsv->extent.z };
+		m_initBoundingBox.Extents = { m_skillCsv->m_extent.m_x, m_skillCsv->m_extent.m_y, m_skillCsv->m_extent.m_z };
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -23,15 +23,15 @@ namespace wod_server {
 	{
 	}
 
-	bool CReturnZero::Update(float elapsedTime)
+	bool CReturnZero::Update(float _elapsedTime)
 	{
-		if (!active) {
+		if (!m_active) {
 			m_return = false;
 			m_collideIDs.clear();
 			return false;
 		}
 
-		m_pos += m_look * m_skillCsv->speed * elapsedTime;
+		m_pos += m_look * m_skillCsv->m_speed * _elapsedTime;
 		UpdateBoundingBox();
 
 		std::array<int, MAX_PLAYER> clientIDs = CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum);
@@ -52,14 +52,14 @@ namespace wod_server {
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientIDs[i]);
 			if (client->GetBoundingBox().Intersects(m_boundingBox)) {
 				client->Damage(m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID);
-				network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(client->GetID(), TimeUtil::CurTime(), EPlayerSkill::MemoryLeak, {}, static_cast<int>(m_power * m_memoryLeak.debuffValue), 0, {}, m_clientID));
+				network::GetInstance()->RegisterSkillEvent(SKILL_EVENT(client->GetID(), TimeUtil::CurTime(), EPlayerSkill::MemoryLeak, {}, static_cast<int>(m_power * m_memoryLeak.m_debuffValue), 0, {}, m_clientID));
 				m_collideIDs.insert(clientIDs[i]);
 			}
 		}
 
 		for (int i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i) {
 			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(m_matchNum, i);
-			if (!npc->active)
+			if (!npc->m_active)
 				continue;
 			if (m_collideIDs.contains(npc->GetID()))
 				continue;
@@ -73,23 +73,23 @@ namespace wod_server {
 			if (id == -1)
 				continue;
 			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendUpdateSkillObjectPacket(m_id, m_type, m_pos);
-		}		
+		}
 
 		if (!m_return) {
-			if (DistanceXZ(m_pos, m_startPos) > m_skillCsv->skillRadius) {
+			if (DistanceXZ(m_pos, m_startPos) > m_skillCsv->m_skillRadius) {
 				m_return = true;
 				m_look = vec3::Normalize(CObjectMgr::GetInstance()->GetClient(m_clientID)->GetPos() - m_pos);
 				m_collideIDs.clear();
 			}
 		}
 		else {
-			if (DistanceXZ(m_pos, CObjectMgr::GetInstance()->GetClient(m_clientID)->GetPos()) < m_skillCsv->extraParam1) {
+			if (DistanceXZ(m_pos, CObjectMgr::GetInstance()->GetClient(m_clientID)->GetPos()) < m_skillCsv->m_extraParam1) {
 				for (int id : clientIDs) {
 					if (id == -1)
 						continue;
 					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(m_id, m_type);
 				}
-				active = false;
+				m_active = false;
 				m_return = false;
 				m_collideIDs.clear();
 				return false;
@@ -103,7 +103,7 @@ namespace wod_server {
 
 	void CReturnZero::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}

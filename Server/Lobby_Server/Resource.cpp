@@ -2,11 +2,11 @@
 #include "Resource.h"
 
 namespace wod_server {
-	CSocketPool Resource::socketpool;
-	wod::core::ObjectPool<OverlapEx> Resource::overExPool;
+	CSocketPool Resource::m_socketpool;
+	wod::core::ObjectPool<OverlapEx> Resource::m_overExPool;
 
 	OverlapEx* Resource::GetOverObjectFromPool()
 	{
-		return overExPool.Acquire();
+		return m_overExPool.Acquire();
 	}
 }

@@ -5,19 +5,19 @@
 
 namespace wod_server {
 
-	void CSwordManTimer::Dodge(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::Dodge(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
 			//pos = look
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManDodge);
 
-			vec3 newPos = client->GetPos() + ev.pos * (skillCsv->speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().speed)) * TimeUtil::CalElapsedTime(ev.lastProcessTime);
+			vec3 newPos = client->GetPos() + _ev.m_pos * (skillCsv->m_speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().m_speed)) * TimeUtil::CalElapsedTime(_ev.m_lastProcessTime);
 
 			float height;
 			int curNode;
 			if (GameUtil::MapCollision(newPos, height, curNode)) {
-				newPos.y = height;
+				newPos.m_y = height;
 				client->SetPos(newPos);
 				client->SetCurNode(curNode);
 
@@ -29,38 +29,38 @@ namespace wod_server {
 			}
 
 			if (client->GetUsingSkill())
-				timerQueue.push({ ev.objID, TimeUtil::NextFrameTime(), EPlayerSkill::SwordManDodge, ev.pos, 0, 0, TimeUtil::CurTime() });
+				_timerQueue.push({ _ev.m_objID, TimeUtil::NextFrameTime(), EPlayerSkill::SwordManDodge, _ev.m_pos, 0, 0, TimeUtil::CurTime() });
 		}
 		catch (const std::exception& ex) {
 			LogPrinter::PrintMsg("Err(CSwordManTimer Dodge), " + std::string(ex.what()));
 		}
 	}
 
-	void CSwordManTimer::HeavySlash(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::HeavySlash(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManHeavySlash);
 
-			DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(ev.pos, { 0.f, 0.f, 0.f }, { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->posOffset * 2.f }, client->GetWorldMatrix());
+			DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(_ev.m_pos, { 0.f, 0.f, 0.f }, { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->m_posOffset * 2.f }, client->GetWorldMatrix());
 
-			GameUtil::HeroSkillCollisionCheck(box, client->GetMatchNum(), ev.power, client->GetStatus()->GetStat().critical, DAMAGE_TYPE::STRENGTH, ev.objID, false);
+			GameUtil::HeroSkillCollisionCheck(box, client->GetMatchNum(), _ev.m_power, client->GetStatus()->GetStat().m_critical, DAMAGE_TYPE::STRENGTH, _ev.m_objID, false);
 		}
 		catch (const std::exception& ex) {
 			LogPrinter::PrintMsg("Err(CSwordManTimer HeavySlash), " + std::string(ex.what()));
 		}
 	}
 
-	void CSwordManTimer::AuraBlade(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::AuraBlade(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
-			int objectID = CGameMgr::GetInstance()->AuraBlade(client->GetMatchNum(), ev.pos + ClientInfos::HERO_ATTACK_OFFSET, client->GetLook(), ev.power, client->GetStatus()->GetStat().critical, ev.objID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
+			int objectID = CGameMgr::GetInstance()->AuraBlade(client->GetMatchNum(), _ev.m_pos + ClientInfos::HERO_ATTACK_OFFSET, client->GetLook(), _ev.m_power, client->GetStatus()->GetStat().m_critical, _ev.m_objID);
 
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())) {
 				if (id == -1)
 					continue;
-				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_AURA_BLADE, ev.pos + ClientInfos::HERO_ATTACK_OFFSET, client->GetLook());
+				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_AURA_BLADE, _ev.m_pos + ClientInfos::HERO_ATTACK_OFFSET, client->GetLook());
 			}
 		}
 		catch (const std::exception& ex) {
@@ -68,32 +68,32 @@ namespace wod_server {
 		}
 	}
 
-	void CSwordManTimer::HellBlade(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::HellBlade(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManHellBlade);
 			int matchNum = client->GetMatchNum();
 
 			int bossId = CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)[3];
 			if (-1 != bossId) {
-				if (DistanceXZ(CObjectMgr::GetInstance()->GetClient(bossId)->GetPos(), client->GetPos()) <= skillCsv->skillRadius) {
-					CObjectMgr::GetInstance()->GetClient(bossId)->Damage(ev.power, client->GetStatus()->GetStat().critical, DAMAGE_TYPE::STRENGTH, ev.objID);
+				if (DistanceXZ(CObjectMgr::GetInstance()->GetClient(bossId)->GetPos(), client->GetPos()) <= skillCsv->m_skillRadius) {
+					CObjectMgr::GetInstance()->GetClient(bossId)->Damage(_ev.m_power, client->GetStatus()->GetStat().m_critical, DAMAGE_TYPE::STRENGTH, _ev.m_objID);
 				}
 			}
 
 			for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 				std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-				if (!npc->active)
+				if (!npc->m_active)
 					continue;
-				if (DistanceXZ(npc->GetPos(), client->GetPos()) <= skillCsv->skillRadius) {
-					npc->Damaged(ev.objID, ev.power, DAMAGE_TYPE::STRENGTH);
+				if (DistanceXZ(npc->GetPos(), client->GetPos()) <= skillCsv->m_skillRadius) {
+					npc->Damaged(_ev.m_objID, _ev.m_power, DAMAGE_TYPE::STRENGTH);
 				}
 			}
 
-			if (ev.repeatTime < skillCsv->repeatTime) {
+			if (_ev.m_repeatTime < skillCsv->m_repeatTime) {
 				client->SetUsingSkill(true);
-				timerQueue.push(SKILL_EVENT(client->GetID(), TimeUtil::PassedTimeMSec(skillCsv->damageCycleTime), EPlayerSkill::SwordManHellBlade, {}, ev.power, ev.repeatTime + 1, {}));
+				_timerQueue.push(SKILL_EVENT(client->GetID(), TimeUtil::PassedTimeMSec(skillCsv->m_damageCycleTime), EPlayerSkill::SwordManHellBlade, {}, _ev.m_power, _ev.m_repeatTime + 1, {}));
 			}
 			else {
 				client->SetUsingSkill(false);
@@ -104,30 +104,30 @@ namespace wod_server {
 		}
 	}
 
-	void CSwordManTimer::JudgementSword(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::JudgementSword(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManJudgementSword);
-			if (ev.repeatTime == 0) {
-				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			if (_ev.m_repeatTime == 0) {
+				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 
-				DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(ev.pos, client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->posOffset * 2.f }, client->GetWorldMatrix());
+				DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(_ev.m_pos, client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->m_posOffset * 2.f }, client->GetWorldMatrix());
 
 				int id = -2;
 				int bossID = CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())[3];
 				if (bossID != -1) {
 					if (CObjectMgr::GetInstance()->GetClient(bossID)->GetBoundingBox().Intersects(box)) {
-						CObjectMgr::GetInstance()->GetClient(bossID)->Damage(ev.power, client->GetStatus()->GetStat().critical, DAMAGE_TYPE::STRENGTH, ev.objID);
+						CObjectMgr::GetInstance()->GetClient(bossID)->Damage(_ev.m_power, client->GetStatus()->GetStat().m_critical, DAMAGE_TYPE::STRENGTH, _ev.m_objID);
 						id = bossID;
 					}
 				}
 
 				for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), i);
-					if (!npc->active)
+					if (!npc->m_active)
 						continue;
 					if (npc->GetBoundingBox().Intersects(box)) {
-						npc->Damaged(client->GetID(), ev.power, DAMAGE_TYPE::STRENGTH);
+						npc->Damaged(client->GetID(), _ev.m_power, DAMAGE_TYPE::STRENGTH);
 
 						if (id != bossID) {
 							if (-2 == id) {
@@ -142,28 +142,28 @@ namespace wod_server {
 
 				//Sword Damage From Sky
 				if (bossID == id) {
-					timerQueue.push(SKILL_EVENT(bossID, TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->extraParam2)), EPlayerSkill::SwordManJudgementSword, vec3(static_cast<float>(client->GetMatchNum()), 0.f, 0.f), ev.power + static_cast<int>(client->GetStatus()->GetStat().magic * 1.2f), 1, {}, client->GetID()));
+					_timerQueue.push(SKILL_EVENT(bossID, TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->m_extraParam2)), EPlayerSkill::SwordManJudgementSword, vec3(static_cast<float>(client->GetMatchNum()), 0.f, 0.f), _ev.m_power + static_cast<int>(client->GetStatus()->GetStat().m_magic * 1.2f), 1, {}, client->GetID()));
 				}
 				else if (-2 != id) {
-					timerQueue.push(SKILL_EVENT(CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), id)->GetID(), TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->extraParam2)), EPlayerSkill::SwordManJudgementSword, vec3(static_cast<float>(client->GetMatchNum()), 0.f, 0.f), ev.power + static_cast<int>(client->GetStatus()->GetStat().magic * 1.2f), 1, {}, client->GetID()));
+					_timerQueue.push(SKILL_EVENT(CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), id)->GetID(), TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->m_extraParam2)), EPlayerSkill::SwordManJudgementSword, vec3(static_cast<float>(client->GetMatchNum()), 0.f, 0.f), _ev.m_power + static_cast<int>(client->GetStatus()->GetStat().m_magic * 1.2f), 1, {}, client->GetID()));
 				}
 			}
-			else if (ev.repeatTime == 1) {
+			else if (_ev.m_repeatTime == 1) {
 				//pos.x = matchNum
 				int objectID;
 				vec3 objectPos;
-				if (ev.objID >= NPC_ID) {
-					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(static_cast<int>(ev.pos.x), ev.objID - NPC_ID);
-					objectPos = npc->GetPos() + vec3(0.f, skillCsv->posOffset, 0.f);
-					objectID = CGameMgr::GetInstance()->JudgeMentSword(static_cast<int>(ev.pos.x), objectPos, ev.power, 0, ev.objID, ev.clientID);
+				if (_ev.m_objID >= NPC_ID) {
+					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(static_cast<int>(_ev.m_pos.m_x), _ev.m_objID - NPC_ID);
+					objectPos = npc->GetPos() + vec3(0.f, skillCsv->m_posOffset, 0.f);
+					objectID = CGameMgr::GetInstance()->JudgeMentSword(static_cast<int>(_ev.m_pos.m_x), objectPos, _ev.m_power, 0, _ev.m_objID, _ev.m_clientID);
 				}
 				else {
-					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
-					objectPos = client->GetPos() + vec3(0.f, skillCsv->posOffset, 0.f);
-					objectID = CGameMgr::GetInstance()->JudgeMentSword(static_cast<int>(ev.pos.x), objectPos, ev.power, client->GetStatus()->GetStat().critical, ev.objID, ev.clientID);
+					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
+					objectPos = client->GetPos() + vec3(0.f, skillCsv->m_posOffset, 0.f);
+					objectID = CGameMgr::GetInstance()->JudgeMentSword(static_cast<int>(_ev.m_pos.m_x), objectPos, _ev.m_power, client->GetStatus()->GetStat().m_critical, _ev.m_objID, _ev.m_clientID);
 				}
 
-				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(static_cast<int>(ev.pos.x))) {
+				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(static_cast<int>(_ev.m_pos.m_x))) {
 					if (-1 == id)
 						continue;
 					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_JUDGEMENT_SWORD, objectPos, vec3(0.f, 0.f, 1.f));
@@ -171,10 +171,10 @@ namespace wod_server {
 			}
 			else {
 				//power = matchNum
-				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(ev.power)) {
+				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(_ev.m_power)) {
 					if (id == -1)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(ev.objID, static_cast<SKILL_TYPE>(ev.clientID));
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(_ev.m_objID, static_cast<SKILL_TYPE>(_ev.m_clientID));
 				}
 			}
 		}
@@ -183,63 +183,63 @@ namespace wod_server {
 		}
 	}
 
-	void CSwordManTimer::AnkleCut(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::AnkleCut(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManAnkleCut);
-			if (ev.repeatTime == 0) {
-				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
-				auto slowDebuff = skillCsv->debuffInfo[EDebuffType::Slow];
+			if (_ev.m_repeatTime == 0) {
+				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
+				auto slowDebuff = skillCsv->m_debuffInfo[EDebuffType::Slow];
 
-				DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(ev.pos, { 0.f, 0.f, 0.f }, { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->posOffset * 2.f }, client->GetWorldMatrix());
+				DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(_ev.m_pos, { 0.f, 0.f, 0.f }, { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->m_posOffset * 2.f }, client->GetWorldMatrix());
 
 				CStat changeStat = CStat(0);
-				changeStat.speed = -slowDebuff.debuffValue;
-				
+				changeStat.m_speed = -slowDebuff.m_debuffValue;
+
 
 				int bossID = CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())[3];
 				if (bossID != -1) {
 					if (CObjectMgr::GetInstance()->GetClient(bossID)->GetBoundingBox().Intersects(box)) {
-						CObjectMgr::GetInstance()->GetClient(bossID)->Damage(ev.power, client->GetStatus()->GetStat().critical, DAMAGE_TYPE::STRENGTH, ev.objID);
+						CObjectMgr::GetInstance()->GetClient(bossID)->Damage(_ev.m_power, client->GetStatus()->GetStat().m_critical, DAMAGE_TYPE::STRENGTH, _ev.m_objID);
 						CStat stat = CObjectMgr::GetInstance()->GetClient(bossID)->GetStatus()->GetStat();
-						stat.speed -= slowDebuff.debuffValue;
+						stat.m_speed -= slowDebuff.m_debuffValue;
 						CObjectMgr::GetInstance()->GetClient(bossID)->GetStatus()->SetStat(stat);
-						timerQueue.push(SKILL_EVENT(bossID, TimeUtil::CurTime(), EPlayerSkill::SwordManAnkleCut, {}, client->GetStatus()->GetStat().strength + client->GetStatus()->GetStat().magic, 1, {}));
-						network::GetInstance()->RegisterTimerEvent({ bossID, TimeUtil::PassedTimeMSec(slowDebuff.debuffDuration), EVENT_TYPE::EV_STAT_CHANGE, -1, changeStat });
+						_timerQueue.push(SKILL_EVENT(bossID, TimeUtil::CurTime(), EPlayerSkill::SwordManAnkleCut, {}, client->GetStatus()->GetStat().m_strength + client->GetStatus()->GetStat().m_magic, 1, {}));
+						network::GetInstance()->RegisterTimerEvent({ bossID, TimeUtil::PassedTimeMSec(slowDebuff.m_debuffDuration), EVENT_TYPE::EV_STAT_CHANGE, -1, changeStat });
 					}
 				}
 
 				for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), i);
-					if (!npc->active)
+					if (!npc->m_active)
 						continue;
 					if (npc->GetBoundingBox().Intersects(box)) {
-						npc->Damaged(ev.objID, ev.power, DAMAGE_TYPE::STRENGTH);
+						npc->Damaged(_ev.m_objID, _ev.m_power, DAMAGE_TYPE::STRENGTH);
 
 						float speed = npc->GetSpeed();
-						speed -= slowDebuff.debuffValue;
+						speed -= slowDebuff.m_debuffValue;
 						npc->SetSpeed(speed);
 
-						timerQueue.push(SKILL_EVENT(npc->GetID(), TimeUtil::CurTime(), EPlayerSkill::SwordManAnkleCut, vec3(static_cast<float>(npc->GetMatchNum()), 0.f, 0.f), client->GetStatus()->GetStat().strength + client->GetStatus()->GetStat().magic, 1, {}, ev.objID));
-						network::GetInstance()->RegisterTimerEvent({ npc->GetID(), TimeUtil::PassedTimeMSec(slowDebuff.debuffDuration), EVENT_TYPE::EV_STAT_CHANGE, npc->GetMatchNum(), changeStat });
+						_timerQueue.push(SKILL_EVENT(npc->GetID(), TimeUtil::CurTime(), EPlayerSkill::SwordManAnkleCut, vec3(static_cast<float>(npc->GetMatchNum()), 0.f, 0.f), client->GetStatus()->GetStat().m_strength + client->GetStatus()->GetStat().m_magic, 1, {}, _ev.m_objID));
+						network::GetInstance()->RegisterTimerEvent({ npc->GetID(), TimeUtil::PassedTimeMSec(slowDebuff.m_debuffDuration), EVENT_TYPE::EV_STAT_CHANGE, npc->GetMatchNum(), changeStat });
 					}
 				}
 			}
 			else {
-				auto bleedDebuff = skillCsv->debuffInfo[EDebuffType::Bleed];
-				if (ev.objID >= NPC_ID) {
+				auto bleedDebuff = skillCsv->m_debuffInfo[EDebuffType::Bleed];
+				if (_ev.m_objID >= NPC_ID) {
 					//ev.pos.x = matchNum
-					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(static_cast<int>(ev.pos.x), ev.objID - NPC_ID);
-					npc->Damaged(ev.clientID, ev.power, DAMAGE_TYPE::STRENGTH, false);
-					if (ev.repeatTime < bleedDebuff.debuffRepeatTime)
-						timerQueue.push(SKILL_EVENT(ev.objID, TimeUtil::PassedTimeMSec(bleedDebuff.debuffDuration), EPlayerSkill::SwordManAnkleCut, ev.pos, ev.power, ev.repeatTime + 1, {}));
+					std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(static_cast<int>(_ev.m_pos.m_x), _ev.m_objID - NPC_ID);
+					npc->Damaged(_ev.m_clientID, _ev.m_power, DAMAGE_TYPE::STRENGTH, false);
+					if (_ev.m_repeatTime < bleedDebuff.m_debuffRepeatTime)
+						_timerQueue.push(SKILL_EVENT(_ev.m_objID, TimeUtil::PassedTimeMSec(bleedDebuff.m_debuffDuration), EPlayerSkill::SwordManAnkleCut, _ev.m_pos, _ev.m_power, _ev.m_repeatTime + 1, {}));
 				}
 				else {
-					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
-					client->Damage(ev.power, 0, DAMAGE_TYPE::STRENGTH, ev.objID);
+					std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
+					client->Damage(_ev.m_power, 0, DAMAGE_TYPE::STRENGTH, _ev.m_objID);
 					//Damage client
-					if (ev.repeatTime < bleedDebuff.debuffRepeatTime)
-						timerQueue.push(SKILL_EVENT(ev.objID, TimeUtil::PassedTimeMSec(bleedDebuff.debuffDuration), EPlayerSkill::SwordManAnkleCut, {}, ev.power, ev.repeatTime + 1, {}));
+					if (_ev.m_repeatTime < bleedDebuff.m_debuffRepeatTime)
+						_timerQueue.push(SKILL_EVENT(_ev.m_objID, TimeUtil::PassedTimeMSec(bleedDebuff.m_debuffDuration), EPlayerSkill::SwordManAnkleCut, {}, _ev.m_power, _ev.m_repeatTime + 1, {}));
 				}
 			}
 		}
@@ -248,38 +248,38 @@ namespace wod_server {
 		}
 	}
 
-	void CSwordManTimer::ShieldBash(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::ShieldBash(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
 			//pos = look
-			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 			auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManShieldBash);
 
 			//Check Collision
-			DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(client->GetPos(), client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->posOffset }, client->GetWorldMatrix());
+			DirectX::BoundingOrientedBox box = GameUtil::GenerateShortRangeBox(client->GetPos(), client->GetLook(), { client->GetBoundingBox().Extents }, { 2.f, 2.f, skillCsv->m_posOffset }, client->GetWorldMatrix());
 
 			int bossID = CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())[3];
 			if (bossID != -1) {
 				if (CObjectMgr::GetInstance()->GetClient(bossID)->GetBoundingBox().Intersects(box)) {
-					CObjectMgr::GetInstance()->GetClient(bossID)->Damage(ev.power, client->GetStatus()->GetStat().critical, DAMAGE_TYPE::STRENGTH, ev.objID);
+					CObjectMgr::GetInstance()->GetClient(bossID)->Damage(_ev.m_power, client->GetStatus()->GetStat().m_critical, DAMAGE_TYPE::STRENGTH, _ev.m_objID);
 				}
 			}
 
 			for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 				std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), i);
-				if (!npc->active)
+				if (!npc->m_active)
 					continue;
 				if (npc->GetBoundingBox().Intersects(box)) {
-					npc->Damaged(ev.objID, ev.power, DAMAGE_TYPE::STRENGTH);
+					npc->Damaged(_ev.m_objID, _ev.m_power, DAMAGE_TYPE::STRENGTH);
 				}
 			}
 
 			// Move Client
-			vec3 newPos = client->GetPos() + ev.pos * (skillCsv->speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().speed)) * TimeUtil::CalElapsedTime(ev.lastProcessTime);
+			vec3 newPos = client->GetPos() + _ev.m_pos * (skillCsv->m_speed + SKILL_ADDITIONAL_SPEED_FROM_STAT(client->GetStatus()->GetStat().m_speed)) * TimeUtil::CalElapsedTime(_ev.m_lastProcessTime);
 			float height;
 			int curNode;
 			if (GameUtil::MapCollision(newPos, height, curNode)) {
-				newPos.y = height;
+				newPos.m_y = height;
 				client->SetPos(newPos);
 				client->SetCurNode(curNode);
 
@@ -291,31 +291,31 @@ namespace wod_server {
 			}
 
 			if (client->GetUsingSkill())
-				timerQueue.push({ ev.objID, TimeUtil::NextFrameTime(), EPlayerSkill::SwordManShieldBash, ev.pos, ev.power, 0, TimeUtil::CurTime() });
+				_timerQueue.push({ _ev.m_objID, TimeUtil::NextFrameTime(), EPlayerSkill::SwordManShieldBash, _ev.m_pos, _ev.m_power, 0, TimeUtil::CurTime() });
 		}
 		catch (const std::exception& ex) {
 			LogPrinter::PrintMsg("Err(CSwordManTimer ShieldBash), " + std::string(ex.what()));
 		}
 	}
 
-	void CSwordManTimer::ProtectedArea(const SKILL_EVENT& ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& timerQueue)
+	void CSwordManTimer::ProtectedArea(const SKILL_EVENT& _ev, concurrency::concurrent_priority_queue<SKILL_EVENT>& _timerQueue)
 	{
 		try {
-			if (ev.repeatTime == 0) {
-				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(ev.objID);
+			if (_ev.m_repeatTime == 0) {
+				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_ev.m_objID);
 				auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::SwordManProtectedArea);
-				int objectID = CGameMgr::GetInstance()->ProtectedArea(client->GetMatchNum(), ev.pos, ev.power, ev.objID);
+				int objectID = CGameMgr::GetInstance()->ProtectedArea(client->GetMatchNum(), _ev.m_pos, _ev.m_power, _ev.m_objID);
 
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())) {
 					if (id == -1)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_PROTECTED_AREA, ev.pos, client->GetLook());
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendAddSkillObjectPacket(objectID, SKILL_TYPE::SWORDMAN_PROTECTED_AREA, _ev.m_pos, client->GetLook());
 				}
-				timerQueue.push(SKILL_EVENT(objectID, TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->extraParam2)), EPlayerSkill::SwordManProtectedArea, {}, client->GetMatchNum(), 1, {}));
+				_timerQueue.push(SKILL_EVENT(objectID, TimeUtil::PassedTimeMSec(static_cast<int>(skillCsv->m_extraParam2)), EPlayerSkill::SwordManProtectedArea, {}, client->GetMatchNum(), 1, {}));
 			}
 			else {
 				//power = matchID
-				CGameMgr::GetInstance()->ProtectedArea(ev.power, ev.objID);
+				CGameMgr::GetInstance()->ProtectedArea(_ev.m_power, _ev.m_objID);
 			}
 		}
 		catch (const std::exception& ex) {

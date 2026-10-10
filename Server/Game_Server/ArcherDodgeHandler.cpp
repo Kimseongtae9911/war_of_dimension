@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    ArcherDodgeHandler::ArcherDodgeHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    ArcherDodgeHandler::ArcherDodgeHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::ArcherDodge;
     }
 
-    CSkillHandler* ArcherDodgeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ArcherDodgeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ArcherDodgeHandler(client);
+        return new ArcherDodgeHandler(_client);
     }
 
     void ArcherDodgeHandler::Handle()

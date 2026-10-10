@@ -11,8 +11,8 @@ namespace wod_server {
 	{
 		const auto skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::ArcherAttack);
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = DirectX::XMFLOAT3(skillCsv->extent.x, skillCsv->extent.y, skillCsv->extent.z);
-		m_maxVelXZ = skillCsv->speed;
+		m_initBoundingBox.Extents = DirectX::XMFLOAT3(skillCsv->m_extent.m_x, skillCsv->m_extent.m_y, skillCsv->m_extent.m_z);
+		m_maxVelXZ = skillCsv->m_speed;
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -21,12 +21,12 @@ namespace wod_server {
 	{
 	}
 
-	bool CArcherAttack::Update(float elapsedTime)
+	bool CArcherAttack::Update(float _elapsedTime)
 	{
-		if (!active)
+		if (!m_active)
 			return false;
 
-		m_pos += m_look * m_maxVelXZ * elapsedTime;
+		m_pos += m_look * m_maxVelXZ * _elapsedTime;
 		UpdateBoundingBox();
 
 		if (GameUtil::HeroSkillCollisionCheck(m_boundingBox, m_matchNum, m_power, m_critical, DAMAGE_TYPE::STRENGTH, m_clientID)) {
@@ -35,7 +35,7 @@ namespace wod_server {
 					continue;
 				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(m_id, m_type);
 			}
-			active = false;
+			m_active = false;
 			return false;
 		}
 		else {
@@ -51,7 +51,7 @@ namespace wod_server {
 
 	void CArcherAttack::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}

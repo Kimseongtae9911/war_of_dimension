@@ -11,7 +11,7 @@ namespace wod_server {
 	{
 		m_skillCsv = SkillCsvMgr::GetInstance()->GetSkillCsv(EPlayerSkill::FighterFireBall);
 		m_initBoundingBox.Center = { 0.0f, 0.0f, 0.0f };
-		m_initBoundingBox.Extents = { m_skillCsv->extent.x,m_skillCsv->extent.y,m_skillCsv->extent.z };
+		m_initBoundingBox.Extents = { m_skillCsv->m_extent.m_x,m_skillCsv->m_extent.m_y,m_skillCsv->m_extent.m_z };
 
 		DirectX::XMStoreFloat4x4(&m_worldMatrix, DirectX::XMMatrixIdentity());
 	}
@@ -20,12 +20,12 @@ namespace wod_server {
 	{
 	}
 
-	bool CFireBall::Update(float elapsedTime)
+	bool CFireBall::Update(float _elapsedTime)
 	{
-		if (!active)
+		if (!m_active)
 			return false;
 
-		m_pos += m_look * m_skillCsv->speed * elapsedTime;
+		m_pos += m_look * m_skillCsv->m_speed * _elapsedTime;
 		UpdateBoundingBox();
 
 		if (GameUtil::HeroSkillCollisionCheck(m_boundingBox, m_matchNum, m_power, m_critical, DAMAGE_TYPE::MAGIC, m_clientID)) {
@@ -34,7 +34,7 @@ namespace wod_server {
 					continue;
 				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendRemoveSkillObjectPacket(m_id, m_type);
 			}
-			active = false;
+			m_active = false;
 			return false;
 		}
 		else {
@@ -51,7 +51,7 @@ namespace wod_server {
 
 	void CFireBall::UpdateBoundingBox()
 	{
-		m_worldMatrix._41 = m_pos.x; m_worldMatrix._42 = m_pos.y; m_worldMatrix._43 = m_pos.z;
+		m_worldMatrix._41 = m_pos.m_x; m_worldMatrix._42 = m_pos.m_y; m_worldMatrix._43 = m_pos.m_z;
 
 		m_initBoundingBox.Transform(m_boundingBox, DirectX::XMLoadFloat4x4(&m_worldMatrix));
 	}

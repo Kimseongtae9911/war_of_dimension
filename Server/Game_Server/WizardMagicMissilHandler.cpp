@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    WizardMagicMissilHandler::WizardMagicMissilHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    WizardMagicMissilHandler::WizardMagicMissilHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::WizardMagicMissile;
         SetSkillInfo();
     }
 
-    CSkillHandler* WizardMagicMissilHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* WizardMagicMissilHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new WizardMagicMissilHandler(client);
+        return new WizardMagicMissilHandler(_client);
     }
 }

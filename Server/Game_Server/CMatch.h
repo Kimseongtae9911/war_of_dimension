@@ -3,40 +3,40 @@
 namespace wod_server {
 class CMatch
 {
-	enum class ESceneType { ReadyScene = 0, LoadingScene = 1, GameScene = 2 };	
+	enum class ESceneType { ReadyScene = 0, LoadingScene = 1, GameScene = 2 };
 
 public:
 	CMatch() {}
 	~CMatch() {}
 
 	//Connecting
-	void ConnectUpdate(int matchNum);
-	void ClientConnect(const CS_LOGIN_PACKET* packet, std::shared_ptr<CClient> client);
+	void ConnectUpdate(int _matchNum);
+	void ClientConnect(const CS_LOGIN_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 	//ReadyScene
-	void RegisterClient(int matchID, int id) { m_clientid[matchID] = id; }
-	bool IsAllReady() { return std::ranges::all_of(m_clientReady, [](bool ready) {return ready; }); }
-	bool IsLoadComplete() { return std::ranges::all_of(m_clientLoading, [](bool ready) {return ready; }); }
-	void ReadyUpdate(int matchNum);
-	void SetReady(const CS_READY_PACKET* packet);
-	void SelectSkill(const CS_SKILL_SELECT_PACKET* packet, std::shared_ptr<CClient> client);
-	void SelectJob(const CS_JOB_SELECT_PACKET* packet, std::shared_ptr<CClient> client);
-	void SelectStat(const CS_STAT_SELECT_PACKET* packet, std::shared_ptr<CClient> client);
+	void RegisterClient(int _matchID, int _id) { m_clientid[_matchID] = _id; }
+	bool IsAllReady() { return std::ranges::all_of(m_clientReady, [](bool _ready) {return _ready; }); }
+	bool IsLoadComplete() { return std::ranges::all_of(m_clientLoading, [](bool _ready) {return _ready; }); }
+	void ReadyUpdate(int _matchNum);
+	void SetReady(const CS_READY_PACKET* _packet);
+	void SelectSkill(const CS_SKILL_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
+	void SelectJob(const CS_JOB_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
+	void SelectStat(const CS_STAT_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
 
 	//Loading
-	void LoadComplete(const CS_LOAD_COMPLETE_PACKET* packet, int id) { m_clientLoading[id] = true; }
-	void LoadingUpdate(int matchNum);
+	void LoadComplete(const CS_LOAD_COMPLETE_PACKET* _packet, int _id) { m_clientLoading[_id] = true; }
+	void LoadingUpdate(int _matchNum);
 
 	//InGame
-	void TeleportStart(std::shared_ptr<CClient> client);
-	void UseItem(const CS_USE_ITEM_PACKET* packet, std::shared_ptr<CClient> client);
-	void InGameUpdate(int matchNum);
+	void TeleportStart(std::shared_ptr<CClient> _client);
+	void UseItem(const CS_USE_ITEM_PACKET* _packet, std::shared_ptr<CClient> _client);
+	void InGameUpdate(int _matchNum);
 
 	void Update();
 	void Reset();
 
 	template<typename Func>
-	void PushJob(Func&& f) { m_jobQueue.PushJob(std::forward<Func>(f)); }
+	void PushJob(Func&& _f) { m_jobQueue.PushJob(std::forward<Func>(_f)); }
 
 	const std::array<int, MAX_PLAYER>& GetClientIds() const { return m_clientid; }
 

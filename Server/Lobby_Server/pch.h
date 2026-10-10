@@ -61,11 +61,11 @@ constexpr const char* GAME_IP = "222.99.104.16";
 constexpr const int MIN_STAKE_DAYS = 100;
 constexpr const int MIN_STAKE_TOKEN = 10;
 
-static int GenerateRandomNumber(int min, int max) {
+static int GenerateRandomNumber(int _min, int _max) {
 	std::random_device rd;
 	std::mt19937 engine(rd());
 
-	std::uniform_int_distribution<int> distribution(min, max);	
+	std::uniform_int_distribution<int> distribution(_min, _max);
 
 	return distribution(engine);
 }

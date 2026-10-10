@@ -1,15 +1,15 @@
 #include "pch.h"
 #include "CUserMgr.h"
 
-namespace wod_server {	
+namespace wod_server {
 	std::vector<Triangle> GameUtil::m_naviMesh;
 	std::vector<Triangle> GameUtil::m_heightMesh;
 	PlayerBoundingBox GameUtil::m_playerInitBB;
 	std::array<std::array<Section, SECTION_NUM>, SECTION_NUM> GameUtil::m_sections;
 
-	bool GameUtil::LoadNaviMesh(std::string filename)
+	bool GameUtil::LoadNaviMesh(std::string _filename)
 	{
-		std::ifstream in(filename);
+		std::ifstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -23,7 +23,7 @@ namespace wod_server {
 
 			if (token == "v") {
 				vec3 vertex;
-				ss >> vertex.x >> vertex.y >> vertex.z;
+				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
 				vertices.push_back(vertex);
 			}
 			else if (token == "f") {
@@ -36,9 +36,9 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadHeightMesh(std::string filename)
+	bool GameUtil::LoadHeightMesh(std::string _filename)
 	{
-		std::ifstream in(filename);
+		std::ifstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -52,7 +52,7 @@ namespace wod_server {
 
 			if (token == "v") {
 				vec3 vertex;
-				ss >> vertex.x >> vertex.y >> vertex.z;
+				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
 				vertices.push_back(vertex);
 			}
 			else if (token == "f") {
@@ -62,16 +62,16 @@ namespace wod_server {
 			}
 		}
 
-		std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& t1, const Triangle& t2) {
-			return (t1.v1.y + t1.v2.y + t1.v3.y) / 3.f > (t2.v1.y + t2.v2.y + t2.v3.y) / 3.f;
+		std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& _t1, const Triangle& _t2) {
+			return (_t1.m_v1.m_y + _t1.m_v2.m_y + _t1.m_v3.m_y) / 3.f > (_t2.m_v1.m_y + _t2.m_v2.m_y + _t2.m_v3.m_y) / 3.f;
 			});
 
 		return true;
 	}
 
-	bool GameUtil::LoadMap(std::string filename)
+	bool GameUtil::LoadMap(std::string _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -105,34 +105,34 @@ namespace wod_server {
 			DirectX::XMMATRIX transformMatrix = DirectX::XMMatrixScalingFromVector(scaling) * DirectX::XMMatrixRotationQuaternion(quater);
 			obb.Transform(obb, transformMatrix);
 			obb.Center = { center[0], center[1], center[2] };
-			m_sections[static_cast<int>((center[0] + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM))][static_cast<int>((center[2] + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM))].boundingBoxs.push_back(obb);
+			m_sections[static_cast<int>((center[0] + (WORLD_WIDTH / 2)) / (WORLD_WIDTH / SECTION_NUM))][static_cast<int>((center[2] + (WORLD_HEIGHT / 2)) / (WORLD_HEIGHT / SECTION_NUM))].m_boundingBoxs.push_back(obb);
 		}
 
 		return true;
 	}
 
-	bool GameUtil::MapCollision(const vec3& rayPos, float& height)
+	bool GameUtil::MapCollision(const vec3& _rayPos, float& _height)
 	{
 		Ray ray;
-		ray.origin = rayPos;
-		ray.origin.y += RAY_OFFSET;
-		if (true == ray.RayCast(m_naviMesh, height)) {
-			ray.RayCast(m_heightMesh, height);
+		ray.m_origin = _rayPos;
+		ray.m_origin.m_y += RAY_OFFSET;
+		if (true == ray.RayCast(m_naviMesh, _height)) {
+			ray.RayCast(m_heightMesh, _height);
 			return true;
 		}
 		return false;
 	}
 
-	void GameUtil::UpdateSection(int socketNum, int beforeX, int beforeZ, int sectionX, int sectionZ)
+	void GameUtil::UpdateSection(int _socketNum, int _beforeX, int _beforeZ, int _sectionX, int _sectionZ)
 	{
 		try {
-			m_sections[beforeX][beforeZ].clientLock.lock();
-			m_sections[beforeX][beforeZ].clients.erase(socketNum);
-			m_sections[beforeX][beforeZ].clientLock.unlock();
+			m_sections[_beforeX][_beforeZ].m_clientLock.lock();
+			m_sections[_beforeX][_beforeZ].m_clients.erase(_socketNum);
+			m_sections[_beforeX][_beforeZ].m_clientLock.unlock();
 
-			m_sections[sectionX][sectionZ].clientLock.lock();
-			m_sections[sectionX][sectionZ].clients.insert(socketNum);
-			m_sections[sectionX][sectionZ].clientLock.unlock();
+			m_sections[_sectionX][_sectionZ].m_clientLock.lock();
+			m_sections[_sectionX][_sectionZ].m_clients.insert(_socketNum);
+			m_sections[_sectionX][_sectionZ].m_clientLock.unlock();
 		}
 		catch (std::exception ex) {
 			LogPrinter::PrintMsg("Err(GameUtil UpdateSection), " + std::string(ex.what()));

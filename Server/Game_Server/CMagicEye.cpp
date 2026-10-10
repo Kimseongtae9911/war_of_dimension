@@ -18,9 +18,9 @@ namespace wod_server {
 	{
 	}
 
-	bool CMagicEye::Update(float elapsedTime)
+	bool CMagicEye::Update(float _elapsedTime)
 	{
-	
+
 		return false;
 	}
 }

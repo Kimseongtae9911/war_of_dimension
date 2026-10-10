@@ -17,11 +17,11 @@ namespace wod_server {
 		return true;
 	}
 
-	void NpcCsvMgr::LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader)
+	void NpcCsvMgr::LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader)
 	{
 		tabledata::NpcInfo npcInfo;
-		for (auto i = 2; i < datas.size(); ++i) {
-			npcInfo = CreateStructFromCSV<tabledata::NpcInfo>(datas[i], csvHeader);
+		for (auto i = 2; i < _datas.size(); ++i) {
+			npcInfo = CreateStructFromCSV<tabledata::NpcInfo>(_datas[i], _csvHeader);
 			m_npcCsvMap.emplace(npcInfo.Type, new NpcCsv(npcInfo));
 		}
 	}

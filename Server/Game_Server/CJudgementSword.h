@@ -8,9 +8,9 @@ namespace wod_server {
 		CJudgementSword();
 		~CJudgementSword() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
-		void SetTargetID(int id) { m_targetID = id; }
+		void SetTargetID(int _id) { m_targetID = _id; }
 
 	private:
 		void UpdateBoundingBox() override;

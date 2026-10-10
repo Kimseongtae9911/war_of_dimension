@@ -18,15 +18,15 @@ namespace wod_server {
 		m_pos = { 20.0f, 2.6f, 20.0f };
 	}
 
-	void CTransform::Move(const vec3& shift, float height)
+	void CTransform::Move(const vec3& _shift, float _height)
 	{
-		m_pos += shift;
-		m_pos.y = height;
+		m_pos += _shift;
+		m_pos.m_y = _height;
 	}
 
-	bool CTransform::CheckDistance(const vec3& pos)
+	bool CTransform::CheckDistance(const vec3& _pos)
 	{
-		if (sqrtf(powf(m_pos.x - pos.x, 2.f) + powf(m_pos.y - pos.y, 2.f) + powf(m_pos.z - pos.z, 2.f)) <= VIEW_DISTANCE)
+		if (sqrtf(powf(m_pos.m_x - _pos.m_x, 2.f) + powf(m_pos.m_y - _pos.m_y, 2.f) + powf(m_pos.m_z - _pos.m_z, 2.f)) <= VIEW_DISTANCE)
 			return true;
 
 		return false;

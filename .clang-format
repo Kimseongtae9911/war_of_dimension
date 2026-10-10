@@ -1,0 +1,20 @@
+BasedOnStyle: Microsoft
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 250
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+SeparateDefinitionBlocks: Always
+SortIncludes: Never
+SortUsingDeclarations: Never
+FixNamespaceComments: false
+ReflowComments: Never
+InsertBraces: false
+BreakStringLiterals: false
+# if/else 묶음·while 뒤 빈 줄, 마지막 return 앞 빈 줄과 연결된 분기의 중괄호는 AGENTS.md에 따라 편집 시 추가한다.
+MaxEmptyLinesToKeep: 1
+RemoveEmptyLinesInUnwrappedLines: false
+RemoveBracesLLVM: false

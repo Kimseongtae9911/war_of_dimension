@@ -3,15 +3,15 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    OgreCrunchHandler::OgreCrunchHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    OgreCrunchHandler::OgreCrunchHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::OgreCrunch;
         SetSkillInfo();
     }
 
-    CSkillHandler* OgreCrunchHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* OgreCrunchHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new OgreCrunchHandler(client);
+        return new OgreCrunchHandler(_client);
     }
 
     void OgreCrunchHandler::Handle()

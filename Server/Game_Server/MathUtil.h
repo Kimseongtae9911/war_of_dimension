@@ -4,248 +4,248 @@
 #define RAY_OFFSET 2.0f
 
 namespace wod_server {
-	static bool IsFloatEqual(float f1, float f2) {
-		return ::abs(f1 - f2) <= FLT_EPSILON;
+	static bool IsFloatEqual(float _f1, float _f2) {
+		return ::abs(_f1 - _f2) <= FLT_EPSILON;
 	}
 
-	static bool IsFloatEqual(float f1, float f2, float epsilon) {
-		return ::abs(f1 - f2) <= epsilon;
+	static bool IsFloatEqual(float _f1, float _f2, float _epsilon) {
+		return ::abs(_f1 - _f2) <= _epsilon;
 	}
 
 	class Vector2
 	{
 	public:
-		Vector2() { x = 0; z = 0; };
-		constexpr Vector2(float x, float z) noexcept : x(x), z(z) {}
+		Vector2() { m_x = 0; m_z = 0; };
+		constexpr Vector2(float _x, float _z) noexcept : m_x(_x), m_z(_z) {}
 
-		friend std::ostream& operator<< (std::ostream& os, const Vector2& v)
+		friend std::ostream& operator<< (std::ostream& _os, const Vector2& _v)
 		{
-			return os << "{" << v.x << ", " << v.z << "}";
+			return _os << "{" << _v.m_x << ", " << _v.m_z << "}";
 		}
 
-		friend Vector2  operator -(const Vector2& l, const Vector2& r)
+		friend Vector2  operator -(const Vector2& _l, const Vector2& _r)
 		{
-			return Vector2(l.x - r.x, l.z - r.z);
+			return Vector2(_l.m_x - _r.m_x, _l.m_z - _r.m_z);
 		}
 
-		static Vector2 Normalize(Vector2& vec)
+		static Vector2 Normalize(Vector2& _vec)
 		{
-			float length = vec.Length();
+			float length = _vec.Length();
 			if (length == 0)
 				return Vector2(0, 0);
-			return Vector2(vec.x / length, vec.z / length);
+			return Vector2(_vec.m_x / length, _vec.m_z / length);
 		}
-		static Vector2 Normalize(Vector2&& vec)
+		static Vector2 Normalize(Vector2&& _vec)
 		{
-			float length = vec.Length();
+			float length = _vec.Length();
 			if (length == 0)
 				return Vector2(0, 0);
-			return Vector2(vec.x / length, vec.z / length);
+			return Vector2(_vec.m_x / length, _vec.m_z / length);
 		}
 
 		const float Length()
 		{
-			return sqrtf(x * x + z * z);
+			return sqrtf(m_x * m_x + m_z * m_z);
 		}
 
-		float x, z;
+		float m_x, m_z;
 	};
 
 	class Vector3 {
 	public:
-		Vector3() { x = 0; y = 0; z = 0; }
-		Vector3(const DirectX::XMFLOAT3& pos) { x = pos.x; y = pos.y; z = pos.z; }
-		constexpr Vector3(float x, float y, float z) noexcept : x(x), y(y), z(z) {}
+		Vector3() { m_x = 0; m_y = 0; m_z = 0; }
+		Vector3(const DirectX::XMFLOAT3& _pos) { m_x = _pos.x; m_y = _pos.y; m_z = _pos.z; }
+		constexpr Vector3(float _x, float _y, float _z) noexcept : m_x(_x), m_y(_y), m_z(_z) {}
 
-		friend std::ostream& operator<< (std::ostream& os, const Vector3& v) {
-			return os << "{" << v.x << ", " << v.y << ", " << v.z << "}";
+		friend std::ostream& operator<< (std::ostream& _os, const Vector3& _v) {
+			return _os << "{" << _v.m_x << ", " << _v.m_y << ", " << _v.m_z << "}";
 		}
 
-		friend Vector3 operator +(const Vector3& l, const Vector3& r) {		
-			return Vector3(l.x + r.x, l.y + r.y, l.z + r.z);
+		friend Vector3 operator +(const Vector3& _l, const Vector3& _r) {
+			return Vector3(_l.m_x + _r.m_x, _l.m_y + _r.m_y, _l.m_z + _r.m_z);
 		}
 
-		friend Vector3  operator -(const Vector3& l, const Vector3& r) {
-			return Vector3(l.x - r.x, l.y - r.y, l.z - r.z);
+		friend Vector3  operator -(const Vector3& _l, const Vector3& _r) {
+			return Vector3(_l.m_x - _r.m_x, _l.m_y - _r.m_y, _l.m_z - _r.m_z);
 		}
 
-		friend void operator +=(Vector3& l, const Vector3& r) {
-			l.x += r.x;
-			l.y += r.y;
-			l.z += r.z;
+		friend void operator +=(Vector3& _l, const Vector3& _r) {
+			_l.m_x += _r.m_x;
+			_l.m_y += _r.m_y;
+			_l.m_z += _r.m_z;
 		}
 
-		friend void operator -=(Vector3& l, const Vector3& r) {
-			l.x -= r.x;
-			l.y -= r.y;
-			l.z -= r.z;
+		friend void operator -=(Vector3& _l, const Vector3& _r) {
+			_l.m_x -= _r.m_x;
+			_l.m_y -= _r.m_y;
+			_l.m_z -= _r.m_z;
 		}
 
-		friend bool operator==(const Vector3& l, const Vector3& r) {
-			return (IsFloatEqual(l.x, r.x) && IsFloatEqual(l.y, r.y) && IsFloatEqual(l.z, r.z));
+		friend bool operator==(const Vector3& _l, const Vector3& _r) {
+			return (IsFloatEqual(_l.m_x, _r.m_x) && IsFloatEqual(_l.m_y, _r.m_y) && IsFloatEqual(_l.m_z, _r.m_z));
 		}
 
-		friend bool operator!=(const Vector3& l, const Vector3& r) {		
-			return (!IsFloatEqual(l.x, r.x) || !IsFloatEqual(l.y, r.y) || !IsFloatEqual(l.z, r.z));
+		friend bool operator!=(const Vector3& _l, const Vector3& _r) {
+			return (!IsFloatEqual(_l.m_x, _r.m_x) || !IsFloatEqual(_l.m_y, _r.m_y) || !IsFloatEqual(_l.m_z, _r.m_z));
 		}
 
-		friend Vector3 operator*(Vector3& l, const float r) {
-			return Vector3(l.x * r, l.y * r, l.z * r);
+		friend Vector3 operator*(Vector3& _l, const float _r) {
+			return Vector3(_l.m_x * _r, _l.m_y * _r, _l.m_z * _r);
 		}
 
-		friend Vector3 operator*(const Vector3& l, const float r) {
-			return Vector3(l.x * r, l.y * r, l.z * r);
+		friend Vector3 operator*(const Vector3& _l, const float _r) {
+			return Vector3(_l.m_x * _r, _l.m_y * _r, _l.m_z * _r);
 		}
 
-		friend Vector3 operator*(const Vector3& l, const Vector3& r) {
-			return Vector3(l.x * r.x, l.y * r.y, l.z * r.z);
+		friend Vector3 operator*(const Vector3& _l, const Vector3& _r) {
+			return Vector3(_l.m_x * _r.m_x, _l.m_y * _r.m_y, _l.m_z * _r.m_z);
 		}
 
-		friend Vector3 operator/(Vector3& l, const float r) {
-			return Vector3(l.x / r, l.y / r, l.z / r);
+		friend Vector3 operator/(Vector3& _l, const float _r) {
+			return Vector3(_l.m_x / _r, _l.m_y / _r, _l.m_z / _r);
 		}
 
-		static Vector3 Add(Vector3& vec1, Vector3& vec2, float scalar) {
-			return vec1 + (vec2 * scalar);
+		static Vector3 Add(Vector3& _vec1, Vector3& _vec2, float _scalar) {
+			return _vec1 + (_vec2 * _scalar);
 		}
 
-		static Vector3 Add(Vector3& vec1, const Vector3& vec2, float scalar) {
-			return vec1 + (vec2 * scalar);
+		static Vector3 Add(Vector3& _vec1, const Vector3& _vec2, float _scalar) {
+			return _vec1 + (_vec2 * _scalar);
 		}
 
-		static Vector3 Add(Vector3& vec1, Vector3&& vec2) {		
-			return vec1 + vec2;
+		static Vector3 Add(Vector3& _vec1, Vector3&& _vec2) {
+			return _vec1 + _vec2;
 		}
 
-		static Vector3 Normalize(const Vector3& vec) {
-			float length = vec.Length();
+		static Vector3 Normalize(const Vector3& _vec) {
+			float length = _vec.Length();
 			if (length == 0)
 				return Vector3(0, 0, 0);
-			return Vector3(vec.x / length, vec.y / length, vec.z / length);
+			return Vector3(_vec.m_x / length, _vec.m_y / length, _vec.m_z / length);
 		}
 
-		static Vector3 Normalize(Vector3& vec) {
-			float length = vec.Length();
+		static Vector3 Normalize(Vector3& _vec) {
+			float length = _vec.Length();
 			if (length == 0)
 				return Vector3(0, 0, 0);
-			return Vector3(vec.x / length, vec.y / length, vec.z / length);
+			return Vector3(_vec.m_x / length, _vec.m_y / length, _vec.m_z / length);
 		}
 
-		static Vector3 Normalize(Vector3&& vec) {
-			float length = vec.Length();
+		static Vector3 Normalize(Vector3&& _vec) {
+			float length = _vec.Length();
 			if (length == 0)
 				return Vector3(0, 0, 0);
-			return Vector3(vec.x / length, vec.y / length, vec.z / length);
+			return Vector3(_vec.m_x / length, _vec.m_y / length, _vec.m_z / length);
 		}
 
-		static Vector3 Lerp(const Vector3& start, const Vector3& end, float t) {
-			t = std::clamp(t, 0.0f, 1.0f);
+		static Vector3 Lerp(const Vector3& _start, const Vector3& _end, float _t) {
+			_t = std::clamp(_t, 0.0f, 1.0f);
 
-			return start * (1.0f - t) + end * t;
+			return _start * (1.0f - _t) + _end * _t;
 		}
 
-		static Vector3 Reflect(const Vector3& vector, const Vector3& normal) {
-			return vector - normal * 2.0f * vector.Dot(normal);
+		static Vector3 Reflect(const Vector3& _vector, const Vector3& _normal) {
+			return _vector - _normal * 2.0f * _vector.Dot(_normal);
 		}
 
-		Vector3 Cross(Vector3& vec) {
-			return Vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
+		Vector3 Cross(Vector3& _vec) {
+			return Vector3(m_y * _vec.m_z - m_z * _vec.m_y, m_z * _vec.m_x - m_x * _vec.m_z, m_x * _vec.m_y - m_y * _vec.m_x);
 		}
 
-		Vector3 Cross(Vector3&& vec) {		
-			return Vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
+		Vector3 Cross(Vector3&& _vec) {
+			return Vector3(m_y * _vec.m_z - m_z * _vec.m_y, m_z * _vec.m_x - m_x * _vec.m_z, m_x * _vec.m_y - m_y * _vec.m_x);
 		}
 
-		float Dot(const Vector3& vec) const {
-			return (x * vec.x) + (y * vec.y) + (z * vec.z);
+		float Dot(const Vector3& _vec) const {
+			return (m_x * _vec.m_x) + (m_y * _vec.m_y) + (m_z * _vec.m_z);
 		}
 
 		const float Length() const {
-			return sqrtf(x * x + y * y + z * z);
+			return sqrtf(m_x * m_x + m_y * m_y + m_z * m_z);
 		}
 
-		float Magnitude(const Vector3& v) {
-			return sqrt((x - v.x) * (x - v.x) + (y - v.y) * (y - v.y) + (z - v.z) * (z - v.z));
+		float Magnitude(const Vector3& _v) {
+			return sqrt((m_x - _v.m_x) * (m_x - _v.m_x) + (m_y - _v.m_y) * (m_y - _v.m_y) + (m_z - _v.m_z) * (m_z - _v.m_z));
 		}
 
-		float x, y, z;
+		float m_x, m_y, m_z;
 	};
 
 	class Triangle
 	{
 	public:
-		Vector3 v1, v2, v3;
-		int id = -1;
-		Triangle() { v1 = {}; v2 = {}; v3 = {}; };
-		Triangle(Vector3 v1, Vector3 v2, Vector3 v3) { this->v1 = v1; this->v2 = v2; this->v3 = v3; }
-		Triangle(Vector3 v1, Vector3 v2, Vector3 v3, int id) { this->v1 = v1; this->v2 = v2; this->v3 = v3; this->id = id; }
+		Vector3 m_v1, m_v2, m_v3;
+		int m_id = -1;
+		Triangle() { m_v1 = {}; m_v2 = {}; m_v3 = {}; };
+		Triangle(Vector3 _v1, Vector3 _v2, Vector3 _v3) { this->m_v1 = _v1; this->m_v2 = _v2; this->m_v3 = _v3; }
+		Triangle(Vector3 _v1, Vector3 _v2, Vector3 _v3, int _id) { this->m_v1 = _v1; this->m_v2 = _v2; this->m_v3 = _v3; this->m_id = _id; }
 
-		const Vector3& GetVertex(int index) const {
-			switch (index) {
+		const Vector3& GetVertex(int _index) const {
+			switch (_index) {
 			case 0:
-				return v1;
+				return m_v1;
 				break;
 			case 1:
-				return v2;
+				return m_v2;
 				break;
-			case 2: 
-				return v3;
+			case 2:
+				return m_v3;
 				break;
 			default:
-				return v1;
+				return m_v1;
 				break;
 			}
 		}
 
-		Vector3 GetEdge(int index) const {
-			Vector3 v1 = GetVertex(index);
-			Vector3 v2 = GetVertex((index + 1) % 3);
+		Vector3 GetEdge(int _index) const {
+			Vector3 v1 = GetVertex(_index);
+			Vector3 v2 = GetVertex((_index + 1) % 3);
 
 			return v2 - v1;
 		}
 
-		bool ContainsEdge(const Vector3& v1, const Vector3& v2) const {
-			return (v1 == v2) && ((v1 == v1 && v2 == v2) || (v1 == v2 && v2 == v1));
+		bool ContainsEdge(const Vector3& _v1, const Vector3& _v2) const {
+			return (_v1 == _v2) && ((_v1 == _v1 && _v2 == _v2) || (_v1 == _v2 && _v2 == _v1));
 		}
 	};
 
 	class Node
 	{
 	public:
-		Triangle triangle;
-		std::vector<Node*> adjacentNodes;
+		Triangle m_triangle;
+		std::vector<Node*> m_adjacentNodes;
 
-		Node(const Triangle& triangle) : triangle(triangle) {}
+		Node(const Triangle& _triangle) : m_triangle(_triangle) {}
 	};
 
 	class Ray
 	{
 	public:
-		Ray() { origin = {0.0f, 0.0f, 0.0f}; direction = { 0.0f, -1.0f, 0.0f }; }
-		Ray(Vector3& pos) { origin = pos; direction = { 0.0f, -1.0f, 0.0f }; }
-		Ray(Vector3& pos, Vector3& dir) { origin = pos; direction = dir; }
-		Vector3 origin, direction;
+		Ray() { m_origin = {0.0f, 0.0f, 0.0f}; m_direction = { 0.0f, -1.0f, 0.0f }; }
+		Ray(Vector3& _pos) { m_origin = _pos; m_direction = { 0.0f, -1.0f, 0.0f }; }
+		Ray(Vector3& _pos, Vector3& _dir) { m_origin = _pos; m_direction = _dir; }
+		Vector3 m_origin, m_direction;
 
-		bool RayCast(const std::vector<Triangle>& triangles, float& distance) const
+		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance) const
 		{
-			for (const Triangle& triangle : triangles) {
-				if (triangle.v1.y < 1.5f || triangle.v2.y < 1.5f || triangle.v3.y < 1.5f) {
+			for (const Triangle& triangle : _triangles) {
+				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
-				Vector3 normal = Vector3::Normalize((triangle.v2 - triangle.v1).Cross(triangle.v3 - triangle.v1));
+				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
 				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.v1 - origin).Dot(normal) / direction.Dot(normal);
+				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
 				// Check if the ray intersects the plane of the triangle
 				if (d >= 0.0f) {
 					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = origin + direction * d;
+					Vector3 point = m_origin + m_direction * d;
 
 					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.v2 - triangle.v1;
-					Vector3 edge2 = triangle.v3 - triangle.v1;
-					Vector3 pointToV1 = point - triangle.v1;
+					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+					Vector3 pointToV1 = point - triangle.m_v1;
 					float dot11 = edge1.Dot(edge1);
 					float dot12 = edge1.Dot(edge2);
 					float dot22 = edge2.Dot(edge2);
@@ -257,11 +257,11 @@ namespace wod_server {
 
 					// Check if the point of intersection is inside the triangle
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						if (::abs(direction.y * d) - RAY_OFFSET >= 0.8f) {
-							distance = origin.y - RAY_OFFSET;
+						if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.8f) {
+							_distance = m_origin.m_y - RAY_OFFSET;
 						}
 						else {
-							distance = origin.y + direction.y * d;
+							_distance = m_origin.m_y + m_direction.m_y * d;
 						}
 						return true;
 					}
@@ -271,26 +271,26 @@ namespace wod_server {
 			return false;
 		}
 
-		bool RayCast(const std::vector<Triangle>& triangles, float& distance, bool skill) const
+		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance, bool _skill) const
 		{
-			for (const Triangle& triangle : triangles) {
-				if (triangle.v1.y < 1.5f || triangle.v2.y < 1.5f || triangle.v3.y < 1.5f) {
+			for (const Triangle& triangle : _triangles) {
+				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
-				Vector3 normal = Vector3::Normalize((triangle.v2 - triangle.v1).Cross(triangle.v3 - triangle.v1));
+				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
 				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.v1 - origin).Dot(normal) / direction.Dot(normal);
+				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
 				// Check if the ray intersects the plane of the triangle
 				if (d >= 0.0f) {
 					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = origin + direction * d;
+					Vector3 point = m_origin + m_direction * d;
 
 					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.v2 - triangle.v1;
-					Vector3 edge2 = triangle.v3 - triangle.v1;
-					Vector3 pointToV1 = point - triangle.v1;
+					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+					Vector3 pointToV1 = point - triangle.m_v1;
 					float dot11 = edge1.Dot(edge1);
 					float dot12 = edge1.Dot(edge2);
 					float dot22 = edge2.Dot(edge2);
@@ -302,7 +302,7 @@ namespace wod_server {
 
 					// Check if the point of intersection is inside the triangle
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						distance = origin.y + direction.y * d;
+						_distance = m_origin.m_y + m_direction.m_y * d;
 
 						return true;
 					}
@@ -312,27 +312,27 @@ namespace wod_server {
 			return false;
 		}
 
-		bool RayCast(const std::vector<Node*>& nodes, float& distance, int& nodeNum) const
+		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum) const
 		{
-			for (const Node* node : nodes) {
-				Triangle triangle = node->triangle;
-				if (triangle.v1.y < 1.5f || triangle.v2.y < 1.5f || triangle.v3.y < 1.5f) {
+			for (const Node* node : _nodes) {
+				Triangle triangle = node->m_triangle;
+				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
-				Vector3 normal = Vector3::Normalize((triangle.v2 - triangle.v1).Cross(triangle.v3 - triangle.v1));
+				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
 				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.v1 - origin).Dot(normal) / direction.Dot(normal);
+				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
 				// Check if the ray intersects the plane of the triangle
 				if (d >= 0.0f) {
 					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = origin + direction * d;
+					Vector3 point = m_origin + m_direction * d;
 
 					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.v2 - triangle.v1;
-					Vector3 edge2 = triangle.v3 - triangle.v1;
-					Vector3 pointToV1 = point - triangle.v1;
+					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+					Vector3 pointToV1 = point - triangle.m_v1;
 					float dot11 = edge1.Dot(edge1);
 					float dot12 = edge1.Dot(edge2);
 					float dot22 = edge2.Dot(edge2);
@@ -344,13 +344,13 @@ namespace wod_server {
 
 					// Check if the point of intersection is inside the triangle
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						if (::abs(direction.y * d) - RAY_OFFSET >= 0.6f) {
-							distance = origin.y - RAY_OFFSET;
+						if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.6f) {
+							_distance = m_origin.m_y - RAY_OFFSET;
 						}
 						else {
-							distance = origin.y + direction.y * d;
+							_distance = m_origin.m_y + m_direction.m_y * d;
 						}
-						nodeNum = triangle.id;
+						_nodeNum = triangle.m_id;
 						return true;
 					}
 				}
@@ -359,27 +359,27 @@ namespace wod_server {
 			return false;
 		}
 
-		bool RayCast(const std::vector<Node*>& nodes, float& distance, int& nodeNum, bool skill) const
+		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum, bool _skill) const
 		{
-			for (const Node* node : nodes) {
-				Triangle triangle = node->triangle;
-				if (triangle.v1.y < 1.5f || triangle.v2.y < 1.5f || triangle.v3.y < 1.5f) {
+			for (const Node* node : _nodes) {
+				Triangle triangle = node->m_triangle;
+				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
-				Vector3 normal = Vector3::Normalize((triangle.v2 - triangle.v1).Cross(triangle.v3 - triangle.v1));
+				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
 				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.v1 - origin).Dot(normal) / direction.Dot(normal);
+				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
 				// Check if the ray intersects the plane of the triangle
 				if (d >= 0.0f) {
 					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = origin + direction * d;
+					Vector3 point = m_origin + m_direction * d;
 
 					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.v2 - triangle.v1;
-					Vector3 edge2 = triangle.v3 - triangle.v1;
-					Vector3 pointToV1 = point - triangle.v1;
+					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+					Vector3 pointToV1 = point - triangle.m_v1;
 					float dot11 = edge1.Dot(edge1);
 					float dot12 = edge1.Dot(edge2);
 					float dot22 = edge2.Dot(edge2);
@@ -391,8 +391,8 @@ namespace wod_server {
 
 					// Check if the point of intersection is inside the triangle
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						distance = origin.y + direction.y * d;
-						nodeNum = triangle.id;
+						_distance = m_origin.m_y + m_direction.m_y * d;
+						_nodeNum = triangle.m_id;
 						return true;
 					}
 				}
@@ -402,28 +402,28 @@ namespace wod_server {
 		}
 	};
 
-	static float DistanceXZ(const Vector3& pos1, const Vector3& pos2)
+	static float DistanceXZ(const Vector3& _pos1, const Vector3& _pos2)
 	{
-		return ::sqrtf(::powf(pos1.x - pos2.x, 2) + ::powf(pos1.z - pos2.z, 2));
+		return ::sqrtf(::powf(_pos1.m_x - _pos2.m_x, 2) + ::powf(_pos1.m_z - _pos2.m_z, 2));
 	}
 
-	static float DistanceXYZ(const Vector3& pos1, const Vector3& pos2)
+	static float DistanceXYZ(const Vector3& _pos1, const Vector3& _pos2)
 	{
-		return ::sqrtf(::powf(pos1.x - pos2.x, 2) + ::powf(pos1.y - pos2.y, 2) + ::powf(pos1.z - pos2.z, 2));
+		return ::sqrtf(::powf(_pos1.m_x - _pos2.m_x, 2) + ::powf(_pos1.m_y - _pos2.m_y, 2) + ::powf(_pos1.m_z - _pos2.m_z, 2));
 	}
 
-	static float DistanceXYZ(const Node* node1, const Node* node2)
+	static float DistanceXYZ(const Node* _node1, const Node* _node2)
 	{
-		const Triangle& triangle1 = node1->triangle;
-		const Triangle& triangle2 = node2->triangle;
+		const Triangle& triangle1 = _node1->m_triangle;
+		const Triangle& triangle2 = _node2->m_triangle;
 
-		Vector3 centroid1 = Vector3((node1->triangle.v1.x + node1->triangle.v2.x + node1->triangle.v3.x) / 3.0f,
-									(node1->triangle.v1.y + node1->triangle.v2.y + node1->triangle.v3.y) / 3.0f,
-									(node1->triangle.v1.z + node1->triangle.v2.z + node1->triangle.v3.z) / 3.0f);
+		Vector3 centroid1 = Vector3((_node1->m_triangle.m_v1.m_x + _node1->m_triangle.m_v2.m_x + _node1->m_triangle.m_v3.m_x) / 3.0f,
+									(_node1->m_triangle.m_v1.m_y + _node1->m_triangle.m_v2.m_y + _node1->m_triangle.m_v3.m_y) / 3.0f,
+									(_node1->m_triangle.m_v1.m_z + _node1->m_triangle.m_v2.m_z + _node1->m_triangle.m_v3.m_z) / 3.0f);
 
-		Vector3 centroid2 = Vector3((node2->triangle.v1.x + node2->triangle.v2.x + node2->triangle.v3.x) / 3.0f,
-									(node2->triangle.v1.y + node2->triangle.v2.y + node2->triangle.v3.y) / 3.0f,
-									(node2->triangle.v1.z + node2->triangle.v2.z + node2->triangle.v3.z) / 3.0f);
+		Vector3 centroid2 = Vector3((_node2->m_triangle.m_v1.m_x + _node2->m_triangle.m_v2.m_x + _node2->m_triangle.m_v3.m_x) / 3.0f,
+									(_node2->m_triangle.m_v1.m_y + _node2->m_triangle.m_v2.m_y + _node2->m_triangle.m_v3.m_y) / 3.0f,
+									(_node2->m_triangle.m_v1.m_z + _node2->m_triangle.m_v2.m_z + _node2->m_triangle.m_v3.m_z) / 3.0f);
 
 		return DistanceXYZ(centroid1, centroid2);
 	}

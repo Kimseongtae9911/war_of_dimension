@@ -3,7 +3,7 @@
 
 namespace wod_server {
 	std::unique_ptr<ItemCsvMgr> ItemCsvMgr::m_instance;
-	std::map<ITEMKIND, EItemType> ItemCsvMgr::ITEMKINDToEItemType = {
+	std::map<ITEMKIND, EItemType> ItemCsvMgr::m_ITEMKINDToEItemType = {
 				{ITEMKIND::NONE, EItemType::None},
 				{ITEMKIND::HEALHP, EItemType::HealHp},
 				{ITEMKIND::HEALMP, EItemType::HealMp},
@@ -31,11 +31,11 @@ namespace wod_server {
 		return true;;
 	}
 
-	void ItemCsvMgr::LoadData(const TCsvData& datas, const TCsvHeaderMap& csvHeader)
+	void ItemCsvMgr::LoadData(const TCsvData& _datas, const TCsvHeaderMap& _csvHeader)
 	{
 		tabledata::ItemInfo itemInfo;
-		for (auto i = 2; i < datas.size(); ++i) {
-			itemInfo = CreateStructFromCSV<tabledata::ItemInfo>(datas[i], csvHeader);
+		for (auto i = 2; i < _datas.size(); ++i) {
+			itemInfo = CreateStructFromCSV<tabledata::ItemInfo>(_datas[i], _csvHeader);
 			m_itemCsvMap.emplace(itemInfo.Type, new ItemCsv(itemInfo));
 		}
 	}

@@ -9,39 +9,39 @@ namespace wod_server {
 		bool Initialize() override;
 		bool Release() override;
 
-		void Packet_Exec(BASE_PACKET* packet, CClient* client);
+		void Packet_Exec(BASE_PACKET* _packet, CClient* _client);
 
 	private:
-		void LoginPacket(BASE_PACKET* packet, CClient* client);
-		void MovePacket(BASE_PACKET* packet, CClient* client);
-		void MatchPacket(BASE_PACKET* packet, CClient* client);
-		void ChatPacket(BASE_PACKET* packet, CClient* client);
-		void RotatePacket(BASE_PACKET* packet, CClient* client);
-		void CustomizePacket(BASE_PACKET* packet, CClient* client);
-		void ShopPacket(BASE_PACKET* packet, CClient* client);
-		void SignUpPacket(BASE_PACKET* packet, CClient* client);
-		void RegisterAuctionPacket(BASE_PACKET* packet, CClient* client);
-		void GetAuctionInfoPacket(BASE_PACKET* packet, CClient* client);
-		void ChangeChannelPacket(BASE_PACKET* packet, CClient* client);
-		void PortNumPacket(BASE_PACKET* packet, CClient* client);
-		void StakeTokenPacket(BASE_PACKET* packet, CClient* client);
-		void ChangeNodePacket(BASE_PACKET* packet, CClient* client);
-		void DummyClientPacket(BASE_PACKET* packet, CClient* client);
-		void CreateTransactionPacket(BASE_PACKET* packet, CClient* client);
-		void OpenCustomizePacket(BASE_PACKET* packet, CClient* client);
-		void OpenAuctionPacket(BASE_PACKET* packet, CClient* client);
-		void OpenBlockChainPacket(BASE_PACKET* packet, CClient* client);
-		void BuyAuctionPacket(BASE_PACKET* packet, CClient* client);
-		void LoginCompletePacket(BASE_PACKET* packet, CClient* client);
-		void RTTPacket(BASE_PACKET* packet, CClient* client);
+		void LoginPacket(BASE_PACKET* _packet, CClient* _client);
+		void MovePacket(BASE_PACKET* _packet, CClient* _client);
+		void MatchPacket(BASE_PACKET* _packet, CClient* _client);
+		void ChatPacket(BASE_PACKET* _packet, CClient* _client);
+		void RotatePacket(BASE_PACKET* _packet, CClient* _client);
+		void CustomizePacket(BASE_PACKET* _packet, CClient* _client);
+		void ShopPacket(BASE_PACKET* _packet, CClient* _client);
+		void SignUpPacket(BASE_PACKET* _packet, CClient* _client);
+		void RegisterAuctionPacket(BASE_PACKET* _packet, CClient* _client);
+		void GetAuctionInfoPacket(BASE_PACKET* _packet, CClient* _client);
+		void ChangeChannelPacket(BASE_PACKET* _packet, CClient* _client);
+		void PortNumPacket(BASE_PACKET* _packet, CClient* _client);
+		void StakeTokenPacket(BASE_PACKET* _packet, CClient* _client);
+		void ChangeNodePacket(BASE_PACKET* _packet, CClient* _client);
+		void DummyClientPacket(BASE_PACKET* _packet, CClient* _client);
+		void CreateTransactionPacket(BASE_PACKET* _packet, CClient* _client);
+		void OpenCustomizePacket(BASE_PACKET* _packet, CClient* _client);
+		void OpenAuctionPacket(BASE_PACKET* _packet, CClient* _client);
+		void OpenBlockChainPacket(BASE_PACKET* _packet, CClient* _client);
+		void BuyAuctionPacket(BASE_PACKET* _packet, CClient* _client);
+		void LoginCompletePacket(BASE_PACKET* _packet, CClient* _client);
+		void RTTPacket(BASE_PACKET* _packet, CClient* _client);
 
 		// For Test
-		void ChangeServerPacket(BASE_PACKET* packet, CClient* client);
+		void ChangeServerPacket(BASE_PACKET* _packet, CClient* _client);
 
-		bool GetPlayerInfo(char name[NAME_SIZE], char password[NAME_SIZE], CClient* client);
+		bool GetPlayerInfo(char _name[NAME_SIZE], char _password[NAME_SIZE], CClient* _client);
 
 	private:
-		std::unordered_map<char, std::function<void(BASE_PACKET*, CClient*)>> m_packetfunc;		
+		std::unordered_map<char, std::function<void(BASE_PACKET*, CClient*)>> m_packetfunc;
 
 		int m_matchNum = 0;
 

@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    SwordManHellBladeHandler::SwordManHellBladeHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    SwordManHellBladeHandler::SwordManHellBladeHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::SwordManHellBlade;
         SetSkillInfo();
     }
 
-    CSkillHandler* SwordManHellBladeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* SwordManHellBladeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new SwordManHellBladeHandler(client);
+        return new SwordManHellBladeHandler(_client);
     }
 
     void SwordManHellBladeHandler::Handle()

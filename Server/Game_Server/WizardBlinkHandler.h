@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		WizardBlinkHandler() {}
-		WizardBlinkHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
+		WizardBlinkHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

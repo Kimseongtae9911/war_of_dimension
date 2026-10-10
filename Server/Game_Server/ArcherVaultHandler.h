@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherVaultHandler() {}
-		ArcherVaultHandler(std::shared_ptr<CClient> client);
+		ArcherVaultHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

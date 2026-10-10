@@ -73,7 +73,7 @@ namespace wod_server {
 			m_handlers.insert({ 103, new OgreDimensionPunchHandler });
 			m_handlers.insert({ 104, new OgreButtingHandler });
 			m_handlers.insert({ 105, new OgreDimensionCrushHandler });
-			
+
 			m_handlers.insert({ 106, new ProSCMHandler });
 			m_handlers.insert({ 107, new ProPointerHandler });
 			m_handlers.insert({ 108, new ProPlusStatHandler });
@@ -91,7 +91,7 @@ namespace wod_server {
 			m_handlers.insert({ 119, new WizardAttackHandler });
 			m_handlers.insert({ 120, new OgreAttackHandler });
 			m_handlers.insert({ 121, new ProAttackHandler });
-			
+
 
 			for (int i = SKILL_START_NUM; i < 122; ++i) {
 				for (int j = 0; j < HANDLER_NUM; ++j) {
@@ -113,28 +113,28 @@ namespace wod_server {
 		return true;
 	}
 
-	void CSkillHandlerFactory::Handle(int skillNum, std::shared_ptr<CClient> client)
+	void CSkillHandlerFactory::Handle(int _skillNum, std::shared_ptr<CClient> _client)
 	{
 		try {
-			if (!m_handlers.contains(skillNum)) {
+			if (!m_handlers.contains(_skillNum)) {
 				LogPrinter::PrintMsg("Wrong SkillNum In SkillHandlerFactory");
 				return;
 			}
 
 			CSkillHandler* handler;
-			if (m_handlerPool[skillNum - SKILL_START_NUM].empty()) {
-				handler = m_handlers[skillNum]->CreateHandler(client);
+			if (m_handlerPool[_skillNum - SKILL_START_NUM].empty()) {
+				handler = m_handlers[_skillNum]->CreateHandler(_client);
 			}
 			else {
-				if (m_handlerPool[skillNum - SKILL_START_NUM].try_pop(handler)) {
-					handler->SetClient(client);
+				if (m_handlerPool[_skillNum - SKILL_START_NUM].try_pop(handler)) {
+					handler->SetClient(_client);
 				}
 				else {
-					handler = m_handlers[skillNum - SKILL_START_NUM]->CreateHandler(client);
+					handler = m_handlers[_skillNum - SKILL_START_NUM]->CreateHandler(_client);
 				}
 			}
 			handler->Handle();
-			m_handlerPool[skillNum - SKILL_START_NUM].push(handler);
+			m_handlerPool[_skillNum - SKILL_START_NUM].push(handler);
 		}
 		catch (const std::exception& ex) {
 			LogPrinter::PrintMsg("Err(CSkillHandlerFactory Handle), " + std::string(ex.what()));

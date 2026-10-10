@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    WizardAttackHandler::WizardAttackHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
-    {        
+    WizardAttackHandler::WizardAttackHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
+    {
         m_type = EPlayerSkill::WizardAttack;
         SetSkillInfo();
     }
 
-    CSkillHandler* WizardAttackHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* WizardAttackHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new WizardAttackHandler(client);
+        return new WizardAttackHandler(_client);
     }
 }

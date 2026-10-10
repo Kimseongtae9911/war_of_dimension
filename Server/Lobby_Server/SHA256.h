@@ -3,13 +3,13 @@
 class SHA256
 {
 public:
-	static constexpr int BLOCKSIZE = 64;
-	static constexpr int HASHSIZE = 32;
+	static constexpr int m_BLOCKSIZE = 64;
+	static constexpr int m_HASHSIZE = 32;
 
-	static std::string Encrpyt(std::string data);
+	static std::string Encrpyt(std::string _data);
 
 private:
-	static std::array<unsigned char, BLOCKSIZE * 2> m_buffer;
+	static std::array<unsigned char, m_BLOCKSIZE * 2> m_buffer;
 	static int m_bufferIndex;
 	static unsigned int m_length;
 	static std::array<unsigned int, 8> m_chain;
@@ -27,16 +27,16 @@ private:
 		0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 	};
 
-	static constexpr unsigned int RightRotate(const unsigned int x, const int n) { return (x >> n) | (x << (32 - n)); }
-	static constexpr unsigned int RightShift(const unsigned int x, const int n) { return (x >> n); }
-	static constexpr unsigned int Sigma0(const unsigned int x) { return RightRotate(x, 7) ^ RightRotate(x, 18) ^ RightShift(x, 3); }
-	static constexpr unsigned int Sigma1(const unsigned int x) { return RightRotate(x, 17) ^ RightRotate(x, 19) ^ RightShift(x, 10); }
-	static constexpr unsigned int Ch(unsigned int x, unsigned int y, unsigned int z) { return (x & y) ^ (~x & z); }
-	static constexpr unsigned int Maj(unsigned int x, unsigned int y, unsigned int z) { return (x & y) ^ (x & z) ^ (y & z); }
+	static constexpr unsigned int RightRotate(const unsigned int _x, const int _n) { return (_x >> _n) | (_x << (32 - _n)); }
+	static constexpr unsigned int RightShift(const unsigned int _x, const int _n) { return (_x >> _n); }
+	static constexpr unsigned int Sigma0(const unsigned int _x) { return RightRotate(_x, 7) ^ RightRotate(_x, 18) ^ RightShift(_x, 3); }
+	static constexpr unsigned int Sigma1(const unsigned int _x) { return RightRotate(_x, 17) ^ RightRotate(_x, 19) ^ RightShift(_x, 10); }
+	static constexpr unsigned int Ch(unsigned int _x, unsigned int _y, unsigned int _z) { return (_x & _y) ^ (~_x & _z); }
+	static constexpr unsigned int Maj(unsigned int _x, unsigned int _y, unsigned int _z) { return (_x & _y) ^ (_x & _z) ^ (_y & _z); }
 	static void Reset();
-	static void Update(const unsigned char* data, unsigned int length);
-	static void ProcessBlock(const unsigned char* message, int number);
-	static void Finalize(unsigned char* output);
+	static void Update(const unsigned char* _data, unsigned int _length);
+	static void ProcessBlock(const unsigned char* _message, int _number);
+	static void Finalize(unsigned char* _output);
 };
 
 

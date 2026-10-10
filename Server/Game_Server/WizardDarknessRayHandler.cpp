@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    WizardDarknessRayHandler::WizardDarknessRayHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    WizardDarknessRayHandler::WizardDarknessRayHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::WizardDarknessRay;
         SetSkillInfo();
     }
 
-    CSkillHandler* WizardDarknessRayHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* WizardDarknessRayHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new WizardDarknessRayHandler(client);
+        return new WizardDarknessRayHandler(_client);
     }
 }

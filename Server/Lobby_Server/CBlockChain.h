@@ -8,15 +8,15 @@ public:
 	CBlockChain();
 	~CBlockChain();
 
-	void AddBlock(CBlock* newBlock);
+	void AddBlock(CBlock* _newBlock);
 	void DeleteLastBlock();
 	bool CheckChainValidity();
 
 	const std::string& GetLastBlockHash() { return m_chain.back()->GetHash(); }
-	void SaveChainDataToHTML(const std::string& filename) const;
+	void SaveChainDataToHTML(const std::string& _filename) const;
 
 private:
-	bool LoadChainData(const std::string& filename);	//From HTML File
+	bool LoadChainData(const std::string& _filename);	//From HTML File
 	bool LoadChainData();								//From Database
 	void CreateGenesisBlock();
 

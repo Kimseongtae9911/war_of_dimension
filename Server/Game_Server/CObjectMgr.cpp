@@ -77,69 +77,69 @@ namespace wod_server {
         m_clientnames.clear(); return true;
 	}
 
-	void CObjectMgr::DisconnectClient(int key)
+	void CObjectMgr::DisconnectClient(int _key)
 	{
-		infolock[key].lock_shared();
-		m_clients[m_idInfo[key]]->Disconnect();
-		infolock[key].unlock_shared();
+		m_infolock[_key].lock_shared();
+		m_clients[m_idInfo[_key]]->Disconnect();
+		m_infolock[_key].unlock_shared();
 	}
 
-	bool CObjectMgr::InitializeClient(const SOCKET& socket, int socketID)
+	bool CObjectMgr::InitializeClient(const SOCKET& _socket, int _socketID)
 	{
 		int clientID = -1;
 		if (!m_clientIDQueue.try_pop(clientID)) {
 			return false;
 		}
-		m_clients[clientID]->GetPacketSender()->GetSession()->SetSocket(socket);
+		m_clients[clientID]->GetPacketSender()->GetSession()->SetSocket(_socket);
 		m_clients[clientID]->Initialize();
 		m_clients[clientID]->SetID(clientID);
 		m_clients[clientID]->GetPacketSender()->GetSession()->Recv();
 
-		infolock[socketID].lock();
-		m_idInfo[socketID] = clientID;
-		infolock[socketID].unlock();
+		m_infolock[_socketID].lock();
+		m_idInfo[_socketID] = clientID;
+		m_infolock[_socketID].unlock();
 		m_clients[clientID]->GetPacketSender()->SendRTTPacket();
 
 		return true;
 	}
 
-	void CObjectMgr::RegisterClientToServer(char name[NAME_SIZE], int id, int matchNum, const ModelCustomize& model)
+	void CObjectMgr::RegisterClientToServer(char _name[NAME_SIZE], int _id, int _matchNum, const ModelCustomize& _model)
 	{
-		namelock.lock();
-		m_clientnames.insert({ name, UserDataFromLobby{ id, matchNum, model } });
-		namelock.unlock();
+		m_namelock.lock();
+		m_clientnames.insert({ _name, UserDataFromLobby{ _id, _matchNum, _model } });
+		m_namelock.unlock();
 	}
 
-	void CObjectMgr::RemoveClientFromServer(int socketID)
+	void CObjectMgr::RemoveClientFromServer(int _socketID)
 	{
-		int clid = GetUserIDFromSocket(socketID);
+		int clid = GetUserIDFromSocket(_socketID);
 
-		Resource::sessionPool.push(m_clients[clid]->GetPacketSender()->GetSession());
+		Resource::m_sessionPool.push(m_clients[clid]->GetPacketSender()->GetSession());
 
-		namelock.lock();
+		m_namelock.lock();
 		if (m_clientnames.contains(m_clients[clid]->GetName()))
 			m_clientnames.erase(m_clients[clid]->GetName());
-		namelock.unlock();
+		m_namelock.unlock();
 	}
 
-	void CObjectMgr::RemoveClientFromServerByID(int id)
+	void CObjectMgr::RemoveClientFromServerByID(int _id)
 	{
-		Resource::sessionPool.push(m_clients[id]->GetPacketSender()->GetSession());
+		Resource::m_sessionPool.push(m_clients[_id]->GetPacketSender()->GetSession());
 
-		namelock.lock();
-		if (m_clientnames.contains(m_clients[id]->GetName()))
-			m_clientnames.erase(m_clients[id]->GetName());
-		namelock.unlock();
+		m_namelock.lock();
+		if (m_clientnames.contains(m_clients[_id]->GetName()))
+			m_clientnames.erase(m_clients[_id]->GetName());
+		m_namelock.unlock();
 	}
 
-	const UserDataFromLobby CObjectMgr::GetUserData(const std::string& name)
+	const UserDataFromLobby CObjectMgr::GetUserData(const std::string& _name)
 	{
 		UserDataFromLobby data;
-		namelock.lock_shared();
-		if (m_clientnames.contains(name)) {
-			data = m_clientnames.find(name)->second;
+		m_namelock.lock_shared();
+		if (m_clientnames.contains(_name)) {
+			data = m_clientnames.find(_name)->second;
 		}
-		namelock.unlock_shared();
+		m_namelock.unlock_shared();
 		return data;
 	}
 

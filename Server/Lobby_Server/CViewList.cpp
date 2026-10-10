@@ -3,32 +3,32 @@
 #include "CUserMgr.h"
 
 namespace wod_server {
-	CViewList::CViewList(CClient* client)
+	CViewList::CViewList(CClient* _client)
 	{
-		m_myClient = client;
+		m_myClient = _client;
 	}
 
-	void CViewList::CheckViewList(int channel, int socketID, int id)
+	void CViewList::CheckViewList(int _channel, int _socketID, int _id)
 	{
-		if (channel == -1)
+		if (_channel == -1)
 			return;
 
 		try {
 			std::unordered_set<int> nearList;
-			viewLock.lock_shared();
+			m_viewLock.lock_shared();
 			std::unordered_set<int> oldList = m_viewList;
-			viewLock.unlock_shared();
+			m_viewLock.unlock_shared();
 
-			for (auto& object : CUserMgr::GetInstance()->GetChannelClients(channel)) {
+			for (auto& object : CUserMgr::GetInstance()->GetChannelClients(_channel)) {
 				if (nullptr == object)
 					continue;
-				object->stateLock.lock_shared();
+				object->m_stateLock.lock_shared();
 				if (object->GetState() != CL_STATE::ST_LOBBY) {
-					object->stateLock.unlock_shared();
+					object->m_stateLock.unlock_shared();
 					continue;
 				}
-				object->stateLock.unlock_shared();
-				if (socketID == object->GetSocketID())
+				object->m_stateLock.unlock_shared();
+				if (_socketID == object->GetSocketID())
 					continue;
 				if (m_myClient->GetTransform()->CheckDistance(object->GetTransform()->GetPos())) {
 					nearList.insert(object->GetSocketID());
@@ -37,18 +37,18 @@ namespace wod_server {
 
 			for (int socketNum : nearList) {
 				CClient* nearClient = CUserMgr::GetInstance()->GetClient(socketNum);
-				nearClient->GetViewList()->viewLock.lock_shared();
-				if (nearClient->GetViewList()->CheckViewList(socketID) != 0) {
+				nearClient->GetViewList()->m_viewLock.lock_shared();
+				if (nearClient->GetViewList()->CheckViewList(_socketID) != 0) {
 					// myClient move
-					nearClient->GetViewList()->viewLock.unlock_shared();
-					nearClient->GetPacketSender()->SendMovePacket(id, m_myClient->GetTransform()->GetPos(), m_myClient->GetTransform()->GetDir());
+					nearClient->GetViewList()->m_viewLock.unlock_shared();
+					nearClient->GetPacketSender()->SendMovePacket(_id, m_myClient->GetTransform()->GetPos(), m_myClient->GetTransform()->GetDir());
 				}
 				else {
 					// myClient moved into near client's view this frame
-					nearClient->GetViewList()->viewLock.unlock_shared();
-					nearClient->GetViewList()->AddToView(m_myClient->GetID(), m_myClient->GetSocketID(), m_myClient->GetTransform()->GetLook(), m_myClient->GetTransform()->GetRight(), m_myClient->GetPlayerInfo().model, nearClient->GetPacketSender());
+					nearClient->GetViewList()->m_viewLock.unlock_shared();
+					nearClient->GetViewList()->AddToView(m_myClient->GetID(), m_myClient->GetSocketID(), m_myClient->GetTransform()->GetLook(), m_myClient->GetTransform()->GetRight(), m_myClient->GetPlayerInfo().m_model, nearClient->GetPacketSender());
 				}
-				
+
 				// clients which came into view this frame
 				if (oldList.count(socketNum) == 0) {
 					AddToView(nearClient->GetID(), socketNum, nearClient->GetTransform()->GetLook(), nearClient->GetTransform()->GetRight(), nearClient->GetModelCustomize(), m_myClient->GetPacketSender());
@@ -69,43 +69,43 @@ namespace wod_server {
 
 	void CViewList::ClearViewList()
 	{
-		viewLock.lock();
+		m_viewLock.lock();
 		m_viewList.clear();
-		viewLock.unlock();
+		m_viewLock.unlock();
 	}
 
-	void CViewList::AddToView(int id, int socketNum, const vec3& look, const vec3& right, const ModelCustomize& model, CPacketSender* sendTarget)
+	void CViewList::AddToView(int _id, int _socketNum, const vec3& _look, const vec3& _right, const ModelCustomize& _model, CPacketSender* _sendTarget)
 	{
-		sendTarget->SendAddPlayerPacket(id, socketNum, look, right, model);
+		_sendTarget->SendAddPlayerPacket(_id, _socketNum, _look, _right, _model);
 
-		viewLock.lock();
-		m_viewList.insert(socketNum);
-		viewLock.unlock();
+		m_viewLock.lock();
+		m_viewList.insert(_socketNum);
+		m_viewLock.unlock();
 	}
 
-	bool CViewList::CheckViewList(int id)
+	bool CViewList::CheckViewList(int _id)
 	{
-		viewLock.lock_shared();
-		bool check = m_viewList.contains(id);
-		viewLock.unlock_shared();
+		m_viewLock.lock_shared();
+		bool check = m_viewList.contains(_id);
+		m_viewLock.unlock_shared();
 
 		return check;
 	}
 
-	void CViewList::DeleteFromView(int id, int socketNum, CPacketSender* sendTarget)
+	void CViewList::DeleteFromView(int _id, int _socketNum, CPacketSender* _sendTarget)
 	{
-		sendTarget->SendRemovePlayerPacket(id, socketNum);
+		_sendTarget->SendRemovePlayerPacket(_id, _socketNum);
 
-		viewLock.lock();
-		m_viewList.erase(socketNum);
-		viewLock.unlock();
+		m_viewLock.lock();
+		m_viewList.erase(_socketNum);
+		m_viewLock.unlock();
 	}
 
 	std::unordered_set<int> CViewList::GetView()
 	{
-		viewLock.lock_shared();
+		m_viewLock.lock_shared();
 		std::unordered_set<int> ret = m_viewList;
-		viewLock.unlock_shared();
+		m_viewLock.unlock_shared();
 		return ret;
 	}
 

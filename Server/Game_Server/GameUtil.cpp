@@ -10,11 +10,11 @@ namespace wod_server {
 	std::vector<Node*> GameUtil::m_naviMesh;
 	std::vector<Triangle> GameUtil::m_heightMesh;
 	std::array<std::array<std::vector<DirectX::BoundingOrientedBox>, SECTION_NUM>, SECTION_NUM> GameUtil::m_boundingBoxs;
-	InitBoundingBox GameUtil::m_playerInitBB;	
+	InitBoundingBox GameUtil::m_playerInitBB;
 	InitBoundingBox GameUtil::m_bossPlayerInitBB;
 	InitBoundingBox GameUtil::m_minionInitBB;
 	std::map<ENpcType, InitBoundingBox*> GameUtil::m_monsterInitBB;
-	std::array<std::vector<vec2>, PATH_NUM> GameUtil::minionPaths = { {} };
+	std::array<std::vector<vec2>, PATH_NUM> GameUtil::m_minionPaths = { {} };
 	std::vector<DirectX::BoundingOrientedBox> GameUtil::m_magneticFences;
 	DirectX::BoundingOrientedBox GameUtil::m_nexusBB;
 	std::array<DirectX::BoundingOrientedBox, PATH_NUM> GameUtil::m_towerBBs;
@@ -29,10 +29,10 @@ namespace wod_server {
 			delete bb;
 	}
 
-	bool GameUtil::LoadCoolTime(std::string filename)
+	bool GameUtil::LoadCoolTime(std::string _filename)
 	{
-		std::fstream in(filename);
-		
+		std::fstream in(_filename);
+
 		if (in.fail())
 			return false;
 
@@ -61,9 +61,9 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadManaConsumption(std::string filename)
+	bool GameUtil::LoadManaConsumption(std::string _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 
 		if (in.fail())
 			return false;
@@ -93,9 +93,9 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadNaviMesh(std::string filename)
+	bool GameUtil::LoadNaviMesh(std::string _filename)
 	{
-		std::ifstream in(filename);
+		std::ifstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -110,7 +110,7 @@ namespace wod_server {
 
 			if (token == "v") {
 				vec3 vertex;
-				ss >> vertex.x >> vertex.y >> vertex.z;
+				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
 				vertices.push_back(vertex);
 			}
 			else if (token == "f") {
@@ -124,22 +124,22 @@ namespace wod_server {
 				//Check Adjacent Triangle
 				for (const auto& node : m_naviMesh)
 				{
-					if (&node->triangle != &currentNodePtr->triangle && CheckTriangleAdjacent(node->triangle, currentNodePtr->triangle))
+					if (&node->m_triangle != &currentNodePtr->m_triangle && CheckTriangleAdjacent(node->m_triangle, currentNodePtr->m_triangle))
 					{
-						currentNodePtr->adjacentNodes.push_back(node);
-						node->adjacentNodes.push_back(currentNodePtr);
+						currentNodePtr->m_adjacentNodes.push_back(node);
+						node->m_adjacentNodes.push_back(currentNodePtr);
 					}
 				}
 			}
-			
+
 		}
 
 		return true;
 	}
 
-	bool GameUtil::LoadHeightMesh(std::string filename)
+	bool GameUtil::LoadHeightMesh(std::string _filename)
 	{
-		std::ifstream in(filename);
+		std::ifstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -153,7 +153,7 @@ namespace wod_server {
 
 			if (token == "v") {
 				vec3 vertex;
-				ss >> vertex.x >> vertex.y >> vertex.z;
+				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
 				vertices.push_back(vertex);
 			}
 			else if (token == "f") {
@@ -163,16 +163,16 @@ namespace wod_server {
 			}
 		}
 
-		std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& t1, const Triangle& t2) {
-			return (t1.v1.y + t1.v2.y + t1.v3.y) / 3.f > (t2.v1.y + t2.v2.y + t2.v3.y) / 3.f;
+		std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& _t1, const Triangle& _t2) {
+			return (_t1.m_v1.m_y + _t1.m_v2.m_y + _t1.m_v3.m_y) / 3.f > (_t2.m_v1.m_y + _t2.m_v2.m_y + _t2.m_v3.m_y) / 3.f;
 			});
 
 		return true;
 	}
 
-	bool GameUtil::LoadMap(std::string filename)
+	bool GameUtil::LoadMap(std::string _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -213,9 +213,9 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadPlayerBB(std::string filename, int type)
+	bool GameUtil::LoadPlayerBB(std::string _filename, int _type)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -226,30 +226,30 @@ namespace wod_server {
 		in >> objectNum;
 
 		//0:HeroPlayer, 1:BossPlayer
-		if (type == 0) {
-			in >> m_playerInitBB.offset.x;
-			in >> m_playerInitBB.offset.y;
-			in >> m_playerInitBB.offset.z;
+		if (_type == 0) {
+			in >> m_playerInitBB.m_offset.m_x;
+			in >> m_playerInitBB.m_offset.m_y;
+			in >> m_playerInitBB.m_offset.m_z;
 
-			in >> m_playerInitBB.extent.x;
-			in >> m_playerInitBB.extent.y;
-			in >> m_playerInitBB.extent.z;
+			in >> m_playerInitBB.m_extent.m_x;
+			in >> m_playerInitBB.m_extent.m_y;
+			in >> m_playerInitBB.m_extent.m_z;
 		}
 		else {
-			in >> m_bossPlayerInitBB.offset.x;
-			in >> m_bossPlayerInitBB.offset.y;
-			in >> m_bossPlayerInitBB.offset.z;
+			in >> m_bossPlayerInitBB.m_offset.m_x;
+			in >> m_bossPlayerInitBB.m_offset.m_y;
+			in >> m_bossPlayerInitBB.m_offset.m_z;
 
-			in >> m_bossPlayerInitBB.extent.x;
-			in >> m_bossPlayerInitBB.extent.y;
-			in >> m_bossPlayerInitBB.extent.z;
+			in >> m_bossPlayerInitBB.m_extent.m_x;
+			in >> m_bossPlayerInitBB.m_extent.m_y;
+			in >> m_bossPlayerInitBB.m_extent.m_z;
 		}
 		return true;
 	}
 
-	bool GameUtil::LoadMinionBB(std::string filename)
+	bool GameUtil::LoadMinionBB(std::string _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -259,20 +259,20 @@ namespace wod_server {
 
 		in >> objectNum;
 
-		in >> m_minionInitBB.offset.x;
-		in >> m_minionInitBB.offset.y;
-		in >> m_minionInitBB.offset.z;
+		in >> m_minionInitBB.m_offset.m_x;
+		in >> m_minionInitBB.m_offset.m_y;
+		in >> m_minionInitBB.m_offset.m_z;
 
-		in >> m_minionInitBB.extent.x;
-		in >> m_minionInitBB.extent.y;
-		in >> m_minionInitBB.extent.z;
+		in >> m_minionInitBB.m_extent.m_x;
+		in >> m_minionInitBB.m_extent.m_y;
+		in >> m_minionInitBB.m_extent.m_z;
 
 		return true;
 	}
 
-	bool GameUtil::LoadFenceBB(std::string filename)
+	bool GameUtil::LoadFenceBB(std::string _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -306,16 +306,16 @@ namespace wod_server {
 			DirectX::XMMATRIX transformMatrix = DirectX::XMMatrixScalingFromVector(scaling) * DirectX::XMMatrixRotationQuaternion(quater);
 			obb.Transform(obb, transformMatrix);
 			obb.Center = { center[0], center[1], center[2] };
-			
+
 			m_magneticFences.push_back(obb);
 		}
 
 		return true;
 	}
 
-	bool GameUtil::LoadMinionPath(std::string filename, int pathNum)
+	bool GameUtil::LoadMinionPath(std::string _filename, int _pathNum)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 
 		if (in.fail())
 			return false;
@@ -326,7 +326,7 @@ namespace wod_server {
 			in >> c;
 			in >> x >> z;
 
-			minionPaths[pathNum].push_back({ x, z });
+			m_minionPaths[_pathNum].push_back({ x, z });
 		}
 		return true;
 	}
@@ -364,13 +364,13 @@ namespace wod_server {
 
 			in[i].first >> objectNum;
 
-			in[i].first >> temp->offset.x;
-			in[i].first >> temp->offset.y;
-			in[i].first >> temp->offset.z;
+			in[i].first >> temp->m_offset.m_x;
+			in[i].first >> temp->m_offset.m_y;
+			in[i].first >> temp->m_offset.m_z;
 
-			in[i].first >> temp->extent.x;
-			in[i].first >> temp->extent.y;
-			in[i].first >> temp->extent.z;
+			in[i].first >> temp->m_extent.m_x;
+			in[i].first >> temp->m_extent.m_y;
+			in[i].first >> temp->m_extent.m_z;
 
 			m_monsterInitBB.emplace(in[i].second, temp);
 		}
@@ -425,9 +425,9 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadNexusBB(const std::string& filename)
+	bool GameUtil::LoadNexusBB(const std::string& _filename)
 	{
-		std::fstream in(filename);
+		std::fstream in(_filename);
 		if (in.fail())
 			return false;
 
@@ -465,65 +465,65 @@ namespace wod_server {
 		return true;
 	}
 
-	int GameUtil::GetCoolTime(int characterNum, int skillNum)
+	int GameUtil::GetCoolTime(int _characterNum, int _skillNum)
 	{
-		if (m_playerSkillCoolTimes[characterNum].contains(skillNum))
-			return m_playerSkillCoolTimes[characterNum][skillNum];
+		if (m_playerSkillCoolTimes[_characterNum].contains(_skillNum))
+			return m_playerSkillCoolTimes[_characterNum][_skillNum];
 		else {
-			LogPrinter::PrintMsg("Failed To Return CoolTime " + std::to_string(skillNum));
+			LogPrinter::PrintMsg("Failed To Return CoolTime " + std::to_string(_skillNum));
 			return 0;
 		}
 	}
 
-	int GameUtil::GetMpConsumption(int characterNum, int skillNum)
+	int GameUtil::GetMpConsumption(int _characterNum, int _skillNum)
 	{
-		if (m_playerManaConsumption[characterNum].contains(skillNum))
-			return m_playerManaConsumption[characterNum][skillNum];
+		if (m_playerManaConsumption[_characterNum].contains(_skillNum))
+			return m_playerManaConsumption[_characterNum][_skillNum];
 		else {
-			LogPrinter::PrintMsg("Failed To Return Mp Consumption " + std::to_string(skillNum));
+			LogPrinter::PrintMsg("Failed To Return Mp Consumption " + std::to_string(_skillNum));
 			return 0;
 		}
 	}
 
-	bool GameUtil::MapCollision(const vec3& pos, float& height, int& nodeNum)
+	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum)
 	{
 		Ray ray;
-		ray.origin = pos;
-		ray.origin.y += RAY_OFFSET;
+		ray.m_origin = _pos;
+		ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, height, nodeNum)) {
-			ray.RayCast(m_heightMesh, height);
+		if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
+			ray.RayCast(m_heightMesh, _height);
 			return true;
 		}
 
 		return false;
 	}
 
-	bool GameUtil::MapCollision(const vec3& pos, vec3& shift, float& height, int& nodeNum)
+	bool GameUtil::MapCollision(const vec3& _pos, vec3& _shift, float& _height, int& _nodeNum)
 	{
 		Ray ray;
-		ray.origin = pos + shift;
-		ray.origin.y += RAY_OFFSET;
+		ray.m_origin = _pos + _shift;
+		ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, height, nodeNum)) {
-			ray.RayCast(m_heightMesh, height);
+		if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
+			ray.RayCast(m_heightMesh, _height);
 			return true;
 		}
 		else {
 			vec3 slidingVector;
-			if (GetSlidingVector(pos, shift, nodeNum, slidingVector)) {
-				shift = slidingVector * shift.Length();
-				ray.origin = pos + shift;
-				ray.origin.y += RAY_OFFSET;
-				if (ray.RayCast(m_naviMesh, height, nodeNum)) {
+			if (GetSlidingVector(_pos, _shift, _nodeNum, slidingVector)) {
+				_shift = slidingVector * _shift.Length();
+				ray.m_origin = _pos + _shift;
+				ray.m_origin.m_y += RAY_OFFSET;
+				if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
 					return false;
 				}
 				else {
 					float desiredMagnitude = slidingVector.Length() * 2.0f;
 					slidingVector = vec3::Normalize(slidingVector) * desiredMagnitude;
-					vec3 temp = shift;
-					shift = slidingVector * shift.Length() - temp;
-					return false; 
+					vec3 temp = _shift;
+					_shift = slidingVector * _shift.Length() - temp;
+					return false;
 				}
 			}
 			else {
@@ -533,23 +533,23 @@ namespace wod_server {
 		return false;
 	}
 
-	bool GameUtil::MapCollision(const vec3& pos, float& height, int& nodeNum, bool skill)
+	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum, bool _skill)
 	{
 		Ray ray;
-		ray.origin = pos;
-		ray.origin.y += RAY_OFFSET;
+		ray.m_origin = _pos;
+		ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, height, nodeNum, skill)) {
-			ray.RayCast(m_heightMesh, height, skill);
+		if (ray.RayCast(m_naviMesh, _height, _nodeNum, _skill)) {
+			ray.RayCast(m_heightMesh, _height, _skill);
 			return true;
 		}
 		return false;
 	}
 
-	bool GameUtil::FenceCollision(const DirectX::BoundingOrientedBox box, const vec3& shift)
+	bool GameUtil::FenceCollision(const DirectX::BoundingOrientedBox _box, const vec3& _shift)
 	{
-		DirectX::BoundingOrientedBox clientOBB = box;
-		clientOBB.Center.x += shift.x; clientOBB.Center.y += shift.y; clientOBB.Center.z += shift.z;
+		DirectX::BoundingOrientedBox clientOBB = _box;
+		clientOBB.Center.x += _shift.m_x; clientOBB.Center.y += _shift.m_y; clientOBB.Center.z += _shift.m_z;
 
 		for (const auto& fence : m_magneticFences) {
 			if (true == fence.Intersects(clientOBB))
@@ -558,17 +558,17 @@ namespace wod_server {
 		return false;
 	}
 
-	bool GameUtil::ClientCollisionCheck(int id, const vec3& shift)
+	bool GameUtil::ClientCollisionCheck(int _id, const vec3& _shift)
 	{
-		std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(id);		
+		std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_id);
 
 		DirectX::BoundingOrientedBox clientOBB = client->GetBoundingBox();
-		clientOBB.Center.x += shift.x; clientOBB.Center.y += shift.y; clientOBB.Center.z += shift.z;
+		clientOBB.Center.x += _shift.m_x; clientOBB.Center.y += _shift.m_y; clientOBB.Center.z += _shift.m_z;
 
 		for (int clID : CMatchMgr::GetInstance()->GetMatchPlayers(client->GetMatchNum())) {
-			if (clID == -1 || clID == id)
+			if (clID == -1 || clID == _id)
 				continue;
-			
+
 			if (clientOBB.Intersects(CObjectMgr::GetInstance()->GetClient(clID)->GetBoundingBox())) {
 				return false;
 			}
@@ -577,25 +577,25 @@ namespace wod_server {
 		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
 			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(client->GetMatchNum(), i);
 
-			if (!npc->active)
+			if (!npc->m_active)
 				continue;
 
 			if (clientOBB.Intersects(npc->GetBoundingBox()))
 				return false;
 		}
-		
+
 
 		return true;
 	}
 
-	bool GameUtil::NpcCollisionCheck(int id, int matchNum, const vec3& shift)
+	bool GameUtil::NpcCollisionCheck(int _id, int _matchNum, const vec3& _shift)
 	{
-		std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, id - NPC_ID);
+		std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, _id - NPC_ID);
 
 		DirectX::BoundingOrientedBox npcOBB = npc->GetBoundingBox();
-		npcOBB.Center.x += shift.x; npcOBB.Center.y += shift.y; npcOBB.Center.z += shift.z;
+		npcOBB.Center.x += _shift.m_x; npcOBB.Center.y += _shift.m_y; npcOBB.Center.z += _shift.m_z;
 
-		for (int clID : CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)) {
+		for (int clID : CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)) {
 			if (clID == -1)
 				continue;
 
@@ -605,18 +605,18 @@ namespace wod_server {
 		}
 
 		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
-			std::shared_ptr<CNpc> otherNpc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
+			std::shared_ptr<CNpc> otherNpc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
 
-			if (!otherNpc->active)
+			if (!otherNpc->m_active)
 				continue;
 
-			if (otherNpc->GetID() == id)
+			if (otherNpc->GetID() == _id)
 				continue;
 
 			if (npcOBB.Intersects(otherNpc->GetBoundingBox())) {
 				//Calculate and Apply Sliding Vector
 				vec3 npcPos = npc->GetPos();
-				vec3 newPosition = npcPos + vec3::Reflect(shift * 2.0f, vec3::Normalize(npcPos - otherNpc->GetPos()));
+				vec3 newPosition = npcPos + vec3::Reflect(_shift * 2.0f, vec3::Normalize(npcPos - otherNpc->GetPos()));
 				npc->SetPos(newPosition);
 				return false;
 			}
@@ -626,41 +626,41 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::HeroSkillCollisionCheck(const DirectX::BoundingOrientedBox skillBox, int matchNum, int power, int critical, DAMAGE_TYPE type, int clientID, bool projectile)
+	bool GameUtil::HeroSkillCollisionCheck(const DirectX::BoundingOrientedBox _skillBox, int _matchNum, int _power, int _critical, DAMAGE_TYPE _type, int _clientID, bool _projectile)
 	{
-		if (skillBox.Center.x < -200.f || skillBox.Center.x > 100.f || skillBox.Center.z < -200.f || skillBox.Center.z > 100.f) {
+		if (_skillBox.Center.x < -200.f || _skillBox.Center.x > 100.f || _skillBox.Center.z < -200.f || _skillBox.Center.z > 100.f) {
 			return true;
 		}
 
-		if (projectile) {
-			if (SkillMapCollision(skillBox))
+		if (_projectile) {
+			if (SkillMapCollision(_skillBox))
 				return true;
 		}
 
-		int bossID = CMatchMgr::GetInstance()->GetMatchPlayers(matchNum)[3];
+		int bossID = CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum)[3];
 		if (bossID != -1) {
-			if (CObjectMgr::GetInstance()->GetClient(bossID)->GetBoundingBox().Intersects(skillBox)) {
-				CObjectMgr::GetInstance()->GetClient(bossID)->Damage(power, critical, type, clientID);
+			if (CObjectMgr::GetInstance()->GetClient(bossID)->GetBoundingBox().Intersects(_skillBox)) {
+				CObjectMgr::GetInstance()->GetClient(bossID)->Damage(_power, _critical, _type, _clientID);
 				return true;
 			}
 		}
 
 		for (int i = 0; i < MAX_MINION; ++i) {
-			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-			if (!npc->active)
+			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+			if (!npc->m_active)
 				continue;
-			if (npc->GetBoundingBox().Intersects(skillBox)) {
-				npc->Damaged(clientID, power, type);
+			if (npc->GetBoundingBox().Intersects(_skillBox)) {
+				npc->Damaged(_clientID, _power, _type);
 				return true;
 			}
 		}
 
 		for (int i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i) {
-			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-			if (!npc->active)
+			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+			if (!npc->m_active)
 				continue;
-			if (npc->GetBoundingBox().Intersects(skillBox)) {
-				npc->Damaged(clientID, power, type);
+			if (npc->GetBoundingBox().Intersects(_skillBox)) {
+				npc->Damaged(_clientID, _power, _type);
 				return true;
 			}
 		}
@@ -668,36 +668,36 @@ namespace wod_server {
 		return false;
 	}
 
-	bool GameUtil::BossSkillCollisionCheck(const DirectX::BoundingOrientedBox skillBox, int matchNum, int power, int critical, DAMAGE_TYPE type, int clientID, bool projectile)
+	bool GameUtil::BossSkillCollisionCheck(const DirectX::BoundingOrientedBox _skillBox, int _matchNum, int _power, int _critical, DAMAGE_TYPE _type, int _clientID, bool _projectile)
 	{
-		if (skillBox.Center.x < -200.f || skillBox.Center.x > 100.f || skillBox.Center.z < -200.f || skillBox.Center.z > 100.f) {
+		if (_skillBox.Center.x < -200.f || _skillBox.Center.x > 100.f || _skillBox.Center.z < -200.f || _skillBox.Center.z > 100.f) {
 			return true;
 		}
 
-		if (projectile) {
-			if (SkillMapCollision(skillBox))
+		if (_projectile) {
+			if (SkillMapCollision(_skillBox))
 				return true;
 		}
 
 		//Hero Collide Check
-		std::array<int, MAX_PLAYER> clientIDs = CMatchMgr::GetInstance()->GetMatchPlayers(matchNum);
+		std::array<int, MAX_PLAYER> clientIDs = CMatchMgr::GetInstance()->GetMatchPlayers(_matchNum);
 		for (int i = 0; i < MAX_PLAYER - 1; ++i) {
 			if (-1 == clientIDs[i])
 				continue;
 			std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(clientIDs[i]);
-			if (client->GetBoundingBox().Intersects(skillBox)) {
-				client->Damage(power, critical, type, clientID);
+			if (client->GetBoundingBox().Intersects(_skillBox)) {
+				client->Damage(_power, _critical, _type, _clientID);
 				return true;
 			}
 		}
 
 		//Monster Collide Check
 		for (int i = MAX_MINION; i < MAX_MINION + MONSTER_NUM; ++i) {
-			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-			if (!npc->active)
+			std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+			if (!npc->m_active)
 				continue;
-			if (npc->GetBoundingBox().Intersects(skillBox)) {
-				npc->Damaged(clientID, power, type);
+			if (npc->GetBoundingBox().Intersects(_skillBox)) {
+				npc->Damaged(_clientID, _power, _type);
 				return true;
 			}
 		}
@@ -705,14 +705,14 @@ namespace wod_server {
 		return false;
 	}
 
-	bool GameUtil::SkillMapCollision(const DirectX::BoundingOrientedBox skillBox)
+	bool GameUtil::SkillMapCollision(const DirectX::BoundingOrientedBox _skillBox)
 	{
-		if (skillBox.Center.x < -200.f || skillBox.Center.x > 100.f || skillBox.Center.z < -200.f || skillBox.Center.z > 100.f) {
+		if (_skillBox.Center.x < -200.f || _skillBox.Center.x > 100.f || _skillBox.Center.z < -200.f || _skillBox.Center.z > 100.f) {
 			return true;
 		}
 
-		int sectionX = static_cast<int>((skillBox.Center.x + 200) / (WORLD_WIDTH / SECTION_NUM));
-		int sectionZ = static_cast<int>((skillBox.Center.z + 200) / (WORLD_HEIGHT / SECTION_NUM));
+		int sectionX = static_cast<int>((_skillBox.Center.x + 200) / (WORLD_WIDTH / SECTION_NUM));
+		int sectionZ = static_cast<int>((_skillBox.Center.z + 200) / (WORLD_HEIGHT / SECTION_NUM));
 		int checkSide = 0;
 		int checkTopBottom = 0;
 
@@ -734,35 +734,35 @@ namespace wod_server {
 			// Map:Client collsion check
 			if (m_boundingBoxs[sectionX][sectionZ].empty() == false) {
 				for (auto& box : m_boundingBoxs[sectionX][sectionZ]) {
-					if (box.Intersects(skillBox)) {
+					if (box.Intersects(_skillBox)) {
 						return true;
 					}
 				}
 			}
 			if (checkSide != 1 && m_boundingBoxs[sectionX - 1][sectionZ].empty() == false) {
 				for (auto& box : m_boundingBoxs[sectionX - 1][sectionZ]) {
-					if (box.Intersects(skillBox)) {
+					if (box.Intersects(_skillBox)) {
 						return true;
 					}
 				}
 			}
 			if (checkSide != 2 && m_boundingBoxs[sectionX + 1][sectionZ].empty() == false) {
 				for (auto& box : m_boundingBoxs[sectionX + 1][sectionZ]) {
-					if (box.Intersects(skillBox)) {
+					if (box.Intersects(_skillBox)) {
 						return true;
 					}
 				}
 			}
 			if (checkTopBottom != 1 && m_boundingBoxs[sectionX][sectionZ - 1].empty() == false) {
 				for (auto& box : m_boundingBoxs[sectionX][sectionZ - 1]) {
-					if (box.Intersects(skillBox)) {
+					if (box.Intersects(_skillBox)) {
 						return true;
 					}
 				}
 			}
 			if (checkTopBottom != 2 && m_boundingBoxs[sectionX][sectionZ + 1].empty() == false) {
 				for (auto& box : m_boundingBoxs[sectionX][sectionZ + 1]) {
-					if (box.Intersects(skillBox)) {
+					if (box.Intersects(_skillBox)) {
 						return true;
 					}
 				}
@@ -776,100 +776,100 @@ namespace wod_server {
 		return false;
 	}
 
-	DirectX::BoundingOrientedBox GameUtil::GenerateShortRangeBox(const vec3& pos, const vec3& look, const vec3& extent, const vec3& scale, const DirectX::XMFLOAT4X4& world)
+	DirectX::BoundingOrientedBox GameUtil::GenerateShortRangeBox(const vec3& _pos, const vec3& _look, const vec3& _extent, const vec3& _scale, const DirectX::XMFLOAT4X4& _world)
 	{
 		DirectX::XMFLOAT4X4 worldMatrix;
 		DirectX::XMStoreFloat4x4(&worldMatrix, DirectX::XMMatrixIdentity());
 
-		vec3 offset = look; offset.y = 0.908f;
-		vec3 newPos = pos + offset;
+		vec3 offset = _look; offset.m_y = 0.908f;
+		vec3 newPos = _pos + offset;
 
-		vec3 scaleValue = { extent.x * 2.f * scale.x, extent.y * 2.f, extent.z * 2.f * scale.z };
-		DirectX::XMStoreFloat4x4(&worldMatrix, DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&worldMatrix), DirectX::XMMatrixScaling(scaleValue.x, scaleValue.y, scaleValue.z)));
-		worldMatrix._41 = newPos.x; worldMatrix._42 = newPos.y; worldMatrix._43 = newPos.z;
+		vec3 scaleValue = { _extent.m_x * 2.f * _scale.m_x, _extent.m_y * 2.f, _extent.m_z * 2.f * _scale.m_z };
+		DirectX::XMStoreFloat4x4(&worldMatrix, DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&worldMatrix), DirectX::XMMatrixScaling(scaleValue.m_x, scaleValue.m_y, scaleValue.m_z)));
+		worldMatrix._41 = newPos.m_x; worldMatrix._42 = newPos.m_y; worldMatrix._43 = newPos.m_z;
 
 		DirectX::XMVECTOR scaleV, rotationV, translationV;
 		DirectX::XMMatrixDecompose(&scaleV, &rotationV, &translationV, XMLoadFloat4x4(&worldMatrix));
 
-		DirectX::XMMATRIX playerWorldMatrix = DirectX::XMLoadFloat4x4(&world);
+		DirectX::XMMATRIX playerWorldMatrix = DirectX::XMLoadFloat4x4(&_world);
 
 		playerWorldMatrix.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
 		DirectX::BoundingOrientedBox box;
-		DirectX::XMVECTOR posVec = { newPos.x, newPos.y, newPos.z };
+		DirectX::XMVECTOR posVec = { newPos.m_x, newPos.m_y, newPos.m_z };
 		box.Transform(box, (DirectX::XMMatrixScalingFromVector(scaleV) * playerWorldMatrix * DirectX::XMMatrixTranslationFromVector(posVec)));
 
 		return box;
 	}
 
-	bool GameUtil::CheckJumpCollision(const vec3& pos, int& jumpNum)
+	bool GameUtil::CheckJumpCollision(const vec3& _pos, int& _jumpNum)
 	{
 		for (int i = 0; i < JUMP_START_POS.size(); ++i) {
-			if (::sqrt(::pow(JUMP_START_POS[i].x - pos.x, 2) + ::pow(JUMP_START_POS[i].z - pos.z, 2)) < 2.f) {
-				jumpNum = i;
+			if (::sqrt(::pow(JUMP_START_POS[i].m_x - _pos.m_x, 2) + ::pow(JUMP_START_POS[i].m_z - _pos.m_z, 2)) < 2.f) {
+				_jumpNum = i;
 				return true;
 			}
 		}
-		jumpNum = -1;
+		_jumpNum = -1;
 		return false;
 	}
 
-	const vec3 GameUtil::GetJumpPos(int jumpNum, float time)
+	const vec3 GameUtil::GetJumpPos(int _jumpNum, float _time)
 	{
-		float otherTime = 1.0f - time;
-		float powT = time * time;
+		float otherTime = 1.0f - _time;
+		float powT = _time * _time;
 		float powOtherTime = otherTime * otherTime;
 
-		vec3 p1 = { JUMP_START_POS[jumpNum].x, 2.f, JUMP_START_POS[jumpNum].z };
-		vec3 p2 = JUMP_CONTROL_POS[jumpNum];
-		vec3 p3 = { JUMP_LANDING_POS[jumpNum].x, 2.f, JUMP_LANDING_POS[jumpNum].z };
+		vec3 p1 = { JUMP_START_POS[_jumpNum].m_x, 2.f, JUMP_START_POS[_jumpNum].m_z };
+		vec3 p2 = JUMP_CONTROL_POS[_jumpNum];
+		vec3 p3 = { JUMP_LANDING_POS[_jumpNum].m_x, 2.f, JUMP_LANDING_POS[_jumpNum].m_z };
 
 
-		return vec3(powOtherTime * p1.x + 2 * otherTime * time * p2.x + powT * p3.x,
-					powOtherTime * p1.y + 2 * otherTime * time * p2.y + powT * p3.y,
-					powOtherTime * p1.z + 2 * otherTime * time * p2.z + powT * p3.z);
+		return vec3(powOtherTime * p1.m_x + 2 * otherTime * _time * p2.m_x + powT * p3.m_x,
+					powOtherTime * p1.m_y + 2 * otherTime * _time * p2.m_y + powT * p3.m_y,
+					powOtherTime * p1.m_z + 2 * otherTime * _time * p2.m_z + powT * p3.m_z);
 	}
 
-	bool GameUtil::CheckTeleportCollision(const vec3& pos, int& teleport)
+	bool GameUtil::CheckTeleportCollision(const vec3& _pos, int& _teleport)
 	{
 		for (int i = 0; i < TELEPORT_POS.size(); ++i) {
-			if (::sqrt(::pow(TELEPORT_POS[i].x - pos.x, 2) + ::pow(TELEPORT_POS[i].z - pos.z, 2)) < TELEPORT_INTERACTION_DISTANCE) {
-				teleport = i;
+			if (::sqrt(::pow(TELEPORT_POS[i].m_x - _pos.m_x, 2) + ::pow(TELEPORT_POS[i].m_z - _pos.m_z, 2)) < TELEPORT_INTERACTION_DISTANCE) {
+				_teleport = i;
 				return true;
 			}
 		}
 		return false;
 	}
 
-	bool GameUtil::GetSlidingVector(const vec3& pos, const vec3& shift, int nodeNum, vec3& slidingVector)
+	bool GameUtil::GetSlidingVector(const vec3& _pos, const vec3& _shift, int _nodeNum, vec3& _slidingVector)
 	{
-		if (nodeNum < 0 || static_cast<size_t>(nodeNum) >= m_naviMesh.size()) return false;
-		const Triangle& triangle = m_naviMesh[nodeNum]->triangle;
+		if (_nodeNum < 0 || static_cast<size_t>(_nodeNum) >= m_naviMesh.size()) return false;
+		const Triangle& triangle = m_naviMesh[_nodeNum]->m_triangle;
 
-		int edgeIndex = FindEdgeAdjacentToPosition(pos, triangle);
+		int edgeIndex = FindEdgeAdjacentToPosition(_pos, triangle);
 		if (edgeIndex != -1) {
 			vec3 edge = triangle.GetEdge(edgeIndex);
-			vec3 edgeNormal = vec3::Normalize(vec3(-edge.z, 0.0f, edge.x));
+			vec3 edgeNormal = vec3::Normalize(vec3(-edge.m_z, 0.0f, edge.m_x));
 
-			vec3 directionXZ = vec3(shift.x, 0.0f, shift.z);
-			slidingVector = directionXZ - edgeNormal * edgeNormal.Dot(directionXZ);
-	
-			slidingVector = vec3::Normalize(slidingVector);
+			vec3 directionXZ = vec3(_shift.m_x, 0.0f, _shift.m_z);
+			_slidingVector = directionXZ - edgeNormal * edgeNormal.Dot(directionXZ);
+
+			_slidingVector = vec3::Normalize(_slidingVector);
 			return true;
 		}
 		return false;
 	}
 
-	int GameUtil::FindEdgeAdjacentToPosition(const vec3& pos, const Triangle& triangle)
+	int GameUtil::FindEdgeAdjacentToPosition(const vec3& _pos, const Triangle& _triangle)
 	{
 		int closestEdgeIndex = -1;
 		float closestDistanceSquared = FLT_MAX;
 
 		for (int i = 0; i < 3; ++i) {
-			vec3 v1 = triangle.GetVertex(i);
-			vec3 v2 = triangle.GetVertex((i + 1) % 3);
+			vec3 v1 = _triangle.GetVertex(i);
+			vec3 v2 = _triangle.GetVertex((i + 1) % 3);
 
-			float distanceSquared = DistanceToEdgeSquared(pos, v1, v2);
+			float distanceSquared = DistanceToEdgeSquared(_pos, v1, v2);
 			if (distanceSquared < closestDistanceSquared) {
 				closestDistanceSquared = distanceSquared;
 				closestEdgeIndex = i;
@@ -879,10 +879,10 @@ namespace wod_server {
 		return closestEdgeIndex;
 	}
 
-	float GameUtil::DistanceToEdgeSquared(const vec3& point, const vec3& edgeStart, const vec3& edgeEnd)
+	float GameUtil::DistanceToEdgeSquared(const vec3& _point, const vec3& _edgeStart, const vec3& _edgeEnd)
 	{
-		vec3 edgeDir = edgeEnd - edgeStart;
-		vec3 pointToEdge = point - edgeStart;
+		vec3 edgeDir = _edgeEnd - _edgeStart;
+		vec3 pointToEdge = _point - _edgeStart;
 
 		float edgeLengthSquared = edgeDir.Length();
 		float dotProduct = pointToEdge.Dot(edgeDir);
@@ -890,26 +890,26 @@ namespace wod_server {
 		float t = dotProduct / edgeLengthSquared;
 		vec3 closestPoint;
 		if (t < 0.0f)
-			closestPoint = edgeStart;
+			closestPoint = _edgeStart;
 		else if (t > 1.0f)
-			closestPoint = edgeEnd;
+			closestPoint = _edgeEnd;
 		else
-			closestPoint = edgeStart + edgeDir * t;
+			closestPoint = _edgeStart + edgeDir * t;
 
-		float distanceSquared = (point - closestPoint).Length();
+		float distanceSquared = (_point - closestPoint).Length();
 		return distanceSquared;
 	}
 
-	bool GameUtil::CheckTriangleAdjacent(const Triangle& triangle1, const Triangle& triangle2)
+	bool GameUtil::CheckTriangleAdjacent(const Triangle& _triangle1, const Triangle& _triangle2)
 	{
 		int sharedVertices = 0;
 
-		if (triangle2.ContainsEdge(triangle1.v1, triangle1.v2) || triangle2.ContainsEdge(triangle1.v2, triangle1.v3) || triangle2.ContainsEdge(triangle1.v3, triangle1.v1))
+		if (_triangle2.ContainsEdge(_triangle1.m_v1, _triangle1.m_v2) || _triangle2.ContainsEdge(_triangle1.m_v2, _triangle1.m_v3) || _triangle2.ContainsEdge(_triangle1.m_v3, _triangle1.m_v1))
 			sharedVertices += 2;
 
-		if (triangle1.ContainsEdge(triangle2.v1, triangle2.v2) || triangle1.ContainsEdge(triangle2.v2, triangle2.v3) || triangle1.ContainsEdge(triangle2.v3, triangle2.v1))
+		if (_triangle1.ContainsEdge(_triangle2.m_v1, _triangle2.m_v2) || _triangle1.ContainsEdge(_triangle2.m_v2, _triangle2.m_v3) || _triangle1.ContainsEdge(_triangle2.m_v3, _triangle2.m_v1))
 			sharedVertices += 2;
-		
+
 		return sharedVertices == 2;
 	}
 }

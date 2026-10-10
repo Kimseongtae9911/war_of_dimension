@@ -6,9 +6,9 @@ namespace wod_server {
 	{
 	public:
 		ArcherStickyArrowHandler() {}
-		ArcherStickyArrowHandler(std::shared_ptr<CClient> client);
+		ArcherStickyArrowHandler(std::shared_ptr<CClient> _client);
 
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;		
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 	};
 
 }

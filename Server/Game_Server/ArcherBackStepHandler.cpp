@@ -3,14 +3,14 @@
 #include "CNetworkMgr.h"
 
 namespace wod_server {
-    ArcherBackStepHandler::ArcherBackStepHandler(std::shared_ptr<CClient> client) : CSkillHandler(client)
+    ArcherBackStepHandler::ArcherBackStepHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client)
     {
         m_type = EPlayerSkill::ArcherBackStep;
     }
 
-    CSkillHandler* ArcherBackStepHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* ArcherBackStepHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new ArcherBackStepHandler(client);
+        return new ArcherBackStepHandler(_client);
     }
 
     void ArcherBackStepHandler::Handle()

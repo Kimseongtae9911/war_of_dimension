@@ -11,18 +11,18 @@ namespace wod_server {
 
 	enum class EVENT_TYPE { EV_CONNECT_UPDATE, EV_READY_UPDATE, EV_LOADING_UPDATE, EV_MATCH_UPDATE, EV_SKILL_END, EV_STAT_CHANGE, EV_MATCH_FINISH, EV_HEALTHMANA_CHANGE, EV_NPC_ACTIVE};
 	struct TIMER_EVENT {
-		int objID;
-		std::chrono::system_clock::time_point wakeUpTime;
-		EVENT_TYPE eventID;
-		int targetID;
-		CStat changeStat;
-		int changeMaxHp;
-		int changeMaxMp;
-        uint64_t sessionGeneration = 0;
-        bool checkSessionGeneration = false;
-		constexpr bool operator < (const TIMER_EVENT& L) const
+		int m_objID;
+		std::chrono::system_clock::time_point m_wakeUpTime;
+		EVENT_TYPE m_eventID;
+		int m_targetID;
+		CStat m_changeStat;
+		int m_changeMaxHp;
+		int m_changeMaxMp;
+        uint64_t m_sessionGeneration = 0;
+        bool m_checkSessionGeneration = false;
+		constexpr bool operator < (const TIMER_EVENT& _l) const
 		{
-			return (wakeUpTime > L.wakeUpTime);
+			return (m_wakeUpTime > _l.m_wakeUpTime);
 		}
 	};
 
@@ -40,34 +40,34 @@ namespace wod_server {
 
 		const HANDLE& GetHandle() const { return m_handle->GetHandle(); }
 
-		void RegisterTimerEvent(const TIMER_EVENT& ev);
-		void RegisterSkillEvent(const SKILL_EVENT& ev);		
+		void RegisterTimerEvent(const TIMER_EVENT& _ev);
+		void RegisterSkillEvent(const SKILL_EVENT& _ev);
 
-		void InitializeMonster(int matchNum);
+		void InitializeMonster(int _matchNum);
 
-		void SendPacketToLobby(BASE_PACKET* pkt) { m_LobbyServer->Send(pkt); }
+		void SendPacketToLobby(BASE_PACKET* _pkt) { m_LobbyServer->Send(_pkt); }
 
 	private:
-		void ProcessTimerEvent(const TIMER_EVENT& ev);
+		void ProcessTimerEvent(const TIMER_EVENT& _ev);
 		//IOCP Func
-		void Accept(int id, int bytes, OverlapEx* over_ex);
-		void Recv(int id, int bytes, OverlapEx* over_ex);
-		void Send(int id, int bytes, OverlapEx* over_ex);
-		void Disconnect(int id, int bytes, OverlapEx* over_ex);
-		void ConnectUpdate(int id, int bytes, OverlapEx* over_ex);
-		void ReadyUpdate(int id, int bytes, OverlapEx* over_ex);
-		void LoadingUpdate(int id, int bytes, OverlapEx* over_ex);
-		void MatchUpdate(int id, int bytes, OverlapEx* overEx);		
-		void MonsterHeal(int id, int bytes, OverlapEx* overEx);
-		void NpcActive(int id, int bytes, OverlapEx* overEx);		
-		void MatchFinish(int id, int bytes, OverlapEx* overEx);
-		void HealthManaChange(int id, int bytes, OverlapEx* overEx);
+		void Accept(int _id, int _bytes, OverlapEx* _over_ex);
+		void Recv(int _id, int _bytes, OverlapEx* _over_ex);
+		void Send(int _id, int _bytes, OverlapEx* _over_ex);
+		void Disconnect(int _id, int _bytes, OverlapEx* _over_ex);
+		void ConnectUpdate(int _id, int _bytes, OverlapEx* _over_ex);
+		void ReadyUpdate(int _id, int _bytes, OverlapEx* _over_ex);
+		void LoadingUpdate(int _id, int _bytes, OverlapEx* _over_ex);
+		void MatchUpdate(int _id, int _bytes, OverlapEx* _overEx);
+		void MonsterHeal(int _id, int _bytes, OverlapEx* _overEx);
+		void NpcActive(int _id, int _bytes, OverlapEx* _overEx);
+		void MatchFinish(int _id, int _bytes, OverlapEx* _overEx);
+		void HealthManaChange(int _id, int _bytes, OverlapEx* _overEx);
 
 		//Packet Func
-		void Packet_Exec(BASE_PACKET* packet);		
+		void Packet_Exec(BASE_PACKET* _packet);
 
 	public:
-		std::string lobbyIP;
+		std::string m_lobbyIP;
 
 	private:
 		std::atomic_bool m_stopping = false;
@@ -77,7 +77,7 @@ namespace wod_server {
 
 		std::atomic<int> m_clientID;
 		std::atomic<int> m_clientnum;
-		
+
 		std::unordered_map<OP_TYPE, std::function<void(int, int, OverlapEx*)>> m_iocpfunc;
 
 		CSkillTimer* m_skillTimer = nullptr;

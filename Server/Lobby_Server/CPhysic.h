@@ -7,11 +7,11 @@ namespace wod_server {
 		CPhysic();
 		~CPhysic() {}
 
-		void SetVelocity(const vec3& v) { m_vel = v; }
+		void SetVelocity(const vec3& _v) { m_vel = _v; }
 		vec3& GetVelocity() { return m_vel; }
 
-		const vec3& CalculateMoveShift(char dir, const vec3& look, const vec3& right);
-		void Deceleration(float elapsedTime);
+		const vec3& CalculateMoveShift(char _dir, const vec3& _look, const vec3& _right);
+		void Deceleration(float _elapsedTime);
 
 	private:
 		vec3 m_vel = {};

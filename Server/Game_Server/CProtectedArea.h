@@ -8,10 +8,10 @@ namespace wod_server {
 		CProtectedArea();
 		~CProtectedArea() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
-		void SetMatchNum(int matchNum) { m_matchNum = matchNum; }
-		void SetDefensePower(int power) { m_defensePower = power; }
+		void SetMatchNum(int _matchNum) { m_matchNum = _matchNum; }
+		void SetDefensePower(int _power) { m_defensePower = _power; }
 
 	private:
 		int m_matchNum = -1;

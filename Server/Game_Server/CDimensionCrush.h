@@ -8,9 +8,9 @@ namespace wod_server {
 		CDimensionCrush();
 		~CDimensionCrush() override;
 
-		bool Update(float elapsedTime) override;
+		bool Update(float _elapsedTime) override;
 
-		void SetMatchNum(int matchNum) { m_matchNum = matchNum; }
+		void SetMatchNum(int _matchNum) { m_matchNum = _matchNum; }
 
 	private:
 		int m_matchNum = -1;

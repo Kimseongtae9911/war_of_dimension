@@ -11,9 +11,9 @@ namespace wod_server {
 		CItemInfo() { m_type = ITEMKIND::NONE; };
 		~CItemInfo() {};
 
-		std::atomic_bool exist = false;
+		std::atomic_bool m_exist = false;
 
-		void SetType(ITEMKIND type) { m_type = type; }
+		void SetType(ITEMKIND _type) { m_type = _type; }
 		ITEMKIND GetType() const { return m_type; }
 
 	private:

@@ -4,14 +4,14 @@
 
 namespace wod_server {
 
-    WizardEarthImpactHandler::WizardEarthImpactHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
-    {        
+    WizardEarthImpactHandler::WizardEarthImpactHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
+    {
         m_type = EPlayerSkill::WizardEarthImpact;
         SetSkillInfo();
     }
 
-    CSkillHandler* WizardEarthImpactHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* WizardEarthImpactHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new WizardEarthImpactHandler(client);
+        return new WizardEarthImpactHandler(_client);
     }
 }

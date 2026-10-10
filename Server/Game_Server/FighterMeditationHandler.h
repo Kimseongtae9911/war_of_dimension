@@ -6,8 +6,8 @@ namespace wod_server {
 	{
 	public:
 		FighterMeditationHandler() {}
-		FighterMeditationHandler(std::shared_ptr<CClient> client) : CSkillHandler(client) {}
-		CSkillHandler* CreateHandler(std::shared_ptr<CClient> client) override;
+		FighterMeditationHandler(std::shared_ptr<CClient> _client) : CSkillHandler(_client) {}
+		CSkillHandler* CreateHandler(std::shared_ptr<CClient> _client) override;
 
 		void Handle() override;
 	};

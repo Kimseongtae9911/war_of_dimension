@@ -10,12 +10,12 @@ namespace wod_server {
 		if (itemCsv == nullptr)
 			return false;
 
-		m_owner->GetStatus()->healthMana.HealHp(itemCsv->Value);
+		m_owner->GetStatus()->m_healthMana.HealHp(itemCsv->Value);
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_owner->GetMatchNum())) {
 			if (-1 == id)
 				continue;
-			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->healthMana);
+			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->m_healthMana);
 		}
 
 		return true;
@@ -27,12 +27,12 @@ namespace wod_server {
 		if (itemCsv == nullptr)
 			return false;
 
-		m_owner->GetStatus()->healthMana.HealMp(itemCsv->Value);
+		m_owner->GetStatus()->m_healthMana.HealMp(itemCsv->Value);
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_owner->GetMatchNum())) {
 			if (-1 == id)
 				continue;
-			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->healthMana);
+			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->m_healthMana);
 		}
 
 		return true;
@@ -45,13 +45,13 @@ namespace wod_server {
 			return false;
 
 		auto status = m_owner->GetStatus();
-		status->healthMana.SetMaxHp(status->healthMana.GetMaxHp() + itemCsv->Value);
-		status->healthMana.HealHp(itemCsv->Value);
+		status->m_healthMana.SetMaxHp(status->m_healthMana.GetMaxHp() + itemCsv->Value);
+		status->m_healthMana.HealHp(itemCsv->Value);
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_owner->GetMatchNum())) {
 			if (-1 == id)
 				continue;
-			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->healthMana);
+			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), m_owner->GetStatus()->m_healthMana);
 		}
 		network::GetInstance()->RegisterTimerEvent(TIMER_EVENT(m_owner->GetID(), TimeUtil::PassedTimeMSec(itemCsv->Time), EVENT_TYPE::EV_HEALTHMANA_CHANGE, -1, {}, itemCsv->Value, 0));
 
@@ -65,13 +65,13 @@ namespace wod_server {
 			return false;
 
 		auto status = m_owner->GetStatus();
-		status->healthMana.SetMaxMp(status->healthMana.GetMaxMp() + itemCsv->Value);
-		status->healthMana.HealMp(itemCsv->Value);
+		status->m_healthMana.SetMaxMp(status->m_healthMana.GetMaxMp() + itemCsv->Value);
+		status->m_healthMana.HealMp(itemCsv->Value);
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_owner->GetMatchNum())) {
 			if (-1 == id)
 				continue;
-			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), status->healthMana);
+			CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendPlayerHealthManaPacket(m_owner->GetMatchId(), status->m_healthMana);
 		}
 		network::GetInstance()->RegisterTimerEvent(TIMER_EVENT(m_owner->GetID(), TimeUtil::PassedTimeMSec(itemCsv->Time), EVENT_TYPE::EV_HEALTHMANA_CHANGE, -1, {}, 0, itemCsv->Value));
 
@@ -85,7 +85,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.strength = itemCsv->Value;
+		changeStat.m_strength = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;
@@ -98,7 +98,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.magic = itemCsv->Value;
+		changeStat.m_magic = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;
@@ -111,7 +111,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.armor = itemCsv->Value;
+		changeStat.m_armor = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;
@@ -124,7 +124,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.regist = itemCsv->Value;
+		changeStat.m_regist = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;
@@ -137,7 +137,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.speed = itemCsv->Value;
+		changeStat.m_speed = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_owner->GetMatchNum())) {
@@ -156,7 +156,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.endure = itemCsv->Value;
+		changeStat.m_endure = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;
@@ -169,7 +169,7 @@ namespace wod_server {
 			return false;
 
 		CStat changeStat(0);
-		changeStat.critical = itemCsv->Value;
+		changeStat.m_critical = itemCsv->Value;
 		m_owner->GetStatus()->GetStat().ChangeStatUntilRollback(m_owner->GetID(), changeStat, itemCsv->Time);
 
 		return true;

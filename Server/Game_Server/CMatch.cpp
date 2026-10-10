@@ -4,69 +4,69 @@
 #include "Stats.h"
 
 namespace wod_server {
-	void CMatch::SetReady(const CS_READY_PACKET* packet)
+	void CMatch::SetReady(const CS_READY_PACKET* _packet)
 	{
-		m_clientReady[packet->id] = packet->ready;
+		m_clientReady[_packet->id] = _packet->ready;
 
 		for (int id : m_clientid) {
 			if (id == -1)
 				continue;
 
-			PACKET_SENDER(id)->SendReadyPacket(packet->id, packet->ready);
+			PACKET_SENDER(id)->SendReadyPacket(_packet->id, _packet->ready);
 		}
 	}
 
-	void CMatch::SelectSkill(const CS_SKILL_SELECT_PACKET* packet, std::shared_ptr<CClient> client)
+	void CMatch::SelectSkill(const CS_SKILL_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client)
 	{
-		if (client->GetMatchId() == 3) {
-			client->SetSkillNum(packet->storage + 1, packet->skill - (21 - 96 - 1));
+		if (_client->GetMatchId() == 3) {
+			_client->SetSkillNum(_packet->storage + 1, _packet->skill - (21 - 96 - 1));
 		}
 		else
-			client->SetSkillNum(packet->storage + 1, packet->skill);
+			_client->SetSkillNum(_packet->storage + 1, _packet->skill);
 
 		for (int id : m_clientid) {
 			if (-1 == id)
 				continue;
 
-			if (packet->id == 3) {
-				PACKET_SENDER(id)->SendSelectSkillPacket(packet->id, packet->storage, packet->skill + 1);
+			if (_packet->id == 3) {
+				PACKET_SENDER(id)->SendSelectSkillPacket(_packet->id, _packet->storage, _packet->skill + 1);
 			}
 			else {
-				PACKET_SENDER(id)->SendSelectSkillPacket(packet->id, packet->storage, packet->skill);
+				PACKET_SENDER(id)->SendSelectSkillPacket(_packet->id, _packet->storage, _packet->skill);
 			}
 		}
 	}
 
-	void CMatch::SelectJob(const CS_JOB_SELECT_PACKET* packet, std::shared_ptr<CClient> client)
+	void CMatch::SelectJob(const CS_JOB_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client)
 	{
-		client->SetPlayerJob(packet->job);
-		client->SetSkillNum(0, packet->job + SKILL_OFFSET);
+		_client->SetPlayerJob(_packet->job);
+		_client->SetSkillNum(0, _packet->job + SKILL_OFFSET);
 
 		for (int id : m_clientid) {
 			if (id == -1)
 				continue;
 
-			PACKET_SENDER(id)->SendJobSelectPacket(packet->id, packet->job);
+			PACKET_SENDER(id)->SendJobSelectPacket(_packet->id, _packet->job);
 		}
 	}
 
-	void CMatch::SelectStat(const CS_STAT_SELECT_PACKET* packet, std::shared_ptr<CClient> client)
+	void CMatch::SelectStat(const CS_STAT_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client)
 	{
-		client->SetInitializeStat(packet->hp, packet->mp, packet->attack, packet->magic_attack, 
-			packet->defense, packet->magic_defense, packet->speed, packet->tenacity, packet->critical);
+		_client->SetInitializeStat(_packet->hp, _packet->mp, _packet->attack, _packet->magic_attack,
+			_packet->defense, _packet->magic_defense, _packet->speed, _packet->tenacity, _packet->critical);
 	}
 
-	void CMatch::LoadingUpdate(int matchNum)
+	void CMatch::LoadingUpdate(int _matchNum)
 	{
 		Update();
 
 		if (!IsLoadComplete()) {
-            network::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::PassedTimeMSec(50), EVENT_TYPE::EV_LOADING_UPDATE, 0 });
+            network::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::PassedTimeMSec(50), EVENT_TYPE::EV_LOADING_UPDATE, 0 });
             return;
         }
 
 		// 스킬 쿨타임, 마나 소모량 세팅
-		for (int id : m_clientid) 
+		for (int id : m_clientid)
 		{
 			if (id == -1)
 				continue;
@@ -88,40 +88,40 @@ namespace wod_server {
 
 			if (i == 3) {
 				std::shared_ptr<CClient> boss = CObjectMgr::GetInstance()->GetClient(m_clientid[i]);
-				boss->GetStatus()->healthMana.SetMaxHp(BossStats::INIT_HP);
-				boss->GetStatus()->healthMana.SetCurHp(BossStats::INIT_HP);
-				boss->GetStatus()->healthMana.SetMaxMp(BossStats::INIT_MP);
-				boss->GetStatus()->healthMana.SetCurMp(BossStats::INIT_MP);
+				boss->GetStatus()->m_healthMana.SetMaxHp(BossStats::INIT_HP);
+				boss->GetStatus()->m_healthMana.SetCurHp(BossStats::INIT_HP);
+				boss->GetStatus()->m_healthMana.SetMaxMp(BossStats::INIT_MP);
+				boss->GetStatus()->m_healthMana.SetCurMp(BossStats::INIT_MP);
 				if (boss->GetPlayerJob() == 4) {
 					//Ogre
-					boss->InitializeBoundingBox(GameUtil::GetBossPlayerInitBB().offset, GameUtil::GetBossPlayerInitBB().extent, OGRE_SCALE);
+					boss->InitializeBoundingBox(GameUtil::GetBossPlayerInitBB().m_offset, GameUtil::GetBossPlayerInitBB().m_extent, OGRE_SCALE);
 				}
 				else {
 					//Programmer
-					boss->InitializeBoundingBox(GameUtil::GetPlayerInitBB().offset, GameUtil::GetPlayerInitBB().extent, PLAYER_SCALE);
+					boss->InitializeBoundingBox(GameUtil::GetPlayerInitBB().m_offset, GameUtil::GetPlayerInitBB().m_extent, PLAYER_SCALE);
 				}
 			}
 			else {
 				std::shared_ptr<CClient> hero = CObjectMgr::GetInstance()->GetClient(m_clientid[i]);
-				hero->GetStatus()->healthMana.SetMaxHp(HeroStats::INIT_HP);
-				hero->GetStatus()->healthMana.SetCurHp(HeroStats::INIT_HP);
-				hero->GetStatus()->healthMana.SetMaxMp(HeroStats::INIT_MP);
-				hero->GetStatus()->healthMana.SetCurMp(HeroStats::INIT_MP);
-				hero->InitializeBoundingBox(GameUtil::GetPlayerInitBB().offset, GameUtil::GetPlayerInitBB().extent, PLAYER_SCALE);
+				hero->GetStatus()->m_healthMana.SetMaxHp(HeroStats::INIT_HP);
+				hero->GetStatus()->m_healthMana.SetCurHp(HeroStats::INIT_HP);
+				hero->GetStatus()->m_healthMana.SetMaxMp(HeroStats::INIT_MP);
+				hero->GetStatus()->m_healthMana.SetCurMp(HeroStats::INIT_MP);
+				hero->InitializeBoundingBox(GameUtil::GetPlayerInitBB().m_offset, GameUtil::GetPlayerInitBB().m_extent, PLAYER_SCALE);
 			}
 
 			for (int id : m_clientid) {
 				if (-1 == id)
 					continue;
-				
-				PACKET_SENDER(id)->SendPlayerHealthManaPacket(i, CObjectMgr::GetInstance()->GetClient(m_clientid[i])->GetStatus()->healthMana);
+
+				PACKET_SENDER(id)->SendPlayerHealthManaPacket(i, CObjectMgr::GetInstance()->GetClient(m_clientid[i])->GetStatus()->m_healthMana);
 			}
 
 			//Initialize Packet for Tower and Nexus
 			for (int j = 0; j < PATH_NUM; ++j) {
-				PACKET_SENDER(m_clientid[i])->SendStructureStatChangePacket(j, CGameMgr::GetInstance()->GetTower(matchNum, j)->GetMaxHp(), CGameMgr::GetInstance()->GetTower(matchNum, j)->GetCurHp());
+				PACKET_SENDER(m_clientid[i])->SendStructureStatChangePacket(j, CGameMgr::GetInstance()->GetTower(_matchNum, j)->GetMaxHp(), CGameMgr::GetInstance()->GetTower(_matchNum, j)->GetCurHp());
 			}
-			PACKET_SENDER(m_clientid[i])->SendStructureStatChangePacket(PATH_NUM, CGameMgr::GetInstance()->GetNexus(matchNum)->GetMaxHp(), CGameMgr::GetInstance()->GetNexus(matchNum)->GetCurHp());
+			PACKET_SENDER(m_clientid[i])->SendStructureStatChangePacket(PATH_NUM, CGameMgr::GetInstance()->GetNexus(_matchNum)->GetMaxHp(), CGameMgr::GetInstance()->GetNexus(_matchNum)->GetCurHp());
 			PACKET_SENDER(m_clientid[i])->SendStructureStatusChangePacket(3);
 		}
 
@@ -129,7 +129,7 @@ namespace wod_server {
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			std::shared_ptr<CClient> player = CObjectMgr::GetInstance()->GetClient(m_clientid[i]);
 			for (int j = 0; j < MAX_PLAYER; ++j) {
-				if (CMatchMgr::GetInstance()->GetMatch(matchNum).m_clientid[i] == -1)
+				if (CMatchMgr::GetInstance()->GetMatch(_matchNum).m_clientid[i] == -1)
 					return;
 				std::shared_ptr<CClient> otherClient = CObjectMgr::GetInstance()->GetClient(m_clientid[j]);
 				player->GetPacketSender()->SendModelCustomizePacket(otherClient->GetMatchId(), otherClient->GetModelCustomize());
@@ -137,24 +137,24 @@ namespace wod_server {
 			}
 		}
 
-		CGameMgr::GetInstance()->ActiveTower(true, matchNum, 3);
-		CGameMgr::GetInstance()->SetLastTime(matchNum);
-		network::GetInstance()->InitializeMonster(matchNum);
-		network::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::CurTime(), EVENT_TYPE::EV_MATCH_UPDATE, -1 });
+		CGameMgr::GetInstance()->ActiveTower(true, _matchNum, 3);
+		CGameMgr::GetInstance()->SetLastTime(_matchNum);
+		network::GetInstance()->InitializeMonster(_matchNum);
+		network::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::CurTime(), EVENT_TYPE::EV_MATCH_UPDATE, -1 });
 	}
 
-	void CMatch::ConnectUpdate(int matchNum)
+	void CMatch::ConnectUpdate(int _matchNum)
 	{
 		Update();
 
 		// 모든 클라인언트 로딩 완료 체크
-		if (std::ranges::all_of(m_clientid, [](int id) {return id != -1; }))
+		if (std::ranges::all_of(m_clientid, [](int _id) {return _id != -1; }))
 		{
-			for (const int id : m_clientid) 
+			for (const int id : m_clientid)
 			{
 				const auto& matchClient = CObjectMgr::GetInstance()->GetClient(id);
 				matchClient->GetPacketSender()->SendModelCustomizePacket(matchClient->GetMatchId(), matchClient->GetModelCustomize());
-				for (auto otherId : m_clientid) 
+				for (auto otherId : m_clientid)
 				{
 					if (id == otherId)
 						continue;
@@ -165,30 +165,30 @@ namespace wod_server {
 			}
 
 			m_updateTime = TimeUtil::CurTime();
-			network::GetInstance()->RegisterTimerEvent(TIMER_EVENT(matchNum, TimeUtil::CurTime(), EVENT_TYPE::EV_READY_UPDATE, -1));
+			network::GetInstance()->RegisterTimerEvent(TIMER_EVENT(_matchNum, TimeUtil::CurTime(), EVENT_TYPE::EV_READY_UPDATE, -1));
 
 			return;
 		}
 
-		network::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::PassedTimeMSec(1000), EVENT_TYPE::EV_CONNECT_UPDATE, -1 });		
+		network::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::PassedTimeMSec(1000), EVENT_TYPE::EV_CONNECT_UPDATE, -1 });
 	}
 
-	void CMatch::ClientConnect(const CS_LOGIN_PACKET* packet, std::shared_ptr<CClient> client)
+	void CMatch::ClientConnect(const CS_LOGIN_PACKET* _packet, std::shared_ptr<CClient> _client)
 	{
-		UserDataFromLobby data = CObjectMgr::GetInstance()->GetUserData(packet->name);
+		UserDataFromLobby data = CObjectMgr::GetInstance()->GetUserData(_packet->name);
 
-		client->SetName(packet->name);
-		client->SetMatchNum(data.matchNum);
-		RegisterClient(data.id, client->GetID());
-		client->SetMatchId(data.id);
-		client->SetModelCustomize(data.model);
+		_client->SetName(_packet->name);
+		_client->SetMatchNum(data.m_matchNum);
+		RegisterClient(data.m_id, _client->GetID());
+		_client->SetMatchId(data.m_id);
+		_client->SetModelCustomize(data.m_model);
 
-		LogPrinter::PrintMsg(std::string(packet->name) + " Connected");
+		LogPrinter::PrintMsg(std::string(_packet->name) + " Connected");
 
-		client->GetPacketSender()->SendLoginPacket();
+		_client->GetPacketSender()->SendLoginPacket();
 	}
 
-	void CMatch::ReadyUpdate(int matchNum)
+	void CMatch::ReadyUpdate(int _matchNum)
 	{
 		auto curTime = TimeUtil::CurTime();
 		auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - m_updateTime).count() * 0.000001f;
@@ -201,7 +201,7 @@ namespace wod_server {
 		if (IsAllReady() || m_readyTime <= 0.f)
 		{
 			// 선택 결과를 같은 TCP 연결에서 먼저 전송해야 클라이언트가 필요한 효과만 생성할 수 있다.
-			CGameMgr::GetInstance()->SkillAutoSelect(matchNum);
+			CGameMgr::GetInstance()->SkillAutoSelect(_matchNum);
 
 			for (const auto id : m_clientid)
 				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendGameStartPacket();
@@ -221,7 +221,7 @@ namespace wod_server {
 				}
 			}
 
-			network::GetInstance()->RegisterTimerEvent({ matchNum, std::chrono::system_clock::now(), EVENT_TYPE::EV_LOADING_UPDATE, 0 });
+			network::GetInstance()->RegisterTimerEvent({ _matchNum, std::chrono::system_clock::now(), EVENT_TYPE::EV_LOADING_UPDATE, 0 });
 			return;
 		}
 
@@ -229,59 +229,59 @@ namespace wod_server {
 		for (const auto id : m_clientid)
 			PACKET_SENDER(id)->SendGameTimePacket(static_cast<int>(::ceil(m_readyTime)), 0);
 
-		network::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::PassedTimeMSec(50), EVENT_TYPE::EV_READY_UPDATE, 0 });
+		network::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::PassedTimeMSec(50), EVENT_TYPE::EV_READY_UPDATE, 0 });
 	}
 
-	void CMatch::TeleportStart(std::shared_ptr<CClient> client)
+	void CMatch::TeleportStart(std::shared_ptr<CClient> _client)
 	{
 		int teleport;
-		if (!GameUtil::CheckTeleportCollision(client->GetPos(), teleport) || client->GetTeleport() || !client->CheckTeleportCoolTime())
+		if (!GameUtil::CheckTeleportCollision(_client->GetPos(), teleport) || _client->GetTeleport() || !_client->CheckTeleportCoolTime())
 			return;
 
-		client->SetTeleport(true);
-		client->SetPos(TELEPORT_POS[teleport]);
-		client->SetTeleportNum(teleport);
-		client->SetTeleportLastUsedTime();
-		client->GetPacketSender()->SendTeleportActivePacket(false);
+		_client->SetTeleport(true);
+		_client->SetPos(TELEPORT_POS[teleport]);
+		_client->SetTeleportNum(teleport);
+		_client->SetTeleportLastUsedTime();
+		_client->GetPacketSender()->SendTeleportActivePacket(false);
 
 		for (int id : m_clientid) {
 			if (id == -1)
 				continue;
-			PACKET_SENDER(id)->SendTeleportPacket(client->GetMatchId(), false);
-		}		
+			PACKET_SENDER(id)->SendTeleportPacket(_client->GetMatchId(), false);
+		}
 	}
 
-	void CMatch::UseItem(const CS_USE_ITEM_PACKET* packet, std::shared_ptr<CClient> client)
+	void CMatch::UseItem(const CS_USE_ITEM_PACKET* _packet, std::shared_ptr<CClient> _client)
 	{
-		if (!client->GetItemInfo(packet->itemNum)->exist)
+		if (!_client->GetItemInfo(_packet->itemNum)->m_exist)
 			return;
 
-		auto it = ItemCsvMgr::ITEMKINDToEItemType.find(client->GetItemInfo(packet->itemNum)->GetType());
-		if (it == ItemCsvMgr::ITEMKINDToEItemType.end())
+		auto it = ItemCsvMgr::m_ITEMKINDToEItemType.find(_client->GetItemInfo(_packet->itemNum)->GetType());
+		if (it == ItemCsvMgr::m_ITEMKINDToEItemType.end())
 			return;
 
-		if (false == CItemFactory::UseItem(it->second, client)) {
+		if (false == CItemFactory::UseItem(it->second, _client)) {
 			LogPrinter::PrintMsg("Failed To Use Item");
 			return;
 		}
 
-		client->GetItemInfo(packet->itemNum)->exist = false;
-		client->GetItemInfo(packet->itemNum)->SetType(ITEMKIND::NONE);
+		_client->GetItemInfo(_packet->itemNum)->m_exist = false;
+		_client->GetItemInfo(_packet->itemNum)->SetType(ITEMKIND::NONE);
 	}
 
-	void CMatch::InGameUpdate(int matchNum)
+	void CMatch::InGameUpdate(int _matchNum)
 	{
 		// id == match number
-		if (-1 == CGameMgr::GetInstance()->IsGameOver(matchNum)) {
-			CNetworkMgr::GetInstance()->RegisterTimerEvent({ matchNum, TimeUtil::NextFrameTime(), EVENT_TYPE::EV_MATCH_UPDATE, -1 });			
+		if (-1 == CGameMgr::GetInstance()->IsGameOver(_matchNum)) {
+			CNetworkMgr::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::NextFrameTime(), EVENT_TYPE::EV_MATCH_UPDATE, -1 });
 		}
 		else {
-			CNetworkMgr::GetInstance()->RegisterTimerEvent({ matchNum, std::chrono::system_clock::now() + std::chrono::seconds(10), EVENT_TYPE::EV_MATCH_FINISH, -1 });
+			CNetworkMgr::GetInstance()->RegisterTimerEvent({ _matchNum, std::chrono::system_clock::now() + std::chrono::seconds(10), EVENT_TYPE::EV_MATCH_FINISH, -1 });
 
 			constexpr short INIT_EARN_TOKEN = 10;
 
-			bool heroWin = static_cast<bool>(CGameMgr::GetInstance()->IsGameOver(matchNum));
-			short earnToken = INIT_EARN_TOKEN + static_cast<int>(CGameMgr::GetInstance()->GetGameTime(matchNum) / 30.0f);
+			bool heroWin = static_cast<bool>(CGameMgr::GetInstance()->IsGameOver(_matchNum));
+			short earnToken = INIT_EARN_TOKEN + static_cast<int>(CGameMgr::GetInstance()->GetGameTime(_matchNum) / 30.0f);
 
 			std::time_t t = time(nullptr);
 			std::tm time;
@@ -310,8 +310,8 @@ namespace wod_server {
 			return;
 		}
 
-		float elapsedTime = CGameMgr::GetInstance()->UpdateGameData(matchNum);
-		auto now = CGameMgr::GetInstance()->GetLastTime(matchNum);
+		float elapsedTime = CGameMgr::GetInstance()->UpdateGameData(_matchNum);
+		auto now = CGameMgr::GetInstance()->GetLastTime(_matchNum);
 
 		Update();
 
@@ -335,14 +335,14 @@ namespace wod_server {
 
 		//Npc Update
 		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
-            const auto npc = CObjectMgr::GetInstance()->GetNpc(matchNum,i);
-            if (npc->active.load()) npc->Update(elapsedTime);
+            const auto npc = CObjectMgr::GetInstance()->GetNpc(_matchNum,i);
+            if (npc->m_active.load()) npc->Update(elapsedTime);
         }
 
 		//골드 지급
 		if (now - m_lastGoldUpdateTime >= std::chrono::milliseconds(300))
 		{
-			for (int clientID : m_clientid) 
+			for (int clientID : m_clientid)
 			{
 				if (clientID == -1)
 					continue;
@@ -354,25 +354,25 @@ namespace wod_server {
 
 			m_lastGoldUpdateTime = now;
 		}
-		
+
 		// 플레이어 힐
 		if (now - m_lastPlayerHeal >= std::chrono::milliseconds(ClientInfos::HEAL_COOLTIME))
 		{
 			constexpr float HP_HEAL_PERCENTAGE = 0.1f;	// 데이터로 빼자
 			constexpr float MP_HEAL_PERCENTAGE = 0.15f; // 데이터로 빼자
-			for (int clientID : m_clientid) 
+			for (int clientID : m_clientid)
 			{
 				if (clientID == -1)
 					continue;
 
 				const auto& healedClient = CObjectMgr::GetInstance()->GetClient(clientID);
-				healedClient->GetStatus()->healthMana.HealHp(static_cast<int>(healedClient->GetStatus()->healthMana.GetMaxHp() * HP_HEAL_PERCENTAGE));
-				healedClient->GetStatus()->healthMana.HealMp(static_cast<int>(healedClient->GetStatus()->healthMana.GetMaxMp() * MP_HEAL_PERCENTAGE));
+				healedClient->GetStatus()->m_healthMana.HealHp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxHp() * HP_HEAL_PERCENTAGE));
+				healedClient->GetStatus()->m_healthMana.HealMp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxMp() * MP_HEAL_PERCENTAGE));
 
 				for (int clID : m_clientid) {
 					if (clID == -1)
 						continue;
-					PACKET_SENDER(clID)->SendPlayerHealthManaPacket(healedClient->GetMatchId(), healedClient->GetStatus()->healthMana);
+					PACKET_SENDER(clID)->SendPlayerHealthManaPacket(healedClient->GetMatchId(), healedClient->GetStatus()->m_healthMana);
 				}
 			}
 
@@ -384,16 +384,16 @@ namespace wod_server {
 		if (now - m_lastMinionRespawn >= std::chrono::milliseconds(NpcCsvMgr::GetInstance()->GetNpcCsv(ENpcType::Minion)->RespawnTime))
 		{
 			int cnt = 0;
-			for (int i = 0; ; ++i) 
+			for (int i = 0; ; ++i)
 			{
 				if (cnt == MINION_WAVE || i == MAX_MINION)
 					break;
 
-				auto npc = CObjectMgr::GetInstance()->GetNpc(matchNum, i);
-				if (!npc || npc->active)
+				auto npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+				if (!npc || npc->m_active)
 					continue;
 
-				network::GetInstance()->RegisterTimerEvent({ NPC_ID + i, std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1)/*미니언 하나하나 출현 간격 데이터로 정의하자*/), EVENT_TYPE::EV_NPC_ACTIVE, matchNum });
+				network::GetInstance()->RegisterTimerEvent({ NPC_ID + i, std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1)/*미니언 하나하나 출현 간격 데이터로 정의하자*/), EVENT_TYPE::EV_NPC_ACTIVE, _matchNum });
 				cnt++;
 			}
 

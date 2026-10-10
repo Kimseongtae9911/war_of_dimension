@@ -4,15 +4,15 @@
 
 namespace wod_server {
 
-    SwordManAuraBladeHandler::SwordManAuraBladeHandler(std::shared_ptr<CClient> client) : CAttackSkillHandler(client)
+    SwordManAuraBladeHandler::SwordManAuraBladeHandler(std::shared_ptr<CClient> _client) : CAttackSkillHandler(_client)
     {
         m_type = EPlayerSkill::SwordManAuraBlade;
         SetSkillInfo();
     }
 
-    CSkillHandler* SwordManAuraBladeHandler::CreateHandler(std::shared_ptr<CClient> client)
+    CSkillHandler* SwordManAuraBladeHandler::CreateHandler(std::shared_ptr<CClient> _client)
     {
-        return new SwordManAuraBladeHandler(client);
+        return new SwordManAuraBladeHandler(_client);
     }
 
 }

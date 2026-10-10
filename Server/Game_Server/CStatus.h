@@ -8,16 +8,16 @@ namespace wod_server {
 		CStatus();
 		~CStatus();
 
-		CStat GetStat() { statLock.lock(); CStat stat = m_stats; statLock.unlock(); return stat; }
-		void SetStat(const CStat& stat) { statLock.lock();  m_stats = stat; statLock.unlock(); }
+		CStat GetStat() { m_statLock.lock(); CStat stat = m_stats; m_statLock.unlock(); return stat; }
+		void SetStat(const CStat& _statValue) { m_statLock.lock();  m_stats = _statValue; m_statLock.unlock(); }
 
-		CHealthMana healthMana;
-		DEFENSIVE_BUFF defensiveBuff = DEFENSIVE_BUFF::NONE;
-		DAMAGE_BUFF damageBuff = DAMAGE_BUFF::NONE;
-		COOLTIME_BUFF coolTimeBuff = COOLTIME_BUFF::NONE;
-		SKILL_BUFF skillBuff = SKILL_BUFF::NONE;
+		CHealthMana m_healthMana;
+		DEFENSIVE_BUFF m_defensiveBuff = DEFENSIVE_BUFF::NONE;
+		DAMAGE_BUFF m_damageBuff = DAMAGE_BUFF::NONE;
+		COOLTIME_BUFF m_coolTimeBuff = COOLTIME_BUFF::NONE;
+		SKILL_BUFF m_skillBuff = SKILL_BUFF::NONE;
 
-		std::mutex statLock;
+		std::mutex m_statLock;
 
 	private:
 		CStat m_stats;

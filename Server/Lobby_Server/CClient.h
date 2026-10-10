@@ -8,12 +8,12 @@
 namespace wod_server {
 
 	struct PlayerInfo {
-		ModelCustomize model;
-		int tokenNum;
+		ModelCustomize m_model;
+		int m_tokenNum;
 
 		void Reset() {
-			tokenNum = 0;
-			memset(&model, 0, sizeof(model));
+			m_tokenNum = 0;
+			memset(&m_model, 0, sizeof(m_model));
 		}
 	};
 
@@ -24,10 +24,10 @@ namespace wod_server {
 		CClient();
 		~CClient();
 
-		void Initialize(const SOCKET& socket);
+		void Initialize(const SOCKET& _socket);
 		void Disconnect();
 
-		void RecvPacket(int recvBytes, OverlapEx* overEx);
+		void RecvPacket(int _recvBytes, OverlapEx* _overEx);
 		void Move();
 		bool Reset();
 
@@ -35,7 +35,7 @@ namespace wod_server {
 		CPacketSender* GetPacketSender() const { return m_packetSender.get(); }
 		CL_STATE GetState() const { return m_state; }
 		const PlayerInfo& GetPlayerInfo() const { return m_playerInfo; }
-		const ModelCustomize& GetModelCustomize() const { return m_playerInfo.model; }
+		const ModelCustomize& GetModelCustomize() const { return m_playerInfo.m_model; }
 		int GetSocketID() const { return m_socketID; }
 		const std::string& GetIP() const { return m_ipAddress; }
 		bool IsFullNode() { return m_isFullNode; }
@@ -58,21 +58,21 @@ namespace wod_server {
 		bool IsInQueue() const { return m_isEnqueued.load(); }
 		JobQueue* GetJobQueue() { return m_jobQueue; }
 
-		void SetState(CL_STATE st) { m_state = st; }
+		void SetState(CL_STATE _st) { m_state = _st; }
 		void SetUpdateTime() { m_updateTime = std::chrono::system_clock::now(); }
-		void SetPlayerInfo(const PlayerInfo& info) { m_playerInfo = info; }
-		void SetTokenNum(int num) { m_playerInfo.tokenNum = num; }
-		void SetModelCustomize(const ModelCustomize& model) { m_playerInfo.model = model; }		
-		void SetIP(const std::string& ip) { m_ipAddress = ip; }
-		void SetFullNode(bool fullNode) { m_isFullNode = fullNode; }
-		void SetChannel(int channel) { m_channel = channel; }
-		void SetSection(int x, int z) { m_sectionX = x; m_sectionZ = z; }
-		void SetID(const int id) { m_id = id; }
-		void SetName(const char* name) { memcpy_s(m_name, NAME_SIZE, name, NAME_SIZE); }
+		void SetPlayerInfo(const PlayerInfo& _info) { m_playerInfo = _info; }
+		void SetTokenNum(int _num) { m_playerInfo.m_tokenNum = _num; }
+		void SetModelCustomize(const ModelCustomize& _model) { m_playerInfo.m_model = _model; }
+		void SetIP(const std::string& _ip) { m_ipAddress = _ip; }
+		void SetFullNode(bool _fullNode) { m_isFullNode = _fullNode; }
+		void SetChannel(int _channel) { m_channel = _channel; }
+		void SetSection(int _x, int _z) { m_sectionX = _x; m_sectionZ = _z; }
+		void SetID(const int _id) { m_id = _id; }
+		void SetName(const char* _name) { memcpy_s(m_name, NAME_SIZE, _name, NAME_SIZE); }
 
-		void ProcessUpdate(bool isDummy = false);
+		void ProcessUpdate(bool _isDummy = false);
 
-		std::shared_mutex stateLock;
+		std::shared_mutex m_stateLock;
 
 	private:
 		std::unique_ptr<CPacketSender> m_packetSender;
