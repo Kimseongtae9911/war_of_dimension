@@ -330,6 +330,72 @@ void ThreadLifetimes()
     Check(exited == 1, "partial thread startup scope cleanup");
 }
 
+void BatchedSends()
+{
+    for (int mode = 0; mode < 3; ++mode)
+    {
+        IocpService *owner = nullptr;
+        int calls = 0;
+        std::vector<char> wire;
+        IocpService service([&](SOCKET, WSABUF *_data, OVERLAPPED *_over) {
+            ++calls;
+            if (mode == 1 && calls > 1)
+            {
+                WSASetLastError(WSAECONNRESET);
+
+                return SOCKET_ERROR;
+            }
+
+            const auto bytes = (std::min)(_data->len, ULONG{5});
+            wire.insert(wire.end(), _data->buf, _data->buf + bytes);
+            PostQueuedCompletionStatus(owner->Handle(), bytes, 9, _over);
+            WSASetLastError(WSA_IO_PENDING);
+
+            return SOCKET_ERROR;
+        });
+        owner = &service;
+        auto socket = service.CreateSocket();
+        service.Attach(socket, 9);
+        std::array<IoContext, 8> contexts;
+        std::vector<char> expected;
+        for (int i = 0; i < 8; ++i)
+        {
+            const char frame[] = {3, 4, static_cast<char>(i)};
+            contexts[i].CopyPacket(frame);
+            expected.insert(expected.end(), frame, frame + 3);
+            service.Send(socket, contexts[i]);
+        }
+
+        Completion completion;
+        Check(service.Poll(completion) && completion.m_context == &contexts[0] && !completion.m_error, "batch starts after first frame completes");
+        if (mode == 2)
+            service.RequestStop(1);
+
+        int errors = 0;
+        for (int i = 1; i < 8; ++i)
+        {
+            Check(service.Poll(completion) && completion.m_context == &contexts[i] && !contexts[i].m_pending, "batch retires each context once in order");
+            if (completion.m_error)
+                ++errors;
+        }
+
+        if (mode == 0)
+        {
+            Check(wire == expected && calls == 6 && service.Stats().m_sent == expected.size(), "batch preserves frame bytes across partial sends with fewer native calls");
+        }
+        else
+        {
+            Check(errors == 7, "batch failure or cancellation retires every active context");
+        }
+
+        completion.Clear();
+        service.RequestStop(1);
+        service.Drain();
+        service.Finish();
+        Check(!service.Stats().m_pending && !service.Stats().m_queuedSends, "batch teardown drains contexts and send queue");
+    }
+}
+
 void CallbackSerialization()
 {
     IocpService *owner = nullptr;
@@ -628,6 +694,7 @@ int main(int argc, char **argv)
         Jobs();
         Pool();
         SendFailureAndPartial();
+        BatchedSends();
         ThreadLifetimes();
         CallbackSerialization();
         CanceledQueue();

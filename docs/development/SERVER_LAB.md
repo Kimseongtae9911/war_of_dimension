@@ -282,3 +282,4 @@ native_calls는 부분 전송 재발행/즉시 실패를 포함하며 frames는 
 Peer 수신 오류는 port/phase/시각/closing과 함께 남는다. 정상 EOF/종료와 측정 중 오류를 구분하고 재접속은 현재 error를 지운다.
 성능 요약은 pending I/O/전송 대기의 peak/end와 native 호출·배치·프레임 증분/s를 추가 계산한다. 과거 결과의 없는 지표는 생략한다.
 `Measure-ServerPerformance.ps1 -Stage before|after|diagnostic`은 실험 단계 식별용이며 부하를 바꾸지 않는다.
+[원인 분리와 동일 조건 전후 비교](JOBQUEUE_IMPROVEMENT.md)를 참조한다.

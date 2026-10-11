@@ -213,3 +213,5 @@ CPU나 jobs/s만 개선 기준으로 삼지 않는다. 더미별 이동/정지, 
 모든 매치의 게임 나이/NPC 수를 동일하게 맞추는 시나리오나 요청률을 올리는 포화 실험을 추가하면 이 기준과 다른 조건으로 별도 기록한다.
 
 [측정 구조도](../diagrams/server-baseline/README.md), [성능 검사 지침](../guides/SERVER_PERFORMANCE.md), [작업 기록](../../tasks/todo.md)의 72번을 함께 참조한다.
+
+후속 FIFO/전송 적체 수정과 동일 조건 재측정은 [개선 전후 기록](JOBQUEUE_IMPROVEMENT.md)에 있다. 이 문서의 수치와 미검증 범위는 기준 측정 당시 상태다.

@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JobQueue 개선 보고서 · War Of Dimension</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1420;--panel:#151f2f;--line:#2c3a4e;--ink:#eaf0f8;--muted:#a9b8cb;--accent:#64dbc8;--warn:#f0c37b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,'Malgun Gothic',sans-serif}main{max-width:1240px;padding:38px 32px 55px;margin:auto}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(28px,3.7vw,44px);line-height:1.25;letter-spacing:-.04em;margin-bottom:24px}h2{font-size:24px;letter-spacing:-.025em;line-height:1.4;margin-bottom:17px}h2 .number{color:var(--accent);font-size:14px;letter-spacing:.05em;margin-right:12px}h3{font-size:19px;line-height:1.45;margin-bottom:12px}a{color:var(--accent);text-underline-offset:4px}.lead{font-size:18px;max-width:1000px;color:#d4e0ed;margin-bottom:18px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:20px}.card small{font-size:12px;color:var(--muted);display:block}.card strong{display:block;font-size:clamp(20px,2.15vw,27px);letter-spacing:-.045em;line-height:1.4;margin:12px 0 8px;white-space:nowrap}.card span{color:var(--accent);font-size:12px}.card .caution{color:var(--warn)}.verdict{color:var(--warn);font-size:14px;margin:17px 0 0}.navigation{display:flex;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:20px 0;margin-top:12px}.navigation a{text-decoration:none;font-size:13px}.section{margin-top:32px;scroll-margin-top:22px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel p{margin-bottom:12px;font-size:14px;color:#c6d3e3}.panel p:last-child{margin-bottom:0}.label{color:var(--accent);font-size:11px;letter-spacing:.1em;display:block;margin-bottom:9px}.note{font-size:12px;color:var(--muted)}.summary{border-left:3px solid var(--accent);padding:8px 16px;font-size:14px;color:#c6d3e3;margin:15px 0 0}pre{background:#0a111c;border:1px solid #27374a;padding:15px;margin:15px 0 0;border-radius:8px;font:13px/1.7 Consolas,'Malgun Gothic',monospace;overflow-x:auto}code{color:#c4ede5;font-size:.9em}.code-note{display:block;color:var(--muted);font-size:11px;margin-top:8px}.chart-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}.chart-head h3{margin:0}.chart-head label{font-size:13px;color:var(--muted)}select,button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 11px}button{cursor:pointer}a:focus-visible,select:focus-visible,button:focus-visible,.table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.metric-chart{margin:0}.metric-chart figcaption{color:var(--muted);font-size:13px;margin:12px 0 0}.metric-chart svg{display:block;width:100%;height:auto}.metric-chart .note{margin:0 0 5px}.js .metric-chart[hidden]{display:none}.facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}.facts span{border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--muted);font-size:12px}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:18px}table{border-collapse:collapse;width:100%;font-size:12px;line-height:1.7}th,td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--panel);white-space:nowrap;font-weight:650}td{font-variant-numeric:tabular-nums}tr:last-child td{border-bottom:0}.checks{font-size:13px;color:#b9c9dc;margin-top:14px}footer{border-top:1px solid var(--line);padding-top:17px;margin-top:32px;color:var(--muted);font-size:12px}footer p{margin-bottom:8px}.hash{font:10px/1.6 Consolas,monospace;overflow-wrap:anywhere}
+@media(max-width:850px){main{padding:25px 18px 40px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.card strong{font-size:26px}.navigation{gap:15px}}@media(max-width:450px){.cards{grid-template-columns:1fr}.card{padding:16px}.card strong{font-size:27px}.panel{padding:15px}.chart-head select{max-width:230px}table{min-width:650px}}@media print{body{font-size:11px}main{padding:0;max-width:none}.navigation,button,select{display:none}.panel,.card,figure{break-inside:avoid}.js .metric-chart[hidden]{display:block}.metric-chart svg{max-height:160px}.section{margin-top:20px}table{font-size:9px}th,td{padding:7px}.table-wrap{overflow:visible}h1{font-size:27px}h2{font-size:20px}pre{font-size:10px}.card strong{font-size:21px}.hash{font-size:8px}}
+</style></head><body><main>
+<h1>JobQueue 공정성·게임 전송 적체 개선</h1>
+<section id="results" aria-labelledby="results-heading"><h2 id="results-heading"><span class="number">01</span>결과</h2><p class="lead">주소 우선순위 기아와 연결별 출력 적체를 수정해, 같은 부하의 이동·정지 검사가 <strong>18/60 → 60/60회</strong> 통과했습니다.</p>
+<div class="cards"><div class="card"><small>기능 검사 통과</small><strong>18/60 → 60/60</strong><span class="">계측 켬·끔 합계 · 준비 EOF 5→0회</span></div><div class="card"><small>로비 64명 처리량</small><strong>16.9 → 250.7</strong><span class="">packets/s · 목표 256/s</span></div><div class="card"><small>게임 64명 pending I/O peak</small><strong>484,206.5 → 2,434</strong><span class="">1초 표본 peak의 중앙값</span></div><div class="card"><small>게임 64명 CPU</small><strong>48.26 → 49.38%</strong><span class="caution">CPU 감소는 확인되지 않음</span></div></div><p class="verdict">남은 문제: 로비 64명 대기 228개 · 게임 CPU 감소 없음 · 게임 tick 지연 p99 131.072ms 유지</p></section>
+<nav class="navigation" aria-label="보고서 목차"><a href="#results">결과</a><a href="#causes">분석한 원인</a><a href="#solutions">해결 방식</a><a href="#measurements">실제 측정</a><a href="#followups">추가 대응</a></nav>
+<section class="section" id="causes"><h2><span class="number">02</span>분석한 원인</h2><div class="two">
+<div class="panel"><span class="label">LOBBY / 주소 우선순위</span><h3>이동 작업이 정지 패킷을 굶겼습니다</h3><p>작업·ready 목록이 포인터 주소로 우선순위를 정했습니다. 즉시 자기 재등록하는 높은 주소의 이동 작업이 계속 선택됐습니다.</p><pre><code>concurrent_priority_queue&lt;JobRef&gt; m_jobs;
+std::priority_queue&lt;JobTarget *&gt; m_queue;
+// 포인터 주소로 우선순위가 정해짐</code></pre><span class="code-note">기존 선언 발췌 · JobQueue / JobScheduler</span></div>
+<div class="panel"><span class="label">GAME / 직렬 전송</span><h3>좌표는 변했지만 과거 상태만 도착했습니다</h3><p>16개 매치 모두 입력·좌표가 갱신됐습니다. 프레임마다 완료 처리를 기다리는 전송에 약 49만 context가 쌓였습니다.</p><pre><code>프레임 1개 전송 → 완료를 worker가 처리
+                 ↓
+            다음 프레임 발행
+// 같은 6개 worker가 매치 tick도 실행</code></pre><span class="code-note">설명용 흐름 · 실제 구현 코드가 아님</span></div></div><p class="summary">분리 실험: FIFO만 적용하거나 TCP_NODELAY만 적용해도 게임 64명 실패는 남았습니다.</p></section>
+<section class="section" id="solutions"><h2><span class="number">03</span>해결 방식</h2><div class="two">
+<div class="panel"><span class="label">LOBBY / FIFO + 대상 순환</span><h3>먼저 게시한 작업과 대상부터 처리합니다</h3><p>작업·ready를 FIFO로 바꾸고 예산 뒤 남은 대상을 꼬리에 넣습니다. 실행 직렬화와 Five / Snapshot 예산은 유지합니다.</p><pre><code>std::queue&lt;JobRef&gt; m_jobs;
+std::queue&lt;JobTarget *&gt; m_queue;
+// 가장 먼저 게시한 대상부터 실행
+target = m_queue.front();
+m_queue.pop();
+// 남은 작업은 ready 목록 뒤에 재등록</code></pre><span class="code-note">실제 코드 발췌 · 서로 다른 선언/처리 구간, 중간 생략</span></div>
+<div class="panel"><span class="label">GAME / 대기 프레임 묶음 전송</span><h3>이미 기다리는 프레임을 최대 64개씩 보냅니다</h3><p>첫 프레임은 즉시 보냅니다. 이후 대기 프레임만 묶어 완료 대기 횟수를 줄이며 전송 순서·부분 전송·개별 회수는 유지합니다.</p><pre><code>for (auto *queued : _state.m_sends)
+{
+    _state.m_sendBatch.push_back(queued);
+    // 프레임 bytes를 소유 버퍼에 복사…
+    if (_state.m_sendBatch.size() == 64)
+        break;
+}</code></pre><span class="code-note">실제 IssueSend 발췌 · 버퍼 복사 부분 생략</span></div></div><p class="summary">별도 수정: SC_MATCH 직후 Disconnect를 제거해 목적지 패킷의 전달 취소를 막았습니다. 새 연결 유지 timeout 정책은 추가하지 않았습니다.</p></section>
+<section class="section" id="measurements"><h2><span class="number">04</span>실제 측정한 내용</h2>
+<div class="facts"><span>Release x64 · LOCAL_TEST · DB 없음</span><span>Ryzen 5 7500F · 논리 CPU 12개</span><span>4/16/64명 × seed 1~5 × 계측 켬·끔</span><span>워밍업 5초 · 측정 20초 · 입력 250ms</span><span>입장 소프트 제한 해제 · 매회 재시작</span><span>게임 64명 = 4명 × 16매치</span></div>
+<div class="panel"><div class="chart-head"><h3>64명 지표 비교</h3><label for="metric">지표 선택 <select id="metric"><option value="0">로비 처리량</option><option value="1">로비 패킷 대기 p99</option><option value="2">게임 pending I/O peak</option><option value="3">게임 private bytes peak</option><option value="4">게임 CPU</option><option value="5">게임 tick 지연 p99</option></select></label></div><figure class="metric-chart" data-metric="0"><figcaption>로비 처리량</figcaption><svg role="img" aria-label="로비 처리량: 개선 전 16.899, 개선 후 250.702 packets/s" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-0-figure_1">
+  <g id="chart-0-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-0-axes_1">
+   <g id="chart-0-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-0-matplotlib.axis_1">
+    <g id="chart-0-xtick_1">
+     <g id="chart-0-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-0-line2d_2"/>
+     <g id="chart-0-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-0-xtick_2">
+     <g id="chart-0-line2d_3">
+      <path d="M 241.440252 143.1
+L 241.440252 9.54
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-0-line2d_4"/>
+     <g id="chart-0-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="241.440252" y="161.098047" transform="rotate(-0 241.440252 161.098047)">80</text>
+     </g>
+    </g>
+    <g id="chart-0-xtick_3">
+     <g id="chart-0-line2d_5">
+      <path d="M 400.080505 143.1
+L 400.080505 9.54
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-0-line2d_6"/>
+     <g id="chart-0-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="400.080505" y="161.098047" transform="rotate(-0 400.080505 161.098047)">160</text>
+     </g>
+    </g>
+    <g id="chart-0-xtick_4">
+     <g id="chart-0-line2d_7">
+      <path d="M 558.720757 143.1
+L 558.720757 9.54
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-0-line2d_8"/>
+     <g id="chart-0-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="558.720757" y="161.098047" transform="rotate(-0 558.720757 161.098047)">240</text>
+     </g>
+    </g>
+    <g id="chart-0-text_5">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">packets/s · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-0-matplotlib.axis_2">
+    <g id="chart-0-ytick_1">
+     <g id="chart-0-line2d_9"/>
+     <g id="chart-0-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-0-ytick_2">
+     <g id="chart-0-line2d_10"/>
+     <g id="chart-0-text_7">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-0-patch_3">
+    <path d="M 82.8 59.017909
+L 116.31077 59.017909
+L 116.31077 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-0-patch_4">
+    <path d="M 82.8 119.727
+L 579.942857 119.727
+L 579.942857 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-0-p7e7e4eaf27)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-0-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="125.259342" y="49.563111" transform="rotate(-0 125.259342 49.563111)">16.899</text>
+   </g>
+   <g id="chart-0-text_9">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="110.272202" transform="rotate(-0 588.891429 110.272202)">250.702</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-0-p7e7e4eaf27">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">높을수록 좋음 · 목표 256 packets/s. 고정 부하 처리율이며 최대 TPS가 아닙니다.</p></figure><figure class="metric-chart" data-metric="1"><figcaption>로비 패킷 대기 p99</figcaption><svg role="img" aria-label="로비 패킷 대기 p99: 개선 전 33,554.432, 개선 후 2,097.152 ms" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-1-figure_1">
+  <g id="chart-1-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-1-axes_1">
+   <g id="chart-1-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-1-matplotlib.axis_1">
+    <g id="chart-1-xtick_1">
+     <g id="chart-1-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-1-p3e51b81b46)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-1-line2d_2"/>
+     <g id="chart-1-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-1-xtick_2">
+     <g id="chart-1-line2d_3">
+      <path d="M 305.040176 143.1
+L 305.040176 9.54
+" clip-path="url(#chart-1-p3e51b81b46)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-1-line2d_4"/>
+     <g id="chart-1-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="305.040176" y="161.098047" transform="rotate(-0 305.040176 161.098047)">15,000</text>
+     </g>
+    </g>
+    <g id="chart-1-xtick_3">
+     <g id="chart-1-line2d_5">
+      <path d="M 527.280351 143.1
+L 527.280351 9.54
+" clip-path="url(#chart-1-p3e51b81b46)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-1-line2d_6"/>
+     <g id="chart-1-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="527.280351" y="161.098047" transform="rotate(-0 527.280351 161.098047)">30,000</text>
+     </g>
+    </g>
+    <g id="chart-1-text_4">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">ms · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-1-matplotlib.axis_2">
+    <g id="chart-1-ytick_1">
+     <g id="chart-1-line2d_7"/>
+     <g id="chart-1-text_5">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-1-ytick_2">
+     <g id="chart-1-line2d_8"/>
+     <g id="chart-1-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-1-patch_3">
+    <path d="M 82.8 59.017909
+L 579.942857 59.017909
+L 579.942857 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-1-p3e51b81b46)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-1-patch_4">
+    <path d="M 82.8 119.727
+L 113.871429 119.727
+L 113.871429 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-1-p3e51b81b46)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-1-text_7">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="49.563111" transform="rotate(-0 588.891429 49.563111)">33,554.432</text>
+   </g>
+   <g id="chart-1-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="122.82" y="110.272202" transform="rotate(-0 122.82 110.272202)">2,097.152</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-1-p3e51b81b46">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">낮을수록 좋음 · 실행별 histogram bucket 상한의 중앙값. 종단 간 응답 지연과 구분합니다.</p></figure><figure class="metric-chart" data-metric="2"><figcaption>게임 pending I/O peak</figcaption><svg role="img" aria-label="게임 pending I/O peak: 개선 전 484,206.5, 개선 후 2,434 contexts" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-2-figure_1">
+  <g id="chart-2-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-2-axes_1">
+   <g id="chart-2-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-2-matplotlib.axis_1">
+    <g id="chart-2-xtick_1">
+     <g id="chart-2-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-2-line2d_2"/>
+     <g id="chart-2-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-2-xtick_2">
+     <g id="chart-2-line2d_3">
+      <path d="M 288.143322 143.1
+L 288.143322 9.54
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-2-line2d_4"/>
+     <g id="chart-2-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="288.143322" y="161.098047" transform="rotate(-0 288.143322 161.098047)">200,000</text>
+     </g>
+    </g>
+    <g id="chart-2-xtick_3">
+     <g id="chart-2-line2d_5">
+      <path d="M 493.486645 143.1
+L 493.486645 9.54
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-2-line2d_6"/>
+     <g id="chart-2-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="493.486645" y="161.098047" transform="rotate(-0 493.486645 161.098047)">400,000</text>
+     </g>
+    </g>
+    <g id="chart-2-xtick_4">
+     <g id="chart-2-line2d_7">
+      <path d="M 698.829967 143.1
+L 698.829967 9.54
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-2-line2d_8"/>
+     <g id="chart-2-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="698.829967" y="161.098047" transform="rotate(-0 698.829967 161.098047)">600,000</text>
+     </g>
+    </g>
+    <g id="chart-2-text_5">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">contexts · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-2-matplotlib.axis_2">
+    <g id="chart-2-ytick_1">
+     <g id="chart-2-line2d_9"/>
+     <g id="chart-2-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-2-ytick_2">
+     <g id="chart-2-line2d_10"/>
+     <g id="chart-2-text_7">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-2-patch_3">
+    <path d="M 82.8 59.017909
+L 579.942857 59.017909
+L 579.942857 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-2-patch_4">
+    <path d="M 82.8 119.727
+L 85.299028 119.727
+L 85.299028 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-2-pae9f8a73d9)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-2-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="49.563111" transform="rotate(-0 588.891429 49.563111)">484,206.5</text>
+   </g>
+   <g id="chart-2-text_9">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="94.2476" y="110.272202" transform="rotate(-0 94.2476 110.272202)">2,434</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-2-pae9f8a73d9">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">낮을수록 좋음 · 1초 표본 peak의 중앙값. 전송 대기 전용 개수와는 다릅니다.</p></figure><figure class="metric-chart" data-metric="3"><figcaption>게임 private bytes peak</figcaption><svg role="img" aria-label="게임 private bytes peak: 개선 전 278.66, 개선 후 33.754 MiB" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-3-figure_1">
+  <g id="chart-3-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-3-axes_1">
+   <g id="chart-3-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-3-matplotlib.axis_1">
+    <g id="chart-3-xtick_1">
+     <g id="chart-3-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-3-line2d_2"/>
+     <g id="chart-3-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-3-xtick_2">
+     <g id="chart-3-line2d_3">
+      <path d="M 261.204815 143.1
+L 261.204815 9.54
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-3-line2d_4"/>
+     <g id="chart-3-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="261.204815" y="161.098047" transform="rotate(-0 261.204815 161.098047)">100</text>
+     </g>
+    </g>
+    <g id="chart-3-xtick_3">
+     <g id="chart-3-line2d_5">
+      <path d="M 439.60963 143.1
+L 439.60963 9.54
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-3-line2d_6"/>
+     <g id="chart-3-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="439.60963" y="161.098047" transform="rotate(-0 439.60963 161.098047)">200</text>
+     </g>
+    </g>
+    <g id="chart-3-xtick_4">
+     <g id="chart-3-line2d_7">
+      <path d="M 618.014445 143.1
+L 618.014445 9.54
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-3-line2d_8"/>
+     <g id="chart-3-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="618.014445" y="161.098047" transform="rotate(-0 618.014445 161.098047)">300</text>
+     </g>
+    </g>
+    <g id="chart-3-text_5">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">MiB · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-3-matplotlib.axis_2">
+    <g id="chart-3-ytick_1">
+     <g id="chart-3-line2d_9"/>
+     <g id="chart-3-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-3-ytick_2">
+     <g id="chart-3-line2d_10"/>
+     <g id="chart-3-text_7">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-3-patch_3">
+    <path d="M 82.8 59.017909
+L 579.942857 59.017909
+L 579.942857 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-3-patch_4">
+    <path d="M 82.8 119.727
+L 143.018761 119.727
+L 143.018761 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-3-pc650a2af6d)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-3-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="49.563111" transform="rotate(-0 588.891429 49.563111)">278.66</text>
+   </g>
+   <g id="chart-3-text_9">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="151.967333" y="110.272202" transform="rotate(-0 151.967333 110.272202)">33.754</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-3-pc650a2af6d">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">낮을수록 좋음 · 1초 표본 peak의 중앙값. 풀 보유량을 포함하며 전부 누수는 아닙니다.</p></figure><figure class="metric-chart" data-metric="4"><figcaption>게임 CPU</figcaption><svg role="img" aria-label="게임 CPU: 개선 전 48.263, 개선 후 49.375 %" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-4-figure_1">
+  <g id="chart-4-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-4-axes_1">
+   <g id="chart-4-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-4-matplotlib.axis_1">
+    <g id="chart-4-xtick_1">
+     <g id="chart-4-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-4-line2d_2"/>
+     <g id="chart-4-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-4-xtick_2">
+     <g id="chart-4-line2d_3">
+      <path d="M 284.174322 143.1
+L 284.174322 9.54
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-4-line2d_4"/>
+     <g id="chart-4-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="284.174322" y="161.098047" transform="rotate(-0 284.174322 161.098047)">20</text>
+     </g>
+    </g>
+    <g id="chart-4-xtick_3">
+     <g id="chart-4-line2d_5">
+      <path d="M 485.548644 143.1
+L 485.548644 9.54
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-4-line2d_6"/>
+     <g id="chart-4-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="485.548644" y="161.098047" transform="rotate(-0 485.548644 161.098047)">40</text>
+     </g>
+    </g>
+    <g id="chart-4-xtick_4">
+     <g id="chart-4-line2d_7">
+      <path d="M 686.922966 143.1
+L 686.922966 9.54
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-4-line2d_8"/>
+     <g id="chart-4-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="686.922966" y="161.098047" transform="rotate(-0 686.922966 161.098047)">60</text>
+     </g>
+    </g>
+    <g id="chart-4-text_5">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">% · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-4-matplotlib.axis_2">
+    <g id="chart-4-ytick_1">
+     <g id="chart-4-line2d_9"/>
+     <g id="chart-4-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-4-ytick_2">
+     <g id="chart-4-line2d_10"/>
+     <g id="chart-4-text_7">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-4-patch_3">
+    <path d="M 82.8 59.017909
+L 568.746445 59.017909
+L 568.746445 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-4-patch_4">
+    <path d="M 82.8 119.727
+L 579.942857 119.727
+L 579.942857 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-4-pe1aedbc54b)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-4-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="577.695016" y="49.563111" transform="rotate(-0 577.695016 49.563111)">48.263</text>
+   </g>
+   <g id="chart-4-text_9">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="110.272202" transform="rotate(-0 588.891429 110.272202)">49.375</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-4-pe1aedbc54b">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">낮을수록 좋음 · 논리 CPU 12개 기준. 이번 변경에서 CPU는 낮아지지 않았습니다.</p></figure><figure class="metric-chart" data-metric="5"><figcaption>게임 tick 지연 p99</figcaption><svg role="img" aria-label="게임 tick 지연 p99: 개선 전 131.072, 개선 후 131.072 ms" xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="190.8pt" viewBox="0 0 720 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Build-JobQueueReport.py / matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="chart-5-figure_1">
+  <g id="chart-5-patch_1">
+   <path d="M 0 190.8
+L 720 190.8
+L 720 0
+L 0 0
+z
+" style="fill: #151f2f"/>
+  </g>
+  <g id="chart-5-axes_1">
+   <g id="chart-5-patch_2">
+    <path d="M 82.8 143.1
+L 709.2 143.1
+L 709.2 9.54
+L 82.8 9.54
+z
+" style="fill: #151f2f"/>
+   </g>
+   <g id="chart-5-matplotlib.axis_1">
+    <g id="chart-5-xtick_1">
+     <g id="chart-5-line2d_1">
+      <path d="M 82.8 143.1
+L 82.8 9.54
+" clip-path="url(#chart-5-p07fe501212)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-5-line2d_2"/>
+     <g id="chart-5-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="82.8" y="161.098047" transform="rotate(-0 82.8 161.098047)">0</text>
+     </g>
+    </g>
+    <g id="chart-5-xtick_2">
+     <g id="chart-5-line2d_3">
+      <path d="M 272.44495 143.1
+L 272.44495 9.54
+" clip-path="url(#chart-5-p07fe501212)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-5-line2d_4"/>
+     <g id="chart-5-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="272.44495" y="161.098047" transform="rotate(-0 272.44495 161.098047)">50</text>
+     </g>
+    </g>
+    <g id="chart-5-xtick_3">
+     <g id="chart-5-line2d_5">
+      <path d="M 462.0899 143.1
+L 462.0899 9.54
+" clip-path="url(#chart-5-p07fe501212)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-5-line2d_6"/>
+     <g id="chart-5-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="462.0899" y="161.098047" transform="rotate(-0 462.0899 161.098047)">100</text>
+     </g>
+    </g>
+    <g id="chart-5-xtick_4">
+     <g id="chart-5-line2d_7">
+      <path d="M 651.734849 143.1
+L 651.734849 9.54
+" clip-path="url(#chart-5-p07fe501212)" style="fill: none; stroke: #2c3a4e; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="chart-5-line2d_8"/>
+     <g id="chart-5-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="651.734849" y="161.098047" transform="rotate(-0 651.734849 161.098047)">150</text>
+     </g>
+    </g>
+    <g id="chart-5-text_5">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle; fill: #a9b8cb" x="396" y="183.71875" transform="rotate(-0 396 183.71875)">ms · 0부터 시작하는 공통 선형 축</text>
+    </g>
+   </g>
+   <g id="chart-5-matplotlib.axis_2">
+    <g id="chart-5-ytick_1">
+     <g id="chart-5-line2d_9"/>
+     <g id="chart-5-text_6">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="51.08983" transform="rotate(-0 67.8 51.08983)">개선 전</text>
+     </g>
+    </g>
+    <g id="chart-5-ytick_2">
+     <g id="chart-5-line2d_10"/>
+     <g id="chart-5-text_7">
+      <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: end; fill: #eaf0f8" x="67.8" y="111.79892" transform="rotate(-0 67.8 111.79892)">개선 후</text>
+     </g>
+    </g>
+   </g>
+   <g id="chart-5-patch_3">
+    <path d="M 82.8 59.017909
+L 579.942857 59.017909
+L 579.942857 32.913
+L 82.8 32.913
+z
+" clip-path="url(#chart-5-p07fe501212)" style="fill: #aab9cc"/>
+   </g>
+   <g id="chart-5-patch_4">
+    <path d="M 82.8 119.727
+L 579.942857 119.727
+L 579.942857 93.622091
+L 82.8 93.622091
+z
+" clip-path="url(#chart-5-p07fe501212)" style="fill: #64dbc8"/>
+   </g>
+   <g id="chart-5-text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="49.563111" transform="rotate(-0 588.891429 49.563111)">131.072</text>
+   </g>
+   <g id="chart-5-text_9">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: start; fill: #eaf0f8" x="588.891429" y="110.272202" transform="rotate(-0 588.891429 110.272202)">131.072</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="chart-5-p07fe501212">
+   <rect x="82.8" y="9.54" width="626.4" height="133.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<p class="note">낮을수록 좋음 · 목표 tick 15ms 초과 지연의 bucket 상한. 개선 전후 같습니다.</p></figure></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="4 16 64명 실제 서버 전후 비교"><table><thead><tr><th scope="col">조건</th><th scope="col">처리량 전→후 (packets/s)</th><th scope="col">패킷 대기 p99 전→후 (ms)</th><th scope="col">CPU 전→후 (%)</th></tr></thead><tbody><tr><td>로비 4명</td><td>9.078 → 15.901</td><td>33,554.432 → 65.536</td><td>16.629 → 12.521</td></tr><tr><td>로비 16명</td><td>18.624 → 64.116</td><td>33,554.432 → 262.144</td><td>16.211 → 14.679</td></tr><tr><td>로비 64명</td><td>16.899 → 250.702</td><td>33,554.432 → 2,097.152</td><td>17.646 → 17.353</td></tr><tr><td>게임 4명</td><td>16.02 → 16.011</td><td>32.768 → 32.768</td><td>7.786 → 8.081</td></tr><tr><td>게임 16명</td><td>64.029 → 64.197</td><td>65.536 → 32.768</td><td>30.981 → 30.708</td></tr><tr><td>게임 64명</td><td>255.546 → 256.112</td><td>131.072 → 131.072</td><td>48.263 → 49.375</td></tr></tbody></table></div>
+<p class="note">표·그래프는 계측 켬 실행별 중앙값입니다. p99는 bucket 상한, CPU는 논리 CPU 12개 기준입니다. 전체 범위·계측 끔·큐 단위 대조는 <a href="JOBQUEUE_IMPROVEMENT.md">상세 근거</a>에 있습니다.</p>
+<p class="checks">전후 각 60회 중 기능 통과 18→60회 · 준비 EOF 5→0회 · 유효 성능 구간 55→60회 · 전후 120회 종료 자원/더미 연결 0<br>검증 완료: Debug/Release Core 199검사·ABI, 실제 네트워크 회귀, Python 29검사. 이번 보고서 개편에서 부하 검사를 다시 실행한 것은 아닙니다.</p></section>
+<section class="section" id="followups"><h2><span class="number">05</span>추가 발견한 결함·대응 필요 요소</h2><div class="table-wrap" tabindex="0" role="region" aria-label="추가 결함 및 대응 필요 요소"><table><thead><tr><th scope="col">항목</th><th scope="col">영향</th><th scope="col">상태 / 근거</th><th scope="col">다음 대응</th></tr></thead><tbody><tr><td>로비 64명 잔여 대기</td><td>지연·처리율 부족</td><td>확인 · 종료 대기 228개, p99 상한 2.097초</td><td>재등록 주기·단일 worker·view/지형 비용 분리 측정</td></tr><tr><td>게임 64명 CPU·tick</td><td>tick 목표 초과 지속</td><td>확인 · CPU 49.375%, tick 지연 p99 131.072ms</td><td>AI·충돌·전송 실행 비용과 IOCP 경합 측정</td></tr><tr><td>다중 스레드 큐 경합</td><td>일부 단위 처리량 저하</td><td>확인 · producers4/Five 계측 끔 4.745→4.594M jobs/s</td><td>잠금 대기·게시/소비 경합 분리 측정</td></tr><tr><td>SC_MATCH 전달 취소</td><td>매치 준비 중 EOF</td><td>수정 · 즉시 Disconnect 제거, 준비 실패 5→0회</td><td>연결 유지 timeout 정책은 별도 검토</td></tr><tr><td>장시간·출력 대기 상한</td><td>장기 적체 가능성</td><td>미측정 · backpressure 추가 안 됨</td><td>장시간·포화 부하와 출력 대기량 제한 검토</td></tr></tbody></table></div><p class="note">로비 tick 지연은 이동 계산 간격−1ms로 정지/재시작도 포함하며 게임의 고정 tick 지연과 다릅니다. 요청별 ACK·장시간·전체 전투·운영 DB는 미검증입니다.</p></section>
+<footer><p><a href="JOBQUEUE_IMPROVEMENT.md">전체 실측·분포·검증 근거</a> · <a href="SERVER_BASELINE.md">개선 전 실제 서버 기준</a> · <a href="JOBQUEUE_BASELINE.md">큐 단위 기준</a> · <a href="../diagrams/jobqueue-improvement/jobqueue-improvement.architecture.html">개선 흐름도</a> · <button id="print" type="button">인쇄 / PDF 저장</button></p><p>측정: 2026-10-11 · 원시 결과: artifacts/logs/jobqueue-improvement/final-on, final-off · 재생성: python scripts/Build-JobQueueReport.py (matplotlib 필요)</p><p class="hash">상세 근거 SHA-256: 81c174ca580ea62877add53c5b085ea90578d16c5d1dde3a9f8177e984408e96</p></footer>
+</main><script id="report-data" type="application/json">{"metrics": [{"label": "로비 처리량", "unit": "packets/s", "values": [16.899, 250.702], "note": "높을수록 좋음 · 목표 256 packets/s. 고정 부하 처리율이며 최대 TPS가 아닙니다."}, {"label": "로비 패킷 대기 p99", "unit": "ms", "values": [33554.432, 2097.152], "note": "낮을수록 좋음 · 실행별 histogram bucket 상한의 중앙값. 종단 간 응답 지연과 구분합니다."}, {"label": "게임 pending I/O peak", "unit": "contexts", "values": [484206.5, 2434.0], "note": "낮을수록 좋음 · 1초 표본 peak의 중앙값. 전송 대기 전용 개수와는 다릅니다."}, {"label": "게임 private bytes peak", "unit": "MiB", "values": [278.66, 33.754], "note": "낮을수록 좋음 · 1초 표본 peak의 중앙값. 풀 보유량을 포함하며 전부 누수는 아닙니다."}, {"label": "게임 CPU", "unit": "%", "values": [48.263, 49.375], "note": "낮을수록 좋음 · 논리 CPU 12개 기준. 이번 변경에서 CPU는 낮아지지 않았습니다."}, {"label": "게임 tick 지연 p99", "unit": "ms", "values": [131.072, 131.072], "note": "낮을수록 좋음 · 목표 tick 15ms 초과 지연의 bucket 상한. 개선 전후 같습니다."}], "passed": [18, 60, 60, 60]}</script><script>
+document.documentElement.classList.add('js');const metricSelect=document.getElementById('metric'),charts=[...document.querySelectorAll('.metric-chart')];function selectMetric(){charts.forEach((chart,i)=>chart.hidden=i!==Number(metricSelect.value));}metricSelect.addEventListener('change',selectMetric);document.getElementById('print').addEventListener('click',()=>window.print());selectMetric();
+</script></body></html>

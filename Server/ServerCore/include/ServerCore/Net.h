@@ -293,6 +293,9 @@ class IocpService
         std::shared_ptr<std::recursive_mutex> m_dispatch = std::make_shared<std::recursive_mutex>();
         IoContext *m_disconnected = nullptr;
         std::deque<IoContext *> m_sends;
+        std::vector<IoContext *> m_sendBatch;
+        std::vector<char> m_sendBytes;
+        size_t m_sendOffset = 0;
     };
 
     bool Begin(SOCKET _socket, IoContext& _context, IoOperation _op);

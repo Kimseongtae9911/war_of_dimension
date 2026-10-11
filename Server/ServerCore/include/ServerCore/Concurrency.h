@@ -4,7 +4,6 @@
 #include <atomic>
 #include <thread>
 #include <vector>
-#include <concurrent_priority_queue.h>
 #include <condition_variable>
 #include <functional>
 #include <exception>
@@ -133,6 +132,7 @@ class JobQueue
             JobMetrics::Submit();
             try
             {
+                std::lock_guard lock(m_mutex);
                 m_jobs.push(std::move(_job));
             }
             catch (...)
@@ -153,12 +153,23 @@ class JobQueue
     virtual void ProcessJob()
     {
         std::lock_guard execute(m_execute);
-        const auto count = m_budget == JobBudget::Five ? size_t{5} : m_jobs.size();
+        size_t count;
+        {
+            std::lock_guard lock(m_mutex);
+            count = m_budget == JobBudget::Five ? size_t{5} : m_jobs.size();
+        }
+
         for (size_t i = 0; i < count; ++i)
         {
             JobRef job;
-            if (!m_jobs.try_pop(job))
-                break;
+            {
+                std::lock_guard lock(m_mutex);
+                if (m_jobs.empty())
+                    break;
+
+                job = std::move(m_jobs.front());
+                m_jobs.pop();
+            }
 
             JobMetrics::Execution observation(job->m_enqueuedUs.load(std::memory_order_relaxed));
             job->Execute();
@@ -168,22 +179,31 @@ class JobQueue
 
     bool HasJobs() const
     {
+        std::lock_guard lock(m_mutex);
+
         return !m_jobs.empty();
     }
 
     void Clear()
     {
         std::lock_guard execute(m_execute);
-        JobRef job;
-        while (m_jobs.try_pop(job))
+        std::queue<JobRef> discarded;
         {
+            std::lock_guard lock(m_mutex);
+            m_jobs.swap(discarded);
+        }
+
+        while (!discarded.empty())
+        {
+            discarded.pop();
             JobMetrics::Clear();
         }
     }
 
   private:
-    // 기존 shared_ptr 우선순위 비교를 유지한다. FIFO/시간순 계약이 아니다.
-    concurrency::concurrent_priority_queue<JobRef> m_jobs;
+    // 게시 순서를 유지한다. callback은 게시 mutex 밖에서, 실행 mutex 안에서 수행한다.
+    std::queue<JobRef> m_jobs;
+    mutable std::mutex m_mutex;
     JobBudget m_budget;
     std::mutex m_execute;
 };
@@ -285,7 +305,7 @@ class JobScheduler
                 if (m_stopping)
                     return;
 
-                target = m_queue.top();
+                target = m_queue.front();
                 m_queue.pop();
             }
             if (target->IsDisconnected())
@@ -314,7 +334,8 @@ class JobScheduler
   private:
     std::mutex m_mutex;
     std::condition_variable m_ready;
-    std::priority_queue<JobTarget *> m_queue;
+    // 한 budget 뒤 남은 대상은 뒤에 등록해 주소에 따른 기아를 막는다.
+    std::queue<JobTarget *> m_queue;
     bool m_stopping = false;
 };
 

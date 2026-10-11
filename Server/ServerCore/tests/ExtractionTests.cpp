@@ -195,6 +195,144 @@ class TestTarget : public JobTarget
     std::promise<void> m_cleaned;
 };
 
+class OrderedJob : public IJob
+{
+  public:
+    std::function<void()> m_callback;
+
+    void Execute() override
+    {
+        m_callback();
+    }
+};
+
+void FairQueues()
+{
+    JobQueue queue(JobBudget::Snapshot);
+    std::vector<JobQueue::JobRef> jobs;
+    std::vector<int> order;
+    for (int i = 0; i < 12; ++i)
+        jobs.push_back(std::make_shared<OrderedJob>());
+
+    std::sort(jobs.begin(), jobs.end());
+    for (int i = 0; i < 12; ++i)
+    {
+        std::static_pointer_cast<OrderedJob>(jobs[i])->m_callback = [&, i] {
+            order.push_back(i);
+        };
+        queue.PushJob(jobs[i]);
+    }
+
+    queue.ProcessJob();
+    std::vector<int> expected;
+    for (int i = 0; i < 12; ++i)
+        expected.push_back(i);
+
+    Check(order == expected, "FIFO preserves publication order independently of allocation address");
+
+    JobQueue recursive(JobBudget::Five);
+    auto first = std::make_shared<OrderedJob>();
+    auto second = std::make_shared<OrderedJob>();
+    if (first < second)
+        std::swap(first, second);
+
+    int repeats = 0;
+    int atPacket = -1;
+    first->m_callback = [&] {
+        if (++repeats < 100)
+            recursive.PushJob(first);
+    };
+    second->m_callback = [&] {
+        atPacket = repeats;
+    };
+    recursive.PushJob(first);
+    recursive.PushJob(second);
+    recursive.ProcessJob();
+    Check(atPacket == 1 && repeats == 4, "self-requeue cannot overtake an already queued packet");
+    recursive.Clear();
+
+    JobScheduler scheduler;
+    TestTarget targets[2];
+    auto *hot = &targets[0];
+    auto *victim = &targets[1];
+    if (std::less<TestTarget *>{}(hot, victim))
+        std::swap(hot, victim);
+
+    std::function<void()> repeat;
+    int executed = 0;
+    int atVictim = -1;
+    repeat = [&] {
+        if (++executed < 500)
+            hot->GetJobQueue()->PushJob(repeat);
+    };
+    hot->GetJobQueue()->PushJob(repeat);
+    victim->GetJobQueue()->PushJob([&] {
+        atVictim = executed;
+        scheduler.Stop();
+    });
+    scheduler.AddSessionQueue(hot);
+    scheduler.AddSessionQueue(victim);
+    scheduler.ProcessJob();
+    Check(atVictim == 5, "ready targets rotate after one budget despite address and self-requeue");
+    hot->GetJobQueue()->Clear();
+
+    JobQueue exceptional(JobBudget::Snapshot);
+    int survivors = 0;
+    exceptional.PushJob([] {
+        throw std::runtime_error("expected job failure");
+    });
+    exceptional.PushJob([&] {
+        ++survivors;
+    });
+    bool threw = false;
+    try
+    {
+        exceptional.ProcessJob();
+    }
+    catch (const std::runtime_error&)
+    {
+        threw = true;
+    }
+
+    exceptional.ProcessJob();
+    Check(threw && survivors == 1 && !exceptional.HasJobs(), "callback failure retains remaining FIFO jobs and releases execution lock");
+
+    JobQueue concurrent(JobBudget::Five);
+    std::array<std::atomic_int, 4> previous = {-1, -1, -1, -1};
+    std::atomic_int producersDone = 0;
+    std::atomic_int calls = 0;
+    std::atomic_int active = 0;
+    std::atomic_bool ordered = true;
+    std::vector<std::thread> workers;
+    for (int producer = 0; producer < 4; ++producer)
+        workers.emplace_back([&, producer] {
+            for (int sequence = 0; sequence < 1000; ++sequence)
+                concurrent.PushJob([&, producer, sequence] {
+                    if (++active != 1 || previous[producer].exchange(sequence) != sequence - 1)
+                        ordered = false;
+
+                    ++calls;
+                    --active;
+                });
+
+            ++producersDone;
+        });
+
+    for (int consumer = 0; consumer < 2; ++consumer)
+        workers.emplace_back([&] {
+            while (producersDone != 4 || concurrent.HasJobs())
+            {
+                concurrent.ProcessJob();
+                std::this_thread::yield();
+            }
+        });
+
+    for (auto& worker : workers)
+        worker.join();
+
+    Check(ordered && calls == 4000 && !concurrent.HasJobs(), "concurrent publication preserves each producer order with exactly-once serialized callbacks");
+}
+
 void ScheduledJobs()
 {
     JobScheduler scheduler;
@@ -352,6 +490,7 @@ void MatchObservationCopies()
 
 int RunExtractionTests()
 {
+    FairQueues();
     MatchObservationCopies();
     ClientReceive();
     ContextAndDisconnect();

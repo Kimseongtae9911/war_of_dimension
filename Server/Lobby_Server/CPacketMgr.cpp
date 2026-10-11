@@ -153,7 +153,7 @@ namespace wod_server {
 						memcpy_s(lgp.name, NAME_SIZE, matchClient->GetName(), NAME_SIZE);
 						network::GetInstance()->GetGameServer()->Send(&lgp);
 						matchClient->GetPacketSender()->SendMatchPacket(i);
-						matchClient->Disconnect();
+						// SC_MATCH 수신 뒤 클라이언트가 연결을 닫는다. 즉시 Disconnect하면 대기 중 전송이 취소된다.
 					}
 				}
 				while (true) {
@@ -170,7 +170,7 @@ namespace wod_server {
 						memcpy_s(lgp.name, NAME_SIZE, matchClient->GetName(), NAME_SIZE);
 						network::GetInstance()->GetGameServer()->Send(&lgp);
 						matchClient->GetPacketSender()->SendMatchPacket(3);
-						matchClient->Disconnect();
+						// 목적지 패킷을 받은 클라이언트의 disconnect에서 기존 정리 경로를 실행한다.
 						break;
 					}
 				}

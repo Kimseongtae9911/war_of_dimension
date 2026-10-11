@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "JobQueue 공정성과 게임 전송 적체 개선",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1050,
+      590
+    ]
+  },
+  "components": [
+    {
+      "id": "publish",
+      "type": "backend",
+      "label": "작업 게시",
+      "sublabel": "패킷·자기 재등록",
+      "pos": [
+        80,
+        35
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "fifo",
+      "type": "messagebus",
+      "label": "JobQueue FIFO",
+      "sublabel": "Five / Snapshot · callback 직렬",
+      "pos": [
+        80,
+        180
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "ready",
+      "type": "messagebus",
+      "label": "ready 대상 순환",
+      "sublabel": "예산 후 남은 대상은 꼬리에 등록",
+      "pos": [
+        80,
+        325
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "callback",
+      "type": "backend",
+      "label": "worker 실행",
+      "sublabel": "기존 깨우기·종료 계약 유지",
+      "pos": [
+        80,
+        470
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "frames",
+      "type": "backend",
+      "label": "게임 상태 패킷",
+      "sublabel": "갱신·NPC 이벤트 · 기존 빈도 유지",
+      "pos": [
+        650,
+        35
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "batch",
+      "type": "messagebus",
+      "label": "연결별 전송 대기",
+      "sublabel": "대기 중 프레임 최대 64개 묶음",
+      "pos": [
+        650,
+        180
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "native",
+      "type": "backend",
+      "label": "WSASend 완료",
+      "sublabel": "부분 전송은 같은 버퍼에서 계속",
+      "pos": [
+        650,
+        325
+      ],
+      "size": [
+        300,
+        76
+      ]
+    },
+    {
+      "id": "retire",
+      "type": "backend",
+      "label": "context 개별 회수",
+      "sublabel": "오류·취소도 각 요청을 완료",
+      "pos": [
+        650,
+        470
+      ],
+      "size": [
+        300,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "pub-fifo",
+      "from": "publish",
+      "to": "fifo",
+      "label": "게시 순서",
+      "labelDy": 34
+    },
+    {
+      "id": "fifo-ready",
+      "from": "fifo",
+      "to": "ready",
+      "label": "로비 대상 등록",
+      "labelDy": 34
+    },
+    {
+      "id": "ready-callback",
+      "from": "ready",
+      "to": "callback",
+      "label": "예산 단위 실행",
+      "labelDy": 34
+    },
+    {
+      "id": "frame-batch",
+      "from": "frames",
+      "to": "batch",
+      "label": "패킷 bytes 소유",
+      "labelDy": 34
+    },
+    {
+      "id": "batch-native",
+      "from": "batch",
+      "to": "native",
+      "label": "wire 순서 유지",
+      "labelDy": 34
+    },
+    {
+      "id": "native-retire",
+      "from": "native",
+      "to": "retire",
+      "label": "각 요청 수명 보존",
+      "labelDy": 34
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "로비 원인",
+      "items": [
+        "포인터 주소 우선순위가 패킷과 대상을 굶겼다.",
+        "FIFO와 예산별 순환으로 선행 게시 작업을 실행한다."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "게임 원인",
+      "items": [
+        "단일 프레임마다 worker 완료 처리를 기다렸다.",
+        "기다리는 프레임을 묶어 전송 적체를 줄인다."
+      ]
+    }
+  ]
+}

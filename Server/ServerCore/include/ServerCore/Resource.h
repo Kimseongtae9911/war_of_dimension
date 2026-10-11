@@ -1,6 +1,7 @@
 #pragma once
 #include <ServerCore/Concurrency.h>
 #include <ServerCore/Net.h>
+#include <concurrent_priority_queue.h>
 
 namespace wod::core
 {

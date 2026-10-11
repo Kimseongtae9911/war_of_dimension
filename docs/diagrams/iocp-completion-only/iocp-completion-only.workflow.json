@@ -1,0 +1,167 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "m_deferred: 배치 완료와 개별 완료의 구분",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "native",
+      "label": "A가 대표하는 실제 배치 전송 완료"
+    },
+    {
+      "id": "individual",
+      "label": "B·C에 대해 코어가 게시하는 개별 완료 통지"
+    }
+  ],
+  "mainPath": [
+    "native-arrival",
+    "normal-check",
+    "batch-retire",
+    "finish-a"
+  ],
+  "semanticChecks": {
+    "allowedRoots": [
+      "native-arrival"
+    ],
+    "allowedTerminals": [
+      "finish-a",
+      "finish-bc"
+    ],
+    "requiredPaths": [
+      {
+        "from": "batch-retire",
+        "to": "finish-bc"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "native-arrival",
+      "lane": "native",
+      "col": 0,
+      "type": "external",
+      "label": "A의 완료 수신",
+      "sublabel": "A+B+C 전송 종료",
+      "width": 160
+    },
+    {
+      "id": "normal-check",
+      "lane": "native",
+      "col": 1,
+      "type": "backend",
+      "label": "m_deferred = false",
+      "sublabel": "Send 배치 분기 진입",
+      "width": 160
+    },
+    {
+      "id": "batch-retire",
+      "lane": "native",
+      "col": 2,
+      "type": "backend",
+      "label": "배치 처리 1회",
+      "sublabel": "A·B·C를 전송 큐에서 제거",
+      "width": 160
+    },
+    {
+      "id": "finish-a",
+      "lane": "native",
+      "col": 3,
+      "type": "backend",
+      "label": "A 개별 완료",
+      "sublabel": "pending 감소 · 결과 반환",
+      "width": 160
+    },
+    {
+      "id": "mark-bc",
+      "lane": "individual",
+      "col": 2,
+      "type": "messagebus",
+      "label": "B·C 완료 게시",
+      "sublabel": "m_deferred = true",
+      "width": 160
+    },
+    {
+      "id": "skip-batch",
+      "lane": "individual",
+      "col": 1,
+      "type": "backend",
+      "label": "B·C 완료 수신",
+      "sublabel": "true: 배치 분기 생략",
+      "width": 160
+    },
+    {
+      "id": "finish-bc",
+      "lane": "individual",
+      "col": 0,
+      "type": "backend",
+      "label": "B·C 각각 완료",
+      "sublabel": "pending 감소 · 결과 반환",
+      "width": 160
+    }
+  ],
+  "edges": [
+    {
+      "id": "receive-native",
+      "from": "native-arrival",
+      "to": "normal-check",
+      "label": "Poll(A)",
+      "role": "main"
+    },
+    {
+      "id": "enter-batch",
+      "from": "normal-check",
+      "to": "batch-retire",
+      "label": "Send && !m_deferred",
+      "role": "main"
+    },
+    {
+      "id": "complete-first",
+      "from": "batch-retire",
+      "to": "finish-a",
+      "label": "Complete(A)",
+      "role": "main"
+    },
+    {
+      "id": "fanout-others",
+      "from": "batch-retire",
+      "to": "mark-bc",
+      "label": "나머지 개별 통지",
+      "role": "branch"
+    },
+    {
+      "id": "receive-individual",
+      "from": "mark-bc",
+      "to": "skip-batch",
+      "label": "Poll(B) / Poll(C)",
+      "role": "async",
+      "variant": "dashed"
+    },
+    {
+      "id": "complete-others",
+      "from": "skip-batch",
+      "to": "finish-bc",
+      "label": "Complete(B/C)",
+      "role": "main"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "false / true의 차이",
+      "items": [
+        "false: 배치 처리 후 개별 완료",
+        "true: 개별 완료만 수행"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "설명 범위",
+      "items": [
+        "전송이 모두 끝난 성공 경로 예시",
+        "부분 전송은 재발행, 오류는 같은 결과로 분배"
+      ]
+    }
+  ]
+}

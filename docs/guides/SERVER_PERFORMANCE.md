@@ -6,6 +6,7 @@
 이 문서는 검사 절차와 확장 기준이다. 아래의 추가 후보가 이미 구현되었거나 성능 측정이 완료되었다는 의미는 아니다.
 Core JobQueue의 개선 전 처리량·공정성과 반복 측정 도구는 [2026-10-11 큐 단위 기준 측정](../development/JOBQUEUE_BASELINE.md)을 참조한다.
 실제 서버의 이동/정지·다중 매치 반복 측정과 지표 계약은 [실제 서버 기준 측정](../development/SERVER_BASELINE.md)을 따른다.
+FIFO·전송 적체 수정과 동일 조건의 재측정은 [개선 전후 기록](../development/JOBQUEUE_IMPROVEMENT.md)을 참조한다.
 
 ## 검사 시작 전
 
@@ -131,3 +132,4 @@ match 준비는 4명씩 순차 수행하므로 현재 방식의 결과를 동시
 입력 큐 대기와 출력 대기를 별도로 보존하고, FIFO만/전송 경로 변경 등 분리 실험으로 원인을 구분한다.
 정상 종료 EOF와 측정 중 수신 오류는 Peer의 receive_error_port/phase/ms/closing으로 구분한다. 연결 이전 오류가 재접속 후 판정에 남지 않는지도 확인한다.
 개선 후 실행에는 `-Stage after`를 지정하고 시나리오/seed/인원/구간·입장 설정·콘텐츠 hash를 기준과 대조한다.
+[2026-10-11 개선 전후 실측](../development/JOBQUEUE_IMPROVEMENT.md)은 실패를 포함한 비교와 전송 관측 계약을 기록한다.

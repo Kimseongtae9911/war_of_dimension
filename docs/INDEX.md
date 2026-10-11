@@ -12,6 +12,8 @@
 | 서버 성능 검사·에이전트 조회·계측/시나리오 확장 | [성능 검사 지침](guides/SERVER_PERFORMANCE.md) |
 | JobQueue 개선 전 처리량·공정성·개선 방향 | [기준 측정/검토](development/JOBQUEUE_BASELINE.md), [측정 구조도](diagrams/jobqueue-baseline/README.md) |
 | 실제 서버 이동/정지·다중 매치 기준 성능·입장 설정·tick/대기 계측 | [실제 서버 기준 측정](development/SERVER_BASELINE.md), [관측 구조도](diagrams/server-baseline/README.md) |
+| 로비 패킷 기아·게임 응답 적체 원인·FIFO/전송 배치·전후 성능 | [HTML 요약 보고서](development/JOBQUEUE_IMPROVEMENT.html), [상세 실측·검증 근거](development/JOBQUEUE_IMPROVEMENT.md), [개선 흐름도](diagrams/jobqueue-improvement/README.md) |
+| m_deferred·배치 전송 완료·개별 완료 통지 | [코드 근거와 흐름도](diagrams/iocp-completion-only/README.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |
 | 프로젝트별 Serena 서버 재사용 | [HTTP 실행·복구](development/AGENTS.md#프로젝트별-codex-serena-http-서버), [연결 구조도](diagrams/serena-http/README.md) |
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |

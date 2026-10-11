@@ -68,8 +68,8 @@ Core와 테스트의 `.filters`에서 소스·헤더·개발 설정을 구분한
 중복 `.cpp` 16개를 제거했다. [정리 근거](../development/CLEANUP.md)를 참조한다.
 
 로비 작업 큐는 최대 5개, 게임 큐는 실행 시작 시 크기만큼 처리한다.
-기존 PPL `shared_ptr` 우선순위 비교를 유지한다.
-FIFO나 예약 시간순 실행을 새로 보장하지 않는다.
+2026-10-11 공정성 개선에서 작업과 ready 대상을 FIFO로 바꿨다.
+큐 mutex에서 확정한 게시 순서를 따르며 예약 시간순 실행은 보장하지 않는다.
 로비 content worker는 조건 변수로 대기하고 남은 작업을 다시 예약한다.
 
 ## 서버에 남은 공통 기반의 추가 추출 (2026-10-10)
@@ -103,8 +103,8 @@ Core는 `Protocol`, `CUserMgr`, `CMatchMgr`, `CPacketMgr`, DirectX에 의존하�
 `JobTarget`이 Five budget 큐와 disconnect/enqueued atomic 상태를 소유한다.
 처리 정책은 `JobQueue(JobBudget)` 생성자 인자로 반드시 지정한다.
 로비 CClient/Zone은 Five, 게임 CMatch는 Snapshot을 지정하며 별도 정책 래퍼 타입은 사용하지 않는다.
-현재 JobQueue의 성능 개선은 [작업 목록](../../tasks/todo.md)의 후속 작업으로,
-개선 전 기준 측정 → 개선 → 같은 조건의 개선 후 측정 순서로 진행할 예정이다. 기준 측정 결과는 [큐 단위 기준](../development/JOBQUEUE_BASELINE.md)과 [실제 서버 기준](../development/SERVER_BASELINE.md)을 참조한다.
+[기준 측정](../development/SERVER_BASELINE.md)의 로비 패킷 기아를 재현하고 FIFO·ready 대상 순환을 적용했다.
+원인·전송 적체의 별도 수정·동일 조건 전후 비교는 [개선 기록](../development/JOBQUEUE_IMPROVEMENT.md)을 참조한다.
 스케줄러는 중복 등록 억제·조건 변수 대기·남은 작업 재등록·Stop 깨우기를 담당한다.
 연결 종료 시 큐를 비우고 등록 상태를 해제한 뒤 `OnJobQueueDisconnected`를 호출한다.
 실제 사용자 정리는 로비의 `CUserMgr::ClientReset`이 수행한다.
@@ -148,7 +148,7 @@ context 타입별 I/O 풀은 하나이며 구성 타입을 통해 접근해도 �
 참조 선언은 `SocketResource& _other`, `Func&& _func`, `auto& value`처럼 타입에 붙인다.
 루트 `.clang-format`의 `ReferenceAlignment: Left`와 공통 지침에 규칙을 기록했다.
 서버 자체 코드의 해당 공백만 바꾸었고 람다 캡처·주소/비트 연산·외부 코드는 별도로 보존했다.
-JobQueue의 성능 개선과 개선 전·후 측정은 작업 목록 54번의 미착수 후속 작업이다.
+공통화 당시 미착수였던 JobQueue 개선과 전후 측정은 작업 목록 73번과 [개선 기록](../development/JOBQUEUE_IMPROVEMENT.md)에 이어진다.
 
 Resource 공통화 이후 Debug/Release 서버 빌드·각 Core 126항목·ABI 110종/106상수를 통과했다.
 추가 자원 검사 12항목은 풀 공유/격리·임대 중 Clear 거부·재사용·세션 소유·소켓 순서를 확인한다.
@@ -338,7 +338,7 @@ Core 검사는 프레임·부분 송신·즉시 실패·풀 반환·다중 worke
 4인 검사는 TCP 참가자 4개이며 실제 렌더링 클라이언트 4개 실행은 아니다.
 DB 없는 `LOCAL_TEST`만 사용한다.
 운영 DB·블록체인·전투 전체·장시간 부하는 미검증이다.
-서버 메모리·CPU·처리량의 전후 수치는 이번에 측정하지 않았다.
+공통화 당시 서버 메모리·CPU·처리량의 전후 수치는 측정하지 않았다. 이후 기준 성능은 아래의 측정 문서로 구분한다.
 기존 서버/클라이언트 경고는 빌드 로그에 남겼으며 성공으로 숨기지 않는다.
 
 ## 후속 단계
@@ -348,17 +348,26 @@ DB 없는 `LOCAL_TEST`만 사용한다.
 선택 활성화 `JobMetrics`·`TelemetryReporter`와 새 시나리오 더미·로컬 웹 관측의 [첫 구현](../development/SERVER_LAB.md)을 추가했다.
 `WOD_METRICS_DIRECTORY`가 있는 서버 실행만 계측하며 기존 게임 wire는 유지한다.
 로비 disconnect 정리는 content worker에 예약하고, Core는 재사용 초기화 전까지 중복 정리 callback을 막는다.
-계측과 기준 측정에서는 JobQueue 자료구조·budget·잠금을 유지한다. 기준 성능과 기능 실패는 별도 문서에 보존한다.
+기준 관측 도구를 추가한 시점에는 JobQueue 자료구조·budget·잠금을 유지했다. [큐 단위 기준 측정](../development/JOBQUEUE_BASELINE.md)과 [실제 서버 기준](../development/SERVER_BASELINE.md)을 보존한다.
+후속 [FIFO·전송 배치 개선](../development/JOBQUEUE_IMPROVEMENT.md)은 두 기준과 구분한다.
 원격 관측 API·전체 월드 렌더링은 아직 구현하지 않았다.
+
+2026-10-11 [실제 서버 기준 측정](../development/SERVER_BASELINE.md)을 위해 선택 활성화 작업/패킷 대기 histogram과 미실행 패킷 추적·실제 업데이트 지연/실행 계측을 추가했다.
+기준 계측 추가 당시 일반 작업 timestamp는 queue push에 기록하고 비교·정렬·budget·callback 직렬화를 유지했다. 패킷 작업의 별도 추적 수명은 callback 시작 또는 폐기까지다.
+이 계측 추가 이전 단위 측정의 hash/처리량은 당시 기록으로 보존하며 새 계측과 섞어 비교하지 않는다.
 
 2~4단계에서 신규 시나리오 도구와 agent/GUI 제어·월드 관찰을 만든다.
 기존 `scripts/Test-ServerCore*.py`는 회귀용이며, 신규 제품 도구는 별도 `tools/server_lab`에 있다.
 5단계 전체 서버 문서화와 6단계 콘텐츠 데이터화는 이후 순차 진행한다.
 
-## 성능 기준 계측 (2026-10-11)
+## FIFO 공정성과 연결별 묶음 전송 (2026-10-11)
 
-선택 활성화 작업/패킷 대기 histogram, 미실행 패킷 추적, 실제 업데이트 지연/실행 시간과 이동/정지 처리 수를 추가했다.
-일반 작업 timestamp를 push에 기록하고 기존 비교·정렬·budget·callback 직렬화는 유지한다. 패킷 추적 수명은 callback 시작 또는 폐기까지다.
-`send_queue`는 active/대기 context 수·한 연결 최대·native 발행/배치/프레임 누적값을 1초 snapshot으로 제공한다.
-기준 전송 경로의 한 배치는 프레임 하나이며 부분 전송 재발행은 native_calls에 포함한다. 전송 순서·발행 방식은 변경하지 않는다.
-[Server Lab 관측 계약](../development/SERVER_LAB.md), [실제 서버 기준 측정](../development/SERVER_BASELINE.md)을 참조한다.
+`JobQueue`는 게시/HasJobs/개별 pop을 짧은 mutex로 보호하며 callback 전체는 기존 실행 mutex로 직렬화한다.
+`JobScheduler`는 FIFO ready 대상에서 예산을 실행한 뒤 남은 대상을 꼬리에 재등록한다. Five/Snapshot·wake/Stop·disconnect/generation 계약은 유지한다.
+
+`IocpService`는 연결별로 이미 대기한 프레임을 최대 64개씩 묶어 한 native send를 발행한다.
+부분 전송 때 소유 버퍼의 남은 bytes를 재발행하고 배치가 완료되면 각 원래 context를 개별 완료/회수한다.
+Close/Disconnect는 active 배치를 취소 완료까지 보존하며 아직 발행하지 않은 프레임을 개별 실패 처리한다.
+`send_queue` snapshot의 active/대기 개수·한 연결 최대·native 발행/배치/프레임 누적값은 API와 결과에 전달한다.
+로비는 SC_MATCH 직후 Disconnect를 호출하지 않고 목적지를 받은 클라이언트의 연결 종료를 받는다.
+[원인과 전후 실측](../development/JOBQUEUE_IMPROVEMENT.md), [현재 흐름도](../diagrams/jobqueue-improvement/README.md)를 참조한다.
