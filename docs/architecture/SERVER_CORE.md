@@ -258,6 +258,14 @@ packing과 wire 필드 배치는 유지했다.
 IOCP 상태 mutex를 해제한 뒤 callback mutex를 기다린다.
 `Completion::Clear()`는 guard를 먼저 풀고 mutex 소유권을 반환한다.
 
+`IocpService::Poll`은 완료 대기·callback 실행권 확보·공통 최종 완료를 담당한다.
+`HandleCompletion`의 switch가 고정된 IoOperation을 분류하고 Send·Disconnect·Accept 처리는 private 함수에 위임한다.
+Receive는 성공 byte를 계측하고 AppEvent는 그대로 최종 전달한다.
+부분 송신 재발행·다른 I/O를 기다리는 Disconnect 보류는 `ContinuePolling`을 반환한다.
+`Deliver`일 때만 Poll에서 오류 계측과 `Complete`를 한 번 실행하고 결과와 callback guard를 반환한다.
+공개 API·잠금 순서·전송 배치·m_deferred 의미는 유지하며 가상 함수나 동적 핸들러 등록은 추가하지 않았다.
+[완료 흐름도와 함수별 책임](../diagrams/iocp-completion-only/README.md)을 참조한다. 이 책임 분리의 성능 효과는 별도 측정 대상이다.
+
 Disconnect는 다른 native I/O를 취소한다.
 미제출 송신을 실패 완료로 반환하고, native 완료가 배출된 뒤 재사용 callback을 전달한다.
 일반 DisconnectEx 완료는 상대 연결 상태에 영향을 받는다.

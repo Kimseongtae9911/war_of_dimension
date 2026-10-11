@@ -52,7 +52,7 @@
       "col": 1,
       "type": "backend",
       "label": "m_deferred = false",
-      "sublabel": "Send 배치 분기 진입",
+      "sublabel": "Send 핸들러 배치 처리 진입",
       "width": 160
     },
     {
@@ -88,7 +88,7 @@
       "col": 1,
       "type": "backend",
       "label": "B·C 완료 수신",
-      "sublabel": "true: 배치 분기 생략",
+      "sublabel": "true: Send 핸들러 조기 반환",
       "width": 160
     },
     {
@@ -152,7 +152,8 @@
       "title": "false / true의 차이",
       "items": [
         "false: 배치 처리 후 개별 완료",
-        "true: 개별 완료만 수행"
+        "true: 개별 완료만 수행",
+        "Poll은 분류 함수에 처리를 위임"
       ]
     },
     {

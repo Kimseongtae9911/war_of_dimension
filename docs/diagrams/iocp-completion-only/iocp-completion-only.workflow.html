@@ -5063,15 +5063,15 @@
           <text data-detail="context" x="128" y="131" class="t-muted" font-size="8" text-anchor="middle">A+B+C 전송 종료</text>
         </g>
 
-        <g id="node-normal-check" data-node-id="normal-check" data-node-label="m_deferred = false" tabindex="0" role="button" aria-label="Focus m_deferred = false, Send 배치 분기 진입, A가 대표하는 실제 배치 전송 완료" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Send 배치 분기 진입" data-node-context="A가 대표하는 실제 배치 전송 완료">
-          <title>m_deferred = false · Send 배치 분기 진입 · A가 대표하는 실제 배치 전송 완료</title>
+        <g id="node-normal-check" data-node-id="normal-check" data-node-label="m_deferred = false" tabindex="0" role="button" aria-label="Focus m_deferred = false, Send 핸들러 배치 처리 진입, A가 대표하는 실제 배치 전송 완료" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Send 핸들러 배치 처리 진입" data-node-context="A가 대표하는 실제 배치 전송 완료">
+          <title>m_deferred = false · Send 핸들러 배치 처리 진입 · A가 대표하는 실제 배치 전송 완료</title>
           <rect x="288.4" y="93" width="160" height="52" rx="6" class="c-mask"/>
           <rect x="288.4" y="93" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(294.4 99) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="368.4" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">m_deferred = false</text>
-          <text data-detail="context" x="368.4" y="131" class="t-muted" font-size="8" text-anchor="middle">Send 배치 분기 진입</text>
+          <text data-detail="context" x="368.4" y="131" class="t-muted" font-size="8" text-anchor="middle">Send 핸들러 배치 처리 진입</text>
         </g>
 
         <g id="node-batch-retire" data-node-id="batch-retire" data-node-label="배치 처리 1회" tabindex="0" role="button" aria-label="Focus 배치 처리 1회, A·B·C를 전송 큐에서 제거, A가 대표하는 실제 배치 전송 완료" aria-pressed="false" data-node-kind="backend" data-node-sublabel="A·B·C를 전송 큐에서 제거" data-node-context="A가 대표하는 실제 배치 전송 완료">
@@ -5107,15 +5107,15 @@
           <text data-detail="context" x="128" y="255" class="t-muted" font-size="8" text-anchor="middle">pending 감소 · 결과 반환</text>
         </g>
 
-        <g id="node-skip-batch" data-node-id="skip-batch" data-node-label="B·C 완료 수신" tabindex="0" role="button" aria-label="Focus B·C 완료 수신, true: 배치 분기 생략, B·C에 대해 코어가 게시하는 개별 완료 통지" aria-pressed="false" data-node-kind="backend" data-node-sublabel="true: 배치 분기 생략" data-node-context="B·C에 대해 코어가 게시하는 개별 완료 통지">
-          <title>B·C 완료 수신 · true: 배치 분기 생략 · B·C에 대해 코어가 게시하는 개별 완료 통지</title>
+        <g id="node-skip-batch" data-node-id="skip-batch" data-node-label="B·C 완료 수신" tabindex="0" role="button" aria-label="Focus B·C 완료 수신, true: Send 핸들러 조기 반환, B·C에 대해 코어가 게시하는 개별 완료 통지" aria-pressed="false" data-node-kind="backend" data-node-sublabel="true: Send 핸들러 조기 반환" data-node-context="B·C에 대해 코어가 게시하는 개별 완료 통지">
+          <title>B·C 완료 수신 · true: Send 핸들러 조기 반환 · B·C에 대해 코어가 게시하는 개별 완료 통지</title>
           <rect x="288.4" y="217" width="160" height="52" rx="6" class="c-mask"/>
           <rect x="288.4" y="217" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(294.4 223) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="368.4" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">B·C 완료 수신</text>
-          <text data-detail="context" x="368.4" y="255" class="t-muted" font-size="8" text-anchor="middle">true: 배치 분기 생략</text>
+          <text data-detail="context" x="368.4" y="255" class="t-muted" font-size="8" text-anchor="middle">true: Send 핸들러 조기 반환</text>
         </g>
 
         <g id="node-mark-bc" data-node-id="mark-bc" data-node-label="B·C 완료 게시" tabindex="0" role="button" aria-label="Focus B·C 완료 게시, m_deferred = true, B·C에 대해 코어가 게시하는 개별 완료 통지" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="m_deferred = true" data-node-context="B·C에 대해 코어가 게시하는 개별 완료 통지">
@@ -5368,6 +5368,7 @@
         <ul>
           <li>&bull; false: 배치 처리 후 개별 완료</li>
           <li>&bull; true: 개별 완료만 수행</li>
+          <li>&bull; Poll은 분류 함수에 처리를 위임</li>
         </ul>
       </div>
 

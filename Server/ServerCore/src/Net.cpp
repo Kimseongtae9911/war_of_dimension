@@ -407,6 +407,121 @@ void IocpService::Complete(IoContext& _context)
         Wake();
 }
 
+std::shared_ptr<std::recursive_mutex> IocpService::GetDispatchMutex(const IoContext& _context, ULONG_PTR _key)
+{
+    std::lock_guard lock(m_mutex);
+    if (_context.m_socket != INVALID_SOCKET)
+        return State(_context.m_socket).m_dispatch;
+
+    auto& slot = m_appDispatch[_key];
+    if (!slot)
+        slot = std::make_shared<std::recursive_mutex>();
+
+    return slot;
+}
+
+IocpService::CompletionAction IocpService::HandleCompletion(IoContext& _context, DWORD& _bytes, DWORD& _error)
+{
+    switch (_context.m_operation)
+    {
+    case IoOperation::Send:
+        return HandleSendCompletion(_context, _bytes, _error);
+    case IoOperation::Disconnect:
+        return HandleDisconnectCompletion(_context, _error);
+    case IoOperation::Receive:
+        if (!_error)
+            m_received += _bytes;
+
+        break;
+    case IoOperation::Accept:
+        HandleAcceptCompletion(_context, _error);
+        break;
+    case IoOperation::AppEvent:
+        break;
+    }
+
+    return CompletionAction::Deliver;
+}
+
+IocpService::CompletionAction IocpService::HandleSendCompletion(IoContext& _context, DWORD& _bytes, DWORD& _error)
+{
+    // 다른 프레임의 배치 완료 또는 미제출 전송 취소는 개별 완료만 전달한다.
+    if (_context.m_deferred)
+        return CompletionAction::Deliver;
+
+    auto& state = State(_context.m_socket);
+    if (state.m_sendBatch.empty() || state.m_sendBatch.front() != &_context)
+        throw std::logic_error("send completion without active batch");
+
+    if (!_error && (!_bytes || _bytes > state.m_sendBytes.size() - state.m_sendOffset))
+        _error = WSAECONNRESET;
+
+    if (!_error)
+    {
+        m_sent += _bytes;
+        state.m_sendOffset += _bytes;
+        if (state.m_sendOffset < state.m_sendBytes.size())
+        {
+            if (!m_stopping && state.m_socket != INVALID_SOCKET && !state.m_disconnecting)
+            {
+                IssueSend(state, _context);
+
+                return CompletionAction::ContinuePolling;
+            }
+
+            _error = ERROR_OPERATION_ABORTED;
+        }
+    }
+
+    // native 완료는 첫 context가 소유한다. 나머지는 같은 결과로 각각 회수한다.
+    for (auto *sent : state.m_sendBatch)
+    {
+        state.m_sends.pop_front();
+        if (!_error)
+            sent->m_offset = sent->m_length;
+
+        if (sent != &_context)
+        {
+            sent->m_deferred = true;
+            sent->m_error = _error;
+            if (!PostQueuedCompletionStatus(m_handle, _error ? 0 : static_cast<DWORD>(sent->m_length), sent->m_key, &sent->GetOver()))
+                throw SocketError("post batched send", GetLastError());
+        }
+    }
+
+    state.m_sendBatch.clear();
+    if (!state.m_sends.empty() && !m_stopping && state.m_socket != INVALID_SOCKET && !state.m_disconnecting)
+        IssueSend(state, *state.m_sends.front());
+
+    if (!_error)
+        _bytes = static_cast<DWORD>(_context.m_length);
+
+    return CompletionAction::Deliver;
+}
+
+IocpService::CompletionAction IocpService::HandleDisconnectCompletion(IoContext& _context, DWORD _error)
+{
+    if (!_context.m_deferred && State(_context.m_socket).m_pending > 1)
+    {
+        _context.m_error = _error;
+        State(_context.m_socket).m_disconnected = &_context;
+
+        return CompletionAction::ContinuePolling;
+    }
+
+    return CompletionAction::Deliver;
+}
+
+void IocpService::HandleAcceptCompletion(const IoContext& _context, DWORD& _error)
+{
+    if (!_error && !m_stopping)
+    {
+        SOCKET listener = _context.m_socket;
+        if (setsockopt(_context.m_listener, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<const char *>(&listener), sizeof(listener)) == SOCKET_ERROR)
+            _error = WSAGetLastError();
+    }
+}
+
 bool IocpService::Poll(Completion& _completion)
 {
     _completion.Clear();
@@ -429,22 +544,7 @@ bool IocpService::Poll(Completion& _completion)
         }
 
         auto *context = IoContext::FromOver(over);
-        std::shared_ptr<std::recursive_mutex> dispatch;
-        if (context->m_socket != INVALID_SOCKET)
-        {
-            std::lock_guard lock(m_mutex);
-            dispatch = State(context->m_socket).m_dispatch;
-        }
-        else
-        {
-            std::lock_guard lock(m_mutex);
-            auto& slot = m_appDispatch[key];
-            if (!slot)
-                slot = std::make_shared<std::recursive_mutex>();
-
-            dispatch = slot;
-        }
-
+        auto dispatch = GetDispatchMutex(*context, key);
         // 코어 상태 잠금을 해제한 뒤 callback 실행권을 기다려 잠금 순환을 막는다.
         std::unique_lock<std::recursive_mutex> dispatchLock;
         if (dispatch)
@@ -454,71 +554,8 @@ bool IocpService::Poll(Completion& _completion)
         if (context->m_error)
             error = context->m_error;
 
-        if (context->m_operation == IoOperation::Send && !context->m_deferred)
-        {
-            auto& state = State(context->m_socket);
-            if (state.m_sendBatch.empty() || state.m_sendBatch.front() != context)
-                throw std::logic_error("send completion without active batch");
-
-            if (!error && (!bytes || bytes > state.m_sendBytes.size() - state.m_sendOffset))
-                error = WSAECONNRESET;
-
-            if (!error)
-            {
-                m_sent += bytes;
-                state.m_sendOffset += bytes;
-                if (state.m_sendOffset < state.m_sendBytes.size())
-                {
-                    if (!m_stopping && state.m_socket != INVALID_SOCKET && !state.m_disconnecting)
-                    {
-                        IssueSend(state, *context);
-                        continue;
-                    }
-
-                    error = ERROR_OPERATION_ABORTED;
-                }
-            }
-
-            // native 완료는 첫 context가 소유한다. 나머지는 같은 결과로 각각 회수한다.
-            for (auto *sent : state.m_sendBatch)
-            {
-                state.m_sends.pop_front();
-                if (!error)
-                    sent->m_offset = sent->m_length;
-
-                if (sent != context)
-                {
-                    sent->m_deferred = true;
-                    sent->m_error = error;
-                    if (!PostQueuedCompletionStatus(m_handle, error ? 0 : static_cast<DWORD>(sent->m_length), sent->m_key, &sent->GetOver()))
-                        throw SocketError("post batched send", GetLastError());
-                }
-            }
-
-            state.m_sendBatch.clear();
-            if (!state.m_sends.empty() && !m_stopping && state.m_socket != INVALID_SOCKET && !state.m_disconnecting)
-                IssueSend(state, *state.m_sends.front());
-
-            if (!error)
-                bytes = static_cast<DWORD>(context->m_length);
-        }
-
-        if (context->m_operation == IoOperation::Disconnect && !context->m_deferred && State(context->m_socket).m_pending > 1)
-        {
-            context->m_error = error;
-            State(context->m_socket).m_disconnected = context;
+        if (HandleCompletion(*context, bytes, error) == CompletionAction::ContinuePolling)
             continue;
-        }
-
-        if (context->m_operation == IoOperation::Receive && !error)
-            m_received += bytes;
-
-        if (context->m_operation == IoOperation::Accept && !error && !m_stopping)
-        {
-            SOCKET listener = context->m_socket;
-            if (setsockopt(context->m_listener, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<const char *>(&listener), sizeof(listener)) == SOCKET_ERROR)
-                error = WSAGetLastError();
-        }
 
         if (error)
             ++m_errors;

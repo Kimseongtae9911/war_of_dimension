@@ -1,5 +1,23 @@
 # 개발 환경 정비 작업
 
+## 82. IOCP 완료 처리 책임 분리 (2026-10-11)
+
+- [x] Poll·완료/잠금 계약·두 서버 호출부와 기존 회귀 검사 확인
+- [x] Poll의 대기/잠금/최종 완료와 연산별 처리 분리
+- [x] AppEvent·오류/계측·callback 직렬성 등 분리 경계 회귀 확인
+- [x] Debug/Release Core·ABI·Release 서버 빌드 및 실제 네트워크/종료 검증
+- [x] 현재 코드 문서·Archify 완료 흐름도·실제 검증과 미검증 범위 기록
+
+완료 종류는 고정된 IoOperation이므로 private switch와 처리 함수로 분리한다. 부분 송신 재발행·Disconnect 보류는 ContinuePolling, 최종 전달은 Deliver로 명시하며 Complete/오류 계측은 공통 경로에서 한 번 수행한다.
+연결 callback 잠금 → 코어 상태 잠금 순서와 Completion의 callback guard 수명은 유지한다. 가상 핸들러·공개 API·패킷 형식·전송 배치 정책·m_deferred 의미는 변경하지 않는다. 목적은 책임 분리이며 성능 향상을 측정한 것으로 간주하지 않는다.
+
+구현: GetDispatchMutex가 소켓/AppEvent key의 실행권을 조회하고 HandleCompletion의 switch가 Send·Disconnect·Accept 핸들러로 분류한다. Receive 성공 byte 계측과 AppEvent 통과는 분류 함수 안에 간결하게 유지한다. 오류 수·pending 감소·Completion 반환은 Poll의 공통 경로에 둔다.
+검증: Test-ServerCore.ps1 Debug/Release 각 212검사·ABI 110종/106상수 PASS, Build.ps1 -Configuration Release -Module Servers PASS. 기존 부분 송신·배치 실패/취소·다중 worker callback/Disconnect 검사와 새 AppEvent key/byte/guard/계측·오류 1회 계측 검사가 통과했다.
+Test-ServerCoreIntegration.ps1 Release PASS: 실제 네트워크 12종·보스 4/5의 4인 매칭/로딩·초기화 실패 4종, 각 종료 pending=0 sockets=0 leased=0. 결과는 artifacts/logs/test-server-core-{Debug,Release}/와 server-core-integration-Release/에 저장한다.
+clang-format --dry-run --Werror(수정 C++ 3파일), UTF-8·Markdown 링크·git diff --check PASS. Release 서버 빌드의 기존 C4065/C4101/C4244/C4305/C4309 경고는 남아 있다.
+기존 Archify workflow JSON/HTML을 갱신해 validate/deliver showcase 9/9·composition 오류/경고 0을 확인했다. 현재 hash/byte는 해당 README에 기록한다. 앞서 확인된 file URL 보안 제한을 우회하지 않아 실제 HTML 시각/containment 검증은 미실행이다.
+새 성능 부하·Debug 서버 통합·전체 게임 플레이·운영 DB/블록체인·장시간 부하는 미검증이며 기존 JobQueue 성능 수치는 변경하지 않았다. 구현 당시에는 커밋·푸시하지 않았다. 후속 사용자 요청으로 관련 9개 파일을 검토·스테이징하고 정확한 메시지 미리보기를 준비한다. 미리보기 승인 후 main에 커밋·푸시한다.
+
 ## 81. 잔여 Serena 변경 검토·커밋 준비 (2026-10-11)
 
 - [x] 잔여 3개 파일의 변경 범위·공용 실행 도구·기존 검증 근거 검토

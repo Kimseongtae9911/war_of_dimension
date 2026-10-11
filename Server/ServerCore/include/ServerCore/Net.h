@@ -283,6 +283,12 @@ class IocpService
     NetworkStats Stats() const;
 
   private:
+    enum class CompletionAction
+    {
+        Deliver,
+        ContinuePolling
+    };
+
     struct SocketState
     {
         SOCKET m_socket = INVALID_SOCKET;
@@ -302,6 +308,12 @@ class IocpService
     void IssueSend(SocketState& _state, IoContext& _context);
     void Fail(IoContext& _context, DWORD _error);
     void Complete(IoContext& _context);
+    std::shared_ptr<std::recursive_mutex> GetDispatchMutex(const IoContext& _context, ULONG_PTR _key);
+    // 호출자는 연결 callback 잠금과 m_mutex를 이 순서로 보유한다.
+    CompletionAction HandleCompletion(IoContext& _context, DWORD& _bytes, DWORD& _error);
+    CompletionAction HandleSendCompletion(IoContext& _context, DWORD& _bytes, DWORD& _error);
+    CompletionAction HandleDisconnectCompletion(IoContext& _context, DWORD _error);
+    void HandleAcceptCompletion(const IoContext& _context, DWORD& _error);
     void Wake();
     SocketState& State(SOCKET _socket);
     HANDLE m_handle = nullptr;

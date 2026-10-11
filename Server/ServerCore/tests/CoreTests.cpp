@@ -230,6 +230,7 @@ void SendFailureAndPartial()
     IoContext error;
     error.CopyPacket(a);
     Check(failed.Send(failedSocket, error) && failed.Poll(complete) && complete.m_error == WSAECONNRESET && !error.m_pending, "immediate send error");
+    Check(failed.Stats().m_errors == 1 && failed.Stats().m_sent == 0 && failed.Stats().m_pending == 0, "send error accounted once on final delivery");
     failed.RequestStop(1);
     failed.Drain();
     failed.Finish();
@@ -273,6 +274,7 @@ void Loopback()
     }
 
     Check(received == 4 && std::memcmp(recv.GetSendBuf(), frame, 4) == 0, "loopback bytes");
+    Check(service.Stats().m_received == 4 && service.Stats().m_sent == 4, "receive and send completion byte accounting");
     recv.Reset();
     Check(service.Receive(accepted, recv), "pending receive before stop");
     service.RequestStop(1);
@@ -394,6 +396,25 @@ void BatchedSends()
         service.Finish();
         Check(!service.Stats().m_pending && !service.Stats().m_queuedSends, "batch teardown drains contexts and send queue");
     }
+}
+
+void AppEventCompletions()
+{
+    IocpService service;
+    IoContext first, second, third;
+    Check(service.Post(41, first) && service.Post(41, second) && service.Post(42, third), "app events submitted without sockets");
+    Completion completion;
+    Check(service.Poll(completion) && completion.m_context == &first && completion.m_key == 41 && completion.m_bytes == 1 && !completion.m_error && !first.m_pending && service.Stats().m_pending == 2,
+          "app event delivers key and bytes and retires once");
+    auto firstDispatch = completion.m_dispatchMutex;
+    Check(completion.m_dispatchLock.owns_lock(), "app event retains callback execution guard");
+    Check(service.Poll(completion) && completion.m_context == &second && completion.m_dispatchMutex == firstDispatch, "app events with same key reuse callback serialization");
+    Check(service.Poll(completion) && completion.m_context == &third && completion.m_key == 42 && completion.m_dispatchMutex != firstDispatch, "distinct app event keys have independent callback guards");
+    const auto stats = service.Stats();
+    Check(!stats.m_pending && !stats.m_received && !stats.m_sent && !stats.m_errors, "app event completion leaves network byte counters unchanged");
+    service.RequestStop(1);
+    Check(!service.Poll(completion) && !completion.m_context && !completion.m_dispatchLock.owns_lock() && !service.Post(41, first), "stop clears callback guard and rejects new app events");
+    service.Finish();
 }
 
 void CallbackSerialization()
@@ -696,6 +717,7 @@ int main(int argc, char **argv)
         SendFailureAndPartial();
         BatchedSends();
         ThreadLifetimes();
+        AppEventCompletions();
         CallbackSerialization();
         CanceledQueue();
         GenerationAndValidation();
