@@ -1,0 +1,16 @@
+name: codex
+description: 프로젝트를 고정하는 Codex HTTP 서버
+prompt: |
+  You are running in Codex. Use Codex's own tools for shell commands and ordinary file edits.
+  Prefer Serena's symbolic tools for code navigation and symbol edits.
+  This HTTP server is shared by chats for one project. The project is activated at server startup.
+  Do not try to switch projects. Use a separate server and port for another project.
+excluded_tools:
+  - activate_project
+  - create_text_file
+  - read_file
+  - execute_shell_command
+  - replace_content
+  - find_file
+  - list_dir
+tool_description_overrides: {}

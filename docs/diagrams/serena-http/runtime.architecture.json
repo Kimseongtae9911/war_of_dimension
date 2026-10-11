@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "프로젝트별 Serena 서버 재사용", "quality_profile": "showcase", "viewBox": [1240, 720] },
+  "components": [
+    { "id": "project-chats", "type": "frontend", "label": "NewWod 채팅들", "sublabel": "프로젝트 설정의 동일 URL", "pos": [60, 310], "size": [220, 90] },
+    { "id": "project-http", "type": "backend", "label": "Serena 전용 서버", "sublabel": "127.0.0.1:9120/mcp", "pos": [510, 310], "size": [230, 90] },
+    { "id": "project-index", "type": "database", "label": "NewWod · clangd", "sublabel": "war_of_dimension 활성화 유지", "pos": [950, 310], "size": [230, 90] },
+    { "id": "login-launch", "type": "external", "label": "Windows 로그인", "sublabel": "공용 도구 · 초기화 잠금", "pos": [510, 60], "size": [230, 90] },
+    { "id": "other-project", "type": "external", "label": "기타 8개 프로젝트", "sublabel": "9121~9128 · 활성 프로젝트 분리", "pos": [510, 570], "size": [230, 90] }
+  ],
+  "connections": [
+    { "id": "chats-http", "from": "project-chats", "to": "project-http", "label": "Streamable HTTP", "variant": "emphasis" },
+    { "id": "server-index", "from": "project-http", "to": "project-index", "label": "심볼 탐색" },
+    { "id": "login-start", "from": "login-launch", "to": "project-http", "label": "한 번 시작 · 중복 방지", "labelDy": 24 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "채팅 간 재사용", "items": ["채팅 연결 종료 후에도 서버 유지", "MCP 연결마다 같은 활성 프로젝트 확인"] },
+    { "dot": "emerald", "title": "프로젝트 분리", "items": ["시작 시 --project 경로 지정", "activate_project 도구 제외"] },
+    { "dot": "rose", "title": "실행 관리", "items": ["언어 서버 준비 후 HTTP 연결", "프로젝트 경로·PID·시작 시각 확인"] }
+  ]
+}

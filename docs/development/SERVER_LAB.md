@@ -4,6 +4,7 @@
 Python 3.12 이상과 표준 라이브러리만 사용한다. 기존 `Stress_Test`·`CDummyClient`와 독립적이다.
 `LOCAL_TEST`·DB 없는 서버가 대상이며, 운영 인증·DB·블록체인을 검증하지 않는다.
 [구현 구조도](../diagrams/server-lab/README.md), [작업·검증 기록](../../tasks/todo.md#61-시나리오-더미실시간-로컬-서버-관측-첫-구현)을 함께 참조한다.
+성능 검사·병목 조사·개선 전후 비교를 수행하는 에이전트는 [성능 검사 지침](../guides/SERVER_PERFORMANCE.md)에 따라 필요한 계측과 시나리오를 보완한다.
 
 ## 실행과 중지
 

@@ -9,7 +9,9 @@
 | 작업별 필수 지침 | [작업 지침 인덱스](guides/INDEX.md) |
 | 빌드·실행·중지 | [개발 환경](development/SETUP.md) |
 | 시나리오 더미·실시간 로컬 웹 관측·지형/NPC/게임 일정 | [Server Lab 사용·계약](development/SERVER_LAB.md), [구현 구조도](diagrams/server-lab/README.md) |
+| 서버 성능 검사·에이전트 조회·계측/시나리오 확장 | [성능 검사 지침](guides/SERVER_PERFORMANCE.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |
+| 프로젝트별 Serena 서버 재사용 | [HTTP 실행·복구](development/AGENTS.md#프로젝트별-codex-serena-http-서버), [연결 구조도](diagrams/serena-http/README.md) |
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |
 | 현재 구성·연결 | [아키텍처](architecture/OVERVIEW.md) |
 | 서버 공통 기반 구현·종료·회귀 검사 | [ServerCore 구현](architecture/SERVER_CORE.md), [구현 구조도](diagrams/server-core/README.md), [소스·검증 근거](architecture/evidence/server-core-implementation-20261007.json) |

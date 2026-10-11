@@ -1,5 +1,45 @@
 # 개발 환경 정비 작업
 
+## 70. 다른 로컬 프로젝트에 Serena HTTP 확장 (2026-10-11)
+
+- [ ] Codex 로컬 프로젝트와 기존 Serena 프로젝트의 지침·설정·언어·포트 조사
+- [ ] 사용자 공용 실행 도구 설치·프로젝트별 HTTP URL/포트·활성 프로젝트 설정
+- [ ] 프로젝트별 로그인 자동 시작·다중 연결/재연결·프로젝트 전환 거부 검증
+- [ ] 포트 배정표·복구 방법·실제 검증과 미검증 범위 기록
+
+대상은 NewWod(9120 유지), vafk_client(9121), vafk_server(9122), RunningApp(9123), WebPopup(9124), MazeRouge(9125), TradeApp(9126), TradeWebsite(9127), VampireAFK(9128)다.
+기존 MCP의 다른 서버와 사용자 변경은 보존한다. 저장된 로컬 프로젝트/기존 Serena 등록에 없는 과거 작업 폴더와 원본 war_of_dimension은 수정하지 않는다.
+
+## 67. 프로젝트별 Serena HTTP 서버 재사용 (2026-10-11)
+
+- [x] 프로젝트별 포트·활성 프로젝트를 고정하는 숨김 실행과 중복 시작 방지 구현
+- [x] Codex HTTP 연결 전환·Windows 로그인 자동 시작·종료/복구 안내
+- [x] 여러 MCP 세션의 동일 서버/활성 프로젝트·실패 경로·환경 검사 검증
+- [x] 에이전트 환경 문서·Archify 구조도·실제 검증 결과 기록
+
+기존 사용자 변경을 유지한다. NewWod의 Codex 설정만 전환하고 다른 저장소·Claude/Gemini 설정은 수정하지 않는다.
+다른 프로젝트도 별도 포트와 명시적인 --project로 실행해 활성 프로젝트가 서로 바뀌지 않게 한다.
+
+완료: NewWod Codex는 `127.0.0.1:9120/mcp`에 연결한다. `.serena/codex-http.yml`에서 activate_project를 제외한다.
+Serena.ps1은 숨김 시작·중복 재사용·상태·소유한 프로세스 트리 종료·프로젝트별 Startup 바로가기 등록/해제를 제공한다.
+현재 사용자 로그인 자동 시작을 등록했고 바로가기를 실제 실행해 서버 시작/HTTP 도구 호출을 확인했다. 서버를 실행 상태로 유지했다.
+Serena 1.2.0 기본 HTTP의 세션 종료가 공유 agent/clangd를 정리하는 동작을 실제 재현해 serena_http.py에서 서버 수명으로 분리했다.
+설치 패키지와 전역 Codex 설정은 변경하지 않았다. 내부 _set_mcp_tools 의존은 패키지 갱신 후 회귀 검사 대상이다.
+
+실제 검증: 독립 MCP 세션 ID 2개·같은 활성 war_of_dimension·activate_project 미노출 및 직접 호출 거부·전체 연결 종료 후 재연결/실제 CServer 심볼 조회 PASS.
+동일 PID 재사용·다른 프로젝트의 동일 포트 사용 거부·시작 시각 불일치 PID 종료 거부·소유 서버 트리 13개 종료·Startup 바로가기 재시작 PASS.
+실행 기록의 JSON 날짜 자동 변환으로 생긴 비교 실패를 UTC ticks 비교로 수정했다. 최종 검사에서 같은 PID 재사용을 확인했다.
+Test-AgentEnvironment.ps1 -StaticOnly -SerenaHttp PASS(226소스 compilation database 생성·경로 검증 및 HTTP 검사).
+Codex CLI의 mcp get으로 streamable_http와 URL을 확인했다. 설치 CLI가 기존 전역 service_tier=default를 해석하지 못해 해당 조회에만 -c service_tier=fast를 사용했다. 설정 파일은 수정하지 않았다.
+Archify 2.16 showcase 9/9·composition 오류/경고 0·4크기 containment PASS. 최소/최대 크기 light/dark PNG 4장 직접 점검했다.
+JSON/HTML hash·byte와 재생성 방법은 구조도 README에 기록했고 자동 visualReview=pending과 별도 수동 점검을 구분한다.
+로그·실행 기록·화면/자동 검사 receipt는 Git 제외 .runtime과 artifacts/logs/serena-http에 보관한다.
+UTF-8·PowerShell/Python/TOML/YAML 구문·git diff --check PASS. Git의 기존 LF→CRLF 안내는 오류가 아니다.
+
+기존 STDIO 채팅은 재연결 또는 새 채팅에서 새 설정을 읽어야 한다. 기존 채팅의 프로세스를 강제로 종료하지 않았다.
+실제 Windows 로그아웃/로그인·Codex UI 새 채팅의 연결은 미검증이며 독립 MCP 클라이언트와 로그인 바로가기 실행으로 검사했다.
+다른 실제 저장소의 추가 서버 등록·장시간 부하·게임 실행/빌드는 이번 변경 범위가 아니다. 커밋·push하지 않았다.
+
 사용자 요청 순서대로 진행한다. 1~5는 초기 이전·개발 환경·커밋의 기록이고, 6은 현재 통합 솔루션·메시 공유 구현이다. 초기 커밋은 사용자 요청으로 GitHub에 업로드했으며 현재 구현의 추가 커밋·push는 별도 요청에 따라 진행한다.
 
 ## 1. 로컬 실행 설정
@@ -1137,3 +1177,17 @@ API 조회는 같은 PC에서 실행 중인 monitor에 가능하다. 커밋 준�
 실제 저장 결과에서 NPC 13개·매치 일정 1개를 읽었고 현재 계측 파일은 stale로 확인했다. 임시 HTTP 서버는 종료했다.
 전체 서버 월드·AI FSM/타깃·명중·외부 참가자 위치·전체 시간 월드 리플레이는 현재 관측 범위 밖이다.
 로그·실행 결과·스크린샷은 Git 제외 상태를 유지한다. 기존 컴파일 경고·운영 DB/블록체인 및 전체 전투 미검증 범위도 유지한다.
+
+## 69. 에이전트 서버 성능 검사·계측/시나리오 확장 지침 (2026-10-11)
+
+- [x] 기존 Server Lab API·지표·시나리오·보존 상한과 후속 성능 과제 확인
+- [x] 필요한 정보의 직접 조회와 부족한 계측의 도구/API/결과 확장 기준 문서화
+- [x] 검사 목적에 맞는 시나리오 추가·검증 및 동일 조건 전후 측정 지침 작성
+- [x] 작업 지침/문서 인덱스·Server Lab 연결, UTF-8·링크·diff 검사
+
+docs/guides/SERVER_PERFORMANCE.md를 추가했다. API 원본/저장 결과 조회, 정보 누락 시 소유 경로의 안전한 계측과 재사용 가능한 조회/저장 확장을 기본으로 한다.
+JobQueue 대기/공정성·tick 지연·실제 수용 부하·부하 생성기 포화·종료 후 비용·장시간 보존의 현재 미구현 항목을 구분했다.
+성능 검사마다 시나리오 적합성을 확인하고 필요한 행동/부하/시간이 없으면 시나리오와 runner를 보완하도록 했다.
+동일 입력/계측·워밍업/측정/정리 구간·반복·실패율/꼬리 지연·계측 비용·원시 결과를 기록하며 기능 회귀를 벤치마크로 해석하지 않는다.
+이번 작업은 문서 지침 추가다. 새 계측/시나리오 구현·성능 측정·게임 실행·빌드/회귀 재실행·커밋/push는 수행하지 않았다.
+기존 Serena HTTP 관련 미커밋 변경은 보존했다. 구조/실행 흐름을 변경하지 않아 다이어그램은 갱신하지 않았다.
