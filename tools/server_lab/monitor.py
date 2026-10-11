@@ -6,6 +6,9 @@ import re
 import signal
 import threading
 import time
+import os
+from performance import HISTOGRAMS, histogram_delta
+from process_cpu import sample as process_cpu_sample
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -23,7 +26,7 @@ NUMERIC_FIELDS = ('pid', 'sequence', 'timestamp_ms', 'uptime_ms', 'cpu_ticks', '
 
 
 def derive_rates(previous, current):
-    result = {key: None for key in ('cpu_percent', 'rx_bps', 'tx_bps', 'jobs_per_s', 'job_mean_us')}
+    result = {key: None for key in ('cpu_percent', 'rx_bps', 'tx_bps', 'jobs_per_s', 'job_mean_us', 'packets_per_s', 'job_wait_p99_us', 'packet_job_wait_p99_us', 'tick_delay_p99_us', 'tick_duration_p99_us')}
     if not previous or previous['instance'] != current['instance'] or current['sequence'] <= previous['sequence']:
         return result
     elapsed = (current['uptime_ms'] - previous['uptime_ms']) / 1000
@@ -37,6 +40,18 @@ def derive_rates(previous, current):
     result.update(cpu_percent=min(100, delta['cpu_ticks'] / 10_000_000 / elapsed / current['logical_processors'] * 100),
                   rx_bps=delta['received_bytes'] / elapsed, tx_bps=delta['sent_bytes'] / elapsed,
                   jobs_per_s=delta['jobs_completed'] / elapsed, job_mean_us=delta['job_execute_us'] / executed if executed else None)
+    before, after = previous.get('performance'), current.get('performance')
+    if before and after:
+        if before.get('schema_version') != 1 or after.get('schema_version') != 1:
+            raise ValueError('performance schema 불일치')
+        for field in ('packets_processed', 'move_requests', 'stop_requests'):
+            if type(after.get(field)) is not int or type(before.get(field)) is not int or after[field] < before[field]:
+                raise ValueError('performance counter 불일치')
+        result['packets_per_s'] = (after['packets_processed'] - before['packets_processed']) / elapsed
+        for field in HISTOGRAMS:
+            hist = histogram_delta(before.get(field), after.get(field))
+            if hist and field != 'lobby_movement_gap_us':
+                result[field.replace('_us', '_p99_us')] = hist['p99_us_upper']
     return result
 
 
@@ -69,6 +84,8 @@ class ServerFeed:
                 status = 'stopped' if data['stopped'] else 'stale' if age > 3.5 or age < -2 else 'live'
                 if role == 'GameServer':
                     self.content = content if isinstance(content, dict) else {}
+                elif isinstance(content, dict):
+                    data['admission'] = content
                 output.append({**data, **self.rates.get(role, {}), 'status': status, 'age_s': max(0, age)})
             except FileNotFoundError:
                 output.append({'role': role, 'status': 'missing', 'detail': '계측 파일 없음 · 계측을 켜고 서버를 시작하세요'})
@@ -104,6 +121,8 @@ class Lab:
                     if game.get('status') in ('live', 'stopped'):
                         self.state.world.apply_schedule(self.feed.content, game['instance'], game['stopped'])
                 sample = {'timestamp_ms': time.time_ns() // 1_000_000, 'servers': servers,
+                          'observer_cpu_seconds': time.process_time(), 'logical_processors': os.cpu_count(),
+                          'process_cpu': process_cpu_sample(ROOT),
                           'run_id': run['run_id'] if run else None, 'dummy': run['counters'] if run else None}
                 self.series.append(sample)
                 if self.worker and self.worker.is_alive():

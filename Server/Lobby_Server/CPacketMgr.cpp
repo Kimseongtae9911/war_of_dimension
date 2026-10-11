@@ -67,6 +67,7 @@ namespace wod_server {
 	{
 		if (m_packetfunc.contains(_packet->type)) {
 			m_packetfunc[_packet->type](_packet, _client);
+            wod::core::JobMetrics::Packet();
 		}
 		else {
 			LogPrinter::PrintMsg(static_cast<int>(_packet->type) + ": Undefined Packet Type");
@@ -106,6 +107,7 @@ namespace wod_server {
 
 		char befDir = _client->GetTransform()->GetDir();
 		_client->GetTransform()->SetDir(p->direction);
+        wod::core::JobMetrics::Move(p->direction == 0);
 
 		if (p->direction == 0) {
 			_client->GetPhysics()->SetVelocity(vec3(0, 0, 0));
@@ -563,7 +565,7 @@ namespace wod_server {
 			network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(_client->GetName()), -p->buyPrice, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
 
 			//If seller is online, send token change
-			for (int i = 0; i < MAX_CLIENT / LOBBY_MAX_CLIENT; ++i) {
+			for (int i = 0; i < MAX_CLIENT / LOBBY_CHANNEL_CAPACITY; ++i) {
 				for (CClient* cl : CUserMgr::GetInstance()->GetChannelClients(i)) {
 					if (cl == nullptr)
 						continue;

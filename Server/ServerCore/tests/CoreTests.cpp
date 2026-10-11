@@ -11,6 +11,7 @@
 #include <Protocol/Validation.h>
 
 void DumpAbi();
+int RunJobQueueBenchmark(int _argc, char **_argv);
 int RunExtractionTests();
 int RunResourceTests();
 int RunGameObjectTests();
@@ -209,10 +210,12 @@ void SendFailureAndPartial()
     first.CopyPacket(a);
     second.CopyPacket(b);
     Check(service.Send(socket, first) && service.Send(socket, second), "queued send");
+    Check(service.Stats().m_queuedSends == 2 && service.Stats().m_maxSocketQueuedSends == 2, "queued sends include active and waiting contexts");
     Completion complete;
     Check(service.Poll(complete) && complete.m_context == &first && !complete.m_error && first.m_offset == 4, "partial send continuation");
     Check(service.Poll(complete) && complete.m_context == &second && !complete.m_error, "send order");
     Check(calls == 7 && submitted == std::vector<char>({4, 3, 'a', 'b', 3, 4, 'c'}), "no duplicate send bytes");
+    Check(service.Stats().m_queuedSends == 0, "send completion drains queue observations");
     service.RequestStop(1);
     service.Drain();
     service.Finish();
@@ -544,11 +547,31 @@ namespace
 void Observations()
 {
     Check(!JobMetrics::m_enabled.load(), "job metrics disabled by default");
+    MetricHistogram histogram;
+    histogram.Record(0);
+    histogram.Record(3);
+    histogram.Record(uint64_t{1} << 31);
+    Check(histogram.Json().find("\"sum_us\":2147483651") != std::string::npos, "histogram includes zero and overflow sum");
+    Check(histogram.Json().find("\"max_us\":2147483648") != std::string::npos, "histogram retains observed maximum");
     const auto submitted = JobMetrics::m_submitted.load();
     const auto completed = JobMetrics::m_completed.load();
     const auto cleared = JobMetrics::m_cleared.load();
     const auto failed = JobMetrics::m_failed.load();
     JobMetrics::m_enabled = true;
+    const auto discarded = JobMetrics::m_packetsDiscarded.load();
+    {
+        auto pending = JobMetrics::TrackPacket();
+        Check(JobMetrics::PendingPacketJson().find("\"count\":1,") != std::string::npos, "pending packet visible before execution");
+        pending->Start();
+        Check(JobMetrics::PendingPacketJson().find("\"count\":0,") != std::string::npos, "executed packet removed from pending");
+    }
+    {
+        auto abandoned = JobMetrics::TrackPacket();
+    }
+    Check(JobMetrics::m_packetsDiscarded == discarded + 1, "unexecuted packet release recorded as discard");
+    const auto stopCount = JobMetrics::m_stops.load();
+    JobMetrics::Move(true);
+    Check(JobMetrics::m_stops == stopCount + 1, "server stop handler count");
     JobQueue queue(JobBudget::Five);
     for (int i = 0; i < 6; ++i)
         queue.PushJob([] {
@@ -570,6 +593,7 @@ void Observations()
         "job failure still propagates");
     Check(JobMetrics::m_failed == failed + 1 && JobMetrics::m_running == 0, "exception metrics settle running count");
     Check(JobMetrics::m_executeUs > 0 && JobMetrics::m_maxExecuteUs > 0, "job execution duration recorded");
+    Check(JobMetrics::m_wait.Json().find("\"sum_us\":0,") == std::string::npos, "queued job wait recorded");
     JobMetrics::m_enabled = false;
     const auto disabledSubmitted = JobMetrics::m_submitted.load();
     queue.PushJob([] {
@@ -582,6 +606,11 @@ void Observations()
 int main(int argc, char **argv)
 {
     ConfigureProcessDiagnostics();
+    if (argc > 1 && std::string(argv[1]) == "--jobqueue-benchmark")
+    {
+        return RunJobQueueBenchmark(argc, argv);
+    }
+
     if (argc > 1 && std::string(argv[1]) == "--abi")
     {
         DumpAbi();

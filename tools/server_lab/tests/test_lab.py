@@ -92,6 +92,10 @@ class Wire(unittest.IsolatedAsyncioTestCase):
                 await writer.wait_closed()
             with self.assertRaises(ConnectionError):
                 await self.exchange(responder)
+            peer = self.state.snapshot()['peers'][0]
+            self.assertTrue(peer['receive_error'])
+            self.assertEqual(peer['receive_error_phase'], 'setup')
+            self.assertIn('receive_error_port', peer)
 
     async def test_movement_flood_keeps_control_response(self):
         async def responder(reader, writer):
@@ -172,7 +176,7 @@ class Observation(unittest.TestCase):
                 connection.request('GET', '/api/scenarios')
                 response = connection.getresponse()
                 self.assertEqual(response.status, 200)
-                self.assertEqual(len(json.loads(response.read())), 5)
+                self.assertEqual(len(json.loads(response.read())), len(list(SCENARIOS.glob('*.json'))))
                 connection.request('POST', '/api/run', json.dumps({'scenario': 'match-actions', 'clients': 5}))
                 response = connection.getresponse()
                 self.assertEqual(response.status, 400)

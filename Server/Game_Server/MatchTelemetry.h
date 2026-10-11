@@ -1,4 +1,5 @@
 #pragma once
+#include "CommonConstants.h"
 #include <array>
 #include <cstdint>
 #include <map>
@@ -49,7 +50,7 @@ class MatchTelemetry
         }
 
         std::ostringstream json;
-        json << "{\"schema_version\":1,\"matches\":[";
+        json << "{\"schema_version\":1,\"match_capacity\":" << MAX_MATCH << ",\"storage_capacity\":" << MAX_CLIENT << ",\"matches\":[";
         bool first = true;
         for (const auto& [match, sample] : samples)
         {

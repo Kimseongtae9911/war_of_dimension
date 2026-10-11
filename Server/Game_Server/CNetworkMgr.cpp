@@ -204,6 +204,7 @@ namespace wod_server {
 				{
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_UPDATE);
+                    ov->m_dueEpochUs = std::chrono::duration_cast<std::chrono::microseconds>(_ev.m_wakeUpTime.time_since_epoch()).count();
 					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
@@ -331,6 +332,13 @@ namespace wod_server {
 
 	void CNetworkMgr::MatchUpdate(int _id, int _bytes, OverlapEx* _overEx)
 	{
+        if (wod::core::JobMetrics::Enabled())
+        {
+            const auto nowUs = std::chrono::duration_cast<std::chrono::microseconds>(TimeUtil::CurTime().time_since_epoch()).count();
+            wod::core::JobMetrics::m_tickDelay.Record(static_cast<uint64_t>((std::max)(int64_t{0}, nowUs - _overEx->m_dueEpochUs)));
+        }
+
+        wod::core::JobMetrics::Tick observation;
 		auto& match = CMatchMgr::GetInstance()->GetMatch(_id);
 		match.InGameUpdate(_id);
 

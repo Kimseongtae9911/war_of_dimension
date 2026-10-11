@@ -9,6 +9,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="JobQueueBenchmark.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GameObjectTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

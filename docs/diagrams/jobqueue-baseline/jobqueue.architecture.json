@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "JobQueue 현재 성능 측정", "quality_profile": "showcase", "viewBox": [1240, 720] },
+  "components": [
+    { "id": "benchmark-runner", "type": "frontend", "label": "반복 측정 도구", "sublabel": "Measure-JobQueue · Release x64", "pos": [60, 310], "size": [240, 90] },
+    { "id": "actual-core", "type": "backend", "label": "실제 Core 큐", "sublabel": "JobQueue · JobScheduler", "pos": [500, 310], "size": [240, 90] },
+    { "id": "raw-results", "type": "database", "label": "원시 결과와 요약", "sublabel": "JSONL · 환경/hash · summary.json", "pos": [940, 310], "size": [240, 90] },
+    { "id": "workload-matrix", "type": "external", "label": "정책과 부하 조건", "sublabel": "생산자/실행자 · 할당 · 계측", "pos": [500, 60], "size": [240, 90] },
+    { "id": "scheduler-diagnostic", "type": "external", "label": "공정성과 idle 진단", "sublabel": "자기 재등록 · 차단 대기", "pos": [500, 570], "size": [240, 90] }
+  ],
+  "connections": [
+    { "id": "repeat-process", "from": "benchmark-runner", "to": "actual-core", "label": "5회 · 같은 입력", "variant": "emphasis" },
+    { "id": "save-results", "from": "actual-core", "to": "raw-results", "label": "완료 수 · 지연 · CPU" },
+    { "id": "configure-load", "from": "workload-matrix", "to": "actual-core", "label": "Five · Snapshot", "labelDy": 24 },
+    { "id": "probe-scheduler", "from": "scheduler-diagnostic", "to": "actual-core", "label": "실제 실행 경로" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "기준 고정", "items": ["운영 큐 알고리즘 변경 없음", "소스·실행 파일·환경 식별값 저장"] },
+    { "dot": "emerald", "title": "측정 분리", "items": ["기본 처리량과 상세 계측 분리", "전체 작업 수·id 합계 및 중복 검사"] },
+    { "dot": "rose", "title": "검토 범위", "items": ["대상 기아·동일 큐 경합 확인", "서버 전체 TPS와 다른 단위 측정"] }
+  ]
+}

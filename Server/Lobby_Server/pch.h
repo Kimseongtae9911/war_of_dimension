@@ -24,11 +24,21 @@
 #include <functional>
 #include <iomanip>
 #include <ctime>
+#include <cstdlib>
 
 #include <Protocol/protocol.h>
 
 constexpr int MAX_CLIENT = 3000;
-constexpr int CHANNEL_NUM = (MAX_CLIENT / LOBBY_MAX_CLIENT);
+inline const int LOBBY_CHANNEL_CAPACITY = [] {
+#ifdef LOCAL_TEST
+    char value[2]{};
+    if (GetEnvironmentVariableA("WOD_PERF_UNCAPPED", value, sizeof(value)) == 1 && value[0] == '1')
+        return MAX_CLIENT;
+#endif
+
+    return LOBBY_MAX_CLIENT;
+}();
+inline const int CHANNEL_NUM = (MAX_CLIENT / LOBBY_CHANNEL_CAPACITY);
 
 #include <ServerCore/Net.h>
 #include <ServerCore/Concurrency.h>

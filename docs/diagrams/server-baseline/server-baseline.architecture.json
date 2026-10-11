@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {"title": "실제 서버의 최적화 전 기준 측정", "quality_profile": "showcase", "viewBox": [1360, 740]},
+  "components": [
+    {"id": "cohort-driver", "type": "frontend", "label": "시나리오 더미", "sublabel": "전체 준비 · 워밍업 · 고정 주기 부하", "pos": [60, 320], "size": [260, 90]},
+    {"id": "live-servers", "type": "backend", "label": "실제 로비 · 게임 서버", "sublabel": "IOCP · JobQueue · 매치 / NPC", "pos": [550, 320], "size": [260, 90]},
+    {"id": "telemetry-store", "type": "database", "label": "서버 계측 snapshot", "sublabel": "처리량 · 대기 histogram · tick · CPU", "pos": [1040, 320], "size": [260, 90]},
+    {"id": "repeat-controller", "type": "external", "label": "반복 측정 · 입장 설정", "sublabel": "실행마다 재시작 · 채널 제한 해제", "pos": [550, 60], "size": [260, 90]},
+    {"id": "api-report", "type": "frontend", "label": "Server Lab · 저장 결과", "sublabel": "API / 그래프 · 구간 차분 · 실패 기록", "pos": [1040, 580], "size": [260, 90]}
+  ],
+  "connections": [
+    {"id": "tcp-workload", "from": "cohort-driver", "to": "live-servers", "label": "실제 TCP 이동 / 정지"},
+    {"id": "export-counters", "from": "live-servers", "to": "telemetry-store", "label": "1초 누적 계측"},
+    {"id": "configure-run", "from": "repeat-controller", "to": "live-servers", "label": "LOCAL_TEST", "labelDy": 24},
+    {"id": "expose-results", "from": "telemetry-store", "to": "api-report", "label": "표본 · histogram", "labelDy": 24}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "실제 경로", "items": ["로그인 / 매칭 / 로딩 뒤 동시 부하", "큐 정책 · worker 수 · 게임 규칙 유지"]},
+    {"dot": "emerald", "title": "조회와 재현", "items": ["환경 · 소스 / 바이너리 hash 보존", "워밍업과 측정 / 검증 구간 분리"]},
+    {"dot": "rose", "title": "실패도 결과", "items": ["기아 · 응답 누락 · 발행 지연 기록", "정상 종료와 잔여 자원 별도 판정"]}
+  ]
+}

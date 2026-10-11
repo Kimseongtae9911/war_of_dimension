@@ -117,6 +117,11 @@ void TelemetryReporter::Sample(bool _stopped)
          << ",\"received_bytes\":" << stats.m_received << ",\"sent_bytes\":" << stats.m_sent << ",\"io_errors\":" << stats.m_errors << ",\"sockets\":" << stats.m_sockets << ",\"leased\":" << m_leased() << ",\"jobs_submitted\":" << submitted
          << ",\"jobs_started\":" << started << ",\"jobs_cleared\":" << cleared << ",\"jobs_queued\":" << (submitted > started + cleared ? submitted - started - cleared : 0) << ",\"jobs_running\":" << JobMetrics::m_running.load()
          << ",\"jobs_completed\":" << JobMetrics::m_completed.load() << ",\"jobs_failed\":" << JobMetrics::m_failed.load() << ",\"job_execute_us\":" << JobMetrics::m_executeUs.load() << ",\"job_max_execute_us\":" << JobMetrics::m_maxExecuteUs.load();
+    json << ",\"performance\":{\"schema_version\":1,\"packets_processed\":" << JobMetrics::m_packets.load() << ",\"move_requests\":" << JobMetrics::m_moves.load() << ",\"stop_requests\":" << JobMetrics::m_stops.load()
+         << ",\"job_wait_us\":" << JobMetrics::m_wait.Json() << ",\"packet_job_wait_us\":" << JobMetrics::m_packetWait.Json() << ",\"pending_packets\":" << JobMetrics::PendingPacketJson() << ",\"tick_delay_us\":" << JobMetrics::m_tickDelay.Json()
+         << ",\"tick_duration_us\":" << JobMetrics::m_tickDuration.Json() << ",\"lobby_movement_gap_us\":" << JobMetrics::m_lobbyGap.Json() << '}';
+    json << ",\"send_queue\":{\"count\":" << stats.m_queuedSends << ",\"max_socket_count\":" << stats.m_maxSocketQueuedSends << ",\"native_calls\":" << stats.m_sendCalls << ",\"batches\":" << stats.m_sendBatches
+         << ",\"frames\":" << stats.m_batchedFrames << '}';
     if (m_content)
         json << ",\"content\":" << m_content();
 

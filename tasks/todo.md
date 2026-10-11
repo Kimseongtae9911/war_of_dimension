@@ -1,5 +1,66 @@
 # 개발 환경 정비 작업
 
+## 74. 텔리메트리 선행 커밋 준비
+
+- [x] 계측/측정 도구·시나리오·기준 문서를 개선 구현과 index에서 분리
+- [x] 분리한 계측 Release Core164/ABI·서버 빌드와 Python29 검증
+- [ ] 정확한 staged snapshot/메시지 미리보기의 명시적 승인 후 커밋
+
+FIFO/ready·전송 배치·매치 전달 수정과 해당 회귀/개선 문서는 다음 변경으로 남긴다. 별도 Serena 변경은 보존한다.
+분리 검증 뒤 전체 개선 소스 bytes를 복원하고 Release Core199/ABI·서버 빌드를 다시 통과했다. push는 요청받지 않았다.
+커밋은 공통 commit 스킬의 정확한 메시지·fingerprint 미리보기와 사용자 승인 뒤 수행한다.
+
+## 72. 실제 서버 JobQueue 최적화 전 기준 측정 (2026-10-11)
+
+- [x] 로비/게임 입장 제어·실제 실행 경로·누락 지표 조사
+- [x] LOCAL_TEST 측정용 입장 설정·더미 상한 해제, 작업 대기·tick 지연·패킷 처리 계측 추가
+- [x] 실제 서버 로비 이동/정지·다중 매치 시나리오와 반복 측정/원시 결과 도구 추가
+- [x] Release 부하별 반복 측정·실패/기아·CPU/부하 생성기 포화·종료 자원 확인
+- [x] Core/ABI·Server Lab 회귀·실측 문서·Archify·작업 기록 정리
+
+운영 JobQueue 자료구조·정책·worker 수·이동 재등록 방식은 최적화하지 않는다. 실제 IOCP/콘텐츠 경로를 유지한다.
+사용자 승인에 따라 측정용 소프트 인원 제한을 해제한다. 매치 4인 규칙과 고정 저장 용량의 범위 검사는 유지하고 설정/용량을 결과에 기록한다.
+71번의 기준 측정 및 기존 Serena 미커밋 변경을 보존한다. 커밋/push 요청은 없다.
+
+완료: perf-lobby/perf-match와 Measure-ServerPerformance.ps1을 추가했다. 4/16/64명×5회×계측 켬/끔=60회를 실행해 55회 측정 구간·18회 기능 통과·42회 기능 실패를 보존했다.
+양쪽 서버의 종료 pending=0 sockets=0 leased=0과 더미 연결 0은 60회 모두 확인했다. 계측 켬의 측정 구간 job 실패·I/O 오류 증가분은 0이었다.
+로비 처리 packets/s 중앙값은 9.08/18.62/16.90, CPU는 16.63/16.21/17.65%였다. 미실행 패킷 대기의 전체 최대는 24.425초, 로비 15회 모두 이동/정지 실패였다.
+게임 처리 packets/s는 16.02/64.03/255.55, CPU는 7.79/30.98/48.26%, tick 지연 p99 bucket 상한 중앙값은 32.768/32.768/131.072ms였다.
+게임 64명은 측정 가능한 계측 켬 4회·끔 3회 모두 60/64명 이동 응답 누락, 준비 EOF는 켬 2회·끔 3회였다. 원인을 확정하거나 실패를 재시도로 대체하지 않았다.
+정확한 조건·분포·CPU 대조·한계는 docs/development/SERVER_BASELINE.md에, 원시/요약/식별값은 artifacts/logs/server-baseline/20261011-final-on 및 final-off에 보존했다.
+런타임 32개·데이터 36개 SHA-256 동일, 계측 끔 wrapper 단일 옵션 배열 수정과 당시 wrapper 사본을 분리 보존했다. 60행 원본과 요약을 재계산해 확인했다.
+Release 서버 빌드, Core 162·ABI 110종/106상수(Debug/Release), Python 29, 실제 API 7회귀·export 실패 주입·종료 회수 PASS. 기존 C4065/C4101/C4244/C4305/C4309 경고 유지.
+브라우저의 4인 성능 28판정·연결 0, 그래프 9개·대기 카드·1280px overflow 0·console 오류/경고 0 PASS. 검증용 프로세스는 종료했다.
+Archify showcase 9/9·4크기 containment·light/dark PNG 직접 점검·hash, 정적 환경 227소스·PowerShell/Python/JS·UTF-8·링크·diff 검사 PASS.
+Serena CNetworkMgr/TimerThread symbol 조회는 timeout되어 rg로 확인했다. 최대 TPS·장시간·전체 전투/GUI·운영 DB/블록체인·최적화/전후 비교는 미검증이다.
+
+## 71. JobQueue 최적화 브랜치·현재 처리량·개선 방향 검토 (2026-10-11)
+
+- [x] codex/jobqueue-optimization 브랜치 생성·기존 Serena 미커밋 변경 보존
+- [x] 현재 JobQueue/Scheduler 실행 의미와 기준 소스 hash 고정·측정 도구 추가
+- [x] Release 반복 측정: 정책·생산자/실행자·사전 할당 조건·혼합 작업·계측 비용·대기/공정성
+- [x] 실제 결과와 개선 우선순위·계약/회귀 조건 문서화
+- [x] Core/ABI·측정 결과 무결성·문서/프로젝트/UTF-8 검사
+
+사용자 요청 범위는 브랜치 생성·현재 처리량 확인·개선 방향 검토다. 이번에는 기준 측정을 우선하고 운영 JobQueue 알고리즘은 변경하지 않는다.
+새 측정 도구는 실제 Core 큐/스케줄러를 사용한다. 큐 단위 처리량과 서버 전체 처리량을 구분하며, 원시 결과는 Git 제외 artifacts/logs에 보관한다.
+
+완료: Measure-JobQueue.ps1/Python과 ServerCore.Tests의 --jobqueue-benchmark 모드를 추가했다. 테스트 프로젝트 Release에 /O2를 명시했고 운영 큐/서버 빌드 설정은 유지했다.
+백만 작업·35조건·5회=175회 PASS. 최종 결과는 artifacts/logs/jobqueue-baseline/20261011-101649에 있다.
+단일 생산자/큐·계측 끔 중앙값은 Five 3.932M jobs/s, Snapshot 4.228M jobs/s다. 32 독립 큐는 21.929M/23.725M jobs/s이며 실제 ready Scheduler를 통하지 않는 단위 측정이다.
+높은 주소 대상의 자기 재등록 100만 작업이 완료될 때까지 다른 대상이 실행되지 않은 현상을 10/10회 재현했다. 대기 중앙값은 Five 81.216ms/Snapshot 111.164ms다.
+32 큐의 JobMetrics 켬 처리량 중앙값은 끔보다 약 50.5%/53.1% 감소했다. Scheduler 공정성→이동 주기→큐 경합→계측 비용→할당 측정 순서로 검토안을 작성했다.
+상세 결과·편차·측정 경계·회귀 계약은 docs/development/JOBQUEUE_BASELINE.md, Archify JSON/HTML과 근거는 docs/diagrams/jobqueue-baseline에 기록했다.
+
+실제 검증: Core 155검사·Protocol 110종/106상수 ABI 일치(Debug/Release), 175행/35조건/5회 무결성·요약 재계산·소스/실행 파일 SHA-256 일치 PASS.
+잘못된 CLI 인자 5종 거부·상세 1,000작업 smoke PASS. UTF-8·Python AST·PowerShell 구문·문서 링크·git diff --check PASS.
+반복 도구에 timeout/자식 실패를 주입한 35조건에서 전부 실패를 원시/요약에 남기고 최종 exit 1을 반환했다. 실제 성능 175회와 별도 진단이다.
+신규 C++ clang-format dry-run·프로젝트/filter XML·신규 소스/도구/보고서 후행 공백 검사 PASS.
+Test-AgentEnvironment.ps1 -StaticOnly PASS(새 벤치마크 포함 227소스). Archify showcase 9/9·composition 오류/경고 0·4크기 containment PASS, 최소/최대 light/dark PNG 4장 직접 점검.
+최종 측정 빌드에서 C++ 경고는 없었으며 Git의 기존 LF→CRLF 안내는 남는다. 초기 준비 실행의 실패/조건 수정 로그는 최종 결과와 구분한다.
+71번의 미검증 범위: 실제 서버 TPS/네트워크 부하·운영 DB/블록체인·개선 후 비교. 할당 횟수/bytes·최고 메모리·잠금별 대기·server tick은 이 큐 단위 계측에 없다. 이후 실제 서버의 제한 해제 부하·tick·CPU 기준은 72번에서 측정했다.
+기존 Serena 변경은 보존했으며 커밋·push하지 않았다.
+
 ## 70. 다른 로컬 프로젝트에 Serena HTTP 확장 (2026-10-11)
 
 - [ ] Codex 로컬 프로젝트와 기존 Serena 프로젝트의 지침·설정·언어·포트 조사

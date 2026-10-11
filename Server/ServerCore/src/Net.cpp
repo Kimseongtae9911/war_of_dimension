@@ -270,6 +270,14 @@ bool IocpService::Receive(SOCKET _socket, IoContext& _context)
 
 void IocpService::IssueSend(SocketState& _state, IoContext& _context)
 {
+    // 관측만 추가한다. 기준 경로에서는 프레임 하나가 한 배치다.
+    if (_context.m_offset == 0)
+    {
+        ++m_sendBatches;
+        ++m_batchedFrames;
+    }
+
+    ++m_sendCalls;
     _context.GetOver() = {};
     _context.GetWSA().buf = _context.GetSendBuf() + _context.m_offset;
     _context.GetWSA().len = static_cast<ULONG>(_context.m_length - _context.m_offset);
@@ -562,11 +570,18 @@ NetworkStats IocpService::Stats() const
 {
     std::lock_guard lock(m_mutex);
     uint64_t count = 0;
+    uint64_t queuedSends = 0;
+    uint64_t maxSocketQueuedSends = 0;
     for (const auto& [socket, state] : m_sockets)
+    {
         if (state.m_socket != INVALID_SOCKET)
             ++count;
 
-    return {m_pending.load(), m_received.load(), m_sent.load(), m_errors.load(), count};
+        queuedSends += state.m_sends.size();
+        maxSocketQueuedSends = (std::max)(maxSocketQueuedSends, static_cast<uint64_t>(state.m_sends.size()));
+    }
+
+    return {m_pending.load(), m_received.load(), m_sent.load(), m_errors.load(), count, queuedSends, maxSocketQueuedSends, m_sendCalls, m_sendBatches, m_batchedFrames};
 }
 
 bool FrameDecoder::Extract(char *_buffer, size_t _bytes, size_t& _remain, std::vector<Frame>& _frames)

@@ -124,3 +124,7 @@ docs/diagrams/server-lab/server-lab.architecture.json -text whitespace=cr-at-eol
 docs/diagrams/server-lab/server-lab.architecture.html -text whitespace=cr-at-eol
 docs/diagrams/serena-http/runtime.architecture.json -text whitespace=cr-at-eol
 docs/diagrams/serena-http/runtime.architecture.html -text whitespace=cr-at-eol
+docs/diagrams/jobqueue-baseline/jobqueue.architecture.json -text whitespace=cr-at-eol
+docs/diagrams/jobqueue-baseline/jobqueue.architecture.html -text whitespace=cr-at-eol
+docs/diagrams/server-baseline/server-baseline.architecture.json -text whitespace=cr-at-eol
+docs/diagrams/server-baseline/server-baseline.architecture.html -text whitespace=cr-at-eol

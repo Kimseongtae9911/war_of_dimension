@@ -14,6 +14,7 @@ namespace wod_server {
 	bool CServer::Initialize()
 	{
 		LogPrinter::PrintMsg("Server Initialize Start");
+        LogPrinter::PrintMsg("Lobby channel capacity: ", LOBBY_CHANNEL_CAPACITY);
 		NetworkRuntime::Start();
         m_transportReady = true;
 
@@ -72,7 +73,9 @@ namespace wod_server {
 	void CServer::Run()
 	{
         wod::core::ProcessStopSignal signal;
-        wod::core::TelemetryReporter telemetry("LobbyServer", [] { return Resource::m_overExPool.Leased(); });
+        wod::core::TelemetryReporter telemetry("LobbyServer", [] { return Resource::m_overExPool.Leased(); }, [] {
+            return std::string("{\"channel_capacity\":") + std::to_string(LOBBY_CHANNEL_CAPACITY) + ",\"storage_capacity\":" + std::to_string(MAX_CLIENT) + '}';
+        });
         const unsigned int count = 4u;
         const auto failure = [](std::exception_ptr _error) {
             try { std::rethrow_exception(_error); }

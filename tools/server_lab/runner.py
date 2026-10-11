@@ -24,13 +24,21 @@ def load_scenario(path):
     data = json.loads(Path(path).read_text(encoding='utf-8-sig'))
     if not isinstance(data, dict):
         raise ValueError('시나리오는 JSON 객체여야 합니다')
-    if set(data) - {'schema_version', 'name', 'description', 'setup', 'clients', 'timeout_s', 'boss_job', 'execution', 'actions'}:
+    if set(data) - {'schema_version', 'name', 'description', 'setup', 'clients', 'timeout_s', 'boss_job', 'execution', 'actions', 'performance'}:
         raise ValueError('알 수 없는 시나리오 필드')
     if data.get('schema_version') != 1 or data.get('setup') not in ('lobby', 'match'):
         raise ValueError('schema_version=1, setup=lobby|match가 필요합니다')
     if not isinstance(data.get('name'), str) or not data['name'] or len(data['name']) > 80:
         raise ValueError('시나리오 이름이 필요합니다')
     validate_clients(data.get('clients'), data['setup'])
+    if 'performance' in data:
+        config = data['performance']
+        if not isinstance(config, dict) or set(config) != {'warmup_s', 'duration_s', 'interval_s'}:
+            raise ValueError('performance는 warmup_s/duration_s/interval_s가 필요합니다')
+        for key, low, high in [('warmup_s', .1, 120), ('duration_s', 1, 120), ('interval_s', .02, 10)]:
+            value = config[key]
+            if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
+                raise ValueError(f'performance {key} 범위: {low}~{high}')
     if data.get('execution', 'parallel') not in ('parallel', 'sequential'):
         raise ValueError('execution은 parallel|sequential')
     timeout = data.get('timeout_s', 15)
@@ -38,8 +46,10 @@ def load_scenario(path):
         raise ValueError('timeout_s 범위: 0.1~60')
     if data.get('boss_job', 4) not in (4, 5):
         raise ValueError('boss_job은 4 또는 5')
-    actions = data.get('actions')
-    if not isinstance(actions, list) or not 1 <= len(actions) <= 100:
+    actions = data.get('actions', [] if 'performance' in data else None)
+    if 'performance' in data and actions:
+        raise ValueError('performance 부하에서는 actions 대신 고정 이동/정지 주기를 사용합니다')
+    if not isinstance(actions, list) or not (0 if 'performance' in data else 1) <= len(actions) <= 100:
         raise ValueError('actions는 1~100개')
     for action in actions:
         if not isinstance(action, dict):
@@ -66,8 +76,8 @@ def load_scenario(path):
 
 
 def validate_clients(count, setup):
-    if type(count) is not int or not 1 <= count <= 32 or (setup == 'match' and count % 4):
-        raise ValueError('clients는 1~32, match는 4의 배수여야 합니다')
+    if type(count) is not int or count < 1 or (setup == 'match' and count % 4):
+        raise ValueError('clients는 양의 정수, match는 4의 배수여야 합니다')
 
 
 def percentile(values, fraction):
@@ -98,6 +108,14 @@ class RunState:
         self.error = None
         self.loop = self.task = None
         self.cancel_requested = False
+        self.current_phase = 'setup'
+        self.phases = []
+        self.load_lags = {'warmup': [], 'measure': []}
+
+    def phase(self, name):
+        with self.lock:
+            self.current_phase = name
+            self.phases.append({'phase': name, 'timestamp_ms': time.time_ns() // 1_000_000})
 
     def event(self, client, stage, status, detail='', elapsed_ms=None):
         with self.lock:
@@ -124,6 +142,8 @@ class RunState:
                       'started_ms': self.started_ms, 'clients': self.clients, 'error': self.error, 'counters': dict(self.counters),
                       'latency_ms': {'p50': percentile(self.latencies, .5), 'p95': percentile(self.latencies, .95), 'p99': percentile(self.latencies, .99), 'samples': len(self.latencies)},
                       'peers': [dict(value) for value in self.peers.values()], 'events': list(self.events)[-100:]}
+            result.update(phase=self.current_phase, phases=list(self.phases),
+                          generator_lag_ms={phase: {'samples': len(values), 'p50': percentile(values, .5), 'p95': percentile(values, .95), 'p99': percentile(values, .99), 'max': max(values, default=None)} for phase, values in self.load_lags.items()})
             if full:
                 result.update(schema_version=1, scenario=self.scenario, abi_sha256=hashlib.sha256(ABI_PATH.read_bytes()).hexdigest(),
                               assertions=list(self.assertions), finished_ms=time.time_ns() // 1_000_000,
@@ -166,6 +186,9 @@ class Peer:
         self.slot = None
         self.port = None
         self.player_id = None
+        self.measure_moves = 0
+        self.measure_position = None
+        self.measure_distance = 0
 
     async def connect(self, port):
         self.reader, self.writer = await asyncio.wait_for(asyncio.open_connection('127.0.0.1', port), self.timeout)
@@ -197,6 +220,11 @@ class Peer:
                     if len(self.moves) > 4096:
                         raise RuntimeError('플레이어 관측 한도 초과')
                     if player == self.player_id:
+                        if self.state.current_phase == 'measure' and direction != 0:
+                            self.measure_moves += 1
+                            if self.measure_position:
+                                self.measure_distance += math.hypot(x - self.measure_position[0], z - self.measure_position[1])
+                            self.measure_position = (x, z)
                         self.state.peer(self.index, x=x, y=y, z=z, direction=direction)
                 elif kind not in TRANSIENT_PACKETS:
                     if len(self.history) == self.history.maxlen:
@@ -208,6 +236,9 @@ class Peer:
             raise
         except Exception as error:
             self.error = str(error) or type(error).__name__
+            self.state.peer(self.index, receive_error=self.error, receive_error_port=self.port,
+                            receive_error_phase=self.state.current_phase, receive_error_ms=time.time_ns() // 1_000_000,
+                            receive_error_closing=bool(self.writer and self.writer.is_closing()))
             self.changed.set()
 
     async def send(self, name, *values, split=False):
@@ -292,6 +323,7 @@ class Peer:
         self.moves.clear()
         self.evicted.clear()
         self.sequence, self.error = 0, None
+        self.state.peer(self.index, receive_error=None)
         # 서버의 disconnect 후 사용자 정리가 완료될 여유. 자동 재시도로 실패를 숨기지 않는다.
         await asyncio.sleep(.3)
         await self.login(port)
@@ -414,6 +446,13 @@ async def run(state):
         for index in range(state.clients):
             name = (state.run_id[:5] + f'{index:03x}').encode().ljust(10, b'\0')
             all_peers.append(Peer(state, index, name, state.scenario.get('timeout_s', 15)))
+        if 'performance' in state.scenario:
+            from performance import exercise
+            await exercise(state, all_peers, setup_match)
+            with state.lock:
+                state.status = 'passed'
+            return
+
         async def group_run(group):
             async with setup_lock:
                 if state.scenario['setup'] == 'match':

@@ -138,6 +138,7 @@ template <class Operation> class TaggedIoContext final : public IoContext
         IoContext::Reset();
         m_op = Operation::OP_RECV;
         m_hasGeneration = false;
+        m_dueEpochUs = 0;
     }
 
     Operation GetOP() const
@@ -207,6 +208,9 @@ template <class Operation> class TaggedIoContext final : public IoContext
         m_info = _info;
     }
 
+    // 측정용 예약 시각. wire에 포함되지 않으며 IOCP context 소유권으로 전달한다.
+    int64_t m_dueEpochUs = 0;
+
   private:
     Operation m_op = Operation::OP_RECV;
     int m_socketID = -1;
@@ -237,6 +241,9 @@ struct Completion
 struct NetworkStats
 {
     uint64_t m_pending, m_received, m_sent, m_errors, m_sockets;
+    uint64_t m_queuedSends = 0;
+    uint64_t m_maxSocketQueuedSends = 0;
+    uint64_t m_sendCalls = 0, m_sendBatches = 0, m_batchedFrames = 0;
 };
 
 class IocpService
@@ -302,6 +309,7 @@ class IocpService
     std::atomic_uint64_t m_pending = 0, m_received = 0, m_sent = 0, m_errors = 0;
     size_t m_workers = 1;
     SendCall m_sendCall;
+    uint64_t m_sendCalls = 0, m_sendBatches = 0, m_batchedFrames = 0;
 };
 
 // 프로세스 공용 Winsock과 IOCP의 수명을 관리한다.

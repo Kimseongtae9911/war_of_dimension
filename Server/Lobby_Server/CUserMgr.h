@@ -18,13 +18,18 @@ namespace wod_server {
 
 		CClient* GetClient(int _id) { return m_clients.at(_id); }
 		const concurrency::concurrent_unordered_map<int, CClient*>& GetAllClient() const { return m_clients; }
-		std::array<CClient*, LOBBY_MAX_CLIENT> GetChannelClients(int _channel) { m_channelLock.lock(); std::array<CClient*, LOBBY_MAX_CLIENT> temp = m_channelClient[_channel]; m_channelLock.unlock(); return temp; }
+        std::vector<CClient*> GetChannelClients(int _channel)
+        {
+            std::lock_guard lock(m_channelLock);
+
+            return m_channelClient.at(_channel);
+        }
 
 	private:
 		concurrency::concurrent_unordered_map<int, CClient*> m_clients;
 
 		std::mutex m_channelLock;
-		std::array<std::array<CClient*, LOBBY_MAX_CLIENT>, CHANNEL_NUM> m_channelClient;
+        std::vector<std::vector<CClient*>> m_channelClient = std::vector<std::vector<CClient*>>(CHANNEL_NUM, std::vector<CClient*>(LOBBY_CHANNEL_CAPACITY, nullptr));
 	};
 
 }

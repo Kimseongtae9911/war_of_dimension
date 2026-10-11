@@ -49,6 +49,7 @@ namespace wod_server {
 	{
 		if (true == m_packetfunc.contains(_packet->type)) {
 			m_packetfunc[_packet->type](_packet, _client);
+            wod::core::JobMetrics::Packet();
 		}
 		else {
 			LogPrinter::PrintMsg(static_cast<int>(_packet->type) + ": Undefined Packet");
@@ -183,6 +184,7 @@ namespace wod_server {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(_packet);
 
 		_client->SetDir(p->direction);
+        wod::core::JobMetrics::Move(p->direction == 0);
 
 		if (p->direction == 0) {
 			_client->SetVelocity(vec3(0, 0, 0));

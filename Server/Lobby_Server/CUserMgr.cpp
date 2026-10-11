@@ -42,7 +42,7 @@ namespace wod_server {
 	void CUserMgr::ClientReset(int _index)
 	{
 		LogPrinter::PrintMsg(std::string(m_clients[_index]->GetName()) + " Disconnect");
-		m_channelClient[m_clients[_index]->GetChannel()][m_clients[_index]->GetID() % LOBBY_MAX_CLIENT] = nullptr;
+		m_channelClient[m_clients[_index]->GetChannel()][m_clients[_index]->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
 
 		if (!m_clients[_index]->Reset()) {
 			LogPrinter::PrintMsg("Client Reset Fail");
@@ -52,11 +52,11 @@ namespace wod_server {
 	void CUserMgr::RegisterClientToChannel(CClient* _client)
 	{
 		for (int i = 0; i < CHANNEL_NUM; ++i) {
-			for (int j = 0; j < LOBBY_MAX_CLIENT; ++j) {
+			for (int j = 0; j < LOBBY_CHANNEL_CAPACITY; ++j) {
 				m_channelLock.lock();
 				if (m_channelClient[i][j] == nullptr) {
 					_client->SetChannel(i);
-					_client->SetID(i * LOBBY_MAX_CLIENT + j);
+					_client->SetID(i * LOBBY_CHANNEL_CAPACITY + j);
 					m_channelClient[i][j] = _client;
 					m_channelLock.unlock();
 					_client->GetPacketSender()->SendChangeChannelPacket(false, i);
@@ -74,7 +74,7 @@ namespace wod_server {
 		if (_changeChannel >= CHANNEL_NUM)
 			return false;
 
-		for (int i = 0; i < LOBBY_MAX_CLIENT; ++i) {
+		for (int i = 0; i < LOBBY_CHANNEL_CAPACITY; ++i) {
 			m_channelLock.lock();
 			if (!m_channelClient[_changeChannel][i]) {
 				for (int id : _client->GetViewList()->GetView()) {
@@ -82,9 +82,9 @@ namespace wod_server {
 				}
 				_client->GetViewList()->ClearViewList();
 
-				m_channelClient[_curChannel][_client->GetID() % LOBBY_MAX_CLIENT] = nullptr;
+				m_channelClient[_curChannel][_client->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
 				int prevID = _client->GetID();
-				_client->SetID(_changeChannel * LOBBY_MAX_CLIENT + i);
+				_client->SetID(_changeChannel * LOBBY_CHANNEL_CAPACITY + i);
 				_client->SetChannel(_changeChannel);
 				m_channelClient[_changeChannel][i] = _client;
 				m_channelLock.unlock();

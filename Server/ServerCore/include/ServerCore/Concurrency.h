@@ -78,6 +78,7 @@ class IJob
   public:
     virtual ~IJob() = default;
     virtual void Execute() = 0;
+    std::atomic_uint64_t m_enqueuedUs = 0;
 };
 
 template <class Func> class Job final : public IJob
@@ -126,6 +127,9 @@ class JobQueue
     {
         if (_job)
         {
+            if (JobMetrics::Enabled())
+                _job->m_enqueuedUs.store(JobMetrics::NowUs(), std::memory_order_relaxed);
+
             JobMetrics::Submit();
             try
             {
@@ -156,7 +160,7 @@ class JobQueue
             if (!m_jobs.try_pop(job))
                 break;
 
-            JobMetrics::Execution observation;
+            JobMetrics::Execution observation(job->m_enqueuedUs.load(std::memory_order_relaxed));
             job->Execute();
             observation.Succeed();
         }

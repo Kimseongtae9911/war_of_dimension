@@ -26,7 +26,7 @@ namespace wod_server {
 		SC_LOGIN_INFO_PACKET p;
 		p.size = sizeof(p);
 		p.type = SC_LOGIN_INFO;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 		p.x = _pos.m_x; p.y = _pos.m_y; p.z = _pos.m_z;
 		p.model = _modelCustomize;
 		m_session->Send(&p);
@@ -49,7 +49,7 @@ namespace wod_server {
 		p.x = _pos.m_x;
 		p.y = _pos.m_y;
 		p.z = _pos.m_z;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 		p.direction = _dir;
 		p.move_time = std::chrono::high_resolution_clock::now().time_since_epoch().count() + m_clientTimeDifference;
 		m_session->Send(&p);
@@ -60,7 +60,7 @@ namespace wod_server {
 		SC_ROTATE_PLAYER_PACKET p;
 		p.size = sizeof(SC_ROTATE_PLAYER_PACKET);
 		p.type = SC_ROTATE_PLAYER;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 		p.lookX = _look.m_x; p.lookY = _look.m_y; p.lookZ = _look.m_z;
 		p.rightX = _right.m_x; p.rightY = _right.m_y; p.rightZ = _right.m_z;
 		m_session->Send(&p);
@@ -71,7 +71,7 @@ namespace wod_server {
 		SC_ADD_PLAYER_PACKET p;
 		p.size = sizeof(SC_ADD_PLAYER_PACKET);
 		p.type = SC_ADD_PLAYER;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 		p.lookX = _look.m_x; p.lookY = _look.m_y; p.lookZ = _look.m_z;
 		p.rightX = _right.m_x; p.rightY = _right.m_y; p.rightZ = _right.m_z;
 		p.model = _model;
@@ -84,7 +84,7 @@ namespace wod_server {
 		SC_REMOVE_PLAYER_PACKET p;
 		p.size = sizeof(SC_REMOVE_PLAYER_PACKET);
 		p.type = SC_REMOVE_PLAYER;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 
 		m_session->Send(&p);
 	}
@@ -106,7 +106,7 @@ namespace wod_server {
 		SC_MODEL_CUSTOMIZE_PACKET p;
 		p.size = sizeof(SC_MODEL_CUSTOMIZE_PACKET);
 		p.type = SC_MODEL_CUSTOMIZE;
-		p.id = _id % LOBBY_MAX_CLIENT;
+		p.id = _id % LOBBY_CHANNEL_CAPACITY;
 		p.model = _model;
 		m_session->Send(&p);
 	}

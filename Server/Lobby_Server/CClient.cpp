@@ -51,7 +51,10 @@ namespace wod_server {
 
     bool CClient::DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation)
     {
-        GetJobQueue()->PushJob([this, session = _session, generation = _generation, frame = std::move(_frame)]() mutable {
+        GetJobQueue()->PushJob([this, session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
+            if (pending)
+                pending->Start();
+
             session->WithGeneration(generation, [&] {
                 CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET *>(frame.data()), this);
             });
@@ -78,6 +81,12 @@ namespace wod_server {
 			return;
 
 		float elapsedTime = elpasedTimeMicro * 0.000001f;
+        if (wod::core::JobMetrics::Enabled())
+        {
+            wod::core::JobMetrics::m_lobbyGap.Record(static_cast<uint64_t>(elpasedTimeMicro));
+            wod::core::JobMetrics::m_tickDelay.Record(static_cast<uint64_t>(elpasedTimeMicro - 1000));
+        }
+
 		SetUpdateTime();
 
 		vec3 moveShift = m_physics->CalculateMoveShift(m_transform->GetDir(), m_transform->GetLook(), m_transform->GetRight()) * elapsedTime;

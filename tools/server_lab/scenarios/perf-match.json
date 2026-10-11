@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "기준 성능 · 다중 게임 매치 이동/정지",
+  "description": "4인씩 실제 매칭/로딩 완료 뒤 5초 워밍업·20초 측정. 250ms마다 이동/정지를 발행하고 이동 수신·최종 정지를 검사합니다. 기존 NPC와 주기 이벤트도 실행됩니다.",
+  "setup": "match",
+  "clients": 4,
+  "boss_job": 4,
+  "timeout_s": 10,
+  "performance": {"warmup_s": 5, "duration_s": 20, "interval_s": 0.25}
+}

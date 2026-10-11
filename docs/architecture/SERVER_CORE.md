@@ -104,7 +104,7 @@ Core는 `Protocol`, `CUserMgr`, `CMatchMgr`, `CPacketMgr`, DirectX에 의존하�
 처리 정책은 `JobQueue(JobBudget)` 생성자 인자로 반드시 지정한다.
 로비 CClient/Zone은 Five, 게임 CMatch는 Snapshot을 지정하며 별도 정책 래퍼 타입은 사용하지 않는다.
 현재 JobQueue의 성능 개선은 [작업 목록](../../tasks/todo.md)의 후속 작업으로,
-개선 전 기준 측정 → 개선 → 같은 조건의 개선 후 측정 순서로 진행할 예정이다. 아직 성능 측정값은 없다.
+개선 전 기준 측정 → 개선 → 같은 조건의 개선 후 측정 순서로 진행할 예정이다. 기준 측정 결과는 [큐 단위 기준](../development/JOBQUEUE_BASELINE.md)과 [실제 서버 기준](../development/SERVER_BASELINE.md)을 참조한다.
 스케줄러는 중복 등록 억제·조건 변수 대기·남은 작업 재등록·Stop 깨우기를 담당한다.
 연결 종료 시 큐를 비우고 등록 상태를 해제한 뒤 `OnJobQueueDisconnected`를 호출한다.
 실제 사용자 정리는 로비의 `CUserMgr::ClientReset`이 수행한다.
@@ -348,9 +348,17 @@ DB 없는 `LOCAL_TEST`만 사용한다.
 선택 활성화 `JobMetrics`·`TelemetryReporter`와 새 시나리오 더미·로컬 웹 관측의 [첫 구현](../development/SERVER_LAB.md)을 추가했다.
 `WOD_METRICS_DIRECTORY`가 있는 서버 실행만 계측하며 기존 게임 wire는 유지한다.
 로비 disconnect 정리는 content worker에 예약하고, Core는 재사용 초기화 전까지 중복 정리 callback을 막는다.
-JobQueue 자료구조·budget·잠금은 유지했으며 개선 전후 성능 비교는 아직 수행하지 않았다.
+계측과 기준 측정에서는 JobQueue 자료구조·budget·잠금을 유지한다. 기준 성능과 기능 실패는 별도 문서에 보존한다.
 원격 관측 API·전체 월드 렌더링은 아직 구현하지 않았다.
 
 2~4단계에서 신규 시나리오 도구와 agent/GUI 제어·월드 관찰을 만든다.
 기존 `scripts/Test-ServerCore*.py`는 회귀용이며, 신규 제품 도구는 별도 `tools/server_lab`에 있다.
 5단계 전체 서버 문서화와 6단계 콘텐츠 데이터화는 이후 순차 진행한다.
+
+## 성능 기준 계측 (2026-10-11)
+
+선택 활성화 작업/패킷 대기 histogram, 미실행 패킷 추적, 실제 업데이트 지연/실행 시간과 이동/정지 처리 수를 추가했다.
+일반 작업 timestamp를 push에 기록하고 기존 비교·정렬·budget·callback 직렬화는 유지한다. 패킷 추적 수명은 callback 시작 또는 폐기까지다.
+`send_queue`는 active/대기 context 수·한 연결 최대·native 발행/배치/프레임 누적값을 1초 snapshot으로 제공한다.
+기준 전송 경로의 한 배치는 프레임 하나이며 부분 전송 재발행은 native_calls에 포함한다. 전송 순서·발행 방식은 변경하지 않는다.
+[Server Lab 관측 계약](../development/SERVER_LAB.md), [실제 서버 기준 측정](../development/SERVER_BASELINE.md)을 참조한다.

@@ -282,7 +282,10 @@ namespace wod_server {
                 return false;
 
             auto& match = CMatchMgr::GetInstance()->GetMatch(m_matchNum);
-            match.PushJob([client = shared_from_this(), session = _session, generation = _generation, frame = std::move(_frame)]() mutable {
+            match.PushJob([client = shared_from_this(), session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
+                if (pending)
+                    pending->Start();
+
                 session->WithGeneration(generation, [&] {
                     CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET *>(frame.data()), client);
                 });
