@@ -16,10 +16,17 @@ namespace wod_server {
 		CNpc();
 		virtual ~CNpc();
 
-		ENpcType GetNpcType() const { return m_npcType; }
-		virtual void Initialize(uint8_t _posIndex) = 0;
+		ENpcType GetNpcType() const { return m_npcType;
+        }
 
-		void SetTargetPos(const vec2& _target) { m_targetPos = _target; }
+        NPC_TYPE GetPacketType() const
+        {
+            return m_npcType == ENpcType::None ? NPC_TYPE::MINION : static_cast<NPC_TYPE>(static_cast<int>(m_npcType) - 1);
+        }
+
+        virtual void Initialize(uint8_t _posIndex) = 0;
+
+        void SetTargetPos(const vec2& _target) { m_targetPos = _target; }
 
 		std::atomic_bool m_active = false;
 

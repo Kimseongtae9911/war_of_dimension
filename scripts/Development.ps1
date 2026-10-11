@@ -10,6 +10,27 @@ function Get-WodMSBuild {
     return Join-Path $installation 'MSBuild\Current\Bin\MSBuild.exe'
 }
 
+function Get-WodPython([string] $Python = '') {
+    if ($Python) {
+        $candidates = @((Get-Command $Python -ErrorAction Stop).Source)
+    } else {
+        $candidates = @()
+        foreach ($name in @('python', 'python3')) {
+            $command = Get-Command $name -ErrorAction SilentlyContinue
+            if ($command -and $command.Source -notlike '*\Microsoft\WindowsApps\*') { $candidates += $command.Source }
+        }
+        # Codex에 이미 설치된 런타임이 있으면 재사용한다. 다운로드·설치는 하지 않는다.
+        $bundled = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+        if (Test-Path -LiteralPath $bundled) { $candidates += $bundled }
+    }
+    foreach ($candidate in ($candidates | Select-Object -Unique)) {
+        if ($candidate -like '*\Microsoft\WindowsApps\*') { continue }
+        & $candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)'
+        if ($LASTEXITCODE -eq 0) { return $candidate }
+    }
+    throw 'Python 3.12 이상이 필요합니다. -Python에 실제 python.exe 경로를 지정하세요.'
+}
+
 function Get-WodModules {
     return @(
         @{ Name = 'LobbyServer'; Project = 'Lobby_Server'; Directory = 'Server/Lobby_Server' },

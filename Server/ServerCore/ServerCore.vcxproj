@@ -40,8 +40,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src/Net.cpp" />
+    <ClCompile Include="src/Telemetry.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include/ServerCore/Metrics.h" />
+    <ClInclude Include="include/ServerCore/Telemetry.h" />
     <ClInclude Include="include/ServerCore/GameObject.h" />
     <ClInclude Include="include/ServerCore/SessionHandler.h" />
     <ClInclude Include="include/ServerCore/Concurrency.h" />

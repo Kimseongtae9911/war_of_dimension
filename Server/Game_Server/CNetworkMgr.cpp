@@ -356,6 +356,7 @@ namespace wod_server {
 		int time = static_cast<int>(CGameMgr::GetInstance()->GetGameTime(match) / 60);
 
 		npc->Respawn(time);
+		CMatchMgr::GetInstance()->GetMatch(match).ObserveNpcActivation(_id - NPC_ID);
 
 		Resource::m_overExPool.push(_overEx);
 	}

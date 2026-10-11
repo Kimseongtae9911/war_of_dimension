@@ -1,4 +1,5 @@
 #pragma once
+#include <ServerCore/Metrics.h>
 #include <chrono>
 #include <atomic>
 #include <thread>
@@ -124,7 +125,18 @@ class JobQueue
     void PushJob(JobRef _job)
     {
         if (_job)
-            m_jobs.push(std::move(_job));
+        {
+            JobMetrics::Submit();
+            try
+            {
+                m_jobs.push(std::move(_job));
+            }
+            catch (...)
+            {
+                JobMetrics::Withdraw();
+                throw;
+            }
+        }
     }
 
     template <class Func>
@@ -144,7 +156,9 @@ class JobQueue
             if (!m_jobs.try_pop(job))
                 break;
 
+            JobMetrics::Execution observation;
             job->Execute();
+            observation.Succeed();
         }
     }
 
@@ -159,6 +173,7 @@ class JobQueue
         JobRef job;
         while (m_jobs.try_pop(job))
         {
+            JobMetrics::Clear();
         }
     }
 
@@ -196,7 +211,15 @@ class JobTarget
 
     void ResetDisconnected()
     {
+        m_disconnectHandled = false;
         m_isDisconnected = false;
+    }
+
+    bool TryBeginDisconnectCleanup()
+    {
+        bool expected = false;
+
+        return m_disconnectHandled.compare_exchange_strong(expected, true);
     }
 
     bool TryMarkInQueue()
@@ -221,6 +244,7 @@ class JobTarget
   private:
     JobQueue m_jobQueue;
     std::atomic_bool m_isDisconnected = false;
+    std::atomic_bool m_disconnectHandled = false;
     std::atomic_bool m_isEnqueued = false;
 };
 
@@ -262,9 +286,16 @@ class JobScheduler
             }
             if (target->IsDisconnected())
             {
-                target->GetJobQueue()->Clear();
-                target->UnmarkInQueue();
-                target->OnJobQueueDisconnected();
+                if (target->TryBeginDisconnectCleanup())
+                {
+                    target->GetJobQueue()->Clear();
+                    target->UnmarkInQueue();
+                    target->OnJobQueueDisconnected();
+                }
+                else
+                {
+                    target->UnmarkInQueue();
+                }
             }
             else
             {

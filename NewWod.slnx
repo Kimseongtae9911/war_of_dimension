@@ -7,10 +7,33 @@
   </Folder>
   <Folder Name="/Development/">
     <File Path="docs/development/SETUP.md" />
+    <File Path="docs/development/SERVER_LAB.md" />
     <File Path="scripts/Build.ps1" />
     <File Path="scripts/Start-Local.ps1" />
     <File Path="scripts/Stop-Local.ps1" />
+    <File Path="scripts/Start-ServerLab.ps1" />
+    <File Path="scripts/Stop-ServerLab.ps1" />
+    <File Path="scripts/Test-ServerLab.ps1" />
     <File Path="scripts/Test-MeshSharing.ps1" />
+  </Folder>
+  <Folder Name="/Development/ServerLab/">
+    <File Path="tools/server_lab/dummy_client.py" />
+    <File Path="tools/server_lab/monitor.py" />
+    <File Path="tools/server_lab/terrain.py" />
+    <File Path="tools/server_lab/observation.py" />
+    <File Path="tools/server_lab/runner.py" />
+    <File Path="tools/server_lab/protocol.py" />
+    <File Path="tools/server_lab/web/index.html" />
+    <File Path="tools/server_lab/web/terrain.js" />
+    <File Path="tools/server_lab/scenarios/match-actions.json" />
+    <File Path="tools/server_lab/scenarios/world-watch.json" />
+    <File Path="tools/server_lab/scenarios/timeline-watch.json" />
+    <File Path="tools/server_lab/scenarios/lobby-cycle.json" />
+    <File Path="tools/server_lab/scenarios/lobby-movement.json" />
+    <File Path="tools/server_lab/tests/test_lab.py" />
+    <File Path="tools/server_lab/tests/test_terrain.py" />
+    <File Path="tools/server_lab/tests/test_observation.py" />
+    <File Path="tools/server_lab/tests/integration.py" />
   </Folder>
   <Folder Name="/Servers/">
     <Project Path="Server/ServerCore/ServerCore.vcxproj" Id="9f0e573d-6ee7-4658-ab7f-a17057b0d76d" />

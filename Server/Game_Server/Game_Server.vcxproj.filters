@@ -601,6 +601,7 @@
     <ClInclude Include="Global.h">
       <Filter>Global</Filter>
     </ClInclude>
+    <ClInclude Include="MatchTelemetry.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="CMatch.h">
       <Filter>Object\Match</Filter>
     </ClInclude>

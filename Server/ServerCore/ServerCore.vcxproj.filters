@@ -12,11 +12,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src/Telemetry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src/Net.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include/ServerCore/Metrics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/ServerCore/Telemetry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include/ServerCore/GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>

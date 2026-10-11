@@ -8,6 +8,7 @@
 | 테스트 편의성 개선·에이전트/메모리 최종 정리 | [최종 보고서](portfolio/FINAL_REFACTORING_REPORT.md), [수치·출처 근거](portfolio/evidence/final-report-20261006.json), [로딩 실측](portfolio/evidence/client-loading-20261007.json) |
 | 작업별 필수 지침 | [작업 지침 인덱스](guides/INDEX.md) |
 | 빌드·실행·중지 | [개발 환경](development/SETUP.md) |
+| 시나리오 더미·실시간 로컬 웹 관측·지형/NPC/게임 일정 | [Server Lab 사용·계약](development/SERVER_LAB.md), [구현 구조도](diagrams/server-lab/README.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |
 | 현재 구성·연결 | [아키텍처](architecture/OVERVIEW.md) |

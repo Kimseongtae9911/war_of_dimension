@@ -71,6 +71,7 @@ namespace wod_server {
 		bool CheckCoolTime(std::shared_ptr<CClient> _client, char _type);
 
 		float GetGameTime(int _match) { return m_gameData[_match]->m_gameTime; }
+		static constexpr int m_fenceReleaseSeconds = 180;
 		std::chrono::system_clock::time_point GetLastTime(int _match) { return  m_gameData[_match]->m_lastTime; }
 		void SetLastTime(int _match) { m_gameData[_match]->m_lastTime = TimeUtil::CurTime(); }
 

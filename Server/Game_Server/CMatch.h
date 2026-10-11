@@ -1,57 +1,103 @@
 #pragma once
 
-namespace wod_server {
+namespace wod_server
+{
 class CMatch
 {
-	enum class ESceneType { ReadyScene = 0, LoadingScene = 1, GameScene = 2 };
+    enum class ESceneType
+    {
+        ReadyScene = 0,
+        LoadingScene = 1,
+        GameScene = 2
+    };
 
-public:
-	CMatch() {}
-	~CMatch() {}
+  public:
+    CMatch()
+    {
+    }
 
-	//Connecting
-	void ConnectUpdate(int _matchNum);
-	void ClientConnect(const CS_LOGIN_PACKET* _packet, std::shared_ptr<CClient> _client);
+    ~CMatch()
+    {
+    }
 
-	//ReadyScene
-	void RegisterClient(int _matchID, int _id) { m_clientid[_matchID] = _id; }
-	bool IsAllReady() { return std::ranges::all_of(m_clientReady, [](bool _ready) {return _ready; }); }
-	bool IsLoadComplete() { return std::ranges::all_of(m_clientLoading, [](bool _ready) {return _ready; }); }
-	void ReadyUpdate(int _matchNum);
-	void SetReady(const CS_READY_PACKET* _packet);
-	void SelectSkill(const CS_SKILL_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
-	void SelectJob(const CS_JOB_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
-	void SelectStat(const CS_STAT_SELECT_PACKET* _packet, std::shared_ptr<CClient> _client);
+    //Connecting
+    void ConnectUpdate(int _matchNum);
+    void ClientConnect(const CS_LOGIN_PACKET *_packet, std::shared_ptr<CClient> _client);
 
-	//Loading
-	void LoadComplete(const CS_LOAD_COMPLETE_PACKET* _packet, int _id) { m_clientLoading[_id] = true; }
-	void LoadingUpdate(int _matchNum);
+    //ReadyScene
+    void RegisterClient(int _matchID, int _id)
+    {
+        m_clientid[_matchID] = _id;
+    }
 
-	//InGame
-	void TeleportStart(std::shared_ptr<CClient> _client);
-	void UseItem(const CS_USE_ITEM_PACKET* _packet, std::shared_ptr<CClient> _client);
-	void InGameUpdate(int _matchNum);
+    bool IsAllReady()
+    {
+        return std::ranges::all_of(m_clientReady, [](bool _ready) {
+            return _ready;
+        });
+    }
 
-	void Update();
-	void Reset();
+    bool IsLoadComplete()
+    {
+        return std::ranges::all_of(m_clientLoading, [](bool _ready) {
+            return _ready;
+        });
+    }
 
-	template<typename Func>
-	void PushJob(Func&& _f) { m_jobQueue.PushJob(std::forward<Func>(_f)); }
+    void ReadyUpdate(int _matchNum);
+    void SetReady(const CS_READY_PACKET *_packet);
+    void SelectSkill(const CS_SKILL_SELECT_PACKET *_packet, std::shared_ptr<CClient> _client);
+    void SelectJob(const CS_JOB_SELECT_PACKET *_packet, std::shared_ptr<CClient> _client);
+    void SelectStat(const CS_STAT_SELECT_PACKET *_packet, std::shared_ptr<CClient> _client);
 
-	const std::array<int, MAX_PLAYER>& GetClientIds() const { return m_clientid; }
+    //Loading
+    void LoadComplete(const CS_LOAD_COMPLETE_PACKET *_packet, int _id)
+    {
+        m_clientLoading[_id] = true;
+    }
 
-private:
-	std::array<int, MAX_PLAYER> m_clientid = { -1, -1, -1, -1 };
-	std::array<bool, MAX_PLAYER> m_clientReady = { false, false, false, false };
-	std::array<bool, MAX_PLAYER> m_clientLoading = { false, false, false, false };
-	ESceneType m_sceneType = ESceneType::ReadyScene;
-	JobQueue m_jobQueue{wod::core::JobBudget::Snapshot};
+    void LoadingUpdate(int _matchNum);
 
-	float m_readyTime = 120.f;
-	TimePoint m_updateTime = {};
-	TimePoint m_lastGoldUpdateTime = {};
-	TimePoint m_lastPlayerHeal = {};
-	TimePoint m_lastMinionRespawn = {};
+    //InGame
+    void TeleportStart(std::shared_ptr<CClient> _client);
+    void UseItem(const CS_USE_ITEM_PACKET *_packet, std::shared_ptr<CClient> _client);
+    void InGameUpdate(int _matchNum);
+
+    void Update();
+    void PublishTelemetry(int _matchNum, TimePoint _now, bool _finished = false);
+
+    void ObserveNpcActivation(int _id)
+    {
+        if (_id >= 0 && _id < MAX_MINION)
+            m_minionSpawns[_id].store(0);
+    }
+
+    void Reset();
+
+    template <typename Func> void PushJob(Func&& _f)
+    {
+        m_jobQueue.PushJob(std::forward<Func>(_f));
+    }
+
+    const std::array<int, MAX_PLAYER>& GetClientIds() const
+    {
+        return m_clientid;
+    }
+
+  private:
+    std::array<int, MAX_PLAYER> m_clientid = {-1, -1, -1, -1};
+    std::array<bool, MAX_PLAYER> m_clientReady = {false, false, false, false};
+    std::array<bool, MAX_PLAYER> m_clientLoading = {false, false, false, false};
+    ESceneType m_sceneType = ESceneType::ReadyScene;
+    JobQueue m_jobQueue{wod::core::JobBudget::Snapshot};
+
+    float m_readyTime = 120.f;
+    TimePoint m_updateTime = {};
+    TimePoint m_lastGoldUpdateTime = {};
+    TimePoint m_lastPlayerHeal = {};
+    TimePoint m_lastMinionRespawn = {};
+    std::atomic<int64_t> m_lastObservation = 0;
+    std::array<std::atomic<int64_t>, MAX_MINION> m_minionSpawns = {};
 };
 
 }

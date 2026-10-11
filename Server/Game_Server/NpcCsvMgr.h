@@ -2,24 +2,9 @@
 namespace wod_server {
     struct NpcCsv : public tabledata::NpcInfo
     {
-        NpcCsv(const tabledata::NpcInfo& _npcInfo) {
-            Type = _npcInfo.Type;
-            RespawnTime = _npcInfo.RespawnTime;
-            BaseHp = _npcInfo.BaseHp;
-            HpIncrease = _npcInfo.HpIncrease;
-            BaseAttack = _npcInfo.BaseAttack;
-            AttackIncrease = _npcInfo.AttackIncrease;
-            AttackDistance = _npcInfo.AttackDistance;
-            AttackCooltime = _npcInfo.AttackCooltime;
-            GoldReward = _npcInfo.GoldReward;
-            HealCooltime = _npcInfo.HealCooltime;
-            HealPercent = _npcInfo.HealPercent;
-            Speed = _npcInfo.Speed;
-            RotateSpeed = _npcInfo.RotateSpeed;
-            ChaseDistance = _npcInfo.ChaseDistance;
-            ChaseMaxDistance = _npcInfo.ChaseMaxDistance;
-            Scale = _npcInfo.Scale;
-
+        // MaxSpeed 등 원본 필드를 빠뜨리지 않도록 기반 데이터 전체를 복사한다.
+        NpcCsv(const tabledata::NpcInfo& _npcInfo) : tabledata::NpcInfo(_npcInfo)
+        {
             if (_npcInfo.BuffType != "NULL") {
                 std::istringstream issBuffType(_npcInfo.BuffType);
                 std::istringstream issBuffValue(_npcInfo.BuffValue);

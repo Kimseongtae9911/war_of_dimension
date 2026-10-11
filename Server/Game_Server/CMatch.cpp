@@ -2,6 +2,8 @@
 #include "CMatch.h"
 #include "ClientInfos.h"
 #include "Stats.h"
+#include "MatchTelemetry.h"
+#include <ServerCore/Metrics.h>
 
 namespace wod_server {
 	void CMatch::SetReady(const CS_READY_PACKET* _packet)
@@ -138,6 +140,18 @@ namespace wod_server {
 		}
 
 		CGameMgr::GetInstance()->ActiveTower(true, _matchNum, 3);
+		if (wod::core::JobMetrics::m_enabled.load())
+		{
+			std::array<std::string, 4> members;
+			for (size_t slot = 0; slot < m_clientid.size(); ++slot)
+				members[slot] = CObjectMgr::GetInstance()->GetClient(m_clientid[slot])->GetName();
+
+			MatchTelemetry::Register(_matchNum, std::move(members));
+			m_lastObservation.store(0);
+			for (auto& due : m_minionSpawns)
+				due.store(0);
+		}
+
 		CGameMgr::GetInstance()->SetLastTime(_matchNum);
 		network::GetInstance()->InitializeMonster(_matchNum);
 		network::GetInstance()->RegisterTimerEvent({ _matchNum, TimeUtil::CurTime(), EVENT_TYPE::EV_MATCH_UPDATE, -1 });
@@ -277,6 +291,7 @@ namespace wod_server {
 		}
 		else {
 			CNetworkMgr::GetInstance()->RegisterTimerEvent({ _matchNum, std::chrono::system_clock::now() + std::chrono::seconds(10), EVENT_TYPE::EV_MATCH_FINISH, -1 });
+			PublishTelemetry(_matchNum, TimeUtil::CurTime(), true);
 
 			constexpr short INIT_EARN_TOKEN = 10;
 
@@ -393,15 +408,51 @@ namespace wod_server {
 				if (!npc || npc->m_active)
 					continue;
 
-				network::GetInstance()->RegisterTimerEvent({ NPC_ID + i, std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1)/*미니언 하나하나 출현 간격 데이터로 정의하자*/), EVENT_TYPE::EV_NPC_ACTIVE, _matchNum });
+				const auto due = std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1));
+				network::GetInstance()->RegisterTimerEvent({ NPC_ID + i, due, EVENT_TYPE::EV_NPC_ACTIVE, _matchNum });
+				m_minionSpawns[i].store(std::chrono::duration_cast<std::chrono::milliseconds>(due.time_since_epoch()).count());
 				cnt++;
 			}
 
 			m_lastMinionRespawn = now;
 		}
+
+		PublishTelemetry(_matchNum, now);
 	}
 
-	void CMatch::Update()
+    void CMatch::PublishTelemetry(int _matchNum, TimePoint _now, bool _finished)
+    {
+        if (!wod::core::JobMetrics::m_enabled.load())
+            return;
+
+        MatchTelemetry::Sample sample;
+        const auto epoch = [](TimePoint _time) {
+            return std::chrono::duration_cast<std::chrono::milliseconds>(_time.time_since_epoch()).count();
+        };
+        sample.m_timestampMs = epoch(_now);
+        auto previous = m_lastObservation.load();
+        if (!_finished && (sample.m_timestampMs - previous < 1000 || !m_lastObservation.compare_exchange_strong(previous, sample.m_timestampMs)))
+            return;
+
+        sample.m_gameMs = static_cast<int64_t>(CGameMgr::GetInstance()->GetGameTime(_matchNum) * 1000);
+        sample.m_nextWaveMs = epoch(m_lastMinionRespawn + std::chrono::milliseconds(NpcCsvMgr::GetInstance()->GetNpcCsv(ENpcType::Minion)->RespawnTime));
+        sample.m_fence = CGameMgr::GetInstance()->GetFence(_matchNum);
+        sample.m_fenceAtGameMs = CGameMgr::m_fenceReleaseSeconds * 1000LL;
+        sample.m_finished = _finished;
+        for (int id = 0; id < MAX_MINION; ++id)
+        {
+            if (CObjectMgr::GetInstance()->GetNpc(_matchNum, id)->m_active.load())
+                ++sample.m_activeMinions;
+
+            const auto due = m_minionSpawns[id].load();
+            if (due)
+                sample.m_spawns.emplace_back(id, due);
+        }
+
+        MatchTelemetry::Publish(_matchNum, std::move(sample));
+    }
+
+    void CMatch::Update()
 	{
 		m_jobQueue.ProcessJob();
 	}

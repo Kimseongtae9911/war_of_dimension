@@ -1,6 +1,7 @@
 #include <ServerCore/Concurrency.h>
 #include <ServerCore/Diagnostics.h>
 #include <ServerCore/Session.h>
+#include <ServerCore/Telemetry.h>
 #include <algorithm>
 #include <array>
 #include <iostream>
@@ -538,6 +539,46 @@ void MultiWorkerDisconnect()
 
 }
 
+namespace
+{
+void Observations()
+{
+    Check(!JobMetrics::m_enabled.load(), "job metrics disabled by default");
+    const auto submitted = JobMetrics::m_submitted.load();
+    const auto completed = JobMetrics::m_completed.load();
+    const auto cleared = JobMetrics::m_cleared.load();
+    const auto failed = JobMetrics::m_failed.load();
+    JobMetrics::m_enabled = true;
+    JobQueue queue(JobBudget::Five);
+    for (int i = 0; i < 6; ++i)
+        queue.PushJob([] {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        });
+
+    queue.ProcessJob();
+    Check(JobMetrics::m_submitted == submitted + 6 && JobMetrics::m_completed == completed + 5, "metrics preserve five budget");
+    Check(queue.HasJobs(), "observed queue retains budget remainder");
+    queue.Clear();
+    Check(JobMetrics::m_cleared == cleared + 1, "cleared jobs distinct from executed");
+    queue.PushJob([] {
+        throw std::runtime_error("observed failure");
+    });
+    ExpectThrow(
+        [&] {
+            queue.ProcessJob();
+        },
+        "job failure still propagates");
+    Check(JobMetrics::m_failed == failed + 1 && JobMetrics::m_running == 0, "exception metrics settle running count");
+    Check(JobMetrics::m_executeUs > 0 && JobMetrics::m_maxExecuteUs > 0, "job execution duration recorded");
+    JobMetrics::m_enabled = false;
+    const auto disabledSubmitted = JobMetrics::m_submitted.load();
+    queue.PushJob([] {
+    });
+    queue.ProcessJob();
+    Check(JobMetrics::m_submitted == disabledSubmitted && JobMetrics::m_completed == completed + 5, "disabled metrics do not record");
+}
+}
+
 int main(int argc, char **argv)
 {
     ConfigureProcessDiagnostics();
@@ -566,6 +607,7 @@ int main(int argc, char **argv)
         checks += RunExtractionTests();
         checks += RunResourceTests();
         checks += RunGameObjectTests();
+        Observations();
         for (int i = 0; i < 5; ++i)
             Loopback();
         std::cout << "{\"ok\":true,\"checks\":" << checks << "}\n";

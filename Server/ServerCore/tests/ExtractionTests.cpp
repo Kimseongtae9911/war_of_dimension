@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstring>
 #include <future>
+#include "../../Game_Server/MatchTelemetry.h"
+#include <regex>
 
 using namespace wod::core;
 
@@ -259,13 +261,102 @@ void ScheduledJobs()
     cleanup.join();
     Check(discarded && staleCalls == 0 && !disconnected.GetJobQueue()->HasJobs(), "disconnected target discards queued content");
 }
+
+class RequeuedCleanupTarget : public JobTarget
+{
+  public:
+    explicit RequeuedCleanupTarget(JobScheduler& _scheduler) : JobTarget(JobBudget::Five), m_scheduler(_scheduler)
+    {
+    }
+
+    void OnJobQueueDisconnected() override
+    {
+        ++m_cleanups;
+        m_scheduler.AddSessionQueue(this);
+        if (m_cleanups == 1)
+            m_requeued.set_value();
+    }
+
+    std::atomic_int m_cleanups = 0;
+    std::promise<void> m_requeued;
+
+  private:
+    JobScheduler& m_scheduler;
+};
+
+void DisconnectCleanupOnce()
+{
+    JobScheduler scheduler;
+    RequeuedCleanupTarget target(scheduler);
+    auto requeued = target.m_requeued.get_future();
+    std::thread worker([&] {
+        scheduler.ProcessJob();
+    });
+    auto drain = [&] {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+        while (target.IsInQueue() && std::chrono::steady_clock::now() < deadline)
+            std::this_thread::yield();
+    };
+    target.SetDisconnected();
+    scheduler.AddSessionQueue(&target);
+    const bool ready = requeued.wait_for(std::chrono::seconds(2)) == std::future_status::ready;
+    drain();
+    // callback에서 다시 등록된 대상까지 처리한 뒤 관찰한다.
+    scheduler.Stop();
+    worker.join();
+    Check(ready && target.m_cleanups == 1 && !target.IsInQueue(), "requeued disconnect cleans up exactly once");
+    target.ResetDisconnected();
+    Check(target.TryBeginDisconnectCleanup(), "reuse rearms disconnect cleanup latch");
+    Check(!target.TryBeginDisconnectCleanup(), "duplicate cleanup claim rejected");
+}
+}
+
+void MatchObservationCopies()
+{
+    using Observation = wod_server::MatchTelemetry;
+    Observation::Register(3, {"test0000", "test0001", "test0002", std::string("a\"\n")});
+    Observation::Sample sample;
+    sample.m_timestampMs = 1000;
+    sample.m_gameMs = 42;
+    sample.m_nextWaveMs = 43;
+    sample.m_spawns.emplace_back(2, 5000);
+    Observation::Publish(3, sample);
+    sample.m_spawns.clear();
+    const auto json = Observation::Json();
+    Check(json.find("7465737430303030") != std::string::npos && json.find("61220a") != std::string::npos, "member byte keys include quotes/control bytes safely");
+    Check(json.find("\"id\":2,\"due_ms\":5000") != std::string::npos, "published observation owns a detached value copy");
+    std::thread writer([] {
+        for (int value = 0; value < 1000; ++value)
+        {
+            Observation::Sample update;
+            update.m_gameMs = value;
+            update.m_nextWaveMs = value + 1;
+            Observation::Publish(3, std::move(update));
+        }
+    });
+    bool consistent = true;
+    const std::regex values("\"game_ms\":([0-9]+),\"next_wave_ms\":([0-9]+)");
+    for (int index = 0; index < 100; ++index)
+    {
+        const auto snapshot = Observation::Json();
+        std::smatch match;
+        consistent = consistent && std::regex_search(snapshot, match, values) && std::stoll(match[2]) == std::stoll(match[1]) + 1;
+    }
+
+    writer.join();
+    Check(consistent, "reporter never reads mixed fields during concurrent publication");
+    Observation::Register(3, {"new00000", "new00001", "new00002", "new00003"});
+    const auto reset = Observation::Json();
+    Check(reset.find("7465737430303030") == std::string::npos && reset.find("\"spawns\":[]") != std::string::npos, "new match registration clears old members and timers");
 }
 
 int RunExtractionTests()
 {
+    MatchObservationCopies();
     ClientReceive();
     ContextAndDisconnect();
     ScheduledJobs();
+    DisconnectCleanupOnce();
 
     return checks;
 }

@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "시나리오 더미·실시간 서버 관측 첫 구현",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1260,
+      720
+    ]
+  },
+  "components": [
+    {
+      "id": "scenario-contract",
+      "type": "external",
+      "label": "시나리오 정의",
+      "sublabel": "행동 · 기대 결과 · 제한 시간",
+      "pos": [
+        55,
+        65
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "dummy-executor",
+      "type": "backend",
+      "label": "시나리오 runner",
+      "sublabel": "요청 판정 · 더미/NPC 수신 관측",
+      "pos": [
+        500,
+        65
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "authoritative-servers",
+      "type": "backend",
+      "label": "로비 · 게임 서버",
+      "sublabel": "기존 TCP 8910 / 8911",
+      "tag": "LOCAL_TEST",
+      "pos": [
+        945,
+        65
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "server-snapshot",
+      "type": "messagebus",
+      "label": "TelemetryReporter",
+      "sublabel": "1초 지표 · 매치 일정 복사본",
+      "pos": [
+        945,
+        320
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "monitor-collector",
+      "type": "backend",
+      "label": "로컬 monitor",
+      "sublabel": "실행/매치 연결 · 지연 판정",
+      "pos": [
+        500,
+        320
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "operator-dashboard",
+      "type": "frontend",
+      "label": "로컬 관측 화면",
+      "sublabel": "NPC 종류 · 궤적 · 실시간 일정",
+      "pos": [
+        55,
+        320
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "terrain-assets",
+      "type": "external",
+      "label": "지형 · 로비 배치 원본",
+      "sublabel": "HeightMesh · NavMesh · Scene.h",
+      "pos": [
+        55,
+        565
+      ],
+      "size": [
+        260,
+        100
+      ]
+    },
+    {
+      "id": "measurement-record",
+      "type": "database",
+      "label": "실행 결과 보관",
+      "sublabel": "JSON / CSV · assertion · 시계열",
+      "pos": [
+        500,
+        565
+      ],
+      "size": [
+        260,
+        100
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "load-terrain-preview",
+      "from": "terrain-assets",
+      "to": "operator-dashboard",
+      "label": "monitor · /api/terrain"
+    },
+    {
+      "id": "scenario-to-executor",
+      "from": "scenario-contract",
+      "to": "dummy-executor",
+      "label": "seed · 실행 조건"
+    },
+    {
+      "id": "exercise-real-protocol",
+      "from": "dummy-executor",
+      "to": "authoritative-servers",
+      "label": "게임 TCP 요청/응답"
+    },
+    {
+      "id": "publish-safe-observation",
+      "from": "authoritative-servers",
+      "to": "server-snapshot",
+      "label": "통계 · 매치 일정 복사",
+      "labelAt": [
+        1075,
+        240
+      ]
+    },
+    {
+      "id": "collect-server-snapshot",
+      "from": "server-snapshot",
+      "to": "monitor-collector",
+      "label": "지표/일정 JSON · 1초"
+    },
+    {
+      "id": "collect-scenario-events",
+      "from": "dummy-executor",
+      "to": "monitor-collector",
+      "label": "assertion · 이동/NPC 관측",
+      "labelAt": [
+        630,
+        240
+      ]
+    },
+    {
+      "id": "display-live-observation",
+      "from": "monitor-collector",
+      "to": "operator-dashboard",
+      "label": "HTTP 8790 · 지표/월드 분리"
+    },
+    {
+      "id": "retain-run-evidence",
+      "from": "monitor-collector",
+      "to": "measurement-record",
+      "label": "run_id · seed · ABI",
+      "labelAt": [
+        630,
+        490
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "행동을 검증",
+      "items": [
+        "전송 성공과 서버 적용을 구분",
+        "단계별 기대 응답 · timeout · 취소"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "측정을 연결",
+      "items": [
+        "서버 지표와 더미 사건을 같은 실행으로 연결",
+        "누락 · 재시작 · 수집 중단을 표시"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "서버 경계를 유지",
+      "items": [
+        "기존 게임 패킷 ABI 유지",
+        "게임 worker의 파일/HTTP I/O 없음"
+      ]
+    }
+  ]
+}

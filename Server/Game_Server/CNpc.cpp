@@ -115,7 +115,7 @@ namespace wod_server {
 				if (-1 == id)
 					continue;
 				std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(id);
-				client->GetPacketSender()->SendRemoveNpcPacket(m_id - NPC_ID);
+				client->GetPacketSender()->SendRemoveNpcPacket(m_id - NPC_ID, GetPacketType());
 			}
 			return true;
 		}

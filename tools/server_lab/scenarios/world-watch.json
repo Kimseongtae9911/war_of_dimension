@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "지형·더미·NPC 관측 (약 40초)",
+  "description": "게임에 진입해 이동·정지·기본 공격을 수행하고 NPC의 생성·이동·공격을 관측할 시간을 둡니다. 지형 탭에서 객체를 선택해 추적할 수 있습니다.",
+  "setup": "match",
+  "clients": 4,
+  "timeout_s": 15,
+  "boss_job": 4,
+  "actions": [
+    {"op": "move", "direction": 1, "duration_s": 3},
+    {"op": "stop"},
+    {"op": "skill", "slot": 1},
+    {"op": "wait", "duration_s": 15},
+    {"op": "move", "direction": 2, "duration_s": 3},
+    {"op": "stop"},
+    {"op": "wait", "duration_s": 15}
+  ]
+}

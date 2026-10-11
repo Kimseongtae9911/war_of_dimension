@@ -28,7 +28,7 @@ namespace wod_server {
 			if (clId == -1)
 				continue;
 
-			CObjectMgr::GetInstance()->GetClient(clId)->GetPacketSender()->SendAddNpcPacket(monsterId, monster->GetPos(), monster->GetLook(), monster->GetRight(), NPC_TYPE::UNIQUE_DRAGON);
+			CObjectMgr::GetInstance()->GetClient(clId)->GetPacketSender()->SendAddNpcPacket(monsterId, monster->GetPos(), monster->GetLook(), monster->GetRight(), GetPacketType());
 			CObjectMgr::GetInstance()->GetClient(clId)->GetPacketSender()->SendNpcStatChangePacket(monsterId, monster->GetMaxHp(), monster->GetCurHp());
 		}
 		monster->m_active = true;
@@ -57,7 +57,7 @@ namespace wod_server {
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 					if (id == -1)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, NPC_TYPE::MINION, true);
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType(), true);
 				}
 			}
 		}
@@ -167,7 +167,7 @@ namespace wod_server {
 		for (int clID : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 			if (clID == -1)
 				continue;
-			CObjectMgr::GetInstance()->GetClient(clID)->GetPacketSender()->SendAddNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right);
+			CObjectMgr::GetInstance()->GetClient(clID)->GetPacketSender()->SendAddNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType());
 			CObjectMgr::GetInstance()->GetClient(clID)->GetPacketSender()->SendNpcStatChangePacket(m_id - NPC_ID, m_maxHp, m_curHp);
 		}
 	}
@@ -301,7 +301,7 @@ namespace wod_server {
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 					if (id == -1)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right);
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType());
 				}
 			}
 			else {
@@ -311,7 +311,7 @@ namespace wod_server {
 				for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 					if (-1 == id)
 						continue;
-					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right);
+					CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType());
 				}
 			}
 		}
@@ -379,7 +379,7 @@ namespace wod_server {
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 				if (id == -1)
 					continue;
-				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right);
+				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType());
 			}
 		}
 
@@ -405,7 +405,7 @@ namespace wod_server {
 			for (int id : CMatchMgr::GetInstance()->GetMatchPlayers(m_matchNum)) {
 				if (id == -1)
 					continue;
-				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right);
+				CObjectMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendMoveNpcPacket(m_id - NPC_ID, m_pos, m_look, m_right, GetPacketType());
 			}
 		}
 

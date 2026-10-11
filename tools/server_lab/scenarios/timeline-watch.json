@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "게임 일정 관측 (약 3분 20초)",
+  "description": "게임 진입 후 190초 동안 연결을 유지합니다. 미니언 웨이브 검사·예약 스폰·180초 자기장 게이트 해제를 서버의 실제 일정과 상태로 확인합니다.",
+  "setup": "match",
+  "clients": 4,
+  "timeout_s": 15,
+  "boss_job": 4,
+  "actions": [
+    {"op": "wait", "duration_s": 95},
+    {"op": "wait", "duration_s": 95}
+  ]
+}

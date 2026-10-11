@@ -21,8 +21,11 @@ Server/ServerCore/
 │  ├─ GameObject.h                   객체 기반·공통 위치/방향/속도 상태·충돌 정책 주입
 │  ├─ Resource.h                     공통 I/O 자원·세션/소켓 재사용 구성
 │  ├─ Concurrency.h                  Job·작업 큐·스케줄러·객체 풀·스레드 그룹
+│  ├─ Metrics.h                      선택 활성화 작업 실행 계측
+│  ├─ Telemetry.h                    별도 스레드의 로컬 snapshot 수집
 │  └─ Diagnostics.h                  로그·프로세스 오류 진단
 ├─ src/Net.cpp                      공통 네트워크 구현
+├─ src/Telemetry.cpp                프로세스·네트워크·작업 계측 내보내기
 └─ tests/                            별도 ServerCore.Tests 프로젝트·filters
 Shared/Protocol/
 ├─ protocol.h                       기존 wire 선언
@@ -39,7 +42,7 @@ scripts/
 Core는 x64 Debug/Release, C++20, v145로 빌드한다.
 런타임은 서버와 동일한 `/MDd`·`/MD`를 사용한다.
 
-공용 헤더 7개를 `ClInclude`에 등록했다.
+공용 헤더 9개를 `ClInclude`에 등록했다.
 Core와 테스트의 `.filters`에서 소스·헤더·개발 설정을 구분한다.
 테스트 소스 5개는 `ServerCore.Tests` 프로젝트에서 표시한다.
 
@@ -342,8 +345,12 @@ DB 없는 `LOCAL_TEST`만 사용한다.
 
 1단계의 코드 공통화가 후속 도구의 기반이다.
 `IocpService::Stats()`는 프로세스 내부 관측값을 제공한다.
-새 원격 관측 API·GUI·월드 렌더링은 아직 구현하지 않았다.
+선택 활성화 `JobMetrics`·`TelemetryReporter`와 새 시나리오 더미·로컬 웹 관측의 [첫 구현](../development/SERVER_LAB.md)을 추가했다.
+`WOD_METRICS_DIRECTORY`가 있는 서버 실행만 계측하며 기존 게임 wire는 유지한다.
+로비 disconnect 정리는 content worker에 예약하고, Core는 재사용 초기화 전까지 중복 정리 callback을 막는다.
+JobQueue 자료구조·budget·잠금은 유지했으며 개선 전후 성능 비교는 아직 수행하지 않았다.
+원격 관측 API·전체 월드 렌더링은 아직 구현하지 않았다.
 
 2~4단계에서 신규 시나리오 도구와 agent/GUI 제어·월드 관찰을 만든다.
-이번 Python 검사는 회귀용이며 기존 더미 제품을 재사용한 신규 도구가 아니다.
+기존 `scripts/Test-ServerCore*.py`는 회귀용이며, 신규 제품 도구는 별도 `tools/server_lab`에 있다.
 5단계 전체 서버 문서화와 6단계 콘텐츠 데이터화는 이후 순차 진행한다.

@@ -287,7 +287,7 @@ namespace wod_server {
         }
 
         //Check Fence Activation
-        if (m_gameData[_match]->m_fence && IsFloatEqual(::floor(m_gameData[_match]->m_gameTime), 180.f)) {
+        if (m_gameData[_match]->m_fence && IsFloatEqual(::floor(m_gameData[_match]->m_gameTime), static_cast<float>(m_fenceReleaseSeconds))) {
             m_gameData[_match]->m_fence = false;
         }
 

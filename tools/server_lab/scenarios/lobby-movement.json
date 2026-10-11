@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "로비 병렬 이동·정지 검사",
+  "description": "4개 더미의 이동·정지를 동시에 검사합니다. 현재 로비의 반복 업데이트가 요청을 지연시키면 timeout 실패로 기록합니다.",
+  "setup": "lobby",
+  "execution": "parallel",
+  "clients": 4,
+  "timeout_s": 10,
+  "actions": [
+    {"op": "move", "direction": "random", "duration_s": 1},
+    {"op": "stop"}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "4인 매칭·이동·기본 공격",
+  "description": "로그인부터 스킬 선택·로딩까지 진행하고 이동 방향·정지·기본 공격의 서버 응답을 검사합니다.",
+  "setup": "match",
+  "clients": 4,
+  "timeout_s": 15,
+  "boss_job": 4,
+  "actions": [
+    {"op": "move", "direction": 1, "duration_s": 1},
+    {"op": "stop"},
+    {"op": "skill", "slot": 1},
+    {"op": "wait", "duration_s": 1},
+    {"op": "move", "direction": 2, "duration_s": 1},
+    {"op": "stop"}
+  ]
+}

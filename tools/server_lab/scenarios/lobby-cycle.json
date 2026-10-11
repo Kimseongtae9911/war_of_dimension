@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "로비 로그인·재접속",
+  "description": "로그인한 더미의 연결을 종료하고 같은 이름으로 다시 로그인합니다. 이동 큐 지연은 별도 로비 이동 시나리오에서 검사합니다.",
+  "setup": "lobby",
+  "execution": "sequential",
+  "clients": 4,
+  "timeout_s": 10,
+  "actions": [
+    {"op": "wait", "duration_s": 0.2},
+    {"op": "reconnect"},
+    {"op": "wait", "duration_s": 0.2}
+  ]
+}

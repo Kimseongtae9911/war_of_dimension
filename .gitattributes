@@ -120,3 +120,5 @@ docs/diagrams/server-core-plan/server-core.architecture.json -text whitespace=cr
 docs/diagrams/server-core-plan/server-core.architecture.html -text whitespace=cr-at-eol
 docs/diagrams/server-core/server-core.architecture.json -text whitespace=cr-at-eol
 docs/diagrams/server-core/server-core.architecture.html -text whitespace=cr-at-eol
+docs/diagrams/server-lab/server-lab.architecture.json -text whitespace=cr-at-eol
+docs/diagrams/server-lab/server-lab.architecture.html -text whitespace=cr-at-eol

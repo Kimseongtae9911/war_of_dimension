@@ -235,8 +235,8 @@ namespace wod_server {
 				std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_INFO));
 		}
 #endif
-		if(!client->IsInQueue())
-			CUserMgr::GetInstance()->ClientReset(_id);
+        // 사용자 정리는 content worker 한 곳에서 실행한다. IOCP와 동시 reset을 하지 않는다.
+        GPacketJobQueue->AddSessionQueue(client);
 
 		_overEx->Reset();
 		Resource::m_overExPool.push(_overEx);

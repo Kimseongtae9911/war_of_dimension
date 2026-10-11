@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <ServerCore/Session.h>
+#include <ServerCore/Telemetry.h>
 #include "CServer.h"
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
@@ -71,6 +72,7 @@ namespace wod_server {
 	void CServer::Run()
 	{
         wod::core::ProcessStopSignal signal;
+        wod::core::TelemetryReporter telemetry("LobbyServer", [] { return Resource::m_overExPool.Leased(); });
         const unsigned int count = 4u;
         const auto failure = [](std::exception_ptr _error) {
             try { std::rethrow_exception(_error); }

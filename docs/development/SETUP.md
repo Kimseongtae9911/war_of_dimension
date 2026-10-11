@@ -104,6 +104,19 @@ OP_TYPE 정의 뒤에 별칭을 선언하고 Global.h·도메인 헤더는 그 �
 로비의 PacketJobQueue는 Core JobScheduler 별칭이며 게임의 매치별 큐와 실행 경로가 다르다.
 Core의 네트워크 수명 API는 `NetworkRuntime::Start/Stop/Get`을 사용한다.
 
+## 시나리오 더미·실시간 서버 관측
+
+```powershell
+./scripts/Start-ServerLab.ps1 -Configuration Release -Build
+# http://127.0.0.1:8790
+./scripts/Stop-ServerLab.ps1
+./scripts/Test-ServerLab.ps1 -Configuration Release
+```
+
+Python 3.12 이상을 사용한다. 서버를 계측 모드로 시작하고 웹에서 시나리오 실행/중지·단계별 판정·CPU/메모리/네트워크/작업 그래프를 확인한다.
+JSON/CSV 결과·계측·로그는 Git 제외 `artifacts/logs/server-lab`에 저장한다.
+실행 조건·CLI·시나리오 작성·지표 정의·발견한 로비 큐 지연은 [Server Lab 문서](SERVER_LAB.md)를 참조한다.
+
 ## 메시 공유 검증
 
 ```powershell

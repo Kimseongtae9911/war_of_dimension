@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\GitFolder\\NewWod\\docs\\diagrams\\server-lab\\server-lab.architecture.json",
+  "output": "C:\\GitFolder\\NewWod\\docs\\diagrams\\server-lab\\server-lab.architecture.html",
+  "specification": {
+    "sha256": "a2fa1c3a44ad2c4dd1923eedde01862d26e5329272f9eef6cbc838e756c5801c",
+    "bytes": 4740
+  },
+  "artifact": {
+    "sha256": "619e6ef46e816a75e0ad12014725d16703a6f48af470f1f435e714307c1f86c0",
+    "bytes": 713464
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

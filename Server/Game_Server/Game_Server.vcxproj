@@ -155,6 +155,7 @@
     <ClInclude Include="ArcherAttackHandler.h" />
     <ClInclude Include="ArcherBackStepHandler.h" />
     <ClInclude Include="CMatch.h" />
+    <ClInclude Include="MatchTelemetry.h" />
     <ClInclude Include="CMinion.h" />
     <ClInclude Include="CMonster.h" />
     <ClInclude Include="CommonConstants.h" />
