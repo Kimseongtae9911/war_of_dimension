@@ -96,7 +96,8 @@ try {
         $initializationMutex = [Threading.Mutex]::new($false, 'Local\SerenaHttp-Initialization')
         $initializationLocked = $false
         try {
-            try { $initializationLocked = $initializationMutex.WaitOne(60000) } catch [Threading.AbandonedMutexException] { $initializationLocked = $true }
+            # 프로젝트 9개의 초기화(각 최대 90초)가 차례로 끝날 시간을 확보한다.
+            try { $initializationLocked = $initializationMutex.WaitOne(900000) } catch [Threading.AbandonedMutexException] { $initializationLocked = $true }
             if (-not $initializationLocked) { throw '다른 프로젝트의 Serena 초기화 대기 시간이 초과되었습니다. 다시 Start를 실행하세요.' }
             $process = Start-Process -FilePath $executable -ArgumentList $arguments -WorkingDirectory $ProjectRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $runtimeRoot "serena-http-$Port.out.log") -RedirectStandardError (Join-Path $runtimeRoot "serena-http-$Port.err.log")
             try {

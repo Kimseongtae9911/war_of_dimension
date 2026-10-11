@@ -1,5 +1,18 @@
 # 개발 환경 정비 작업
 
+## 81. 잔여 Serena 변경 검토·커밋 준비 (2026-10-11)
+
+- [x] 잔여 3개 파일의 변경 범위·공용 실행 도구·기존 검증 근거 검토
+- [x] NewWod 정적 환경·HTTP 연결과 등록된 9개 프로젝트의 세션/재연결·7개 프로젝트 심볼 재검증
+- [x] PowerShell 구문·UTF-8·문서 링크·구조도 hash·staged diff 검증과 커밋 메시지 준비
+- [ ] 정확한 미리보기 승인 후 main 커밋·푸시 및 원격 확인
+
+실행 코드 변경은 scripts/Serena.ps1의 공용 초기화 mutex 대기를 60초에서 900초로 늘리는 것이다. 9개 프로젝트의 순차 초기화를 허용하며 개별 준비 제한 90초·숨김 실행·프로세스 소유권 검사·잠금 해제 경로는 유지한다.
+docs/diagrams/serena-http/README.md와 70번에 공용 도구 적용·초기화 직렬화·기존 검증 근거를 정리했다. 사용자 공용 도구·다른 프로젝트 설정·로그·바로가기는 이 저장소 커밋 대상이 아니다.
+이번 검토에서 Test-AgentEnvironment.ps1 -StaticOnly -SerenaHttp PASS(227소스), 9개 서버 상태/Startup 등록·독립 세션 2개·프로젝트 전환 거부·재연결 PASS를 확인했다. 언어 설정이 있는 7개 프로젝트의 실제 심볼 조회도 PASS이며 기존 빈 언어 목록 2개는 심볼 지원을 검증하지 않았다.
+공용 Test-Projects.py --symbols 결과는 사용자 공용 verification.json에 저장한다. 기존 Unity/Dart 경고는 해소했다고 주장하지 않는다. 실제 Windows 재로그인·Codex UI 새 채팅·장시간 부하·게임 빌드는 이번 재검증 범위 밖이다.
+커밋 대상은 Serena 관련 3개 파일이며 새 다이어그램이나 서버 구현 변경은 없다. 사용자 공통 commit 스킬에 따라 검토한 snapshot과 메시지를 먼저 제시하고 승인 후 커밋·푸시한다.
+
 ## 80. JobQueue 개선 커밋·푸시·main 병합 준비
 
 - [x] 저장소/브랜치·원격 main·변경 범위와 기존 사용자 변경 확인
@@ -167,13 +180,34 @@ Test-AgentEnvironment.ps1 -StaticOnly PASS(새 벤치마크 포함 227소스). A
 
 ## 70. 다른 로컬 프로젝트에 Serena HTTP 확장 (2026-10-11)
 
-- [ ] Codex 로컬 프로젝트와 기존 Serena 프로젝트의 지침·설정·언어·포트 조사
-- [ ] 사용자 공용 실행 도구 설치·프로젝트별 HTTP URL/포트·활성 프로젝트 설정
-- [ ] 프로젝트별 로그인 자동 시작·다중 연결/재연결·프로젝트 전환 거부 검증
-- [ ] 포트 배정표·복구 방법·실제 검증과 미검증 범위 기록
+- [x] Codex 로컬 프로젝트와 기존 Serena 프로젝트의 지침·설정·언어·포트 조사
+- [x] 사용자 공용 실행 도구 설치·프로젝트별 HTTP URL/포트·활성 프로젝트 설정
+- [x] 프로젝트별 로그인 자동 시작·다중 연결/재연결·프로젝트 전환 거부 검증
+- [x] 포트 배정표·복구 방법·실제 검증과 미검증 범위 기록
 
 대상은 NewWod(9120 유지), vafk_client(9121), vafk_server(9122), RunningApp(9123), WebPopup(9124), MazeRouge(9125), TradeApp(9126), TradeWebsite(9127), VampireAFK(9128)다.
 기존 MCP의 다른 서버와 사용자 변경은 보존한다. 저장된 로컬 프로젝트/기존 Serena 등록에 없는 과거 작업 폴더와 원본 war_of_dimension은 수정하지 않는다.
+
+완료: 사용자 공용 `%USERPROFILE%/.codex/tools/serena-http/`에 실행 도구·context·프로젝트 manifest·관리 안내·검사기를 설치했다.
+9개 프로젝트의 Codex Serena 설정을 독립 HTTP URL로 전환하고 명시적인 프로젝트 경로로 서버를 실행했다. 모두 현재 실행 중이며 숨김 로그인 시작 바로가기를 등록했다.
+기존 설정은 공용 도구의 `backups/20261011-092729/`에 보관했다. 기존 다른 MCP 설정과 Serena 프로젝트 언어 목록은 유지했다.
+새 프로젝트 RunningApp은 설치된 Flutter와 같은 Dart SDK 3.13.4를 지정했고 WebPopup·MazeRouge·TradeApp·TradeWebsite는 실제 소스 언어로 구성했다.
+NewWod의 로컬 실행 도구에도 동일한 초기화 개선을 반영했고 공용 도구는 NewWod 경로에 의존하지 않는다.
+
+실제 검증: 9개 서버 각각 독립 세션 2개·올바른 활성 프로젝트·프로젝트 전환 거부·전체 연결 종료 후 재연결 PASS.
+언어 설정이 있는 7개 프로젝트의 실제 소스 심볼 조회와 재연결 뒤 조회 PASS. 기존 languages: []인 vafk_server·VampireAFK는 활성 프로젝트와 세션 수명만 검증했다.
+9개 프로젝트의 실제 작업 디렉터리에서 Codex CLI mcp get으로 streamable_http/전용 URL을 확인했다. 기존 전역 service_tier 문제는 조회에만 fast를 지정해 우회했으며 전역 설정은 변경하지 않았다.
+9개 Startup 바로가기의 경로·포트·숨김 실행과 listener를 확인했다. WebPopup·TradeWebsite 바로가기를 동시에 실행해 두 서버의 준비 완료와 언어 서버 초기화 직렬화를 확인했다.
+초기 동시 시작에서 발견한 TypeScript 언어 서버 패키지 설치 충돌을 공용 초기화 mutex와 언어 서버 준비 후 HTTP listener 개방으로 수정했다. 수정 후 실제 심볼 검사를 통과했다.
+9개 서버의 순차 시작을 고려해 공용 초기화 순서 대기는 최대 15분, 개별 서버 준비는 기존 최대 90초로 설정했다.
+Test-AgentEnvironment.ps1 -StaticOnly -SerenaHttp PASS(226소스 compilation database·NewWod HTTP 심볼 검사).
+Archify showcase 9/9·composition 오류/경고 0·4크기 containment PASS, 최소/최대 크기의 light/dark PNG 4장 직접 점검. 현재 hash/byte는 구조도 README에 기록했다.
+로그·검사 결과·백업은 사용자 공용 도구 또는 Git 제외 runtime/artifacts에 보관한다.
+최종 UTF-8·Python AST·9개 프로젝트 TOML/YAML·PowerShell 구문·수정 범위 git diff --check PASS. Git 저장소가 아닌 TradeApp·TradeWebsite는 diff 검사 대상에서 제외했다.
+
+기존 Unity C# 의존성/MSBuild 경고와 Dart 알림 미지원 경고는 남아 있으며 위 심볼 조회 성공과 구분한다.
+실제 Windows 로그아웃/로그인과 Codex UI 새 채팅 연결·장시간 부하·게임/웹 서비스 빌드는 미검증이다. 기존 STDIO 채팅은 재연결 또는 새 채팅부터 URL 설정이 적용된다.
+위 확장 적용 당시에는 커밋·push하지 않았다. 이후 잔여 변경의 검토·커밋 준비는 81번에 기록한다.
 
 ## 67. 프로젝트별 Serena HTTP 서버 재사용 (2026-10-11)
 
