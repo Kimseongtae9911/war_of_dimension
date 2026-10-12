@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "JobQueue 성능 원인 조사: 교차 실행과 비용 분리", "quality_profile": "showcase"},
+  "lanes": [{"id": "control", "label": "동일 바이너리 · 교차 실행"}, {"id": "evidence", "label": "관측 · 보존 · 복원"}],
+  "mainPath": ["frozen", "select", "scenario", "record", "restore", "diagnose"],
+  "semanticChecks": {"allowedRoots": ["frozen"], "allowedTerminals": ["diagnose"], "requiredPaths": [{"from": "scenario", "to": "restore"}]},
+  "nodes": [
+    {"id": "frozen", "lane": "control", "col": 0, "type": "database", "label": "전후 파일 보존", "sublabel": "헤더·실행 파일 SHA-256", "width": 180},
+    {"id": "select", "lane": "control", "col": 1, "type": "backend", "label": "AB / BA 교대", "sublabel": "seed 홀짝으로 순서 반전", "width": 180},
+    {"id": "scenario", "lane": "control", "col": 2, "type": "backend", "label": "실제 서버 재시작", "sublabel": "64명 이동·정지 시나리오", "width": 188},
+    {"id": "system", "lane": "evidence", "col": 1, "type": "external", "label": "PDH 시스템 표본", "sublabel": "1초 CPU·성능 비율", "width": 180},
+    {"id": "record", "lane": "evidence", "col": 2, "type": "database", "label": "원시 결과 보존", "sublabel": "실패·tick·실제 이동량", "width": 188},
+    {"id": "restore", "lane": "evidence", "col": 3, "type": "security", "label": "실행 파일 복원", "sublabel": "finally에서 hash 확인", "width": 180},
+    {"id": "diagnose", "lane": "control", "col": 3, "type": "backend", "label": "짝별 비교·원인 분리", "sublabel": "별도 단일 스레드 비용 대조", "width": 204}
+  ],
+  "edges": [
+    {"id": "identify", "from": "frozen", "to": "select", "label": "보존본 선택", "role": "main"},
+    {"id": "start", "from": "select", "to": "scenario", "label": "매 실행 교체", "role": "main"},
+    {"id": "collect", "from": "scenario", "to": "record", "label": "서버·더미 결과", "role": "main"},
+    {"id": "sample", "from": "select", "to": "system", "label": "관측 스레드 시작", "role": "branch"},
+    {"id": "correlate", "from": "system", "to": "record", "label": "같은 측정 구간", "role": "branch"},
+    {"id": "recover", "from": "record", "to": "restore", "label": "실험 종료", "role": "main"},
+    {"id": "analyze", "from": "restore", "to": "diagnose", "label": "원본 유지", "role": "main"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "성능 판정", "items": ["CPU와 함께 tick·실제 이동량·실패율 비교", "p99 bucket 상한과 평균 지연을 구분"]},
+    {"dot": "amber", "title": "별도 비용 대조", "items": ["작은 묶음·자기 재등록 경로를 단일 스레드 측정", "atomic 제거 대조군은 서버에서 사용 금지"]}
+  ]
+}

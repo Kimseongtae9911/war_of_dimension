@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "게임 tick 비용 계측", "quality_profile": "showcase"},
+  "lanes": [{"id": "tick", "label": "상태 소유 worker"}, {"id": "observe", "label": "관측과 분석"}],
+  "mainPath": ["dispatch", "jobs", "players", "npcs", "periodic", "publish"],
+  "nodes": [
+    {"id": "dispatch", "lane": "tick", "col": 0, "type": "messagebus", "label": "tick 시작", "sublabel": "예약 지연", "width": 145},
+    {"id": "jobs", "lane": "tick", "col": 1, "type": "backend", "label": "입력 작업", "sublabel": "기존 FIFO 처리", "width": 145},
+    {"id": "players", "lane": "tick", "col": 2, "type": "backend", "label": "플레이어", "sublabel": "이동과 송신 분리", "width": 145},
+    {"id": "npcs", "lane": "tick", "col": 3, "type": "backend", "label": "NPC", "sublabel": "종류별 Update", "width": 145},
+    {"id": "periodic", "lane": "tick", "col": 4, "type": "backend", "label": "주기 처리", "sublabel": "골드·회복·스폰", "width": 145},
+    {"id": "publish", "lane": "tick", "col": 5, "type": "database", "label": "구간 누적", "sublabel": "wall·CPU cycle", "width": 145},
+    {"id": "reporter", "lane": "observe", "col": 5, "type": "backend", "label": "별도 reporter", "sublabel": "snapshot JSON", "width": 145},
+    {"id": "analysis", "lane": "observe", "col": 4, "type": "frontend", "label": "Server Lab", "sublabel": "API·저장 결과 분석", "width": 145}
+  ],
+  "edges": [
+    {"id": "dispatch-jobs", "from": "dispatch", "to": "jobs"},
+    {"id": "jobs-players", "from": "jobs", "to": "players"},
+    {"id": "players-npcs", "from": "players", "to": "npcs"},
+    {"id": "npcs-periodic", "from": "npcs", "to": "periodic"},
+    {"id": "periodic-publish", "from": "periodic", "to": "publish"},
+    {"id": "publish-reporter", "from": "publish", "to": "reporter", "label": "atomic snapshot"},
+    {"id": "reporter-analysis", "from": "reporter", "to": "analysis", "label": "1초 표본 저장"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "실행과 CPU", "items": ["wall은 스케줄링·대기를 포함", "thread CPU는 실행된 CPU 시간"]},
+    {"dot": "rose", "title": "비교 조건", "items": ["1·4·16매치의 같은 입력", "계측 비용과 실패도 보존"]}
+  ]
+}

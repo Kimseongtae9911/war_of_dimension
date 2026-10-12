@@ -379,3 +379,9 @@ Close/Disconnect는 active 배치를 취소 완료까지 보존하며 아직 발
 `send_queue` snapshot의 active/대기 개수·한 연결 최대·native 발행/배치/프레임 누적값은 API와 결과에 전달한다.
 로비는 SC_MATCH 직후 Disconnect를 호출하지 않고 목적지를 받은 클라이언트의 연결 종료를 받는다.
 [원인과 전후 실측](../development/JOBQUEUE_IMPROVEMENT.md), [현재 흐름도](../diagrams/jobqueue-improvement/README.md)를 참조한다.
+
+## 게임 tick 선택 진단 (2026-10-12)
+
+JobQueue는 main의 FIFO/Five/Snapshot 구현을 유지한다. `TickProfile`은 `WOD_TICK_PROFILE=1`인 게임 서버의 MatchUpdate frame 안에서 큰 구간과 이동/지형/NPC/송신 세부 구간의 wall·worker CPU cycle을 수집한다. worker별 frame 로컬 값만 쓰고 종료 때 고정 수의 atomic 카운터에 합산한다. reporter는 이 통계의 JSON만 읽으며 게임 상태를 추가 순회하지 않는다.
+
+Core Send는 기존 mutex 획득 대기와 획득 후 body를 구분해 측정하며 기존 잠금 범위·발행·완료·회수 계약을 유지한다. 비동기 완료 경로처럼 tick frame 밖의 작업은 이 진단에 포함하지 않는다. 기본은 꺼짐이며 계측 켬/끔 비용 대조와 포함 관계/미수집 계약은 [Server Lab](../development/SERVER_LAB.md#게임-tick-구간별-비용-분석), 흐름은 [계측 구조도](../diagrams/game-tick-profile/README.md)를 따른다.

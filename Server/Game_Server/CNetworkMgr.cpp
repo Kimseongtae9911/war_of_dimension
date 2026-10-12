@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <ServerCore/TickProfile.h>
 #include <Protocol/Validation.h>
 #include "ClientInfos.h"
 #include "NpcInfos.h"
@@ -339,7 +340,8 @@ namespace wod_server {
         }
 
         wod::core::JobMetrics::Tick observation;
-		auto& match = CMatchMgr::GetInstance()->GetMatch(_id);
+        wod::core::TickProfile::Frame profile;
+        auto& match = CMatchMgr::GetInstance()->GetMatch(_id);
 		match.InGameUpdate(_id);
 
 		Resource::m_overExPool.push(_overEx);

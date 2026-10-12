@@ -8,6 +8,34 @@ Python 3.12 이상과 표준 라이브러리만 사용한다. 기존 `Stress_Tes
 Core 큐 자체의 반복 측정은 [JobQueue 기준 측정 도구/실측](JOBQUEUE_BASELINE.md)을 사용하며 웹 더미의 서버 전체 부하와 구분한다.
 실제 서버의 반복 성능 측정·입장 제한 설정·새 대기/tick 지표는 [서버 기준 측정](SERVER_BASELINE.md)을 따른다.
 
+## 게임 tick 구간별 비용 분석
+
+`WOD_TICK_PROFILE=1`로 게임 서버를 시작하면 기존 tick의 실행 경로에서 선택 활성화 계측을 수행한다. 기본값은 꺼짐이다. 일반 metrics 수집도 켜야 API/결과에 저장된다.
+게임 규칙·패킷·예약 간격·JobQueue 처리 정책은 바꾸지 않는다. [계측 흐름도](../diagrams/game-tick-profile/README.md)를 참조한다.
+
+```powershell
+python tools/server_lab/tick_profile.py --output artifacts/logs/game-tick-profile-new --clients 4 16 64 --repeats 5
+python tools/server_lab/tick_profile.py --output artifacts/logs/game-tick-profile-new --analyze
+```
+
+기존 `perf-match`를 실제 서버 재시작·입장 소프트 제한 해제·Release·계측 켬으로 실행한다. 각 인원에서 profile 켬을5회 측정하며, 최소 인원에서는 같은 seed의 profile 끔/켬 순서를 교차한다. 기본 총20회다. 성능 비교 전용 서버 포트를 사용하므로 기존 실행 기록이 있으면 시작하지 않는다. 실행 중 빌드·소스 변경·다른 부하 검사를 수행하지 않는다.
+더미 행동·워밍업5초·측정20초·250ms 발행과 기능 검사/timeout은 기존 시나리오 그대로다. 실패와 정리 실패를 결과에 보존하며 임계값을 완화하지 않는다.
+
+`GET /api/state`의 GameServer `tick_profile`과 저장 결과의 `samples[].servers[].tick_profile`에 누적값을 보존한다. 분석 결과는 `analysis.json`, 실제 실행별 결과는 `*/report.json`·`*/lab/runs/*.json`이다.
+`schema_version=1`, `enabled`, `stages.<name>.{calls,wall_ns,cycles,cycle_samples,cycle_errors,work}`를 제공한다. 누락/꺼짐은 미계측이고 0비용으로 해석하지 않는다. 프로세스 재시작 시 초기화되며, 실행 중 플래그 변경은 지원하지 않는다.
+
+| 구간 | 의미 |
+|---|---|
+| `total` | MatchUpdate handler의 profile frame. 기존 tick_duration은 frame 누적/회수 비용까지 포함 |
+| `game_clock/jobs/player_update/player_send/minion_update/monster_update/periodic/observation` | 서로 겹치지 않는 큰 구간. 제외한 예약·순회·계측 등의 잔차는 별도 표시 |
+| `player_move/map_collision/nav_ray/height_ray/client_collision/npc_collision/astar` | 부모 구간 안의 세부 비용. 부모/자식 시간이나 cycle을 중복 합산하지 않음 |
+| `height_ray_player/height_ray_minion/height_ray_monster` | HeightMesh 비용의 호출 주체별 부분집합. 전체 height_ray와 중복 합산하지 않음 |
+| `send_lock/send_body/native_send` | tick에서 직접 Send한 잠금 획득 대기, 획득 후 처리, 배치 생성/native 발행. native_send는 send_body의 부분집합이며 비동기 완료 handler 비용은 제외 |
+
+wall은 steady_clock 경과 시간으로 OS 스케줄링·대기를 포함한다. CPU cycle은 `QueryThreadCycleTime`의 현재 worker 값 차분이며 시간으로 변환하지 않는다([공식 계약](https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-querythreadcycletime)). `cycle_samples/errors`로 수집 성공/실패를 구분한다. cycle 비중의 분모는 계측한 tick의 cycle이며 전체 프로세스 CPU 비중이 아니다. 프로세스 CPU는 기존 GetProcessTimes 지표로 따로 비교한다.
+Ray의 `work`는 반환까지 방문한 삼각형/노드 수이며 높이 필터로 건너뛴 항목도 포함한다. 동적 메모리/파일 I/O 없이 frame 로컬에 모으고 종료 때 고정 수의 atomic 누적값에 반영한다. reporter 동시 snapshot은 근사값이며 누적 감소·서버 재시작·stale/형식 오류는 분석 오류로 보존한다. 결과는 measure→verify 내부 reporter 표본의 차분이다.
+최소 인원 계측 켬/끔 대조는 해당 부하의 비용만 검증한다. NPC 난수·매치 나이·스폰 수·외부 시스템 부하는 완전히 고정되지 않으며, 다중 매치 결과를 순수 확장 비율이나 최대 수용량으로 해석하지 않는다.
+
 ## 실행과 중지
 
 저장소 루트 PowerShell에서 실행한다. 스크립트는 PATH의 실제 Python을 우선 사용하고, 없으면 이미 설치된 Codex Python 런타임을 재사용한다.

@@ -13,7 +13,10 @@
 | JobQueue 개선 전 처리량·공정성·개선 방향 | [기준 측정/검토](development/JOBQUEUE_BASELINE.md), [측정 구조도](diagrams/jobqueue-baseline/README.md) |
 | 실제 서버 이동/정지·다중 매치 기준 성능·입장 설정·tick/대기 계측 | [실제 서버 기준 측정](development/SERVER_BASELINE.md), [관측 구조도](diagrams/server-baseline/README.md) |
 | 로비 패킷 기아·게임 응답 적체 원인·FIFO/전송 배치·전후 성능 | [HTML 요약 보고서](development/JOBQUEUE_IMPROVEMENT.html), [상세 실측·검증 근거](development/JOBQUEUE_IMPROVEMENT.md), [개선 흐름도](diagrams/jobqueue-improvement/README.md) |
+| 과거 JobQueue 후보·추가 처리량 비교 (후보 제외) | [HTML 요약 보고서](development/JOBQUEUE_THROUGHPUT.html), [상세 실측·검증 근거](development/JOBQUEUE_THROUGHPUT.md), [소유권 흐름도](diagrams/jobqueue-throughput/README.md) |
+| 과거 JobQueue 성능 악화 조사·교차 측정 (도구 보관) | [HTML 조사 보고서](development/JOBQUEUE_REGRESSION.html), [상세 실측·검증 한계](development/JOBQUEUE_REGRESSION.md), [측정 도구 흐름도](diagrams/jobqueue-regression/README.md) |
 | IOCP Poll 책임 분리·m_deferred·배치/개별 완료 | [코드 근거와 흐름도](diagrams/iocp-completion-only/README.md) |
+| 게임 tick 로직·이동/지형/NPC/송신의 wall·CPU cycle 분석 | [HTML 분석 보고서](development/GAME_TICK_PROFILE.html), [실제 측정 근거](development/GAME_TICK_PROFILE.md), [계측 계약/도구](development/SERVER_LAB.md#게임-tick-구간별-비용-분석), [계측 흐름도](diagrams/game-tick-profile/README.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |
 | 프로젝트별 Serena 서버 재사용 | [HTTP 실행·복구](development/AGENTS.md#프로젝트별-codex-serena-http-서버), [연결 구조도](diagrams/serena-http/README.md) |
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |

@@ -1,0 +1,2006 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JobQueue 추가 개선</title><style>body{font:16px/1.65 "Malgun Gothic",sans-serif;background:#f3f6fa;color:#17233a;margin:0;padding:36px 20px}main{max-width:1120px;margin:auto}section{background:white;padding:24px;border-radius:16px;margin:20px 0;border:1px solid #d7e0ec}h1{font-size:32px}h2{font-size:22px}.lead{font-size:20px;font-weight:600}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cards>div{padding:14px;background:#edf3f7;border-radius:10px}.cards strong,.cards small{display:block}.cards strong{font-size:24px}pre{background:#17233a;color:#e4eef9;padding:20px;overflow:auto;border-radius:10px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #d7e0ec}th{background:#edf3f7}figure{margin:28px 0}figcaption{font-weight:bold}svg{width:100%;height:auto}a{color:#126b89}summary{cursor:pointer;padding:16px 0}@media(max-width:700px){body{padding:12px}section{padding:14px}.cards{grid-template-columns:1fr}td,th{padding:5px;font-size:12px}}@media print{body{padding:0;background:white}section{break-inside:avoid}details>table{display:table}}</style></head><body>
+<p style="margin:16px;padding:12px;border:1px solid #64748b;border-radius:8px">과거 실험 기록 · 2026-10-12 큐 후보/전용 도구 제외. 현재 큐는 main 구현. 이 보고서는 당시 측정 근거로 보존합니다.</p>
+<main><h1>JobQueue 추가 개선</h1><section><h2>1. 결과</h2><p><b>후속 판정(2026-10-12): 실제 서버 개선으로 채택할 근거가 부족하다. <a href="JOBQUEUE_REGRESSION.html">교차 재측정·성능 악화 원인 조사</a>를 먼저 확인한다.</b></p><p class="lead">큐 단위 28조건 중 처리량 중앙값이 10% 넘게 증가한 조건 17개, 10% 넘게 감소한 조건 1개. 실제 서버의 고정 부하는 별도로 비교했다. 로비 종료 구간의 미시작 패킷은 중앙값 279개로, 이동 처리의 잔여 대기는 남아 있다. 서버 준비 실패 1회가 있어 게임 전후 표본 수가 다르며, 서버 성능 향상 확정 근거로 사용하지 않는다.</p><div class="cards"><div><small>producers4 · Five · 계측 끔</small><strong>3.884 → 6.074</strong><small>백만 jobs/s · +56.4%</small></div><div><small>single · Snapshot · 계측 끔</small><strong>7.043 → 6.107</strong><small>백만 jobs/s · -13.3%</small></div><div><small>로비 64명 CPU</small><strong>16.69 → 16.38%</strong><small>전체 논리 CPU · n=5→5</small></div><div><small>게임 64명 CPU</small><strong>45.21 → 40.42%</strong><small>전체 논리 CPU · n=5→4</small></div><div><small>로비 종료 구간 미시작 패킷</small><strong>220.0 → 279.0 개</strong><small>낮을수록 좋음 · n=5→5</small></div><div><small>게임 tick 지연 p99 상한</small><strong>131.1 → 262.1 ms</strong><small>낮을수록 좋음 · n=5→4</small></div></div><p>before-micro: 175/175 PASS · after-micro: 175/175 PASS · before-server: 10/10 PASS · after-server: 9/10 PASS</p></section>
+<section><h2>2. 분석한 원인</h2><p>기존 FIFO 큐는 callback마다 게시 mutex를 획득했다. 생산자와 소비자가 같은 잠금을 반복 사용한다. 측정은 경합 부하에서 처리량 증가를 보여주지만, 잠금별 대기 시간은 직접 수집하지 않았다.</p><pre>for (작업 예산) {
+  lock(게시 mutex);
+  job = queue.pop();
+  unlock(게시 mutex);
+  job.Execute();
+}</pre><small>개념 설명용 의사 코드 · 초기 예산/계측 생략</small></section>
+<section><h2>3. 해결 방식</h2><p>실행 대기열이 빌 때만 소유권을 교환한다. FIFO·Five/Snapshot·예외 이후 남은 작업·Clear·callback 직렬성은 유지한다.</p><pre>if (실행 대기열.empty()) {
+  lock(게시 mutex);
+  swap(실행 대기열, 게시 대기열);
+}
+job = 실행 대기열.pop();
+job.Execute();</pre><small>개념 설명용 의사 코드 · 초기 예산/카운터/계측 생략</small><p><a href="../diagrams/jobqueue-throughput/ownership.workflow.html">소유권 흐름도</a> · <a href="JOBQUEUE_THROUGHPUT.md">상세 조건·검증 근거</a></p></section>
+<section><h2>4. 실제 측정한 내용</h2><p>Release x64 · 큐 200,000작업×35조건×5회 · 실제 서버 64명 로비/게임 각 seed 1~5 · 워밍업 5초/측정 20초/입력 250ms · 입장 제한 해제 · 게임은 16매치×4명.</p><p>Debug/Release Core 각 223 checks · ABI 110타입/106상수 · Release 네트워크 12개/보스 4·5/초기화 실패 4경로 PASS. 기존 빌드 경고는 남아 있다.</p>
+<figure><figcaption>Five 처리량</figcaption><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="872.39952pt" height="296.39952pt" viewBox="0 0 872.39952 296.39952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="Five-figure_1">
+  <g id="Five-patch_1">
+   <path d="M 0 296.39952
+L 872.39952 296.39952
+L 872.39952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="Five-axes_1">
+   <g id="Five-patch_2">
+    <path d="M 69.726562 257.241707
+L 431.87976 257.241707
+L 431.87976 23.5425
+L 69.726562 23.5425
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="Five-patch_3">
+    <path d="M 69.726562 45.580621
+L 146.614335 45.580621
+L 146.614335 56.36186
+L 69.726562 56.36186
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_4">
+    <path d="M 69.726562 77.290147
+L 113.979654 77.290147
+L 113.979654 88.071386
+L 69.726562 88.071386
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_5">
+    <path d="M 69.726562 108.999673
+L 109.808813 108.999673
+L 109.808813 119.780912
+L 69.726562 119.780912
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_6">
+    <path d="M 69.726562 140.709199
+L 338.510418 140.709199
+L 338.510418 151.490438
+L 69.726562 151.490438
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_7">
+    <path d="M 69.726562 172.418725
+L 221.532951 172.418725
+L 221.532951 183.199964
+L 69.726562 183.199964
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_8">
+    <path d="M 69.726562 204.128251
+L 178.335017 204.128251
+L 178.335017 214.90949
+L 69.726562 214.90949
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_9">
+    <path d="M 69.726562 235.837777
+L 330.999338 235.837777
+L 330.999338 246.619016
+L 69.726562 246.619016
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_10">
+    <path d="M 69.726562 34.165191
+L 145.075532 34.165191
+L 145.075532 44.94643
+L 69.726562 44.94643
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_11">
+    <path d="M 69.726562 65.874717
+L 138.925744 65.874717
+L 138.925744 76.655956
+L 69.726562 76.655956
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_12">
+    <path d="M 69.726562 97.584243
+L 137.467919 97.584243
+L 137.467919 108.365482
+L 69.726562 108.365482
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_13">
+    <path d="M 69.726562 129.29377
+L 321.195265 129.29377
+L 321.195265 140.075008
+L 69.726562 140.075008
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_14">
+    <path d="M 69.726562 161.003296
+L 241.98712 161.003296
+L 241.98712 171.784535
+L 69.726562 171.784535
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_15">
+    <path d="M 69.726562 192.712822
+L 193.14264 192.712822
+L 193.14264 203.494061
+L 69.726562 203.494061
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_16">
+    <path d="M 69.726562 224.422348
+L 366.573446 224.422348
+L 366.573446 235.203587
+L 69.726562 235.203587
+z
+" clip-path="url(#Five-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-matplotlib.axis_1">
+    <g id="Five-xtick_1">
+     <g id="Five-line2d_1">
+      <defs>
+       <path id="Five-m839c66b03e" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="69.726562" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="69.726562" y="272.239754" transform="rotate(-0 69.726562 272.239754)">0</text>
+     </g>
+    </g>
+    <g id="Five-xtick_2">
+     <g id="Five-line2d_2">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="126.689253" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="126.689253" y="272.239754" transform="rotate(-0 126.689253 272.239754)">5</text>
+     </g>
+    </g>
+    <g id="Five-xtick_3">
+     <g id="Five-line2d_3">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="183.651944" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="183.651944" y="272.239754" transform="rotate(-0 183.651944 272.239754)">10</text>
+     </g>
+    </g>
+    <g id="Five-xtick_4">
+     <g id="Five-line2d_4">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="240.614634" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="240.614634" y="272.239754" transform="rotate(-0 240.614634 272.239754)">15</text>
+     </g>
+    </g>
+    <g id="Five-xtick_5">
+     <g id="Five-line2d_5">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="297.577325" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_5">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="297.577325" y="272.239754" transform="rotate(-0 297.577325 272.239754)">20</text>
+     </g>
+    </g>
+    <g id="Five-xtick_6">
+     <g id="Five-line2d_6">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="354.540015" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_6">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="354.540015" y="272.239754" transform="rotate(-0 354.540015 272.239754)">25</text>
+     </g>
+    </g>
+    <g id="Five-xtick_7">
+     <g id="Five-line2d_7">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="411.502706" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_7">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="411.502706" y="272.239754" transform="rotate(-0 411.502706 272.239754)">30</text>
+     </g>
+    </g>
+    <g id="Five-text_8">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="250.803161" y="286.782332" transform="rotate(-0 250.803161 286.782332)">백만 jobs/s · 5회 중앙값 · 클수록 좋음</text>
+    </g>
+   </g>
+   <g id="Five-matplotlib.axis_2">
+    <g id="Five-ytick_1">
+     <g id="Five-line2d_8">
+      <defs>
+       <path id="Five-m78ebcf7f2a" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="45.263525" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_9">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="49.262549" transform="rotate(-0 62.726562 49.262549)">single</text>
+     </g>
+    </g>
+    <g id="Five-ytick_2">
+     <g id="Five-line2d_9">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="76.973052" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_10">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="80.972075" transform="rotate(-0 62.726562 80.972075)">producers4</text>
+     </g>
+    </g>
+    <g id="Five-ytick_3">
+     <g id="Five-line2d_10">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="108.682578" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_11">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="112.681601" transform="rotate(-0 62.726562 112.681601)">consumers4</text>
+     </g>
+    </g>
+    <g id="Five-ytick_4">
+     <g id="Five-line2d_11">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="140.392104" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_12">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="144.391127" transform="rotate(-0 62.726562 144.391127)">queues32</text>
+     </g>
+    </g>
+    <g id="Five-ytick_5">
+     <g id="Five-line2d_12">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="172.10163" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_13">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="176.100653" transform="rotate(-0 62.726562 176.100653)">burst</text>
+     </g>
+    </g>
+    <g id="Five-ytick_6">
+     <g id="Five-line2d_13">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="203.811156" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_14">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="207.810179" transform="rotate(-0 62.726562 207.810179)">preallocated</text>
+     </g>
+    </g>
+    <g id="Five-ytick_7">
+     <g id="Five-line2d_14">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="69.726562" y="235.520682" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_15">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="239.519706" transform="rotate(-0 62.726562 239.519706)">mixed</text>
+     </g>
+    </g>
+   </g>
+   <g id="Five-patch_17">
+    <path d="M 69.726562 257.241707
+L 69.726562 23.5425
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Five-patch_18">
+    <path d="M 69.726562 257.241707
+L 431.87976 257.241707
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Five-text_16">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="149.614335" y="53.369678" transform="rotate(-0 149.614335 53.369678)">6.75</text>
+   </g>
+   <g id="Five-text_17">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="116.979654" y="85.079204" transform="rotate(-0 116.979654 85.079204)">3.88</text>
+   </g>
+   <g id="Five-text_18">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="112.808813" y="116.78873" transform="rotate(-0 112.808813 116.78873)">3.52</text>
+   </g>
+   <g id="Five-text_19">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="341.510418" y="148.498256" transform="rotate(-0 341.510418 148.498256)">23.59</text>
+   </g>
+   <g id="Five-text_20">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="224.532951" y="180.207782" transform="rotate(-0 224.532951 180.207782)">13.33</text>
+   </g>
+   <g id="Five-text_21">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="181.335017" y="211.917308" transform="rotate(-0 181.335017 211.917308)">9.53</text>
+   </g>
+   <g id="Five-text_22">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="333.999338" y="243.626834" transform="rotate(-0 333.999338 243.626834)">22.93</text>
+   </g>
+   <g id="Five-text_23">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="148.075532" y="41.954248" transform="rotate(-0 148.075532 41.954248)">6.61</text>
+   </g>
+   <g id="Five-text_24">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="141.925744" y="73.663774" transform="rotate(-0 141.925744 73.663774)">6.07</text>
+   </g>
+   <g id="Five-text_25">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="140.467919" y="105.3733" transform="rotate(-0 140.467919 105.3733)">5.95</text>
+   </g>
+   <g id="Five-text_26">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="324.195265" y="137.082827" transform="rotate(-0 324.195265 137.082827)">22.07</text>
+   </g>
+   <g id="Five-text_27">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="244.98712" y="168.792353" transform="rotate(-0 244.98712 168.792353)">15.12</text>
+   </g>
+   <g id="Five-text_28">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="196.14264" y="200.501879" transform="rotate(-0 196.14264 200.501879)">10.83</text>
+   </g>
+   <g id="Five-text_29">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="369.573446" y="232.211405" transform="rotate(-0 369.573446 232.211405)">26.06</text>
+   </g>
+   <g id="Five-text_30">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="250.803161" y="17.5425" transform="rotate(-0 250.803161 17.5425)">Five · 계측 끔</text>
+   </g>
+   <g id="Five-legend_1">
+    <g id="Five-patch_19">
+     <path d="M 373.86726 54.810625
+L 426.27976 54.810625
+Q 427.87976 54.810625 427.87976 53.210625
+L 427.87976 29.1425
+Q 427.87976 27.5425 426.27976 27.5425
+L 373.86726 27.5425
+Q 372.26726 27.5425 372.26726 29.1425
+L 372.26726 53.210625
+Q 372.26726 54.810625 373.86726 54.810625
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="Five-patch_20">
+     <path d="M 375.46726 37.575
+L 391.46726 37.575
+L 391.46726 31.975
+L 375.46726 31.975
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="Five-text_31">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="397.86726" y="37.575" transform="rotate(-0 397.86726 37.575)">개선 전</text>
+    </g>
+    <g id="Five-patch_21">
+     <path d="M 375.46726 50.009062
+L 391.46726 50.009062
+L 391.46726 44.409062
+L 375.46726 44.409062
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="Five-text_32">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="397.86726" y="50.009062" transform="rotate(-0 397.86726 50.009062)">개선 후</text>
+    </g>
+   </g>
+  </g>
+  <g id="Five-axes_2">
+   <g id="Five-patch_22">
+    <path d="M 503.046322 257.241707
+L 865.19952 257.241707
+L 865.19952 23.5425
+L 503.046322 23.5425
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="Five-patch_23">
+    <path d="M 503.046322 45.580621
+L 642.394325 45.580621
+L 642.394325 56.36186
+L 503.046322 56.36186
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_24">
+    <path d="M 503.046322 77.290147
+L 580.826525 77.290147
+L 580.826525 88.071386
+L 503.046322 88.071386
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_25">
+    <path d="M 503.046322 108.999673
+L 571.664189 108.999673
+L 571.664189 119.780912
+L 503.046322 119.780912
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_26">
+    <path d="M 503.046322 140.709199
+L 799.893206 140.709199
+L 799.893206 151.490438
+L 503.046322 151.490438
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_27">
+    <path d="M 503.046322 172.418725
+L 682.782483 172.418725
+L 682.782483 183.199964
+L 503.046322 183.199964
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_28">
+    <path d="M 503.046322 204.128251
+L 623.753819 204.128251
+L 623.753819 214.90949
+L 503.046322 214.90949
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_29">
+    <path d="M 503.046322 235.837777
+L 763.25919 235.837777
+L 763.25919 246.619016
+L 503.046322 246.619016
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Five-patch_30">
+    <path d="M 503.046322 34.165191
+L 672.066268 34.165191
+L 672.066268 44.94643
+L 503.046322 44.94643
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_31">
+    <path d="M 503.046322 65.874717
+L 654.730662 65.874717
+L 654.730662 76.655956
+L 503.046322 76.655956
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_32">
+    <path d="M 503.046322 97.584243
+L 640.710189 97.584243
+L 640.710189 108.365482
+L 503.046322 108.365482
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_33">
+    <path d="M 503.046322 129.29377
+L 773.996767 129.29377
+L 773.996767 140.075008
+L 503.046322 140.075008
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_34">
+    <path d="M 503.046322 161.003296
+L 698.331616 161.003296
+L 698.331616 171.784535
+L 503.046322 171.784535
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_35">
+    <path d="M 503.046322 192.712822
+L 678.308593 192.712822
+L 678.308593 203.494061
+L 503.046322 203.494061
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-patch_36">
+    <path d="M 503.046322 224.422348
+L 769.810165 224.422348
+L 769.810165 235.203587
+L 503.046322 235.203587
+z
+" clip-path="url(#Five-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Five-matplotlib.axis_3">
+    <g id="Five-xtick_8">
+     <g id="Five-line2d_15">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="503.046322" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_33">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="503.046322" y="272.239754" transform="rotate(-0 503.046322 272.239754)">0</text>
+     </g>
+    </g>
+    <g id="Five-xtick_9">
+     <g id="Five-line2d_16">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="558.051159" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_34">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="558.051159" y="272.239754" transform="rotate(-0 558.051159 272.239754)">2</text>
+     </g>
+    </g>
+    <g id="Five-xtick_10">
+     <g id="Five-line2d_17">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="613.055996" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_35">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="613.055996" y="272.239754" transform="rotate(-0 613.055996 272.239754)">4</text>
+     </g>
+    </g>
+    <g id="Five-xtick_11">
+     <g id="Five-line2d_18">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="668.060833" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_36">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="668.060833" y="272.239754" transform="rotate(-0 668.060833 272.239754)">6</text>
+     </g>
+    </g>
+    <g id="Five-xtick_12">
+     <g id="Five-line2d_19">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="723.06567" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_37">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="723.06567" y="272.239754" transform="rotate(-0 723.06567 272.239754)">8</text>
+     </g>
+    </g>
+    <g id="Five-xtick_13">
+     <g id="Five-line2d_20">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="778.070507" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_38">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="778.070507" y="272.239754" transform="rotate(-0 778.070507 272.239754)">10</text>
+     </g>
+    </g>
+    <g id="Five-xtick_14">
+     <g id="Five-line2d_21">
+      <g>
+       <use xlink:href="#Five-m839c66b03e" x="833.075344" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_39">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="833.075344" y="272.239754" transform="rotate(-0 833.075344 272.239754)">12</text>
+     </g>
+    </g>
+    <g id="Five-text_40">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="684.122921" y="286.782332" transform="rotate(-0 684.122921 286.782332)">백만 jobs/s · 5회 중앙값 · 클수록 좋음</text>
+    </g>
+   </g>
+   <g id="Five-matplotlib.axis_4">
+    <g id="Five-ytick_8">
+     <g id="Five-line2d_22">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="45.263525" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_41">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="49.262549" transform="rotate(-0 496.046322 49.262549)">single</text>
+     </g>
+    </g>
+    <g id="Five-ytick_9">
+     <g id="Five-line2d_23">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="76.973052" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_42">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="80.972075" transform="rotate(-0 496.046322 80.972075)">producers4</text>
+     </g>
+    </g>
+    <g id="Five-ytick_10">
+     <g id="Five-line2d_24">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="108.682578" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_43">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="112.681601" transform="rotate(-0 496.046322 112.681601)">consumers4</text>
+     </g>
+    </g>
+    <g id="Five-ytick_11">
+     <g id="Five-line2d_25">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="140.392104" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_44">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="144.391127" transform="rotate(-0 496.046322 144.391127)">queues32</text>
+     </g>
+    </g>
+    <g id="Five-ytick_12">
+     <g id="Five-line2d_26">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="172.10163" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_45">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="176.100653" transform="rotate(-0 496.046322 176.100653)">burst</text>
+     </g>
+    </g>
+    <g id="Five-ytick_13">
+     <g id="Five-line2d_27">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="203.811156" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_46">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="207.810179" transform="rotate(-0 496.046322 207.810179)">preallocated</text>
+     </g>
+    </g>
+    <g id="Five-ytick_14">
+     <g id="Five-line2d_28">
+      <g>
+       <use xlink:href="#Five-m78ebcf7f2a" x="503.046322" y="235.520682" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Five-text_47">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="239.519706" transform="rotate(-0 496.046322 239.519706)">mixed</text>
+     </g>
+    </g>
+   </g>
+   <g id="Five-patch_37">
+    <path d="M 503.046322 257.241707
+L 503.046322 23.5425
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Five-patch_38">
+    <path d="M 503.046322 257.241707
+L 865.19952 257.241707
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Five-text_48">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="645.394325" y="53.369678" transform="rotate(-0 645.394325 53.369678)">5.07</text>
+   </g>
+   <g id="Five-text_49">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="583.826525" y="85.079204" transform="rotate(-0 583.826525 85.079204)">2.83</text>
+   </g>
+   <g id="Five-text_50">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="574.664189" y="116.78873" transform="rotate(-0 574.664189 116.78873)">2.49</text>
+   </g>
+   <g id="Five-text_51">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="802.893206" y="148.498256" transform="rotate(-0 802.893206 148.498256)">10.79</text>
+   </g>
+   <g id="Five-text_52">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="685.782483" y="180.207782" transform="rotate(-0 685.782483 180.207782)">6.54</text>
+   </g>
+   <g id="Five-text_53">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="626.753819" y="211.917308" transform="rotate(-0 626.753819 211.917308)">4.39</text>
+   </g>
+   <g id="Five-text_54">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="766.25919" y="243.626834" transform="rotate(-0 766.25919 243.626834)">9.46</text>
+   </g>
+   <g id="Five-text_55">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="675.066268" y="41.954248" transform="rotate(-0 675.066268 41.954248)">6.15</text>
+   </g>
+   <g id="Five-text_56">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="657.730662" y="73.663774" transform="rotate(-0 657.730662 73.663774)">5.52</text>
+   </g>
+   <g id="Five-text_57">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="643.710189" y="105.3733" transform="rotate(-0 643.710189 105.3733)">5.01</text>
+   </g>
+   <g id="Five-text_58">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="776.996767" y="137.082827" transform="rotate(-0 776.996767 137.082827)">9.85</text>
+   </g>
+   <g id="Five-text_59">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="701.331616" y="168.792353" transform="rotate(-0 701.331616 168.792353)">7.10</text>
+   </g>
+   <g id="Five-text_60">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="681.308593" y="200.501879" transform="rotate(-0 681.308593 200.501879)">6.37</text>
+   </g>
+   <g id="Five-text_61">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="772.810165" y="232.211405" transform="rotate(-0 772.810165 232.211405)">9.70</text>
+   </g>
+   <g id="Five-text_62">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="684.122921" y="17.5425" transform="rotate(-0 684.122921 17.5425)">Five · 계측 켬</text>
+   </g>
+   <g id="Five-legend_2">
+    <g id="Five-patch_39">
+     <path d="M 807.18702 54.810625
+L 859.59952 54.810625
+Q 861.19952 54.810625 861.19952 53.210625
+L 861.19952 29.1425
+Q 861.19952 27.5425 859.59952 27.5425
+L 807.18702 27.5425
+Q 805.58702 27.5425 805.58702 29.1425
+L 805.58702 53.210625
+Q 805.58702 54.810625 807.18702 54.810625
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="Five-patch_40">
+     <path d="M 808.78702 37.575
+L 824.78702 37.575
+L 824.78702 31.975
+L 808.78702 31.975
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="Five-text_63">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="831.18702" y="37.575" transform="rotate(-0 831.18702 37.575)">개선 전</text>
+    </g>
+    <g id="Five-patch_41">
+     <path d="M 808.78702 50.009062
+L 824.78702 50.009062
+L 824.78702 44.409062
+L 808.78702 44.409062
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="Five-text_64">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="831.18702" y="50.009062" transform="rotate(-0 831.18702 50.009062)">개선 후</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="Five-p0810784070">
+   <rect x="69.726562" y="23.5425" width="362.153197" height="233.699208"/>
+  </clipPath>
+  <clipPath id="Five-p75f397cd4b">
+   <rect x="503.046322" y="23.5425" width="362.153198" height="233.699208"/>
+  </clipPath>
+ </defs>
+</svg></figure><figure><figcaption>Snapshot 처리량</figcaption><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="872.39952pt" height="296.39952pt" viewBox="0 0 872.39952 296.39952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="Snapshot-figure_1">
+  <g id="Snapshot-patch_1">
+   <path d="M 0 296.39952
+L 872.39952 296.39952
+L 872.39952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="Snapshot-axes_1">
+   <g id="Snapshot-patch_2">
+    <path d="M 69.726562 257.241707
+L 431.87976 257.241707
+L 431.87976 23.5425
+L 69.726562 23.5425
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="Snapshot-patch_3">
+    <path d="M 69.726562 45.580621
+L 139.828128 45.580621
+L 139.828128 56.36186
+L 69.726562 56.36186
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_4">
+    <path d="M 69.726562 77.290147
+L 108.994756 77.290147
+L 108.994756 88.071386
+L 69.726562 88.071386
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_5">
+    <path d="M 69.726562 108.999673
+L 109.939394 108.999673
+L 109.939394 119.780912
+L 69.726562 119.780912
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_6">
+    <path d="M 69.726562 140.709199
+L 287.914227 140.709199
+L 287.914227 151.490438
+L 69.726562 151.490438
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_7">
+    <path d="M 69.726562 172.418725
+L 212.945574 172.418725
+L 212.945574 183.199964
+L 69.726562 183.199964
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_8">
+    <path d="M 69.726562 204.128251
+L 171.776761 204.128251
+L 171.776761 214.90949
+L 69.726562 214.90949
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_9">
+    <path d="M 69.726562 235.837777
+L 327.294715 235.837777
+L 327.294715 246.619016
+L 69.726562 246.619016
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_10">
+    <path d="M 69.726562 34.165191
+L 130.518772 34.165191
+L 130.518772 44.94643
+L 69.726562 44.94643
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_11">
+    <path d="M 69.726562 65.874717
+L 131.038337 65.874717
+L 131.038337 76.655956
+L 69.726562 76.655956
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_12">
+    <path d="M 69.726562 97.584243
+L 136.703121 97.584243
+L 136.703121 108.365482
+L 69.726562 108.365482
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_13">
+    <path d="M 69.726562 129.29377
+L 285.93555 129.29377
+L 285.93555 140.075008
+L 69.726562 140.075008
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_14">
+    <path d="M 69.726562 161.003296
+L 219.87509 161.003296
+L 219.87509 171.784535
+L 69.726562 171.784535
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_15">
+    <path d="M 69.726562 192.712822
+L 174.324759 192.712822
+L 174.324759 203.494061
+L 69.726562 203.494061
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_16">
+    <path d="M 69.726562 224.422348
+L 366.573446 224.422348
+L 366.573446 235.203587
+L 69.726562 235.203587
+z
+" clip-path="url(#Snapshot-p0810784070)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-matplotlib.axis_1">
+    <g id="Snapshot-xtick_1">
+     <g id="Snapshot-line2d_1">
+      <defs>
+       <path id="Snapshot-m839c66b03e" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="69.726562" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="69.726562" y="272.239754" transform="rotate(-0 69.726562 272.239754)">0</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_2">
+     <g id="Snapshot-line2d_2">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="119.495169" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="119.495169" y="272.239754" transform="rotate(-0 119.495169 272.239754)">5</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_3">
+     <g id="Snapshot-line2d_3">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="169.263775" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="169.263775" y="272.239754" transform="rotate(-0 169.263775 272.239754)">10</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_4">
+     <g id="Snapshot-line2d_4">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="219.032381" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="219.032381" y="272.239754" transform="rotate(-0 219.032381 272.239754)">15</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_5">
+     <g id="Snapshot-line2d_5">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="268.800988" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_5">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="268.800988" y="272.239754" transform="rotate(-0 268.800988 272.239754)">20</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_6">
+     <g id="Snapshot-line2d_6">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="318.569594" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_6">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="318.569594" y="272.239754" transform="rotate(-0 318.569594 272.239754)">25</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_7">
+     <g id="Snapshot-line2d_7">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="368.3382" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_7">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="368.3382" y="272.239754" transform="rotate(-0 368.3382 272.239754)">30</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_8">
+     <g id="Snapshot-line2d_8">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="418.106807" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_8">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="418.106807" y="272.239754" transform="rotate(-0 418.106807 272.239754)">35</text>
+     </g>
+    </g>
+    <g id="Snapshot-text_9">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="250.803161" y="286.782332" transform="rotate(-0 250.803161 286.782332)">백만 jobs/s · 5회 중앙값 · 클수록 좋음</text>
+    </g>
+   </g>
+   <g id="Snapshot-matplotlib.axis_2">
+    <g id="Snapshot-ytick_1">
+     <g id="Snapshot-line2d_9">
+      <defs>
+       <path id="Snapshot-m78ebcf7f2a" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="45.263525" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_10">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="49.262549" transform="rotate(-0 62.726562 49.262549)">single</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_2">
+     <g id="Snapshot-line2d_10">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="76.973052" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_11">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="80.972075" transform="rotate(-0 62.726562 80.972075)">producers4</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_3">
+     <g id="Snapshot-line2d_11">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="108.682578" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_12">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="112.681601" transform="rotate(-0 62.726562 112.681601)">consumers4</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_4">
+     <g id="Snapshot-line2d_12">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="140.392104" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_13">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="144.391127" transform="rotate(-0 62.726562 144.391127)">queues32</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_5">
+     <g id="Snapshot-line2d_13">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="172.10163" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_14">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="176.100653" transform="rotate(-0 62.726562 176.100653)">burst</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_6">
+     <g id="Snapshot-line2d_14">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="203.811156" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_15">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="207.810179" transform="rotate(-0 62.726562 207.810179)">preallocated</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_7">
+     <g id="Snapshot-line2d_15">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="69.726562" y="235.520682" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_16">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="62.726562" y="239.519706" transform="rotate(-0 62.726562 239.519706)">mixed</text>
+     </g>
+    </g>
+   </g>
+   <g id="Snapshot-patch_17">
+    <path d="M 69.726562 257.241707
+L 69.726562 23.5425
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Snapshot-patch_18">
+    <path d="M 69.726562 257.241707
+L 431.87976 257.241707
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Snapshot-text_17">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="142.828128" y="53.369678" transform="rotate(-0 142.828128 53.369678)">7.04</text>
+   </g>
+   <g id="Snapshot-text_18">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="111.994756" y="85.079204" transform="rotate(-0 111.994756 85.079204)">3.95</text>
+   </g>
+   <g id="Snapshot-text_19">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="112.939394" y="116.78873" transform="rotate(-0 112.939394 116.78873)">4.04</text>
+   </g>
+   <g id="Snapshot-text_20">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="290.914227" y="148.498256" transform="rotate(-0 290.914227 148.498256)">21.92</text>
+   </g>
+   <g id="Snapshot-text_21">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="215.945574" y="180.207782" transform="rotate(-0 215.945574 180.207782)">14.39</text>
+   </g>
+   <g id="Snapshot-text_22">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="174.776761" y="211.917308" transform="rotate(-0 174.776761 211.917308)">10.25</text>
+   </g>
+   <g id="Snapshot-text_23">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="330.294715" y="243.626834" transform="rotate(-0 330.294715 243.626834)">25.88</text>
+   </g>
+   <g id="Snapshot-text_24">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="133.518772" y="41.954248" transform="rotate(-0 133.518772 41.954248)">6.11</text>
+   </g>
+   <g id="Snapshot-text_25">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="134.038337" y="73.663774" transform="rotate(-0 134.038337 73.663774)">6.16</text>
+   </g>
+   <g id="Snapshot-text_26">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="139.703121" y="105.3733" transform="rotate(-0 139.703121 105.3733)">6.73</text>
+   </g>
+   <g id="Snapshot-text_27">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="288.93555" y="137.082827" transform="rotate(-0 288.93555 137.082827)">21.72</text>
+   </g>
+   <g id="Snapshot-text_28">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="222.87509" y="168.792353" transform="rotate(-0 222.87509 168.792353)">15.08</text>
+   </g>
+   <g id="Snapshot-text_29">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="177.324759" y="200.501879" transform="rotate(-0 177.324759 200.501879)">10.51</text>
+   </g>
+   <g id="Snapshot-text_30">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="369.573446" y="232.211405" transform="rotate(-0 369.573446 232.211405)">29.82</text>
+   </g>
+   <g id="Snapshot-text_31">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="250.803161" y="17.5425" transform="rotate(-0 250.803161 17.5425)">Snapshot · 계측 끔</text>
+   </g>
+   <g id="Snapshot-legend_1">
+    <g id="Snapshot-patch_19">
+     <path d="M 373.86726 54.810625
+L 426.27976 54.810625
+Q 427.87976 54.810625 427.87976 53.210625
+L 427.87976 29.1425
+Q 427.87976 27.5425 426.27976 27.5425
+L 373.86726 27.5425
+Q 372.26726 27.5425 372.26726 29.1425
+L 372.26726 53.210625
+Q 372.26726 54.810625 373.86726 54.810625
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="Snapshot-patch_20">
+     <path d="M 375.46726 37.575
+L 391.46726 37.575
+L 391.46726 31.975
+L 375.46726 31.975
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="Snapshot-text_32">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="397.86726" y="37.575" transform="rotate(-0 397.86726 37.575)">개선 전</text>
+    </g>
+    <g id="Snapshot-patch_21">
+     <path d="M 375.46726 50.009062
+L 391.46726 50.009062
+L 391.46726 44.409062
+L 375.46726 44.409062
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="Snapshot-text_33">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="397.86726" y="50.009062" transform="rotate(-0 397.86726 50.009062)">개선 후</text>
+    </g>
+   </g>
+  </g>
+  <g id="Snapshot-axes_2">
+   <g id="Snapshot-patch_22">
+    <path d="M 503.046322 257.241707
+L 865.19952 257.241707
+L 865.19952 23.5425
+L 503.046322 23.5425
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="Snapshot-patch_23">
+    <path d="M 503.046322 45.580621
+L 648.757768 45.580621
+L 648.757768 56.36186
+L 503.046322 56.36186
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_24">
+    <path d="M 503.046322 77.290147
+L 584.016924 77.290147
+L 584.016924 88.071386
+L 503.046322 88.071386
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_25">
+    <path d="M 503.046322 108.999673
+L 583.236403 108.999673
+L 583.236403 119.780912
+L 503.046322 119.780912
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_26">
+    <path d="M 503.046322 140.709199
+L 784.231109 140.709199
+L 784.231109 151.490438
+L 503.046322 151.490438
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_27">
+    <path d="M 503.046322 172.418725
+L 703.072176 172.418725
+L 703.072176 183.199964
+L 503.046322 183.199964
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_28">
+    <path d="M 503.046322 204.128251
+L 631.359246 204.128251
+L 631.359246 214.90949
+L 503.046322 214.90949
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_29">
+    <path d="M 503.046322 235.837777
+L 747.934721 235.837777
+L 747.934721 246.619016
+L 503.046322 246.619016
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #8695ad"/>
+   </g>
+   <g id="Snapshot-patch_30">
+    <path d="M 503.046322 34.165191
+L 674.977352 34.165191
+L 674.977352 44.94643
+L 503.046322 44.94643
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_31">
+    <path d="M 503.046322 65.874717
+L 670.392346 65.874717
+L 670.392346 76.655956
+L 503.046322 76.655956
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_32">
+    <path d="M 503.046322 97.584243
+L 666.213648 97.584243
+L 666.213648 108.365482
+L 503.046322 108.365482
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_33">
+    <path d="M 503.046322 129.29377
+L 799.893206 129.29377
+L 799.893206 140.075008
+L 503.046322 140.075008
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_34">
+    <path d="M 503.046322 161.003296
+L 695.648847 161.003296
+L 695.648847 171.784535
+L 503.046322 171.784535
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_35">
+    <path d="M 503.046322 192.712822
+L 688.216449 192.712822
+L 688.216449 203.494061
+L 503.046322 203.494061
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-patch_36">
+    <path d="M 503.046322 224.422348
+L 776.561867 224.422348
+L 776.561867 235.203587
+L 503.046322 235.203587
+z
+" clip-path="url(#Snapshot-p75f397cd4b)" style="fill: #187e92"/>
+   </g>
+   <g id="Snapshot-matplotlib.axis_3">
+    <g id="Snapshot-xtick_9">
+     <g id="Snapshot-line2d_16">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="503.046322" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_34">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="503.046322" y="272.239754" transform="rotate(-0 503.046322 272.239754)">0</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_10">
+     <g id="Snapshot-line2d_17">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="558.73272" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_35">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="558.73272" y="272.239754" transform="rotate(-0 558.73272 272.239754)">2</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_11">
+     <g id="Snapshot-line2d_18">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="614.419117" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_36">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="614.419117" y="272.239754" transform="rotate(-0 614.419117 272.239754)">4</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_12">
+     <g id="Snapshot-line2d_19">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="670.105515" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_37">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="670.105515" y="272.239754" transform="rotate(-0 670.105515 272.239754)">6</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_13">
+     <g id="Snapshot-line2d_20">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="725.791912" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_38">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="725.791912" y="272.239754" transform="rotate(-0 725.791912 272.239754)">8</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_14">
+     <g id="Snapshot-line2d_21">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="781.478309" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_39">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="781.478309" y="272.239754" transform="rotate(-0 781.478309 272.239754)">10</text>
+     </g>
+    </g>
+    <g id="Snapshot-xtick_15">
+     <g id="Snapshot-line2d_22">
+      <g>
+       <use xlink:href="#Snapshot-m839c66b03e" x="837.164707" y="257.241707" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_40">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="837.164707" y="272.239754" transform="rotate(-0 837.164707 272.239754)">12</text>
+     </g>
+    </g>
+    <g id="Snapshot-text_41">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="684.122921" y="286.782332" transform="rotate(-0 684.122921 286.782332)">백만 jobs/s · 5회 중앙값 · 클수록 좋음</text>
+    </g>
+   </g>
+   <g id="Snapshot-matplotlib.axis_4">
+    <g id="Snapshot-ytick_8">
+     <g id="Snapshot-line2d_23">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="45.263525" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_42">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="49.262549" transform="rotate(-0 496.046322 49.262549)">single</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_9">
+     <g id="Snapshot-line2d_24">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="76.973052" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_43">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="80.972075" transform="rotate(-0 496.046322 80.972075)">producers4</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_10">
+     <g id="Snapshot-line2d_25">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="108.682578" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_44">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="112.681601" transform="rotate(-0 496.046322 112.681601)">consumers4</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_11">
+     <g id="Snapshot-line2d_26">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="140.392104" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_45">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="144.391127" transform="rotate(-0 496.046322 144.391127)">queues32</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_12">
+     <g id="Snapshot-line2d_27">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="172.10163" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_46">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="176.100653" transform="rotate(-0 496.046322 176.100653)">burst</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_13">
+     <g id="Snapshot-line2d_28">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="203.811156" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_47">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="207.810179" transform="rotate(-0 496.046322 207.810179)">preallocated</text>
+     </g>
+    </g>
+    <g id="Snapshot-ytick_14">
+     <g id="Snapshot-line2d_29">
+      <g>
+       <use xlink:href="#Snapshot-m78ebcf7f2a" x="503.046322" y="235.520682" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="Snapshot-text_48">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="496.046322" y="239.519706" transform="rotate(-0 496.046322 239.519706)">mixed</text>
+     </g>
+    </g>
+   </g>
+   <g id="Snapshot-patch_37">
+    <path d="M 503.046322 257.241707
+L 503.046322 23.5425
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Snapshot-patch_38">
+    <path d="M 503.046322 257.241707
+L 865.19952 257.241707
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="Snapshot-text_49">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="651.757768" y="53.369678" transform="rotate(-0 651.757768 53.369678)">5.23</text>
+   </g>
+   <g id="Snapshot-text_50">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="587.016924" y="85.079204" transform="rotate(-0 587.016924 85.079204)">2.91</text>
+   </g>
+   <g id="Snapshot-text_51">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="586.236403" y="116.78873" transform="rotate(-0 586.236403 116.78873)">2.88</text>
+   </g>
+   <g id="Snapshot-text_52">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="787.231109" y="148.498256" transform="rotate(-0 787.231109 148.498256)">10.10</text>
+   </g>
+   <g id="Snapshot-text_53">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="706.072176" y="180.207782" transform="rotate(-0 706.072176 180.207782)">7.18</text>
+   </g>
+   <g id="Snapshot-text_54">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="634.359246" y="211.917308" transform="rotate(-0 634.359246 211.917308)">4.61</text>
+   </g>
+   <g id="Snapshot-text_55">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="750.934721" y="243.626834" transform="rotate(-0 750.934721 243.626834)">8.80</text>
+   </g>
+   <g id="Snapshot-text_56">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="677.977352" y="41.954248" transform="rotate(-0 677.977352 41.954248)">6.17</text>
+   </g>
+   <g id="Snapshot-text_57">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="673.392346" y="73.663774" transform="rotate(-0 673.392346 73.663774)">6.01</text>
+   </g>
+   <g id="Snapshot-text_58">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="669.213648" y="105.3733" transform="rotate(-0 669.213648 105.3733)">5.86</text>
+   </g>
+   <g id="Snapshot-text_59">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="802.893206" y="137.082827" transform="rotate(-0 802.893206 137.082827)">10.66</text>
+   </g>
+   <g id="Snapshot-text_60">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="698.648847" y="168.792353" transform="rotate(-0 698.648847 168.792353)">6.92</text>
+   </g>
+   <g id="Snapshot-text_61">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="691.216449" y="200.501879" transform="rotate(-0 691.216449 200.501879)">6.65</text>
+   </g>
+   <g id="Snapshot-text_62">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="779.561867" y="232.211405" transform="rotate(-0 779.561867 232.211405)">9.82</text>
+   </g>
+   <g id="Snapshot-text_63">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="684.122921" y="17.5425" transform="rotate(-0 684.122921 17.5425)">Snapshot · 계측 켬</text>
+   </g>
+   <g id="Snapshot-legend_2">
+    <g id="Snapshot-patch_39">
+     <path d="M 807.18702 54.810625
+L 859.59952 54.810625
+Q 861.19952 54.810625 861.19952 53.210625
+L 861.19952 29.1425
+Q 861.19952 27.5425 859.59952 27.5425
+L 807.18702 27.5425
+Q 805.58702 27.5425 805.58702 29.1425
+L 805.58702 53.210625
+Q 805.58702 54.810625 807.18702 54.810625
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="Snapshot-patch_40">
+     <path d="M 808.78702 37.575
+L 824.78702 37.575
+L 824.78702 31.975
+L 808.78702 31.975
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="Snapshot-text_64">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="831.18702" y="37.575" transform="rotate(-0 831.18702 37.575)">개선 전</text>
+    </g>
+    <g id="Snapshot-patch_41">
+     <path d="M 808.78702 50.009062
+L 824.78702 50.009062
+L 824.78702 44.409062
+L 808.78702 44.409062
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="Snapshot-text_65">
+     <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: start" x="831.18702" y="50.009062" transform="rotate(-0 831.18702 50.009062)">개선 후</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="Snapshot-p0810784070">
+   <rect x="69.726562" y="23.5425" width="362.153197" height="233.699208"/>
+  </clipPath>
+  <clipPath id="Snapshot-p75f397cd4b">
+   <rect x="503.046322" y="23.5425" width="362.153198" height="233.699208"/>
+  </clipPath>
+ </defs>
+</svg></figure><figure><figcaption>실제 서버</figcaption><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="800.39952pt" height="260.39952pt" viewBox="0 0 800.39952 260.39952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="server-figure_1">
+  <g id="server-patch_1">
+   <path d="M 0 260.39952
+L 800.39952 260.39952
+L 800.39952 -0
+L 0 -0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="server-axes_1">
+   <g id="server-patch_2">
+    <path d="M 39.758203 235.656942
+L 393.419643 235.656942
+L 393.419643 23.44875
+L 39.758203 23.44875
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="server-patch_3">
+    <path d="M 55.833723 235.656942
+L 120.901304 235.656942
+L 120.901304 170.367541
+L 55.833723 170.367541
+z
+" clip-path="url(#server-pa1a626c72f)" style="fill: #8695ad"/>
+   </g>
+   <g id="server-patch_4">
+    <path d="M 247.208961 235.656942
+L 312.276542 235.656942
+L 312.276542 58.816782
+L 247.208961 58.816782
+z
+" clip-path="url(#server-pa1a626c72f)" style="fill: #8695ad"/>
+   </g>
+   <g id="server-patch_5">
+    <path d="M 120.901304 235.656942
+L 185.968885 235.656942
+L 185.968885 171.575707
+L 120.901304 171.575707
+z
+" clip-path="url(#server-pa1a626c72f)" style="fill: #187e92"/>
+   </g>
+   <g id="server-patch_6">
+    <path d="M 312.276542 235.656942
+L 377.344123 235.656942
+L 377.344123 77.558277
+L 312.276542 77.558277
+z
+" clip-path="url(#server-pa1a626c72f)" style="fill: #187e92"/>
+   </g>
+   <g id="server-matplotlib.axis_1">
+    <g id="server-xtick_1">
+     <g id="server-line2d_1">
+      <defs>
+       <path id="server-m839c66b03e" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#server-m839c66b03e" x="120.901304" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_1">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="120.901304" y="251.197567" transform="rotate(-0 120.901304 251.197567)">로비 64명</text>
+     </g>
+    </g>
+    <g id="server-xtick_2">
+     <g id="server-line2d_2">
+      <g>
+       <use xlink:href="#server-m839c66b03e" x="312.276542" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_2">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="312.276542" y="251.197567" transform="rotate(-0 312.276542 251.197567)">게임 16매치×4명</text>
+     </g>
+    </g>
+   </g>
+   <g id="server-matplotlib.axis_2">
+    <g id="server-ytick_1">
+     <g id="server-line2d_3">
+      <defs>
+       <path id="server-m78ebcf7f2a" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_3">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="239.655965" transform="rotate(-0 32.758203 239.655965)">0</text>
+     </g>
+    </g>
+    <g id="server-ytick_2">
+     <g id="server-line2d_4">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="196.543705" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_4">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="200.542729" transform="rotate(-0 32.758203 200.542729)">10</text>
+     </g>
+    </g>
+    <g id="server-ytick_3">
+     <g id="server-line2d_5">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="157.430468" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_5">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="161.429492" transform="rotate(-0 32.758203 161.429492)">20</text>
+     </g>
+    </g>
+    <g id="server-ytick_4">
+     <g id="server-line2d_6">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="118.317232" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_6">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="122.316255" transform="rotate(-0 32.758203 122.316255)">30</text>
+     </g>
+    </g>
+    <g id="server-ytick_5">
+     <g id="server-line2d_7">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="79.203995" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_7">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="83.203018" transform="rotate(-0 32.758203 83.203018)">40</text>
+     </g>
+    </g>
+    <g id="server-ytick_6">
+     <g id="server-line2d_8">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="39.758203" y="40.090758" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_8">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="32.758203" y="44.089782" transform="rotate(-0 32.758203 44.089782)">50</text>
+     </g>
+    </g>
+    <g id="server-text_9">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="15.740625" y="129.552846" transform="rotate(-90 15.740625 129.552846)">% · 낮을수록 좋음</text>
+    </g>
+   </g>
+   <g id="server-patch_7">
+    <path d="M 39.758203 235.656942
+L 39.758203 23.44875
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="server-patch_8">
+    <path d="M 39.758203 235.656942
+L 393.419643 235.656942
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="server-text_10">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="88.367514" y="165.765979" transform="rotate(-0 88.367514 165.765979)">16.69</text>
+   </g>
+   <g id="server-text_11">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="279.742751" y="54.215219" transform="rotate(-0 279.742751 54.215219)">45.21</text>
+   </g>
+   <g id="server-text_12">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="153.435094" y="166.974145" transform="rotate(-0 153.435094 166.974145)">16.38</text>
+   </g>
+   <g id="server-text_13">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="344.810332" y="72.956714" transform="rotate(-0 344.810332 72.956714)">40.42</text>
+   </g>
+   <g id="server-text_14">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="216.588923" y="17.44875" transform="rotate(-0 216.588923 17.44875)">서버 CPU</text>
+   </g>
+   <g id="server-legend_1">
+    <g id="server-patch_9">
+     <path d="M 320.904018 62.533906
+L 386.419643 62.533906
+Q 388.419643 62.533906 388.419643 60.533906
+L 388.419643 30.44875
+Q 388.419643 28.44875 386.419643 28.44875
+L 320.904018 28.44875
+Q 318.904018 28.44875 318.904018 30.44875
+L 318.904018 60.533906
+Q 318.904018 62.533906 320.904018 62.533906
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="server-patch_10">
+     <path d="M 322.904018 40.989375
+L 342.904018 40.989375
+L 342.904018 33.989375
+L 322.904018 33.989375
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="server-text_15">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: start" x="350.904018" y="40.989375" transform="rotate(-0 350.904018 40.989375)">개선 전</text>
+    </g>
+    <g id="server-patch_11">
+     <path d="M 322.904018 56.531953
+L 342.904018 56.531953
+L 342.904018 49.531953
+L 322.904018 49.531953
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="server-text_16">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: start" x="350.904018" y="56.531953" transform="rotate(-0 350.904018 56.531953)">개선 후</text>
+    </g>
+   </g>
+  </g>
+  <g id="server-axes_2">
+   <g id="server-patch_12">
+    <path d="M 439.53808 235.656942
+L 793.19952 235.656942
+L 793.19952 23.44875
+L 439.53808 23.44875
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="server-patch_13">
+    <path d="M 455.6136 235.656942
+L 520.681181 235.656942
+L 520.681181 60.444144
+L 455.6136 60.444144
+z
+" clip-path="url(#server-pedb7695c55)" style="fill: #8695ad"/>
+   </g>
+   <g id="server-patch_14">
+    <path d="M 646.988838 235.656942
+L 712.056419 235.656942
+L 712.056419 58.816782
+L 646.988838 58.816782
+z
+" clip-path="url(#server-pedb7695c55)" style="fill: #8695ad"/>
+   </g>
+   <g id="server-patch_15">
+    <path d="M 520.681181 235.656942
+L 585.748762 235.656942
+L 585.748762 61.512742
+L 520.681181 61.512742
+z
+" clip-path="url(#server-pedb7695c55)" style="fill: #187e92"/>
+   </g>
+   <g id="server-patch_16">
+    <path d="M 712.056419 235.656942
+L 777.124 235.656942
+L 777.124 59.009345
+L 712.056419 59.009345
+z
+" clip-path="url(#server-pedb7695c55)" style="fill: #187e92"/>
+   </g>
+   <g id="server-matplotlib.axis_3">
+    <g id="server-xtick_3">
+     <g id="server-line2d_9">
+      <g>
+       <use xlink:href="#server-m839c66b03e" x="520.681181" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_17">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="520.681181" y="251.197567" transform="rotate(-0 520.681181 251.197567)">로비 64명</text>
+     </g>
+    </g>
+    <g id="server-xtick_4">
+     <g id="server-line2d_10">
+      <g>
+       <use xlink:href="#server-m839c66b03e" x="712.056419" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_18">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="712.056419" y="251.197567" transform="rotate(-0 712.056419 251.197567)">게임 16매치×4명</text>
+     </g>
+    </g>
+   </g>
+   <g id="server-matplotlib.axis_4">
+    <g id="server-ytick_7">
+     <g id="server-line2d_11">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="235.656942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_19">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="239.655965" transform="rotate(-0 432.53808 239.655965)">0</text>
+     </g>
+    </g>
+    <g id="server-ytick_8">
+     <g id="server-line2d_12">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="201.112465" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_20">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="205.111489" transform="rotate(-0 432.53808 205.111489)">50</text>
+     </g>
+    </g>
+    <g id="server-ytick_9">
+     <g id="server-line2d_13">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="166.567989" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_21">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="170.567012" transform="rotate(-0 432.53808 170.567012)">100</text>
+     </g>
+    </g>
+    <g id="server-ytick_10">
+     <g id="server-line2d_14">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="132.023513" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_22">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="136.022536" transform="rotate(-0 432.53808 136.022536)">150</text>
+     </g>
+    </g>
+    <g id="server-ytick_11">
+     <g id="server-line2d_15">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="97.479036" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_23">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="101.47806" transform="rotate(-0 432.53808 101.47806)">200</text>
+     </g>
+    </g>
+    <g id="server-ytick_12">
+     <g id="server-line2d_16">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="62.93456" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_24">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="66.933583" transform="rotate(-0 432.53808 66.933583)">250</text>
+     </g>
+    </g>
+    <g id="server-ytick_13">
+     <g id="server-line2d_17">
+      <g>
+       <use xlink:href="#server-m78ebcf7f2a" x="439.53808" y="28.390083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="server-text_25">
+      <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: end" x="432.53808" y="32.389107" transform="rotate(-0 432.53808 32.389107)">300</text>
+     </g>
+    </g>
+    <g id="server-text_26">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: middle" x="409.65058" y="129.552846" transform="rotate(-90 409.65058 129.552846)">packets/s · 목표 256</text>
+    </g>
+   </g>
+   <g id="server-patch_17">
+    <path d="M 439.53808 235.656942
+L 439.53808 23.44875
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="server-patch_18">
+    <path d="M 439.53808 235.656942
+L 793.19952 235.656942
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="server-text_27">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="488.147391" y="55.842581" transform="rotate(-0 488.147391 55.842581)">253.60</text>
+   </g>
+   <g id="server-text_28">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="679.522629" y="54.215219" transform="rotate(-0 679.522629 54.215219)">255.96</text>
+   </g>
+   <g id="server-text_29">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="553.214972" y="56.91118" transform="rotate(-0 553.214972 56.91118)">252.06</text>
+   </g>
+   <g id="server-text_30">
+    <text style="font-size: 8px; font-family: 'Malgun Gothic'; text-anchor: middle" x="744.59021" y="54.407783" transform="rotate(-0 744.59021 54.407783)">255.68</text>
+   </g>
+   <g id="server-text_31">
+    <text style="font-size: 12px; font-family: 'Malgun Gothic'; text-anchor: middle" x="616.3688" y="17.44875" transform="rotate(-0 616.3688 17.44875)">실제 입력 처리율</text>
+   </g>
+   <g id="server-legend_2">
+    <g id="server-patch_19">
+     <path d="M 446.53808 230.656942
+L 512.053705 230.656942
+Q 514.053705 230.656942 514.053705 228.656942
+L 514.053705 198.571786
+Q 514.053705 196.571786 512.053705 196.571786
+L 446.53808 196.571786
+Q 444.53808 196.571786 444.53808 198.571786
+L 444.53808 228.656942
+Q 444.53808 230.656942 446.53808 230.656942
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="server-patch_20">
+     <path d="M 448.53808 209.112411
+L 468.53808 209.112411
+L 468.53808 202.112411
+L 448.53808 202.112411
+z
+" style="fill: #8695ad"/>
+    </g>
+    <g id="server-text_32">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: start" x="476.53808" y="209.112411" transform="rotate(-0 476.53808 209.112411)">개선 전</text>
+    </g>
+    <g id="server-patch_21">
+     <path d="M 448.53808 224.654989
+L 468.53808 224.654989
+L 468.53808 217.654989
+L 448.53808 217.654989
+z
+" style="fill: #187e92"/>
+    </g>
+    <g id="server-text_33">
+     <text style="font-size: 10px; font-family: 'Malgun Gothic'; text-anchor: start" x="476.53808" y="224.654989" transform="rotate(-0 476.53808 224.654989)">개선 후</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="server-pa1a626c72f">
+   <rect x="39.758203" y="23.44875" width="353.66144" height="212.208192"/>
+  </clipPath>
+  <clipPath id="server-pedb7695c55">
+   <rect x="439.53808" y="23.44875" width="353.66144" height="212.208192"/>
+  </clipPath>
+ </defs>
+</svg></figure>
+<table><thead><tr><th>서버</th><th>지표</th><th>개선 전</th><th>개선 후</th></tr></thead><tbody><tr><td>로비</td><td>packets/s</td><td>253.605 (n=5)</td><td>252.058 (n=5)</td></tr><tr><td>로비</td><td>jobs/s</td><td>511.556 (n=5)</td><td>503.567 (n=5)</td></tr><tr><td>로비</td><td>CPU %</td><td>16.692 (n=5)</td><td>16.384 (n=5)</td></tr><tr><td>로비</td><td>작업 대기 p99 상한 ms</td><td>4,194.304 (n=5)</td><td>4,194.304 (n=5)</td></tr><tr><td>로비</td><td>패킷 대기 p99 상한 ms</td><td>4,194.304 (n=5)</td><td>4,194.304 (n=5)</td></tr><tr><td>로비</td><td>tick 지연 p99 상한 ms</td><td>2,097.152 (n=5)</td><td>2,097.152 (n=5)</td></tr><tr><td>로비</td><td>종료 시점 미시작 패킷</td><td>220.000 (n=5)</td><td>279.000 (n=5)</td></tr><tr><td>게임</td><td>packets/s</td><td>255.960 (n=5)</td><td>255.681 (n=4)</td></tr><tr><td>게임</td><td>jobs/s</td><td>255.960 (n=5)</td><td>255.681 (n=4)</td></tr><tr><td>게임</td><td>CPU %</td><td>45.212 (n=5)</td><td>40.421 (n=4)</td></tr><tr><td>게임</td><td>작업 대기 p99 상한 ms</td><td>131.072 (n=5)</td><td>262.144 (n=4)</td></tr><tr><td>게임</td><td>패킷 대기 p99 상한 ms</td><td>131.072 (n=5)</td><td>262.144 (n=4)</td></tr><tr><td>게임</td><td>tick 지연 p99 상한 ms</td><td>131.072 (n=5)</td><td>262.144 (n=4)</td></tr><tr><td>게임</td><td>종료 시점 미시작 패킷</td><td>0.000 (n=5)</td><td>0.000 (n=4)</td></tr></tbody></table><p>p99는 실행별 histogram bucket 상한의 중앙값이다. 로비 tick은 이동 갱신 간격−1ms로 게임의 15ms 예약 초과와 의미가 다르다. CPU는 전체 논리 CPU 기준이다.</p>
+<details open><summary>실패 실행 · 성능 통계 표본 없음</summary><table><thead><tr><th>측정</th><th>seed</th><th>실패</th></tr></thead><tbody><tr><td>after-server</td><td>3</td><td>client 11 / match-transfer: client 11 / game-login: SC_LOGIN_INFO: 기대 응답 없음 (10s)</td></tr></tbody></table><p>실패를 재시도로 대체하지 않았다. 게임은 전 seed 1~5, 후 성공 seed 1·2·4·5의 중앙값이며 표본 차이가 있다.</p></details>
+<p>원본 서버 바이너리로 추가 진단 3회: 실패 0회. 로그인 실패는 재현되지 않았으며 원인과 이번 변경의 관련성은 미확정이다. 이 진단을 기본 성능 표본에 합치지 않았다.</p>
+<details><summary>전후 모두 성공한 동일 seed 쌍</summary><table><thead><tr><th>시나리오</th><th>seed</th><th>지표</th><th>개선 전</th><th>개선 후</th></tr></thead><tbody><tr><td>perf-lobby</td><td>1,2,3,4,5</td><td>CPU %</td><td>16.692</td><td>16.384</td></tr><tr><td>perf-lobby</td><td>1,2,3,4,5</td><td>tick p99 상한 ms</td><td>2,097.152</td><td>2,097.152</td></tr><tr><td>perf-lobby</td><td>1,2,3,4,5</td><td>패킷 대기 p99 상한 ms</td><td>4,194.304</td><td>4,194.304</td></tr><tr><td>perf-match</td><td>1,2,4,5</td><td>CPU %</td><td>44.931</td><td>40.421</td></tr><tr><td>perf-match</td><td>1,2,4,5</td><td>tick p99 상한 ms</td><td>131.072</td><td>262.144</td></tr><tr><td>perf-match</td><td>1,2,4,5</td><td>패킷 대기 p99 상한 ms</td><td>131.072</td><td>262.144</td></tr></tbody></table><p>제외된 준비 실패는 위 성공/실패 분모에 남긴다. NPC 무작위 상태·실행 시점까지 고정한 쌍은 아니므로 작은 차이를 효과로 확정하지 않는다.</p></details>
+<details><summary>상세 대기·공정성·idle</summary><table><thead><tr><th>부하</th><th>정책</th><th>지표</th><th>개선 전</th><th>개선 후</th></tr></thead><tbody><tr><td>fairness</td><td>Five</td><td>cold 작업 대기 ms</td><td>0.460</td><td>0.456</td></tr><tr><td>fairness</td><td>Snapshot</td><td>cold 작업 대기 ms</td><td>0.404</td><td>0.363</td></tr><tr><td>idle</td><td>Five</td><td>CPU seconds · 1초 대기</td><td>0.000</td><td>0.000</td></tr><tr><td>producers4</td><td>Five</td><td>enqueue 시도→시작 p99 ms · 1/67 표본</td><td>36.162</td><td>1.931</td></tr><tr><td>producers4</td><td>Snapshot</td><td>enqueue 시도→시작 p99 ms · 1/67 표본</td><td>34.916</td><td>0.917</td></tr><tr><td>queues32</td><td>Five</td><td>enqueue 시도→시작 p99 ms · 1/67 표본</td><td>5.921</td><td>5.303</td></tr><tr><td>queues32</td><td>Snapshot</td><td>enqueue 시도→시작 p99 ms · 1/67 표본</td><td>7.731</td><td>8.918</td></tr></tbody></table><p>상세 대기는 실행별 p99의 중앙값이다. 모든 상세 작업 ID의 누락/중복 검사를 통과했다. fairness는 전후 모두 cold 전에 완료한 hot 작업 수 중앙값 0, idle CPU의 0은 Windows 시간 해상도 미만을 포함한다.</p></details>
+<details><summary>큐 단위 28개 처리량 조건 · 백만 jobs/s</summary><table><thead><tr><th>부하</th><th>정책</th><th>계측</th><th>개선 전</th><th>개선 후</th><th>변화</th></tr></thead><tbody><tr><td>single</td><td>Five</td><td>끔</td><td>6.749</td><td>6.614</td><td>-2.0%</td></tr><tr><td>producers4</td><td>Five</td><td>끔</td><td>3.884</td><td>6.074</td><td>+56.4%</td></tr><tr><td>consumers4</td><td>Five</td><td>끔</td><td>3.518</td><td>5.946</td><td>+69.0%</td></tr><tr><td>queues32</td><td>Five</td><td>끔</td><td>23.593</td><td>22.073</td><td>-6.4%</td></tr><tr><td>burst</td><td>Five</td><td>끔</td><td>13.325</td><td>15.120</td><td>+13.5%</td></tr><tr><td>preallocated</td><td>Five</td><td>끔</td><td>9.533</td><td>10.833</td><td>+13.6%</td></tr><tr><td>mixed</td><td>Five</td><td>끔</td><td>22.934</td><td>26.056</td><td>+13.6%</td></tr><tr><td>single</td><td>Five</td><td>켬</td><td>5.067</td><td>6.146</td><td>+21.3%</td></tr><tr><td>producers4</td><td>Five</td><td>켬</td><td>2.828</td><td>5.515</td><td>+95.0%</td></tr><tr><td>consumers4</td><td>Five</td><td>켬</td><td>2.495</td><td>5.006</td><td>+100.6%</td></tr><tr><td>queues32</td><td>Five</td><td>켬</td><td>10.793</td><td>9.852</td><td>-8.7%</td></tr><tr><td>burst</td><td>Five</td><td>켬</td><td>6.535</td><td>7.101</td><td>+8.7%</td></tr><tr><td>preallocated</td><td>Five</td><td>켬</td><td>4.389</td><td>6.373</td><td>+45.2%</td></tr><tr><td>mixed</td><td>Five</td><td>켬</td><td>9.461</td><td>9.700</td><td>+2.5%</td></tr><tr><td>single</td><td>Snapshot</td><td>끔</td><td>7.043</td><td>6.107</td><td>-13.3%</td></tr><tr><td>producers4</td><td>Snapshot</td><td>끔</td><td>3.945</td><td>6.160</td><td>+56.1%</td></tr><tr><td>consumers4</td><td>Snapshot</td><td>끔</td><td>4.040</td><td>6.729</td><td>+66.6%</td></tr><tr><td>queues32</td><td>Snapshot</td><td>끔</td><td>21.920</td><td>21.721</td><td>-0.9%</td></tr><tr><td>burst</td><td>Snapshot</td><td>끔</td><td>14.388</td><td>15.085</td><td>+4.8%</td></tr><tr><td>preallocated</td><td>Snapshot</td><td>끔</td><td>10.252</td><td>10.508</td><td>+2.5%</td></tr><tr><td>mixed</td><td>Snapshot</td><td>끔</td><td>25.877</td><td>29.823</td><td>+15.2%</td></tr><tr><td>single</td><td>Snapshot</td><td>켬</td><td>5.233</td><td>6.175</td><td>+18.0%</td></tr><tr><td>producers4</td><td>Snapshot</td><td>켬</td><td>2.908</td><td>6.010</td><td>+106.7%</td></tr><tr><td>consumers4</td><td>Snapshot</td><td>켬</td><td>2.880</td><td>5.860</td><td>+103.5%</td></tr><tr><td>queues32</td><td>Snapshot</td><td>켬</td><td>10.099</td><td>10.661</td><td>+5.6%</td></tr><tr><td>burst</td><td>Snapshot</td><td>켬</td><td>7.184</td><td>6.917</td><td>-3.7%</td></tr><tr><td>preallocated</td><td>Snapshot</td><td>켬</td><td>4.608</td><td>6.650</td><td>+44.3%</td></tr><tr><td>mixed</td><td>Snapshot</td><td>켬</td><td>8.795</td><td>9.823</td><td>+11.7%</td></tr></tbody></table></details></section>
+<section><h2>5. 추가 발견·대응 필요 요소</h2><table><thead><tr><th>항목</th><th>영향</th><th>상태/근거</th><th>다음 대응</th></tr></thead><tbody><tr><td>게임 로그인 응답 누락</td><td>준비 실패로 해당 실행의 성능 표본 없음</td><td>Connected 로그·미시작 작업 0, 원인 미확정</td><td>로그인/송신/수신 경계를 별도 재현·추적</td></tr><tr><td>로비 이동 자기 재등록</td><td>작업·전송·시야 처리 비용이 계속 발생</td><td>기존 경로 유지</td><td>TODO 78의 주기/이동 재설계</td></tr><tr><td>실제 서버 대기/지연 악화</td><td>로비 잔여 패킷·게임 p99 증가 관측</td><td>게임 표본 수 차이·원인 미확정</td><td>동일 seed 쌍·서버 준비/타이머/송신 지연 추가 분해</td></tr><tr><td>조건별 편차/악화</td><td>모든 부하에 같은 효과를 보장하지 않음</td><td>10% 초과 감소 1조건</td><td>범위와 계측 비용을 함께 확인</td></tr><tr><td>추가 대기열 메모리</td><td>큐마다 deque 하나와 카운터 추가</td><td>상시 구조 비용 증가</td><td>저부하/최대 세션 메모리 별도 평가</td></tr><tr><td>실제 서버 검사 범위</td><td>64명 고정 입력률·계측 켬</td><td>최대 TPS/전투/장시간 검사가 아님</td><td>후속 한계 부하와 재설계 전후 측정</td></tr><tr><td>브라우저 검증</td><td>실제 HTML 화면/containment 미확인</td><td>기존 file URL 보안 제한</td><td>정적 검사와 실제 화면 검증 구분</td></tr></tbody></table></section></main></body></html>

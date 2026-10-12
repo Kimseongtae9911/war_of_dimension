@@ -1,5 +1,11 @@
 # 파일 정리 기록
 
+## JobQueue 추가 실험 종료 (2026-10-12)
+
+사용자 요청으로 main `3e34e71a` 기반 `codex/game-tick-profiling`을 생성하고 같은 commit의 로컬 `codex/jobqueue-throughput-optimization`을 삭제했다. 두 큐/atomic 카운터 후보와 해당 테스트, 후보를 현재 구현으로 설명한 문서는 main 상태로 복원했다. 새 브랜치에는 조사/실측 보고서와 연결된 다이어그램을 과거 근거로 보존한다.
+
+전용 `compare.py`·`analyze_compare.py`·`system_load.py`·`probe_queue_cost.py`·`queue_cost_probe.cpp`·`test_compare_analysis.py` 및 `Build-JobQueue*Report.py` 두 파일은 이 미커밋 실험에서만 사용했다. 보고서의 명령/도구 설명은 당시 재현 기록이며 현재 제공 기능이 아니다. 제거 전 전체 미커밋 파일과 patch·SHA-256 manifest를 Git 제외 `artifacts/logs/jobqueue-retired-20261012/`에 복사하고 파일별 일치를 확인했다. 기존 원시 측정/frozen 바이너리는 삭제하지 않았다. 새 게임 tick 계측은 별도 도구로 구현한다.
+
 2026-10-04 실행 기준선과 VS2026 이전을 확인한 뒤 정리했다. 원본 `C:\GitFolder\war_of_dimension` 및 GitLab 이력을 복구 근거로 보존한다.
 
 ## 제거한 범위

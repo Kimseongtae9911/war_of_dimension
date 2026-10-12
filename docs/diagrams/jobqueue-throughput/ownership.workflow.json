@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "JobQueue: 게시와 실행 대기열의 소유권 분리",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {"id": "publish", "label": "생산자 · 게시 mutex"},
+    {"id": "execute", "label": "소비자 · 실행 mutex"}
+  ],
+  "mainPath": ["enqueue", "published", "transfer", "callback", "retained"],
+  "semanticChecks": {
+    "allowedRoots": ["enqueue"],
+    "allowedTerminals": ["retained"],
+    "requiredPaths": [{"from": "published", "to": "retained"}]
+  },
+  "nodes": [
+    {"id": "enqueue", "lane": "publish", "col": 0, "type": "external", "label": "PushJob", "sublabel": "새 작업 FIFO 게시", "width": 160},
+    {"id": "published", "lane": "publish", "col": 1, "type": "messagebus", "label": "게시 대기열", "sublabel": "생산자 접근을 mutex로 보호", "width": 176},
+    {"id": "transfer", "lane": "execute", "col": 1, "type": "backend", "label": "대기열 swap", "sublabel": "실행 대기열이 빌 때만", "width": 176},
+    {"id": "callback", "lane": "execute", "col": 2, "type": "backend", "label": "FIFO 작업 실행", "sublabel": "게시 mutex 없이 pop/callback", "width": 192},
+    {"id": "retained", "lane": "execute", "col": 3, "type": "messagebus", "label": "남은 작업 보존", "sublabel": "예산 소진·예외 뒤에도 유지", "width": 184}
+  ],
+  "edges": [
+    {"id": "publish-job", "from": "enqueue", "to": "published", "label": "미시작 수 증가", "role": "main"},
+    {"id": "transfer-jobs", "from": "published", "to": "transfer", "label": "게시 mutex 안에서 소유권 이동", "role": "main"},
+    {"id": "execute-job", "from": "transfer", "to": "callback", "label": "시작 직전 미시작 수 감소", "role": "main"},
+    {"id": "retain-jobs", "from": "callback", "to": "retained", "label": "다음 차례도 기존 작업 우선", "role": "main"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "기존 실행 계약 유지", "items": ["Five: 새 후속 작업도 남은 예산 안에서 실행", "Snapshot: 진입 시 미시작 수만큼 실행"]},
+    {"dot": "amber", "title": "수명과 재등록", "items": ["HasJobs는 양쪽 대기열의 미시작 작업을 포함", "Clear는 실행 직렬화 뒤 양쪽 대기열을 폐기"]}
+  ]
+}

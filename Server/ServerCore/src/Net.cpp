@@ -1,4 +1,5 @@
 #include <ServerCore/Net.h>
+#include <ServerCore/TickProfile.h>
 #include <ServerCore/Diagnostics.h>
 #include <algorithm>
 #include <cstring>
@@ -270,6 +271,7 @@ bool IocpService::Receive(SOCKET _socket, IoContext& _context)
 
 void IocpService::IssueSend(SocketState& _state, IoContext& _context)
 {
+    TickProfile::Scope profile(TickProfile::Stage::NativeSend);
     // 이미 대기 중인 프레임만 묶는다. 첫 프레임을 기다리거나 wire 순서를 바꾸지 않는다.
     if (_state.m_sendBatch.empty())
     {
@@ -301,7 +303,12 @@ void IocpService::IssueSend(SocketState& _state, IoContext& _context)
 
 bool IocpService::Send(SOCKET _socket, IoContext& _context)
 {
-    std::lock_guard lock(m_mutex);
+    std::unique_lock lock(m_mutex, std::defer_lock);
+    {
+        TickProfile::Scope waiting(TickProfile::Stage::SendLock);
+        lock.lock();
+    }
+    TickProfile::Scope body(TickProfile::Stage::SendBody);
     auto& state = State(_socket);
     if (state.m_disconnecting || !Begin(_socket, _context, IoOperation::Send))
         return false;

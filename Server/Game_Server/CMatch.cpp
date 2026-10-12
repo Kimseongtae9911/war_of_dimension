@@ -4,6 +4,7 @@
 #include "Stats.h"
 #include "MatchTelemetry.h"
 #include <ServerCore/Metrics.h>
+#include <ServerCore/TickProfile.h>
 
 namespace wod_server {
 	void CMatch::SetReady(const CS_READY_PACKET* _packet)
@@ -325,20 +326,32 @@ namespace wod_server {
 			return;
 		}
 
-		float elapsedTime = CGameMgr::GetInstance()->UpdateGameData(_matchNum);
-		auto now = CGameMgr::GetInstance()->GetLastTime(_matchNum);
+        using Profile = wod::core::TickProfile;
+        float elapsedTime;
+        {
+            Profile::Scope scope(Profile::Stage::Clock);
+            elapsedTime = CGameMgr::GetInstance()->UpdateGameData(_matchNum);
+        }
+        auto now = CGameMgr::GetInstance()->GetLastTime(_matchNum);
 
-		Update();
+        {
+            Profile::Scope scope(Profile::Stage::Jobs);
+            Update();
+        }
 
-		//Match Update -> move, rotate
+        //Match Update -> move, rotate
 		for (auto id : m_clientid)
 		{
 			if (-1 == id)
 				continue;
 
 			std::shared_ptr<CClient> myClient = CObjectMgr::GetInstance()->GetClient(id);
-			myClient->Update(elapsedTime);
-			for (auto sendId : m_clientid) {
+            {
+                Profile::Scope scope(Profile::Stage::PlayerUpdate);
+                myClient->Update(elapsedTime);
+            }
+            Profile::Scope broadcast(Profile::Stage::PlayerSend);
+            for (auto sendId : m_clientid) {
 				if (sendId == -1)
 					continue;
 
@@ -351,74 +364,84 @@ namespace wod_server {
 		//Npc Update
 		for (int i = 0; i < MAX_MINION + MONSTER_NUM; ++i) {
             const auto npc = CObjectMgr::GetInstance()->GetNpc(_matchNum,i);
-            if (npc->m_active.load()) npc->Update(elapsedTime);
+            if (npc->m_active.load())
+            {
+                Profile::Scope scope(i < MAX_MINION ? Profile::Stage::MinionUpdate : Profile::Stage::MonsterUpdate);
+                npc->Update(elapsedTime);
+            }
         }
 
-		//골드 지급
-		if (now - m_lastGoldUpdateTime >= std::chrono::milliseconds(300))
-		{
-			for (int clientID : m_clientid)
-			{
-				if (clientID == -1)
-					continue;
+        {
+            Profile::Scope periodic(Profile::Stage::Periodic);
+            //골드 지급
+            if (now - m_lastGoldUpdateTime >= std::chrono::milliseconds(300))
+            {
+                for (int clientID : m_clientid)
+                {
+                    if (clientID == -1)
+                        continue;
 
-				auto& client = CObjectMgr::GetInstance()->GetClient(clientID);
-				client->SetGold(client->GetGold() + 1);
-				client->GetPacketSender()->SendGoldPacket(client->GetMatchId(), client->GetGold());
-			}
+                    auto& client = CObjectMgr::GetInstance()->GetClient(clientID);
+                    client->SetGold(client->GetGold() + 1);
+                    client->GetPacketSender()->SendGoldPacket(client->GetMatchId(), client->GetGold());
+                }
 
-			m_lastGoldUpdateTime = now;
-		}
+                m_lastGoldUpdateTime = now;
+            }
 
-		// 플레이어 힐
-		if (now - m_lastPlayerHeal >= std::chrono::milliseconds(ClientInfos::HEAL_COOLTIME))
-		{
-			constexpr float HP_HEAL_PERCENTAGE = 0.1f;	// 데이터로 빼자
-			constexpr float MP_HEAL_PERCENTAGE = 0.15f; // 데이터로 빼자
-			for (int clientID : m_clientid)
-			{
-				if (clientID == -1)
-					continue;
+            // 플레이어 힐
+            if (now - m_lastPlayerHeal >= std::chrono::milliseconds(ClientInfos::HEAL_COOLTIME))
+            {
+                constexpr float HP_HEAL_PERCENTAGE = 0.1f;  // 데이터로 빼자
+                constexpr float MP_HEAL_PERCENTAGE = 0.15f; // 데이터로 빼자
+                for (int clientID : m_clientid)
+                {
+                    if (clientID == -1)
+                        continue;
 
-				const auto& healedClient = CObjectMgr::GetInstance()->GetClient(clientID);
-				healedClient->GetStatus()->m_healthMana.HealHp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxHp() * HP_HEAL_PERCENTAGE));
-				healedClient->GetStatus()->m_healthMana.HealMp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxMp() * MP_HEAL_PERCENTAGE));
+                    const auto& healedClient = CObjectMgr::GetInstance()->GetClient(clientID);
+                    healedClient->GetStatus()->m_healthMana.HealHp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxHp() * HP_HEAL_PERCENTAGE));
+                    healedClient->GetStatus()->m_healthMana.HealMp(static_cast<int>(healedClient->GetStatus()->m_healthMana.GetMaxMp() * MP_HEAL_PERCENTAGE));
 
-				for (int clID : m_clientid) {
-					if (clID == -1)
-						continue;
-					PACKET_SENDER(clID)->SendPlayerHealthManaPacket(healedClient->GetMatchId(), healedClient->GetStatus()->m_healthMana);
-				}
-			}
+                    for (int clID : m_clientid)
+                    {
+                        if (clID == -1)
+                            continue;
+                        PACKET_SENDER(clID)->SendPlayerHealthManaPacket(healedClient->GetMatchId(), healedClient->GetStatus()->m_healthMana);
+                    }
+                }
 
-			m_lastPlayerHeal = now;
-		}
+                m_lastPlayerHeal = now;
+            }
 
-		//미니언 리스폰
-		// 한 웨이브에 4마리, 맵에 최대 12마리 존재가능
-		if (now - m_lastMinionRespawn >= std::chrono::milliseconds(NpcCsvMgr::GetInstance()->GetNpcCsv(ENpcType::Minion)->RespawnTime))
-		{
-			int cnt = 0;
-			for (int i = 0; ; ++i)
-			{
-				if (cnt == MINION_WAVE || i == MAX_MINION)
-					break;
+            //미니언 리스폰
+            // 한 웨이브에 4마리, 맵에 최대 12마리 존재가능
+            if (now - m_lastMinionRespawn >= std::chrono::milliseconds(NpcCsvMgr::GetInstance()->GetNpcCsv(ENpcType::Minion)->RespawnTime))
+            {
+                int cnt = 0;
+                for (int i = 0;; ++i)
+                {
+                    if (cnt == MINION_WAVE || i == MAX_MINION)
+                        break;
 
-				auto npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
-				if (!npc || npc->m_active)
-					continue;
+                    auto npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, i);
+                    if (!npc || npc->m_active)
+                        continue;
 
-				const auto due = std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1));
-				network::GetInstance()->RegisterTimerEvent({ NPC_ID + i, due, EVENT_TYPE::EV_NPC_ACTIVE, _matchNum });
-				m_minionSpawns[i].store(std::chrono::duration_cast<std::chrono::milliseconds>(due.time_since_epoch()).count());
-				cnt++;
-			}
+                    const auto due = std::chrono::system_clock::now() + std::chrono::seconds(2 * (cnt + 1));
+                    network::GetInstance()->RegisterTimerEvent({NPC_ID + i, due, EVENT_TYPE::EV_NPC_ACTIVE, _matchNum});
+                    m_minionSpawns[i].store(std::chrono::duration_cast<std::chrono::milliseconds>(due.time_since_epoch()).count());
+                    cnt++;
+                }
 
-			m_lastMinionRespawn = now;
-		}
-
-		PublishTelemetry(_matchNum, now);
-	}
+                m_lastMinionRespawn = now;
+            }
+        }
+        {
+            Profile::Scope scope(Profile::Stage::Observation);
+            PublishTelemetry(_matchNum, now);
+        }
+    }
 
     void CMatch::PublishTelemetry(int _matchNum, TimePoint _now, bool _finished)
     {

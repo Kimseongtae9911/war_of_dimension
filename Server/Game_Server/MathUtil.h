@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include <ServerCore/TickProfile.h>
 
 #define RAY_OFFSET 2.0f
 
@@ -228,8 +229,11 @@ namespace wod_server {
 
 		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance) const
 		{
-			for (const Triangle& triangle : _triangles) {
-				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
+            wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
+            uint64_t visited = 0;
+            for (const Triangle& triangle : _triangles) {
+                ++visited;
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
 				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
@@ -263,18 +267,23 @@ namespace wod_server {
 						else {
 							_distance = m_origin.m_y + m_direction.m_y * d;
 						}
-						return true;
-					}
+                        profile.Work(visited);
+                        return true;
+                    }
 				}
 			}
 
-			return false;
-		}
+            profile.Work(visited);
+            return false;
+        }
 
 		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance, bool _skill) const
 		{
-			for (const Triangle& triangle : _triangles) {
-				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
+            wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
+            uint64_t visited = 0;
+            for (const Triangle& triangle : _triangles) {
+                ++visited;
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
 				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
@@ -304,18 +313,23 @@ namespace wod_server {
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
 						_distance = m_origin.m_y + m_direction.m_y * d;
 
-						return true;
-					}
+                        profile.Work(visited);
+                        return true;
+                    }
 				}
 			}
 
-			return false;
-		}
+            profile.Work(visited);
+            return false;
+        }
 
 		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum) const
 		{
-			for (const Node* node : _nodes) {
-				Triangle triangle = node->m_triangle;
+            wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
+            uint64_t visited = 0;
+            for (const Node* node : _nodes) {
+                ++visited;
+                Triangle triangle = node->m_triangle;
 				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
@@ -351,18 +365,23 @@ namespace wod_server {
 							_distance = m_origin.m_y + m_direction.m_y * d;
 						}
 						_nodeNum = triangle.m_id;
-						return true;
-					}
+                        profile.Work(visited);
+                        return true;
+                    }
 				}
 			}
 
-			return false;
-		}
+            profile.Work(visited);
+            return false;
+        }
 
 		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum, bool _skill) const
 		{
-			for (const Node* node : _nodes) {
-				Triangle triangle = node->m_triangle;
+            wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
+            uint64_t visited = 0;
+            for (const Node* node : _nodes) {
+                ++visited;
+                Triangle triangle = node->m_triangle;
 				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
 					continue;
 				}
@@ -393,13 +412,15 @@ namespace wod_server {
 					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
 						_distance = m_origin.m_y + m_direction.m_y * d;
 						_nodeNum = triangle.m_id;
-						return true;
-					}
+                        profile.Work(visited);
+                        return true;
+                    }
 				}
 			}
 
-			return false;
-		}
+            profile.Work(visited);
+            return false;
+        }
 	};
 
 	static float DistanceXZ(const Vector3& _pos1, const Vector3& _pos2)

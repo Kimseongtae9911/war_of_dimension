@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include/ServerCore/Metrics.h" />
+    <ClInclude Include="include/ServerCore/TickProfile.h" />
     <ClInclude Include="include/ServerCore/Telemetry.h" />
     <ClInclude Include="include/ServerCore/GameObject.h" />
     <ClInclude Include="include/ServerCore/SessionHandler.h" />

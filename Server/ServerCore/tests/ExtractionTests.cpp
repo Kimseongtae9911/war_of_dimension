@@ -1,5 +1,6 @@
 #include <ServerCore/SessionHandler.h>
 #include <ServerCore/Concurrency.h>
+#include <ServerCore/TickProfile.h>
 #include <algorithm>
 #include <cstring>
 #include <future>
@@ -488,10 +489,67 @@ void MatchObservationCopies()
     Check(reset.find("7465737430303030") == std::string::npos && reset.find("\"spawns\":[]") != std::string::npos, "new match registration clears old members and timers");
 }
 
+void TickProfileIsolation()
+{
+    using Profile = TickProfile;
+    const auto calls = [](Profile::Stage _stage) {
+        const std::string pattern = std::string("\"") + Profile::m_names[static_cast<size_t>(_stage)] + "\":\\{\"calls\":([0-9]+)";
+        std::smatch result;
+        const auto json = Profile::Json();
+        if (!std::regex_search(json, result, std::regex(pattern)))
+            throw std::runtime_error("missing profile stage");
+
+        return std::stoull(result[1]);
+    };
+    Profile::Enable(false);
+    const auto before = calls(Profile::Stage::Total);
+    {
+        Profile::Frame frame;
+        Profile::Scope scope(Profile::Stage::Jobs);
+    }
+    Check(calls(Profile::Stage::Total) == before, "disabled profiling records no frame");
+    Profile::Enable(true);
+    {
+        Profile::Scope outside(Profile::Stage::Jobs);
+    }
+    Check(calls(Profile::Stage::Jobs) == 0, "profiling ignores work outside tick context");
+    try
+    {
+        Profile::Frame frame;
+        Profile::Scope player(Profile::Stage::PlayerUpdate);
+        Profile::Scope ray(Profile::Stage::HeightRay);
+        ray.Work(17);
+        throw std::runtime_error("unwind profile");
+    }
+    catch (const std::runtime_error&)
+    {
+    }
+    {
+        Profile::Scope outside(Profile::Stage::Jobs);
+    }
+    Check(calls(Profile::Stage::Total) == before + 1 && calls(Profile::Stage::Jobs) == 0, "exception restores profiling context");
+    Check(calls(Profile::Stage::PlayerHeight) == 1 && calls(Profile::Stage::MinionHeight) == 0, "height ray attributed to player owner");
+    Check(Profile::Json().find("\"work\":17") != std::string::npos, "ray visited work retained on unwind");
+    const auto worker = [] {
+        for (int index = 0; index < 100; ++index)
+        {
+            Profile::Frame frame;
+            Profile::Scope minion(Profile::Stage::MinionUpdate);
+            Profile::Scope ray(Profile::Stage::HeightRay);
+        }
+    };
+    std::thread first(worker), second(worker);
+    first.join();
+    second.join();
+    Check(calls(Profile::Stage::Total) == before + 201 && calls(Profile::Stage::MinionHeight) == 200 && calls(Profile::Stage::PlayerHeight) == 1, "parallel tick frames retain independent owners");
+    Profile::Enable(false);
+}
+
 int RunExtractionTests()
 {
     FairQueues();
     MatchObservationCopies();
+    TickProfileIsolation();
     ClientReceive();
     ContextAndDisconnect();
     ScheduledJobs();

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MatchTelemetry.h"
+#include <ServerCore/TickProfile.h>
 #include <ServerCore/Session.h>
 #include <ServerCore/Telemetry.h>
 #include "CServer.h"
@@ -161,6 +162,8 @@ namespace wod_server {
 
 	void CServer::Run()
 	{
+        wchar_t profileFlag[2]{};
+        wod::core::TickProfile::Enable(GetEnvironmentVariableW(L"WOD_TICK_PROFILE", profileFlag, 2) == 1 && profileFlag[0] == L'1');
         wod::core::ProcessStopSignal signal;
         wod::core::TelemetryReporter telemetry("GameServer", [] { return Resource::m_overExPool.Leased(); }, [] { return MatchTelemetry::Json(); });
         const unsigned int count = (std::max)(1u, std::thread::hardware_concurrency()/2);

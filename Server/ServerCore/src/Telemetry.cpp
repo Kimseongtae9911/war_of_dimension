@@ -1,4 +1,5 @@
 #include <ServerCore/Telemetry.h>
+#include <ServerCore/TickProfile.h>
 #include <ServerCore/Metrics.h>
 #include <Psapi.h>
 #include <fstream>
@@ -120,6 +121,7 @@ void TelemetryReporter::Sample(bool _stopped)
     json << ",\"performance\":{\"schema_version\":1,\"packets_processed\":" << JobMetrics::m_packets.load() << ",\"move_requests\":" << JobMetrics::m_moves.load() << ",\"stop_requests\":" << JobMetrics::m_stops.load()
          << ",\"job_wait_us\":" << JobMetrics::m_wait.Json() << ",\"packet_job_wait_us\":" << JobMetrics::m_packetWait.Json() << ",\"pending_packets\":" << JobMetrics::PendingPacketJson() << ",\"tick_delay_us\":" << JobMetrics::m_tickDelay.Json()
          << ",\"tick_duration_us\":" << JobMetrics::m_tickDuration.Json() << ",\"lobby_movement_gap_us\":" << JobMetrics::m_lobbyGap.Json() << '}';
+    json << ",\"tick_profile\":" << TickProfile::Json();
     json << ",\"send_queue\":{\"count\":" << stats.m_queuedSends << ",\"max_socket_count\":" << stats.m_maxSocketQueuedSends << ",\"native_calls\":" << stats.m_sendCalls << ",\"batches\":" << stats.m_sendBatches
          << ",\"frames\":" << stats.m_batchedFrames << '}';
     if (m_content)

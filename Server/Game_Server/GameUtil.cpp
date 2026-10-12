@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <ServerCore/TickProfile.h>
 #include "CClient.h"
 #include "CNpc.h"
 #include <fstream>
@@ -487,7 +488,8 @@ namespace wod_server {
 
 	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum)
 	{
-		Ray ray;
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
+        Ray ray;
 		ray.m_origin = _pos;
 		ray.m_origin.m_y += RAY_OFFSET;
 
@@ -501,7 +503,8 @@ namespace wod_server {
 
 	bool GameUtil::MapCollision(const vec3& _pos, vec3& _shift, float& _height, int& _nodeNum)
 	{
-		Ray ray;
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
+        Ray ray;
 		ray.m_origin = _pos + _shift;
 		ray.m_origin.m_y += RAY_OFFSET;
 
@@ -535,7 +538,8 @@ namespace wod_server {
 
 	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum, bool _skill)
 	{
-		Ray ray;
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
+        Ray ray;
 		ray.m_origin = _pos;
 		ray.m_origin.m_y += RAY_OFFSET;
 
@@ -560,7 +564,8 @@ namespace wod_server {
 
 	bool GameUtil::ClientCollisionCheck(int _id, const vec3& _shift)
 	{
-		std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_id);
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::ClientCollision);
+        std::shared_ptr<CClient> client = CObjectMgr::GetInstance()->GetClient(_id);
 
 		DirectX::BoundingOrientedBox clientOBB = client->GetBoundingBox();
 		clientOBB.Center.x += _shift.m_x; clientOBB.Center.y += _shift.m_y; clientOBB.Center.z += _shift.m_z;
@@ -590,7 +595,8 @@ namespace wod_server {
 
 	bool GameUtil::NpcCollisionCheck(int _id, int _matchNum, const vec3& _shift)
 	{
-		std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, _id - NPC_ID);
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NpcCollision);
+        std::shared_ptr<CNpc> npc = CObjectMgr::GetInstance()->GetNpc(_matchNum, _id - NPC_ID);
 
 		DirectX::BoundingOrientedBox npcOBB = npc->GetBoundingBox();
 		npcOBB.Center.x += _shift.m_x; npcOBB.Center.y += _shift.m_y; npcOBB.Center.z += _shift.m_z;

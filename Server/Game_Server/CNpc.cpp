@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <ServerCore/TickProfile.h>
 #include "GameObject.h"
 #include "CNpc.h"
 #include "CClient.h"
@@ -158,7 +159,8 @@ namespace wod_server {
 
 	bool CNpc::Astar(Node* _startNode, Node* _endNode)
 	{
-		while (!m_chasePath.empty()) {
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::Astar);
+        while (!m_chasePath.empty()) {
 			m_chasePath.pop();
 		}
 

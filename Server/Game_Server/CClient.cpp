@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <ServerCore/TickProfile.h>
 #include <Protocol/Validation.h>
 #include "CClient.h"
 #include "CPacketMgr.h"
@@ -120,7 +121,8 @@ namespace wod_server {
 
 	void CClient::Move(float _elapsedTime)
 	{
-		if (m_usingSkill || (DEFENSIVE_BUFF::INDESTRUCTIBLE == m_status->m_defensiveBuff) || SKILL_BUFF::STUN == m_status->m_skillBuff || m_isDead) {
+        wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::PlayerMove);
+        if (m_usingSkill || (DEFENSIVE_BUFF::INDESTRUCTIBLE == m_status->m_defensiveBuff) || SKILL_BUFF::STUN == m_status->m_skillBuff || m_isDead) {
 			m_vel = { 0.f, 0.f, 0.f };
 			m_dir = 0;
 			SetUpdateTime();
