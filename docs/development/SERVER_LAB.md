@@ -311,3 +311,21 @@ Peer 수신 오류는 port/phase/시각/closing과 함께 남는다. 정상 EOF/
 성능 요약은 pending I/O/전송 대기의 peak/end와 native 호출·배치·프레임 증분/s를 추가 계산한다. 과거 결과의 없는 지표는 생략한다.
 `Measure-ServerPerformance.ps1 -Stage before|after|diagnostic`은 실험 단계 식별용이며 부하를 바꾸지 않는다.
 [원인 분리와 동일 조건 전후 비교](JOBQUEUE_IMPROVEMENT.md)를 참조한다.
+
+## 게임 지형 공간 검색 검사
+
+게임 서버는 NavMesh·HeightMesh를 로드한 뒤 4단위 XZ 공간 인덱스를 공유한다. `GET /api/state`의 GameServer `terrain_index`와 저장된 `samples[].servers[]`에서 준비 상태·규모를 조회할 수 있다. 원본 reporter에서는 `content.terrain_index`다.
+
+`schema_version=1`이며 `nav`/`height`에 `ready`(구축 성공), `triangles`(원본 면 수), `cell_size`(월드 단위), `cells`, `references`(셀별 중복 ID 포함), `global_candidates`(모든 위치에서 순서 병합할 면 수), `bytes`(인덱스 vector capacity 합)가 있다. 마지막 값은 구축 임시 메모리나 전체 프로세스 사용량이 아니다. worker 시작 전 만든 복사본이며 실행 중 갱신하지 않는다. 이전 실행 파일에 없으면 누락 상태로 남기고, `ready=false`일 때는 기존 전체 검색을 사용한다.
+
+```powershell
+$state = Invoke-RestMethod http://127.0.0.1:8790/api/state
+($state.servers | Where-Object role -eq GameServer).terrain_index | ConvertTo-Json -Depth 4
+./scripts/Test-ServerTerrain.ps1 -Configuration Release
+./scripts/Test-ServerTerrain.ps1 -Configuration Debug
+python tools/server_lab/terrain_compare.py --baseline artifacts/logs/game-tick-profile-20261012 --output artifacts/logs/terrain-compare-new
+```
+
+`Test-ServerTerrain`은 Core/ABI와 실제 메시의 기존 참조 Ray 대비 bit 단위 높이/노드/첫 hit 비교를 실행한다. `terrain_compare.py`는 기준 측정의 frozen 게임 실행 파일·현재 게임 실행 파일을 교차 배치해 같은 perf-match seed를 실행하고 종료 후 개선 파일을 복원한다. 기본은 4/16/64명·조건별5쌍·양쪽 계측 켬·입장 소프트 제한 해제다. 기존 서버가 실행 중이면 거부하며 실행 중 소스/데이터/실행 파일을 변경하지 않는다. 기준 데이터/시나리오 hash·종료 자원·실행 파일 복원/fingerprint·누락 profile을 검사하고 실패도 저장한다. 기준/개선 파일·소스 snapshot·원시 결과·분석은 출력 경로에 남는다.
+
+`tick_profile`의 Ray `work`는 실제 방문한 후보 삼각형 수다. 일반 수직 하향 Ray를 가속하며 비수직/비정상/극단 Y·무효 인덱스는 선형 fallback한다. 원본 면 순서·높이 필터/보정·스킬 의미를 유지하며 품질 기준의 변경은 후속 작업이다. [전후 보고서](TERRAIN_SPATIAL_INDEX.html)·[계약/검증](TERRAIN_SPATIAL_INDEX.md)을 참조한다.

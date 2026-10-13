@@ -196,6 +196,19 @@ class Observation(unittest.TestCase):
                 thread.join()
                 lab.close()
 
+    def test_terrain_index_preserved_and_not_inherited_after_restart(self):
+        with tempfile.TemporaryDirectory() as directory:
+            feed = ServerFeed(directory)
+            path = Path(directory) / 'GameServer.json'
+            data = {**self.snapshot(), 'role': 'GameServer', 'content': {'terrain_index': {'schema_version': 1, 'height': {'ready': False}}}}
+            path.write_text(json.dumps(data), encoding='utf-8')
+            game = next(row for row in feed.sample() if row['role'] == 'GameServer')
+            self.assertIs(game['terrain_index']['height']['ready'], False)
+            data.update(instance='new-instance', content={})
+            path.write_text(json.dumps(data), encoding='utf-8')
+            game = next(row for row in feed.sample() if row['role'] == 'GameServer')
+            self.assertNotIn('terrain_index', game)
+
 
 if __name__ == '__main__':
     unittest.main()

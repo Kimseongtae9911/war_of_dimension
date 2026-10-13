@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "게임 지형 공간 검색", "quality_profile": "showcase"},
+  "lanes": [{"id": "startup", "label": "worker 시작 전"}, {"id": "tick", "label": "이동 tick"}],
+  "mainPath": ["load", "grid", "vertical", "candidates", "hit"],
+  "nodes": [
+    {"id": "load", "lane": "startup", "col": 0, "type": "database", "label": "메시 로드", "sublabel": "최종 순서 유지", "width": 160},
+    {"id": "grid", "lane": "startup", "col": 1, "type": "backend", "label": "XZ 격자 구축", "sublabel": "4단위 셀·정적 ID", "width": 160},
+    {"id": "vertical", "lane": "tick", "col": 1, "type": "security", "label": "수직 Ray 확인", "sublabel": "위치와 방향 검사", "width": 160},
+    {"id": "candidates", "lane": "tick", "col": 2, "type": "backend", "label": "후보 순서 병합", "sublabel": "셀 ID + 전역 ID", "width": 160},
+    {"id": "hit", "lane": "tick", "col": 3, "type": "backend", "label": "기존 삼각형 판정", "sublabel": "첫 hit 높이·노드", "width": 160},
+    {"id": "linear", "lane": "tick", "col": 0, "type": "backend", "label": "기존 전체 검색", "sublabel": "미지원·무효 인덱스", "width": 160}
+  ],
+  "edges": [
+    {"id": "load-grid", "from": "load", "to": "grid"},
+    {"id": "grid-query", "from": "grid", "to": "vertical", "label": "읽기 전용 공유"},
+    {"id": "query-candidates", "from": "vertical", "to": "candidates", "label": "수직 하향"},
+    {"id": "candidates-hit", "from": "candidates", "to": "hit", "label": "원본 ID 순"},
+    {"id": "query-fallback", "from": "vertical", "to": "linear", "label": "그 외", "role": "branch"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "검색 범위만 축소", "items": ["NavMesh·HeightMesh에 같은 인덱스", "경계 여유·불안정 삼각형 전역 후보"]},
+    {"dot": "rose", "title": "기존 판정 보존", "items": ["겹친 지형도 첫 hit 순서를 유지", "비수직 Ray는 전체 검색으로 전환"]}
+  ]
+}

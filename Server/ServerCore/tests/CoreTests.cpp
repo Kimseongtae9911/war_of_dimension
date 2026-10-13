@@ -15,6 +15,8 @@ int RunJobQueueBenchmark(int _argc, char **_argv);
 int RunExtractionTests();
 int RunResourceTests();
 int RunGameObjectTests();
+int RunTerrainTests();
+int RunTerrainAssetChecks();
 using namespace wod::core;
 
 namespace
@@ -710,6 +712,11 @@ int main(int argc, char **argv)
 
     try
     {
+        if (argc > 1 && std::string(argv[1]) == "--terrain-assets")
+        {
+            return RunTerrainAssetChecks();
+        }
+
         WinsockRuntime runtime;
         Frames();
         Jobs();
@@ -725,6 +732,7 @@ int main(int argc, char **argv)
         checks += RunExtractionTests();
         checks += RunResourceTests();
         checks += RunGameObjectTests();
+        checks += RunTerrainTests();
         Observations();
         for (int i = 0; i < 5; ++i)
             Loopback();

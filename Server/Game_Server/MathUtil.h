@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include "TerrainSpatialIndex.h"
 #include <ServerCore/TickProfile.h>
 
 #define RAY_OFFSET 2.0f
@@ -219,209 +220,267 @@ namespace wod_server {
 		Node(const Triangle& _triangle) : m_triangle(_triangle) {}
 	};
 
-	class Ray
-	{
-	public:
-		Ray() { m_origin = {0.0f, 0.0f, 0.0f}; m_direction = { 0.0f, -1.0f, 0.0f }; }
-		Ray(Vector3& _pos) { m_origin = _pos; m_direction = { 0.0f, -1.0f, 0.0f }; }
-		Ray(Vector3& _pos, Vector3& _dir) { m_origin = _pos; m_direction = _dir; }
-		Vector3 m_origin, m_direction;
+    class Ray
+    {
+      public:
+        Ray()
+        {
+            m_origin = {0.0f, 0.0f, 0.0f};
+            m_direction = {0.0f, -1.0f, 0.0f};
+        }
 
-		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance) const
-		{
+        Ray(Vector3& _pos)
+        {
+            m_origin = _pos;
+            m_direction = {0.0f, -1.0f, 0.0f};
+        }
+
+        Ray(Vector3& _pos, Vector3& _dir)
+        {
+            m_origin = _pos;
+            m_direction = _dir;
+        }
+
+        Vector3 m_origin, m_direction;
+
+        bool RayCast(const std::vector<Triangle>& _triangles, float& _distance, const TerrainSpatialIndex *_index = nullptr) const
+        {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
             uint64_t visited = 0;
-            for (const Triangle& triangle : _triangles) {
+            for (size_t id : Candidates(_triangles.size(), _index))
+            {
+                const Triangle& triangle = _triangles[id];
                 ++visited;
-                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
-					continue;
-				}
-				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f)
+                {
+                    continue;
+                }
+                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
-				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
+                // Calculate the distance from the ray origin to the plane of the triangle
+                float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
-				// Check if the ray intersects the plane of the triangle
-				if (d >= 0.0f) {
-					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = m_origin + m_direction * d;
+                // Check if the ray intersects the plane of the triangle
+                if (d >= 0.0f)
+                {
+                    // Calculate the point of intersection on the plane of the triangle
+                    Vector3 point = m_origin + m_direction * d;
 
-					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
-					Vector3 pointToV1 = point - triangle.m_v1;
-					float dot11 = edge1.Dot(edge1);
-					float dot12 = edge1.Dot(edge2);
-					float dot22 = edge2.Dot(edge2);
-					float dotP1 = pointToV1.Dot(edge1);
-					float dotP2 = pointToV1.Dot(edge2);
-					float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
-					float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
-					float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
+                    // Check if the point of intersection is inside the triangle
+                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 pointToV1 = point - triangle.m_v1;
+                    float dot11 = edge1.Dot(edge1);
+                    float dot12 = edge1.Dot(edge2);
+                    float dot22 = edge2.Dot(edge2);
+                    float dotP1 = pointToV1.Dot(edge1);
+                    float dotP2 = pointToV1.Dot(edge2);
+                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
+                    float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
-					// Check if the point of intersection is inside the triangle
-					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.8f) {
-							_distance = m_origin.m_y - RAY_OFFSET;
-						}
-						else {
-							_distance = m_origin.m_y + m_direction.m_y * d;
-						}
+                    // Check if the point of intersection is inside the triangle
+                    if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f)
+                    {
+                        if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.8f)
+                        {
+                            _distance = m_origin.m_y - RAY_OFFSET;
+                        }
+                        else
+                        {
+                            _distance = m_origin.m_y + m_direction.m_y * d;
+                        }
+
                         profile.Work(visited);
+
                         return true;
                     }
-				}
-			}
+                }
+            }
 
             profile.Work(visited);
+
             return false;
         }
 
-		bool RayCast(const std::vector<Triangle>& _triangles, float& _distance, bool _skill) const
-		{
+        bool RayCast(const std::vector<Triangle>& _triangles, float& _distance, bool _skill, const TerrainSpatialIndex *_index = nullptr) const
+        {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
             uint64_t visited = 0;
-            for (const Triangle& triangle : _triangles) {
+            for (size_t id : Candidates(_triangles.size(), _index))
+            {
+                const Triangle& triangle = _triangles[id];
                 ++visited;
-                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
-					continue;
-				}
-				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f)
+                {
+                    continue;
+                }
+                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
-				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
+                // Calculate the distance from the ray origin to the plane of the triangle
+                float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
-				// Check if the ray intersects the plane of the triangle
-				if (d >= 0.0f) {
-					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = m_origin + m_direction * d;
+                // Check if the ray intersects the plane of the triangle
+                if (d >= 0.0f)
+                {
+                    // Calculate the point of intersection on the plane of the triangle
+                    Vector3 point = m_origin + m_direction * d;
 
-					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
-					Vector3 pointToV1 = point - triangle.m_v1;
-					float dot11 = edge1.Dot(edge1);
-					float dot12 = edge1.Dot(edge2);
-					float dot22 = edge2.Dot(edge2);
-					float dotP1 = pointToV1.Dot(edge1);
-					float dotP2 = pointToV1.Dot(edge2);
-					float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
-					float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
-					float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
+                    // Check if the point of intersection is inside the triangle
+                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 pointToV1 = point - triangle.m_v1;
+                    float dot11 = edge1.Dot(edge1);
+                    float dot12 = edge1.Dot(edge2);
+                    float dot22 = edge2.Dot(edge2);
+                    float dotP1 = pointToV1.Dot(edge1);
+                    float dotP2 = pointToV1.Dot(edge2);
+                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
+                    float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
-					// Check if the point of intersection is inside the triangle
-					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						_distance = m_origin.m_y + m_direction.m_y * d;
+                    // Check if the point of intersection is inside the triangle
+                    if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f)
+                    {
+                        _distance = m_origin.m_y + m_direction.m_y * d;
 
                         profile.Work(visited);
+
                         return true;
                     }
-				}
-			}
+                }
+            }
 
             profile.Work(visited);
+
             return false;
         }
 
-		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum) const
-		{
+        bool RayCast(const std::vector<Node *>& _nodes, float& _distance, int& _nodeNum, const TerrainSpatialIndex *_index = nullptr) const
+        {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
             uint64_t visited = 0;
-            for (const Node* node : _nodes) {
+            for (size_t id : Candidates(_nodes.size(), _index))
+            {
+                const Node *node = _nodes[id];
                 ++visited;
                 Triangle triangle = node->m_triangle;
-				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
-					continue;
-				}
-				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f)
+                {
+                    continue;
+                }
+                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
-				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
+                // Calculate the distance from the ray origin to the plane of the triangle
+                float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
-				// Check if the ray intersects the plane of the triangle
-				if (d >= 0.0f) {
-					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = m_origin + m_direction * d;
+                // Check if the ray intersects the plane of the triangle
+                if (d >= 0.0f)
+                {
+                    // Calculate the point of intersection on the plane of the triangle
+                    Vector3 point = m_origin + m_direction * d;
 
-					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
-					Vector3 pointToV1 = point - triangle.m_v1;
-					float dot11 = edge1.Dot(edge1);
-					float dot12 = edge1.Dot(edge2);
-					float dot22 = edge2.Dot(edge2);
-					float dotP1 = pointToV1.Dot(edge1);
-					float dotP2 = pointToV1.Dot(edge2);
-					float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
-					float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
-					float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
+                    // Check if the point of intersection is inside the triangle
+                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 pointToV1 = point - triangle.m_v1;
+                    float dot11 = edge1.Dot(edge1);
+                    float dot12 = edge1.Dot(edge2);
+                    float dot22 = edge2.Dot(edge2);
+                    float dotP1 = pointToV1.Dot(edge1);
+                    float dotP2 = pointToV1.Dot(edge2);
+                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
+                    float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
-					// Check if the point of intersection is inside the triangle
-					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.6f) {
-							_distance = m_origin.m_y - RAY_OFFSET;
-						}
-						else {
-							_distance = m_origin.m_y + m_direction.m_y * d;
-						}
-						_nodeNum = triangle.m_id;
+                    // Check if the point of intersection is inside the triangle
+                    if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f)
+                    {
+                        if (::abs(m_direction.m_y * d) - RAY_OFFSET >= 0.6f)
+                        {
+                            _distance = m_origin.m_y - RAY_OFFSET;
+                        }
+                        else
+                        {
+                            _distance = m_origin.m_y + m_direction.m_y * d;
+                        }
+                        _nodeNum = triangle.m_id;
                         profile.Work(visited);
+
                         return true;
                     }
-				}
-			}
+                }
+            }
 
             profile.Work(visited);
+
             return false;
         }
 
-		bool RayCast(const std::vector<Node*>& _nodes, float& _distance, int& _nodeNum, bool _skill) const
-		{
+        bool RayCast(const std::vector<Node *>& _nodes, float& _distance, int& _nodeNum, bool _skill, const TerrainSpatialIndex *_index = nullptr) const
+        {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
             uint64_t visited = 0;
-            for (const Node* node : _nodes) {
+            for (size_t id : Candidates(_nodes.size(), _index))
+            {
+                const Node *node = _nodes[id];
                 ++visited;
                 Triangle triangle = node->m_triangle;
-				if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f) {
-					continue;
-				}
-				Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                if (triangle.m_v1.m_y < 1.5f || triangle.m_v2.m_y < 1.5f || triangle.m_v3.m_y < 1.5f)
+                {
+                    continue;
+                }
+                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
-				// Calculate the distance from the ray origin to the plane of the triangle
-				float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
+                // Calculate the distance from the ray origin to the plane of the triangle
+                float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
 
-				// Check if the ray intersects the plane of the triangle
-				if (d >= 0.0f) {
-					// Calculate the point of intersection on the plane of the triangle
-					Vector3 point = m_origin + m_direction * d;
+                // Check if the ray intersects the plane of the triangle
+                if (d >= 0.0f)
+                {
+                    // Calculate the point of intersection on the plane of the triangle
+                    Vector3 point = m_origin + m_direction * d;
 
-					// Check if the point of intersection is inside the triangle
-					Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-					Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
-					Vector3 pointToV1 = point - triangle.m_v1;
-					float dot11 = edge1.Dot(edge1);
-					float dot12 = edge1.Dot(edge2);
-					float dot22 = edge2.Dot(edge2);
-					float dotP1 = pointToV1.Dot(edge1);
-					float dotP2 = pointToV1.Dot(edge2);
-					float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
-					float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
-					float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
+                    // Check if the point of intersection is inside the triangle
+                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 pointToV1 = point - triangle.m_v1;
+                    float dot11 = edge1.Dot(edge1);
+                    float dot12 = edge1.Dot(edge2);
+                    float dot22 = edge2.Dot(edge2);
+                    float dotP1 = pointToV1.Dot(edge1);
+                    float dotP2 = pointToV1.Dot(edge2);
+                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
+                    float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
-					// Check if the point of intersection is inside the triangle
-					if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-						_distance = m_origin.m_y + m_direction.m_y * d;
-						_nodeNum = triangle.m_id;
+                    // Check if the point of intersection is inside the triangle
+                    if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f)
+                    {
+                        _distance = m_origin.m_y + m_direction.m_y * d;
+                        _nodeNum = triangle.m_id;
                         profile.Work(visited);
+
                         return true;
                     }
-				}
-			}
+                }
+            }
 
             profile.Work(visited);
+
             return false;
         }
-	};
+
+      private:
+        TerrainSpatialIndex::Indices Candidates(size_t _count, const TerrainSpatialIndex *_index) const
+        {
+            // Nonvertical rays and extreme Y keep the original full scan.
+            if (!_index || m_direction.m_x != 0 || m_direction.m_y != -1 || m_direction.m_z != 0 || !std::isfinite(m_origin.m_y) || std::abs(m_origin.m_y) > 1024)
+                return TerrainSpatialIndex::Indices::Linear(_count);
+
+            return _index->Query(m_origin.m_x, m_origin.m_z, _count);
+        }
+    };
 
 	static float DistanceXZ(const Vector3& _pos1, const Vector3& _pos2)
 	{

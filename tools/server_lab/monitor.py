@@ -84,6 +84,8 @@ class ServerFeed:
                 status = 'stopped' if data['stopped'] else 'stale' if age > 3.5 or age < -2 else 'live'
                 if role == 'GameServer':
                     self.content = content if isinstance(content, dict) else {}
+                    if isinstance(self.content.get('terrain_index'), dict):
+                        data['terrain_index'] = self.content['terrain_index']
                 elif isinstance(content, dict):
                     data['admission'] = content
                 output.append({**data, **self.rates.get(role, {}), 'status': status, 'age_s': max(0, age)})

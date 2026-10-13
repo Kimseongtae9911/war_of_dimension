@@ -15,6 +15,7 @@ namespace wod_server {
 		static bool LoadManaConsumption(std::string _filename);
 		static bool LoadNaviMesh(std::string _filename);
 		static bool LoadHeightMesh(std::string _filename);
+        static std::string TerrainIndexJson();
 		static bool LoadMap(std::string _filename);
 		static bool LoadPlayerBB(std::string _filename, int _type);
 		static bool LoadMinionBB(std::string _filename);
@@ -78,6 +79,8 @@ namespace wod_server {
 		static std::array<std::unordered_map<int, int>, MAX_ROLE> m_playerManaConsumption;	//0: archer, fighter, swordman, wizard, ogre, programmer
 		static std::vector<Node*> m_naviMesh;
 		static std::vector<Triangle> m_heightMesh;
+        static TerrainSpatialIndex m_naviIndex;
+        static TerrainSpatialIndex m_heightIndex;
 		static std::array<std::array<std::vector<DirectX::BoundingOrientedBox>, SECTION_NUM>, SECTION_NUM> m_boundingBoxs;
 		static InitBoundingBox m_playerInitBB;
 		static InitBoundingBox m_bossPlayerInitBB;

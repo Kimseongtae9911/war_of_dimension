@@ -165,7 +165,13 @@ namespace wod_server {
         wchar_t profileFlag[2]{};
         wod::core::TickProfile::Enable(GetEnvironmentVariableW(L"WOD_TICK_PROFILE", profileFlag, 2) == 1 && profileFlag[0] == L'1');
         wod::core::ProcessStopSignal signal;
-        wod::core::TelemetryReporter telemetry("GameServer", [] { return Resource::m_overExPool.Leased(); }, [] { return MatchTelemetry::Json(); });
+        const std::string terrainStats = GameUtil::TerrainIndexJson();
+        wod::core::TelemetryReporter telemetry("GameServer", [] { return Resource::m_overExPool.Leased(); }, [terrainStats] {
+            std::string content = MatchTelemetry::Json();
+            content.pop_back();
+
+            return content + ",\"terrain_index\":" + terrainStats + "}";
+        });
         const unsigned int count = (std::max)(1u, std::thread::hardware_concurrency()/2);
         const auto failure = [](std::exception_ptr _error) {
             try { std::rethrow_exception(_error); }

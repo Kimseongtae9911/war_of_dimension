@@ -44,6 +44,7 @@
     <ClCompile Include="GameObjectTests.cpp" />
     <ClCompile Include="ResourceTests.cpp" />
     <ClCompile Include="ExtractionTests.cpp" />
+    <ClCompile Include="TerrainTests.cpp" />
     <ClCompile Include="CoreTests.cpp" />
     <ClCompile Include="ProtocolAbi.cpp" />
   </ItemGroup>

@@ -10,6 +10,8 @@ namespace wod_server {
 	std::array<std::unordered_map<int, int>, MAX_ROLE> GameUtil::m_playerManaConsumption;
 	std::vector<Node*> GameUtil::m_naviMesh;
 	std::vector<Triangle> GameUtil::m_heightMesh;
+    TerrainSpatialIndex GameUtil::m_naviIndex;
+    TerrainSpatialIndex GameUtil::m_heightIndex;
 	std::array<std::array<std::vector<DirectX::BoundingOrientedBox>, SECTION_NUM>, SECTION_NUM> GameUtil::m_boundingBoxs;
 	InitBoundingBox GameUtil::m_playerInitBB;
 	InitBoundingBox GameUtil::m_bossPlayerInitBB;
@@ -22,6 +24,8 @@ namespace wod_server {
 
 	GameUtil::~GameUtil()
 	{
+        m_naviIndex.Reset();
+        m_heightIndex.Reset();
 		for (Node* node : m_naviMesh) {
 			delete node;
 		}
@@ -94,82 +98,113 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::LoadNaviMesh(std::string _filename)
-	{
-		std::ifstream in(_filename);
-		if (in.fail())
-			return false;
 
-		std::vector<vec3> vertices;
-		int triangleID = 0;
+    bool GameUtil::LoadNaviMesh(std::string _filename)
+    {
+        std::ifstream in(_filename);
+        if (in.fail())
+            return false;
 
-		std::string line;
-		while (std::getline(in, line)) {
-			std::stringstream ss(line);
-			std::string token;
-			ss >> token;
+        m_naviIndex.Reset();
+        std::vector<vec3> vertices;
+        int triangleID = 0;
 
-			if (token == "v") {
-				vec3 vertex;
-				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
-				vertices.push_back(vertex);
-			}
-			else if (token == "f") {
-				int index1, index2, index3;
-				ss >> index1 >> index2 >> index3;
-				Triangle triangle(vertices[index1 - 1], vertices[index2 - 1], vertices[index3 - 1], triangleID++);
+        std::string line;
+        while (std::getline(in, line))
+        {
+            std::stringstream ss(line);
+            std::string token;
+            ss >> token;
 
-				Node* currentNodePtr = new Node(triangle);
-				m_naviMesh.push_back(currentNodePtr);
+            if (token == "v")
+            {
+                vec3 vertex;
+                ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
+                vertices.push_back(vertex);
+            }
+            else if (token == "f")
+            {
+                int index1, index2, index3;
+                ss >> index1 >> index2 >> index3;
+                Triangle triangle(vertices[index1 - 1], vertices[index2 - 1], vertices[index3 - 1], triangleID++);
 
-				//Check Adjacent Triangle
-				for (const auto& node : m_naviMesh)
-				{
-					if (&node->m_triangle != &currentNodePtr->m_triangle && CheckTriangleAdjacent(node->m_triangle, currentNodePtr->m_triangle))
-					{
-						currentNodePtr->m_adjacentNodes.push_back(node);
-						node->m_adjacentNodes.push_back(currentNodePtr);
-					}
-				}
-			}
+                Node *currentNodePtr = new Node(triangle);
+                m_naviMesh.push_back(currentNodePtr);
 
-		}
+                //Check Adjacent Triangle
+                for (const auto& node : m_naviMesh)
+                {
+                    if (&node->m_triangle != &currentNodePtr->m_triangle && CheckTriangleAdjacent(node->m_triangle, currentNodePtr->m_triangle))
+                    {
+                        currentNodePtr->m_adjacentNodes.push_back(node);
+                        node->m_adjacentNodes.push_back(currentNodePtr);
+                    }
+                }
+            }
+        }
 
-		return true;
-	}
+        const bool indexed = m_naviIndex.Build(m_naviMesh.size(), [](size_t _id) -> const Triangle& {
+            return m_naviMesh[_id]->m_triangle;
+        });
+        LogPrinter::PrintMsg("LoadNaviMesh spatial index=" + std::to_string(indexed) + " cells=" + std::to_string(m_naviIndex.Cells()) + " references=" + std::to_string(m_naviIndex.References()) +
+                             " global=" + std::to_string(m_naviIndex.GlobalCandidates()) + " bytes=" + std::to_string(m_naviIndex.Bytes()));
 
-	bool GameUtil::LoadHeightMesh(std::string _filename)
-	{
-		std::ifstream in(_filename);
-		if (in.fail())
-			return false;
+        return true;
+    }
 
-		std::vector<vec3> vertices;
 
-		std::string line;
-		while (std::getline(in, line)) {
-			std::stringstream ss(line);
-			std::string token;
-			ss >> token;
+    bool GameUtil::LoadHeightMesh(std::string _filename)
+    {
+        std::ifstream in(_filename);
+        if (in.fail())
+            return false;
 
-			if (token == "v") {
-				vec3 vertex;
-				ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
-				vertices.push_back(vertex);
-			}
-			else if (token == "f") {
-				int index1, index2, index3;
-				ss >> index1 >> index2 >> index3;
-				m_heightMesh.push_back(Triangle(vertices[index1 - 1], vertices[index2 - 1], vertices[index3 - 1]));
-			}
-		}
+        m_heightIndex.Reset();
+        std::vector<vec3> vertices;
 
-		std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& _t1, const Triangle& _t2) {
-			return (_t1.m_v1.m_y + _t1.m_v2.m_y + _t1.m_v3.m_y) / 3.f > (_t2.m_v1.m_y + _t2.m_v2.m_y + _t2.m_v3.m_y) / 3.f;
-			});
+        std::string line;
+        while (std::getline(in, line))
+        {
+            std::stringstream ss(line);
+            std::string token;
+            ss >> token;
 
-		return true;
-	}
+            if (token == "v")
+            {
+                vec3 vertex;
+                ss >> vertex.m_x >> vertex.m_y >> vertex.m_z;
+                vertices.push_back(vertex);
+            }
+            else if (token == "f")
+            {
+                int index1, index2, index3;
+                ss >> index1 >> index2 >> index3;
+                m_heightMesh.push_back(Triangle(vertices[index1 - 1], vertices[index2 - 1], vertices[index3 - 1]));
+            }
+        }
+
+        std::sort(m_heightMesh.begin(), m_heightMesh.end(), [](const Triangle& _t1, const Triangle& _t2) {
+            return (_t1.m_v1.m_y + _t1.m_v2.m_y + _t1.m_v3.m_y) / 3.f > (_t2.m_v1.m_y + _t2.m_v2.m_y + _t2.m_v3.m_y) / 3.f;
+        });
+
+        const bool indexed = m_heightIndex.Build(m_heightMesh.size(), [](size_t _id) -> const Triangle& {
+            return m_heightMesh[_id];
+        });
+        LogPrinter::PrintMsg("LoadHeightMesh spatial index=" + std::to_string(indexed) + " cells=" + std::to_string(m_heightIndex.Cells()) + " references=" + std::to_string(m_heightIndex.References()) +
+                             " global=" + std::to_string(m_heightIndex.GlobalCandidates()) + " bytes=" + std::to_string(m_heightIndex.Bytes()));
+
+        return true;
+    }
+
+    std::string GameUtil::TerrainIndexJson()
+    {
+        auto describe = [](const TerrainSpatialIndex& _index, size_t _triangles) {
+            return "{\"ready\":" + std::string(_index.Ready() ? "true" : "false") + ",\"triangles\":" + std::to_string(_triangles) + ",\"cell_size\":4,\"cells\":" + std::to_string(_index.Cells()) +
+                   ",\"references\":" + std::to_string(_index.References()) + ",\"global_candidates\":" + std::to_string(_index.GlobalCandidates()) + ",\"bytes\":" + std::to_string(_index.Bytes()) + "}";
+        };
+
+        return "{\"schema_version\":1,\"nav\":" + describe(m_naviIndex, m_naviMesh.size()) + ",\"height\":" + describe(m_heightIndex, m_heightMesh.size()) + "}";
+    }
 
 	bool GameUtil::LoadMap(std::string _filename)
 	{
@@ -486,69 +521,85 @@ namespace wod_server {
 		}
 	}
 
+
 	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum)
 	{
         wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
         Ray ray;
-		ray.m_origin = _pos;
-		ray.m_origin.m_y += RAY_OFFSET;
+        ray.m_origin = _pos;
+        ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
-			ray.RayCast(m_heightMesh, _height);
-			return true;
-		}
+        if (ray.RayCast(m_naviMesh, _height, _nodeNum, &m_naviIndex))
+        {
+            ray.RayCast(m_heightMesh, _height, &m_heightIndex);
 
-		return false;
-	}
+            return true;
+        }
 
-	bool GameUtil::MapCollision(const vec3& _pos, vec3& _shift, float& _height, int& _nodeNum)
-	{
+        return false;
+    }
+
+
+    bool GameUtil::MapCollision(const vec3& _pos, vec3& _shift, float& _height, int& _nodeNum)
+    {
         wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
         Ray ray;
-		ray.m_origin = _pos + _shift;
-		ray.m_origin.m_y += RAY_OFFSET;
+        ray.m_origin = _pos + _shift;
+        ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
-			ray.RayCast(m_heightMesh, _height);
-			return true;
-		}
-		else {
-			vec3 slidingVector;
-			if (GetSlidingVector(_pos, _shift, _nodeNum, slidingVector)) {
-				_shift = slidingVector * _shift.Length();
-				ray.m_origin = _pos + _shift;
-				ray.m_origin.m_y += RAY_OFFSET;
-				if (ray.RayCast(m_naviMesh, _height, _nodeNum)) {
-					return false;
-				}
-				else {
-					float desiredMagnitude = slidingVector.Length() * 2.0f;
-					slidingVector = vec3::Normalize(slidingVector) * desiredMagnitude;
-					vec3 temp = _shift;
-					_shift = slidingVector * _shift.Length() - temp;
-					return false;
-				}
-			}
-			else {
-				std::cout << "Failed To Get Sliding Vector" << std::endl;
-			}
-		}
-		return false;
-	}
+        if (ray.RayCast(m_naviMesh, _height, _nodeNum, &m_naviIndex))
+        {
+            ray.RayCast(m_heightMesh, _height, &m_heightIndex);
 
-	bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum, bool _skill)
-	{
+            return true;
+        }
+        else
+        {
+            vec3 slidingVector;
+            if (GetSlidingVector(_pos, _shift, _nodeNum, slidingVector))
+            {
+                _shift = slidingVector * _shift.Length();
+                ray.m_origin = _pos + _shift;
+                ray.m_origin.m_y += RAY_OFFSET;
+                if (ray.RayCast(m_naviMesh, _height, _nodeNum, &m_naviIndex))
+                {
+                    return false;
+                }
+                else
+                {
+                    float desiredMagnitude = slidingVector.Length() * 2.0f;
+                    slidingVector = vec3::Normalize(slidingVector) * desiredMagnitude;
+                    vec3 temp = _shift;
+                    _shift = slidingVector * _shift.Length() - temp;
+                    return false;
+                }
+            }
+            else
+            {
+                std::cout << "Failed To Get Sliding Vector" << std::endl;
+            }
+        }
+
+        return false;
+    }
+
+
+    bool GameUtil::MapCollision(const vec3& _pos, float& _height, int& _nodeNum, bool _skill)
+    {
         wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::MapCollision);
         Ray ray;
-		ray.m_origin = _pos;
-		ray.m_origin.m_y += RAY_OFFSET;
+        ray.m_origin = _pos;
+        ray.m_origin.m_y += RAY_OFFSET;
 
-		if (ray.RayCast(m_naviMesh, _height, _nodeNum, _skill)) {
-			ray.RayCast(m_heightMesh, _height, _skill);
-			return true;
-		}
-		return false;
-	}
+        if (ray.RayCast(m_naviMesh, _height, _nodeNum, _skill, &m_naviIndex))
+        {
+            ray.RayCast(m_heightMesh, _height, _skill, &m_heightIndex);
+
+            return true;
+        }
+
+        return false;
+    }
 
 	bool GameUtil::FenceCollision(const DirectX::BoundingOrientedBox _box, const vec3& _shift)
 	{
