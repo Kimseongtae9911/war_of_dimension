@@ -65,6 +65,7 @@ class JobMetrics
     inline static std::atomic_uint64_t m_submitted = 0, m_started = 0, m_completed = 0, m_failed = 0, m_cleared = 0, m_running = 0, m_executeUs = 0, m_maxExecuteUs = 0;
     inline static std::atomic_uint64_t m_packets = 0, m_moves = 0, m_stops = 0;
     inline static MetricHistogram m_wait, m_packetWait, m_tickDelay, m_tickDuration, m_lobbyGap;
+    inline static MetricHistogram m_tickTimerLateness, m_tickDispatchWait;
     inline static std::mutex m_packetMutex;
     inline static std::unordered_map<const void *, uint64_t> m_pendingPackets;
     inline static std::atomic_uint64_t m_packetsDiscarded = 0;

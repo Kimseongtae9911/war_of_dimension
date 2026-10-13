@@ -206,6 +206,13 @@ namespace wod_server {
 					OverlapEx* ov = Resource::GetOverObjectFromPool();
 					ov->SetOP(OP_TYPE::OP_MATCH_UPDATE);
                     ov->m_dueEpochUs = std::chrono::duration_cast<std::chrono::microseconds>(_ev.m_wakeUpTime.time_since_epoch()).count();
+                    if (wod::core::JobMetrics::Enabled())
+                    {
+                        const auto nowUs = std::chrono::duration_cast<std::chrono::microseconds>(TimeUtil::CurTime().time_since_epoch()).count();
+                        ov->m_timerLatenessUs = static_cast<uint64_t>((std::max)(int64_t{0}, nowUs - ov->m_dueEpochUs));
+                        ov->m_postedSteadyUs = wod::core::JobMetrics::NowUs();
+                    }
+
 					if (!NetworkRuntime::Get().Post(_ev.m_objID, *ov)) Resource::m_overExPool.push(ov);
 					break;
 				}
@@ -337,6 +344,12 @@ namespace wod_server {
         {
             const auto nowUs = std::chrono::duration_cast<std::chrono::microseconds>(TimeUtil::CurTime().time_since_epoch()).count();
             wod::core::JobMetrics::m_tickDelay.Record(static_cast<uint64_t>((std::max)(int64_t{0}, nowUs - _overEx->m_dueEpochUs)));
+            if (_overEx->m_postedSteadyUs)
+            {
+                wod::core::JobMetrics::m_tickTimerLateness.Record(_overEx->m_timerLatenessUs);
+                wod::core::JobMetrics::m_tickDispatchWait.Record(wod::core::JobMetrics::NowUs() - _overEx->m_postedSteadyUs);
+            }
+
         }
 
         wod::core::JobMetrics::Tick observation;

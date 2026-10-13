@@ -5,6 +5,7 @@ import random
 import time
 
 HISTOGRAMS = ('job_wait_us', 'packet_job_wait_us', 'tick_delay_us', 'tick_duration_us', 'lobby_movement_gap_us')
+OPTIONAL_HISTOGRAMS = ('tick_timer_lateness_us', 'tick_dispatch_wait_us')
 
 
 def histogram_delta(before, after):
@@ -64,6 +65,13 @@ async def exercise(state, peers, setup_match):
     state.phase('verify')
     markers = {peer: peer.sequence for peer in peers}
     await asyncio.gather(*(peer.send('CS_MOVE', 0, 0) for peer in peers))
+    drain_error = None
+    if 'settle_s' in config:
+        from settlement import wait_for_drain
+        try:
+            await wait_for_drain(state, config['settle_s'])
+        except Exception as error:
+            drain_error = error
 
     async def verify(peer):
         async def operation():
@@ -95,5 +103,7 @@ async def exercise(state, peers, setup_match):
 
     passed = await asyncio.gather(*(verify(peer) for peer in peers))
     state.phase('cleanup')
+    if drain_error:
+        raise RuntimeError(str(drain_error)) from drain_error
     if not all(passed):
         raise RuntimeError(f'이동/정지 판정 실패: {passed.count(False)}/{len(peers)}명')

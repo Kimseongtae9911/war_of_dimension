@@ -81,6 +81,7 @@ namespace wod_server {
 			return;
 
 		float elapsedTime = elpasedTimeMicro * 0.000001f;
+        wod::core::TickProfile::Frame profile;
         if (wod::core::JobMetrics::Enabled())
         {
             wod::core::JobMetrics::m_lobbyGap.Record(static_cast<uint64_t>(elpasedTimeMicro));
@@ -114,7 +115,10 @@ namespace wod_server {
 			GameUtil::UpdateSection(m_socketID, beforeX, beforeZ, m_sectionX, m_sectionZ);
 		}
 
-		m_viewList->CheckViewList(m_channel, m_socketID, m_id);
+        {
+            wod::core::TickProfile::Scope view(wod::core::TickProfile::Stage::LobbyView);
+            m_viewList->CheckViewList(m_channel, m_socketID, m_id);
+        }
 	}
 
 	bool CClient::Reset()

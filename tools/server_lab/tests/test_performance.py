@@ -62,6 +62,15 @@ class PerformanceContracts(unittest.TestCase):
         self.assertEqual(report['servers']['LobbyServer']['cpu_percent'], 25)
         self.assertEqual(report['servers']['LobbyServer']['job_wait_us']['samples'], 20)
         self.assertEqual(report['servers']['LobbyServer']['pending_packets_end'], 12)
+        self.assertIsNone(report['servers']['GameServer']['tick_dispatch_wait_us'])
+        timing = copy.deepcopy(result)
+        for sample in timing['samples']:
+            for row in sample['servers']:
+                row['performance']['tick_timer_lateness_us'] = histogram(2, row['sequence'] * 10)
+                row['performance']['tick_dispatch_wait_us'] = histogram(3, row['sequence'] * 10)
+        breakdown = summarize_run(timing)['servers']['GameServer']
+        self.assertEqual(breakdown['tick_timer_lateness_us']['samples'], 20)
+        self.assertEqual(breakdown['tick_dispatch_wait_us']['p99_us_upper'], 4)
         self.assertNotIn('send_queue_peak', report['servers']['LobbyServer'])
         observed = copy.deepcopy(result)
         for sample in observed['samples']:

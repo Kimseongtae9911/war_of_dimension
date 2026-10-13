@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "로비 지속 처리·최종 입력 정리",
+  "description": "격리된 새 LOCAL_TEST 서버 전용. 5초 워밍업/120초 이동·정지 뒤 20초 이내 입력 처리 수 충족 및 패킷·송신 대기열 0을 연속 reporter 3회 확인합니다. 계측과 Server Lab monitor가 필요합니다.",
+  "setup": "lobby",
+  "clients": 64,
+  "timeout_s": 10,
+  "performance": {"warmup_s": 5, "duration_s": 120, "interval_s": 0.25, "settle_s": 20}
+}

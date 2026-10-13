@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "동접 누적과 한계 확인", "quality_profile": "showcase"},
+  "lanes": [{"id": "load", "label": "더미 부하"}, {"id": "evidence", "label": "관측과 판정"}],
+  "mainPath": ["connect", "hold", "measure", "classify", "repeat"],
+  "nodes": [
+    {"id": "connect", "lane": "load", "col": 0, "type": "frontend", "label": "참가자 추가", "sublabel": "기존 연결 유지", "width": 160},
+    {"id": "hold", "lane": "load", "col": 1, "type": "backend", "label": "지속 이동·정지", "sublabel": "워밍업·고정 주기", "width": 160},
+    {"id": "measure", "lane": "evidence", "col": 1, "type": "database", "label": "단계별 실측 저장", "sublabel": "tick·큐·CPU·발행 지연", "width": 180},
+    {"id": "classify", "lane": "evidence", "col": 2, "type": "security", "label": "한계 구분", "sublabel": "기능·품질·더미 포화", "width": 160},
+    {"id": "repeat", "lane": "evidence", "col": 3, "type": "backend", "label": "경계 반복 검사", "sublabel": "재시작·유지·최종 입력", "width": 180}
+  ],
+  "edges": [
+    {"id": "add-load", "from": "connect", "to": "hold"},
+    {"id": "load-evidence", "from": "hold", "to": "measure", "label": "측정 구간"},
+    {"id": "evidence-decision", "from": "measure", "to": "classify"},
+    {"id": "decision-confirm", "from": "classify", "to": "repeat", "label": "경계 발견"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "서버와 도구를 구분", "items": ["게임 4인 매치를 추가하고 기존 부하 유지", "더미 CPU·발행 지연도 함께 저장"]},
+    {"dot": "rose", "title": "실패도 결과", "items": ["요청 동접과 실제 준비 완료 동접 분리", "로그인 실패·수신 누락·종료 회수 확인", "유지 검사: 최종 입력 처리·빈 큐 3표본"]}
+  ]
+}

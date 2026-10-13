@@ -84,6 +84,11 @@ class ServerFeed:
                 status = 'stopped' if data['stopped'] else 'stale' if age > 3.5 or age < -2 else 'live'
                 if role == 'GameServer':
                     self.content = content if isinstance(content, dict) else {}
+                    if isinstance(self.content.get('matches'), list):
+                        matches = self.content['matches']
+                        fresh = [row for row in matches if type(row.get('timestamp_ms')) is int and -2000 <= now - row['timestamp_ms'] <= 3500 and row.get('finished') is False]
+                        data['match_observation'] = {'registered': len(matches), 'fresh_active': len(fresh),
+                                                     'active_minions': sum(row.get('active_minions', 0) for row in fresh)}
                     if isinstance(self.content.get('terrain_index'), dict):
                         data['terrain_index'] = self.content['terrain_index']
                 elif isinstance(content, dict):
@@ -119,6 +124,9 @@ class Lab:
             with self.lock:
                 run = self.state.snapshot() if self.state else None
                 if self.state:
+                    with self.state.lock:
+                        self.state.server_observation = {row['role']: copy.deepcopy(row) for row in servers}
+                if self.state and self.state.observe_world:
                     game = next((item for item in servers if item['role'] == 'GameServer'), {})
                     if game.get('status') in ('live', 'stopped'):
                         self.state.world.apply_schedule(self.feed.content, game['instance'], game['stopped'])
@@ -171,8 +179,20 @@ class Lab:
             if self.state and self.worker and self.worker.is_alive():
                 self.state.cancel()
 
+    def progress(self):
+        with self.lock:
+            run = None
+            if self.state:
+                with self.state.lock:
+                    run = {'run_id': self.state.run_id, 'status': self.state.status, 'phase': self.state.current_phase,
+                           'counters': dict(self.state.counters), 'capacity_stages': copy.deepcopy(self.state.capacity_stages)}
+            return {'busy': bool(self.worker and self.worker.is_alive()), 'run': run}
+
     def world_snapshot(self):
         with self.lock:
+            if self.state and not self.state.observe_world:
+                return {'run_id': self.state.run_id, 'enabled': False, 'status': self.state.status,
+                        'players': [], 'npcs': [], 'events': [], 'sources': [], 'timelines': [], 'reason': 'headless 부하 검사: 월드 시각 관측 꺼짐'}
             return self.state.world.snapshot(self.state.status) if self.state else {'run_id': None, 'timestamp_ms': time.time_ns() // 1_000_000, 'status': 'idle', 'players': [], 'npcs': [], 'events': [], 'sources': [], 'dropped': 0, 'timelines': []}
 
     def close(self):
@@ -225,6 +245,8 @@ def handler(lab):
                 return self.respond(200, (WEB.parent / 'terrain.js').read_bytes(), 'text/javascript; charset=utf-8')
             if parsed.path == '/api/state':
                 return self.respond(200, lab.snapshot())
+            if parsed.path == '/api/progress':
+                return self.respond(200, lab.progress())
             if parsed.path == '/api/world':
                 return self.respond(200, lab.world_snapshot())
             if parsed.path == '/api/scenarios':

@@ -38,6 +38,18 @@ Ray의 `work`는 반환까지 방문한 삼각형/노드 수이며 높이 필터
 
 ## 실행과 중지
 
+### 로비 단일 채널 이동 프로파일
+
+로비도 시작 전 `WOD_TICK_PROFILE=1`로 상세 프로파일을 켤 수 있다. `GET /api/state`와 저장 결과 `samples[].servers[]`의 LobbyServer `tick_profile`을 조회한다. 1ms 간격 조건을 통과해 실제로 실행된 `CClient::Move`가 frame(`total`)이며, 패킷 실행·IOCP·타이머 전체 비용은 포함하지 않는다.
+
+`lobby_nav`·`lobby_height`는 각 지형 ray 호출의 wall/cycle, `lobby_view`는 주변 유저 탐색과 주변 유저에 대한 전송 요청의 wall/cycle이다. `map_collision`은 두 지형 검사의 부모 구간이다. 기존 `height_ray`는 Triangle 벡터 RayCast 공통 내부 계측으로 로비에서는 NavMesh 호출까지 포함하므로, 이를 순수 HeightMesh 비용으로 해석하거나 부모와 합산하지 않는다. Ray의 `work`는 실제 방문한 삼각형 수다.
+
+상세 계측을 끈 성능 비교와 켠 원인 분석을 구분한다. 원시 누적값은 reporter의 근사 snapshot이며 동일 instance·서로 다른 sequence·측정 구간 내부의 차분을 사용한다. 시작/로그인 시 첫 Move 간격은 기존 초기화 문제의 영향을 받을 수 있어 기준 측정 구간에 포함하지 않는다.
+
+로비 지형 개선의 [HTML 보고서](LOBBY_THROUGHPUT.html)와 [실측·검증 근거](LOBBY_THROUGHPUT.md)를 참조한다.
+
+로비 인덱스의 준비 여부·면 수·셀 수·참조 수·전역 후보 수·인덱스/정적 캐시 bytes는 LobbyServer `content.terrain_index`에 내보낸다. monitor API와 저장 샘플에서는 현재 `admission.terrain_index` 경로로 조회할 수 있다. 시작 시 소유 스레드가 JSON을 만든 뒤 reporter에는 고정 문자열을 전달하므로 가변 월드 객체를 순회하지 않는다.
+
 저장소 루트 PowerShell에서 실행한다. 스크립트는 PATH의 실제 Python을 우선 사용하고, 없으면 이미 설치된 Codex Python 런타임을 재사용한다.
 Windows 설치 안내용 alias는 실행하지 않는다. `-Python`에 실제 실행 파일 경로를 지정해 명시적으로 선택할 수도 있다.
 
@@ -240,6 +252,43 @@ HTTP는 `127.0.0.1`에만 bind하며 localhost Host/Origin을 검사하고 외�
 
 ## 에이전트의 API 접근
 
+### 동접 계단 부하
+
+`capacity-match`·`capacity-lobby`는 기존 연결과 이동 부하를 유지하면서 참가자를 추가한다. 게임은 항상 4인 매치다. 각 단계는 추가 로그인 → 3초 워밍업 → 20초 측정 → 전체 참가자 이동/위치 변화/정지 확인이며, 다음 단계의 준비 중에도 기존 참가자는 이동한다. `clients`는 탐색 상한이다. 단계 목록 사이의 값을 지정하면 마지막 단계로 추가한다. 계단 단계의 매치 나이·미니언 수가 서로 달라지므로 매회 재시작하는 `perf-match` 기준 검사와 같은 조건으로 비교하지 않는다.
+
+```powershell
+python tools/server_lab/capacity.py --scenario capacity-match --clients 512 --seed 1 --profile --output artifacts/logs/capacity-game-new
+python tools/server_lab/capacity.py --scenario capacity-lobby --clients 512 --seed 1 --output artifacts/logs/capacity-lobby-new
+# 관측기 포화 시 시각 월드를 끄고 플레이어 이동·정지를 계속 검증
+python tools/server_lab/capacity.py --scenario capacity-match --clients 1000 --seed 3 --profile --headless --output artifacts/logs/capacity-game-headless-new
+python scripts/Measure-CapacityBoundary.py --scenario perf-match --clients 16 20 24 --repeats 5 --profile --headless --output artifacts/logs/capacity-boundary-new
+./scripts/Measure-ServerThreads.ps1 -Output artifacts/logs/thread-cpu-new.jsonl -Seconds 30
+```
+
+`GET /api/state`의 `run.capacity_stages`와 저장 결과 JSON은 요청/준비 완료/검증 성공 인원, 단계 상태·오류, 측정 시작/끝 epoch ms, 실제 발행 수, 발행 지연 p99/max, 관측기 전체 CPU(core %)를 보존한다. 실제 더미 종료 연결 수와 서버 정상 종료/잔여 자원도 별도 판정한다. 기존 `phases`의 이름이 반복되므로 여러 단계 실행을 기존 `baseline.summarize_run` 하나로 요약하지 않는다. `capacity.analyze_result`가 각 단계 시각으로 서버 누적 histogram을 차분한다. percentile은 기존과 같이 bucket 상한이다.
+
+발행 지연은 예정 시각 대비 각 입력 주기 시작 시각의 차이다. 모든 소켓의 마지막 write/drain 완료 지연이나 네트워크 RTT를 뜻하지 않는다. 관측/더미 프로세스 CPU는 같은 프로세스 안의 수신·HTTP·표본 작업도 포함한다.
+
+CLI는 `GET /api/progress`에서 busy·run ID/상태·phase·counters·capacity_stages만 읽어 대형 시계열/월드를 매초 직렬화하지 않는다. 상세 관측은 기존 `/api/state`·`/api/world`와 저장 결과에 유지한다. NPC 관측 대표는 해당 그룹의 4명만 조회하며, 매치 일정 연결도 첫 8그룹 제한 없이 실제 게임 참가자 그룹에 적용한다.
+
+`--headless`는 `WOD_LAB_HEADLESS=1`을 자식 관측 프로세스에 전달한다. 시각 월드·NPC 좌표 의미 검사는 꺼지지만 모든 TCP 프레임 수신, 알려진 NPC/플레이어 관측 프레임 길이, 플레이어 유한 좌표·자신의 이동/위치 변화·정지 검증은 유지한다. API/저장 결과는 `world_observation=false`, world는 `enabled=false`로 표시한다. 서버의 NPC 로직은 계속 실행된다. 전체 관측 켬/끔 결과를 같은 조건으로 합치지 않는다. 수신 루프는32프레임마다 제어 코루틴에 실행 기회를 주며, 추가 로그인 중 발행 지연이1초를 넘으면 생성기 한계로 중단한다. 단계 종료의 CPU/지연 중단 기준도 유지한다.
+
+추가 게임 계측 `performance.tick_timer_lateness_us`는 예정 epoch 시각부터 타이머가 IOCP Post를 호출하기 직전까지의 초과 시간(0 미만은0), `tick_dispatch_wait_us`는 Post 직전부터 MatchUpdate 시작까지의 단조 시계 경과 시간이다. 후자는 IOCP 내부 진입 잠금·큐 대기·스케줄링을 포함한다. 같은 context에 실어 성공적으로 실행된 MatchUpdate에서 각각 기록하며, pool Reset은 전달 시각/지연을 지운다. 기존 `tick_delay_us`(예정→handler, system_clock)와 새 두 구간은 시계/표본 순간 차이가 있어 bit 단위 합계 일치를 강제하지 않는다. 계측을 켠 프로세스에서만 추가 수집하며, 기존 schema1의 선택 histogram이고 구버전/미계측은 null로 남긴다. 화면·API·저장 JSON의 원시 performance에 제공한다.
+
+기능 실패 또는 발행 p99가 입력 주기(250ms)를 초과하거나 관측기 CPU가 0.9코어 이상이면 증가를 중단한다. 후자는 서버 동접 한계가 아니라 부하 생성기 한계로 기록한다. 통과한 탐색 상한을 절대 최대 동접으로 보고하지 않는다. 목표 주기를 유지하는 인원과 낮은 갱신률에서도 기능만 통과한 인원도 구분한다.
+
+게임의 `match_observation`은 서버가 발행한 복사본의 등록 개수·최근 3.5초 이내 미종료 매치 개수·그 매치의 활성 미니언 합계다. 실제 접속자 수를 소켓 수나 이 등록 개수로 대신하지 않는다. 오래된 복사본과 종료 매치는 `fresh_active`에서 빠지므로 서버 확정 연결 수와는 다르다. `Measure-ServerThreads.ps1`은 실행 기록의 PID/시작 시각을 확인하고 스레드별 누적 CPU ms를 JSONL로 저장한다. 스레드 이름/함수 주소는 수집하지 않으므로 높은 CPU만으로 함수의 신원을 단정하지 않는다.
+
+`soak-lobby`는 새로 시작한 격리 로비의 5초 워밍업·120초 유지·최종 입력 정리를 검사한다. `performance.settle_s`는 lobby에서만 선택 가능한1~60초 제한이며 이 시나리오는20초를 사용한다. 다른 참가자가 없는 새 서버와 활성 계측·monitor가 필요하다. 마지막 stop 발행 이후 서버의 처리 패킷 수가 이 실행의 총 발행 수 이상이고, 패킷/송신 대기열이 모두0인 서로 다른 reporter 표본3개가 연속되어야 통과한다. 누락/stale/중복 표본은 성공으로 세지 않으며 재시작/sequence 감소는 실패한다. wire ACK 추가 없이 프로세스 합계를 확인하는 검사이므로 다른 클라이언트가 있는 서버에는 적용하지 않는다.
+
+API/저장 결과의 `settlement`에 판정·경과ms·기대 입력 수·마지막 처리/대기 수·연속 빈 표본 수·오류를 보존한다. 정리 검사 실패 후에도 개별 이동/정지 검사를 남긴다. 기본20초 성능/누적 시나리오의 기존 정지 검사는 자기 이동의0.4초 수신 중단(게임은 direction0 응답)이므로 적체된 최종 명령 전체의 완료를 보장하지 않는다. `settlement`가 없는 과거 성공을 대기열 정리 성공으로 해석하지 않는다.
+
+```powershell
+python scripts/Measure-CapacityBoundary.py --scenario soak-lobby --clients 64 128 --repeats 1 --seed-start 3 --headless --output artifacts/logs/capacity-soak-new
+```
+
+동접 실측·경계 반복·계측 켬/끔 대조는 [동접 조사 보고서](SERVER_CAPACITY.md)를 참고한다. 120초 유지는 별도 진단이며 장시간 운영 안정성 검증은 아니다.
+
 같은 PC에서 실행되는 에이전트는 브라우저 없이 HTTP JSON으로 화면의 원본 관측값을 읽을 수 있다.
 Server Lab이 실행 중이어야 하며 기본 주소는 `http://127.0.0.1:8790`이다. 다른 PC·원격 실행 환경의 localhost와는 공유되지 않는다.
 
@@ -341,3 +390,5 @@ python tools/server_lab/terrain_audit.py Server/Game_Server/Resource/NavMeshData
 ```
 
 분류는 겹칠 수 있고 double 기하 진단이므로 서버 float 전역 후보와 개수가 다를 수 있다. 크기가 다르거나 수직이라는 이유만으로 불필요한 면으로 판정하지 않는다. 기존 OBJ에는 원본 오브젝트 이름이 없지만, 원본 Unity 프로젝트 없이도 연결 영역을 직접 검토하여 제외 대상을 지정할 수 있다. [캐시 실측·품질 진단](TERRAIN_CACHE.md)을 참조한다.
+
+OBJ 개편 도구·후보 경로 선택 기능은 성능 이득이 부족하여 롤백했다. 이전 실험은 [롤백된 OBJ 개편 보고서](TERRAIN_REWORK.md)에 보존하며, 현재 서버는 기존 Resource의 OBJ를 사용한다.

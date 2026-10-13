@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "동접 한계 · 로비 연결 누적",
+  "description": "기존 연결과 이동 부하를 유지하며 같은 로비 채널에 더미를 추가합니다. 단계별 3초 워밍업·20초 측정·이동/정지 검증. 기능 실패 또는 더미 포화에서 중단하며 clients는 탐색 상한입니다.",
+  "setup": "lobby",
+  "clients": 512,
+  "timeout_s": 10,
+  "capacity": {"steps": [4, 16, 32, 64, 128, 256, 512, 1024, 2048, 3000], "warmup_s": 3, "duration_s": 20, "interval_s": 0.25}
+}

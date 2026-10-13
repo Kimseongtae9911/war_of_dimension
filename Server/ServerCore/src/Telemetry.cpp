@@ -120,7 +120,8 @@ void TelemetryReporter::Sample(bool _stopped)
          << ",\"jobs_completed\":" << JobMetrics::m_completed.load() << ",\"jobs_failed\":" << JobMetrics::m_failed.load() << ",\"job_execute_us\":" << JobMetrics::m_executeUs.load() << ",\"job_max_execute_us\":" << JobMetrics::m_maxExecuteUs.load();
     json << ",\"performance\":{\"schema_version\":1,\"packets_processed\":" << JobMetrics::m_packets.load() << ",\"move_requests\":" << JobMetrics::m_moves.load() << ",\"stop_requests\":" << JobMetrics::m_stops.load()
          << ",\"job_wait_us\":" << JobMetrics::m_wait.Json() << ",\"packet_job_wait_us\":" << JobMetrics::m_packetWait.Json() << ",\"pending_packets\":" << JobMetrics::PendingPacketJson() << ",\"tick_delay_us\":" << JobMetrics::m_tickDelay.Json()
-         << ",\"tick_duration_us\":" << JobMetrics::m_tickDuration.Json() << ",\"lobby_movement_gap_us\":" << JobMetrics::m_lobbyGap.Json() << '}';
+         << ",\"tick_duration_us\":" << JobMetrics::m_tickDuration.Json() << ",\"lobby_movement_gap_us\":" << JobMetrics::m_lobbyGap.Json()
+         << ",\"tick_timer_lateness_us\":" << JobMetrics::m_tickTimerLateness.Json() << ",\"tick_dispatch_wait_us\":" << JobMetrics::m_tickDispatchWait.Json() << '}';
     json << ",\"tick_profile\":" << TickProfile::Json();
     json << ",\"send_queue\":{\"count\":" << stats.m_queuedSends << ",\"max_socket_count\":" << stats.m_maxSocketQueuedSends << ",\"native_calls\":" << stats.m_sendCalls << ",\"batches\":" << stats.m_sendBatches
          << ",\"frames\":" << stats.m_batchedFrames << '}';

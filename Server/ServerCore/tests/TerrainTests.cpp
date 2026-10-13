@@ -187,9 +187,11 @@ int RunTerrainAssetChecks()
     size_t total = 0;
     std::cout << "{\"meshes\":[";
     bool comma = false;
-    for (bool height : {false, true})
+    for (const auto& asset : std::array<std::pair<const char *, bool>, 4>{{{"Server/Game_Server/Resource/NavMeshData3.obj", false}, {"Server/Game_Server/Resource/HeightMesh.obj", true},
+                                                                       {"Server/Lobby_Server/Resource/NavMeshData2.obj", false}, {"Server/Lobby_Server/Resource/HeightMesh2.obj", true}}})
     {
-        auto mesh = Load(height ? "Server/Game_Server/Resource/HeightMesh.obj" : "Server/Game_Server/Resource/NavMeshData3.obj", height);
+        const auto [path, height] = asset;
+        auto mesh = Load(path, height);
         std::mt19937 generator(20261012);
         std::uniform_real_distribution<float> position(-220, 220);
         std::uniform_real_distribution<float> altitude(0, 120);
@@ -222,7 +224,7 @@ int RunTerrainAssetChecks()
         total += checks;
         if (comma)
             std::cout << ',';
-        std::cout << "{\"name\":\"" << (height ? "height" : "nav") << "\",\"triangles\":" << mesh.m_triangles.size() << ",\"checks\":" << checks << ",\"cells\":" << mesh.m_index.Cells() << ",\"references\":" << mesh.m_index.References()
+        std::cout << "{\"path\":\"" << path << "\",\"name\":\"" << (height ? "height" : "nav") << "\",\"triangles\":" << mesh.m_triangles.size() << ",\"checks\":" << checks << ",\"cells\":" << mesh.m_index.Cells() << ",\"references\":" << mesh.m_index.References()
                   << ",\"global\":" << mesh.m_index.GlobalCandidates() << ",\"bytes\":" << mesh.m_index.Bytes() << ",\"prepared_bytes\":" << mesh.m_index.PreparedBytes() << ",\"candidates_per_query\":" << double(candidates) / queries << '}';
         comma = true;
     }

@@ -139,6 +139,8 @@ template <class Operation> class TaggedIoContext final : public IoContext
         m_op = Operation::OP_RECV;
         m_hasGeneration = false;
         m_dueEpochUs = 0;
+        m_postedSteadyUs = 0;
+        m_timerLatenessUs = 0;
     }
 
     Operation GetOP() const
@@ -210,6 +212,8 @@ template <class Operation> class TaggedIoContext final : public IoContext
 
     // 측정용 예약 시각. wire에 포함되지 않으며 IOCP context 소유권으로 전달한다.
     int64_t m_dueEpochUs = 0;
+    uint64_t m_postedSteadyUs = 0;
+    uint64_t m_timerLatenessUs = 0;
 
   private:
     Operation m_op = Operation::OP_RECV;

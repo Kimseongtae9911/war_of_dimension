@@ -4,6 +4,8 @@
 namespace wod_server {
 	std::vector<Triangle> GameUtil::m_naviMesh;
 	std::vector<Triangle> GameUtil::m_heightMesh;
+    TerrainSpatialIndex GameUtil::m_naviIndex;
+    TerrainSpatialIndex GameUtil::m_heightIndex;
 	PlayerBoundingBox GameUtil::m_playerInitBB;
 	std::array<std::array<Section, SECTION_NUM>, SECTION_NUM> GameUtil::m_sections;
 
@@ -13,6 +15,7 @@ namespace wod_server {
 		if (in.fail())
 			return false;
 
+        m_naviIndex.Reset();
 		std::vector<vec3> vertices;
 
 		std::string line;
@@ -33,6 +36,11 @@ namespace wod_server {
 			}
 		}
 
+        const bool indexed = m_naviIndex.Build(m_naviMesh.size(), [](size_t _id) -> const Triangle& {
+            return m_naviMesh[_id];
+        });
+        LogPrinter::PrintMsg("Lobby NavMesh spatial index=" + std::to_string(indexed) + " cells=" + std::to_string(m_naviIndex.Cells()) + " global=" + std::to_string(m_naviIndex.GlobalCandidates()));
+
 		return true;
 	}
 
@@ -42,6 +50,7 @@ namespace wod_server {
 		if (in.fail())
 			return false;
 
+        m_heightIndex.Reset();
 		std::vector<vec3> vertices;
 
 		std::string line;
@@ -66,8 +75,23 @@ namespace wod_server {
 			return (_t1.m_v1.m_y + _t1.m_v2.m_y + _t1.m_v3.m_y) / 3.f > (_t2.m_v1.m_y + _t2.m_v2.m_y + _t2.m_v3.m_y) / 3.f;
 			});
 
+        const bool indexed = m_heightIndex.Build(m_heightMesh.size(), [](size_t _id) -> const Triangle& {
+            return m_heightMesh[_id];
+        });
+        LogPrinter::PrintMsg("Lobby HeightMesh spatial index=" + std::to_string(indexed) + " cells=" + std::to_string(m_heightIndex.Cells()) + " global=" + std::to_string(m_heightIndex.GlobalCandidates()));
+
 		return true;
 	}
+
+    std::string GameUtil::TerrainIndexJson()
+    {
+        const auto describe = [](const TerrainSpatialIndex& _index, size_t _triangles) {
+            return "{\"ready\":" + std::string(_index.Ready() ? "true" : "false") + ",\"triangles\":" + std::to_string(_triangles) + ",\"cells\":" + std::to_string(_index.Cells()) + ",\"references\":" +
+                   std::to_string(_index.References()) + ",\"global\":" + std::to_string(_index.GlobalCandidates()) + ",\"bytes\":" + std::to_string(_index.Bytes()) + ",\"prepared_bytes\":" + std::to_string(_index.PreparedBytes()) + "}";
+        };
+
+        return "{\"schema_version\":1,\"nav\":" + describe(m_naviIndex, m_naviMesh.size()) + ",\"height\":" + describe(m_heightIndex, m_heightMesh.size()) + "}";
+    }
 
 	bool GameUtil::LoadMap(std::string _filename)
 	{
@@ -111,17 +135,28 @@ namespace wod_server {
 		return true;
 	}
 
-	bool GameUtil::MapCollision(const vec3& _rayPos, float& _height)
-	{
-		Ray ray;
-		ray.m_origin = _rayPos;
-		ray.m_origin.m_y += RAY_OFFSET;
-		if (true == ray.RayCast(m_naviMesh, _height)) {
-			ray.RayCast(m_heightMesh, _height);
-			return true;
-		}
-		return false;
-	}
+    bool GameUtil::MapCollision(const vec3& _rayPos, float& _height)
+    {
+        wod::core::TickProfile::Scope collision(wod::core::TickProfile::Stage::MapCollision);
+        Ray ray;
+        ray.m_origin = _rayPos;
+        ray.m_origin.m_y += RAY_OFFSET;
+        bool navigable;
+        {
+            wod::core::TickProfile::Scope nav(wod::core::TickProfile::Stage::LobbyNav);
+            navigable = ray.RayCast(m_naviMesh, _height, &m_naviIndex);
+        }
+
+        if (navigable)
+        {
+            wod::core::TickProfile::Scope height(wod::core::TickProfile::Stage::LobbyHeight);
+            ray.RayCast(m_heightMesh, _height, &m_heightIndex);
+
+            return true;
+        }
+
+        return false;
+    }
 
 	void GameUtil::UpdateSection(int _socketNum, int _beforeX, int _beforeZ, int _sectionX, int _sectionZ)
 	{

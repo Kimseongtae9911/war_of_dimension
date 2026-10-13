@@ -12,7 +12,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-from performance import HISTOGRAMS, histogram_delta
+from performance import HISTOGRAMS, OPTIONAL_HISTOGRAMS, histogram_delta
 from protocol import ROOT
 
 BASE_URL = 'http://127.0.0.1:8790'
@@ -100,6 +100,8 @@ def summarize_run(result, metrics=True):
                     value['send_' + field + '_per_s'] = (last['send_queue'][field] - first['send_queue'][field]) / seconds
         for name in HISTOGRAMS:
             value[name] = histogram_delta(left[name], right[name])
+        for name in OPTIONAL_HISTOGRAMS:
+            value[name] = histogram_delta(left.get(name), right.get(name))
         summary['servers'][role] = value
     return summary
 

@@ -10,6 +10,8 @@
 | 빌드·실행·중지 | [개발 환경](development/SETUP.md) |
 | 시나리오 더미·실시간 로컬 웹 관측·지형/NPC/게임 일정 | [Server Lab 사용·계약](development/SERVER_LAB.md), [구현 구조도](diagrams/server-lab/README.md) |
 | 서버 성능 검사·에이전트 조회·계측/시나리오 확장 | [성능 검사 지침](guides/SERVER_PERFORMANCE.md) |
+| 캐시 적용 후 동접 증가·게임 tick/로비 패킷 병목·반복 경계 | [HTML 측정 보고서](development/SERVER_CAPACITY.html), [수치·원인·재현 근거](development/SERVER_CAPACITY.md), [동접 탐색 흐름도](diagrams/server-capacity/README.md) |
+| 로비 단일 채널·지형 검색 비용·처리량 전후 비교 | [HTML 보고서](development/LOBBY_THROUGHPUT.html), [실측·검증 근거](development/LOBBY_THROUGHPUT.md), [검색 흐름도](diagrams/lobby-throughput/README.md) |
 | JobQueue 개선 전 처리량·공정성·개선 방향 | [기준 측정/검토](development/JOBQUEUE_BASELINE.md), [측정 구조도](diagrams/jobqueue-baseline/README.md) |
 | 실제 서버 이동/정지·다중 매치 기준 성능·입장 설정·tick/대기 계측 | [실제 서버 기준 측정](development/SERVER_BASELINE.md), [관측 구조도](diagrams/server-baseline/README.md) |
 | 로비 패킷 기아·게임 응답 적체 원인·FIFO/전송 배치·전후 성능 | [HTML 요약 보고서](development/JOBQUEUE_IMPROVEMENT.html), [상세 실측·검증 근거](development/JOBQUEUE_IMPROVEMENT.md), [개선 흐름도](diagrams/jobqueue-improvement/README.md) |

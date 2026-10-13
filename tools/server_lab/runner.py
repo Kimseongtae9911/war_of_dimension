@@ -1,9 +1,11 @@
 """시나리오 상태 머신. GUI와 CLI가 같은 실행/판정/결과 모델을 사용한다."""
 import asyncio
+import copy
 import csv
 import hashlib
 import json
 import math
+import os
 import random
 import threading
 import time
@@ -11,7 +13,7 @@ import uuid
 from collections import deque
 from pathlib import Path
 
-from protocol import ABI_PATH, CONSTANTS, ROOT, packet, unpack
+from protocol import ABI_PATH, CONSTANTS, ROOT, TYPES, packet, unpack
 from observation import NPC_PACKETS, WorldObservation
 
 SCENARIOS = Path(__file__).parent / 'scenarios'
@@ -24,21 +26,35 @@ def load_scenario(path):
     data = json.loads(Path(path).read_text(encoding='utf-8-sig'))
     if not isinstance(data, dict):
         raise ValueError('시나리오는 JSON 객체여야 합니다')
-    if set(data) - {'schema_version', 'name', 'description', 'setup', 'clients', 'timeout_s', 'boss_job', 'execution', 'actions', 'performance'}:
+    if set(data) - {'schema_version', 'name', 'description', 'setup', 'clients', 'timeout_s', 'boss_job', 'execution', 'actions', 'performance', 'capacity'}:
         raise ValueError('알 수 없는 시나리오 필드')
     if data.get('schema_version') != 1 or data.get('setup') not in ('lobby', 'match'):
         raise ValueError('schema_version=1, setup=lobby|match가 필요합니다')
     if not isinstance(data.get('name'), str) or not data['name'] or len(data['name']) > 80:
         raise ValueError('시나리오 이름이 필요합니다')
     validate_clients(data.get('clients'), data['setup'])
-    if 'performance' in data:
-        config = data['performance']
-        if not isinstance(config, dict) or set(config) != {'warmup_s', 'duration_s', 'interval_s'}:
+    if 'performance' in data and 'capacity' in data:
+        raise ValueError('performance와 capacity는 함께 사용할 수 없습니다')
+    if 'performance' in data or 'capacity' in data:
+        config = data.get('capacity', data.get('performance'))
+        fields = {'warmup_s', 'duration_s', 'interval_s'} | ({'steps'} if 'capacity' in data else set())
+        optional = {'settle_s'} if 'performance' in data and data['setup'] == 'lobby' else set()
+        if not isinstance(config, dict) or not fields <= set(config) or set(config) - fields - optional:
             raise ValueError('performance는 warmup_s/duration_s/interval_s가 필요합니다')
+        if 'settle_s' in config and (type(config['settle_s']) not in (int, float) or not math.isfinite(config['settle_s']) or not 1 <= config['settle_s'] <= 60):
+            raise ValueError('settle_s 범위: 1~60초, 격리된 새 로비 서버와 계측 필요')
         for key, low, high in [('warmup_s', .1, 120), ('duration_s', 1, 120), ('interval_s', .02, 10)]:
             value = config[key]
             if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
                 raise ValueError(f'performance {key} 범위: {low}~{high}')
+        if 'capacity' in data:
+            steps = config['steps']
+            if not isinstance(steps, list) or not 1 <= len(steps) <= 32:
+                raise ValueError('capacity steps는 1~32개')
+            for count in steps:
+                validate_clients(count, data['setup'])
+            if steps != sorted(set(steps)):
+                raise ValueError('capacity steps는 중복 없이 오름차순')
     if data.get('execution', 'parallel') not in ('parallel', 'sequential'):
         raise ValueError('execution은 parallel|sequential')
     timeout = data.get('timeout_s', 15)
@@ -46,10 +62,11 @@ def load_scenario(path):
         raise ValueError('timeout_s 범위: 0.1~60')
     if data.get('boss_job', 4) not in (4, 5):
         raise ValueError('boss_job은 4 또는 5')
-    actions = data.get('actions', [] if 'performance' in data else None)
-    if 'performance' in data and actions:
+    load_mode = 'performance' in data or 'capacity' in data
+    actions = data.get('actions', [] if load_mode else None)
+    if load_mode and actions:
         raise ValueError('performance 부하에서는 actions 대신 고정 이동/정지 주기를 사용합니다')
-    if not isinstance(actions, list) or not (0 if 'performance' in data else 1) <= len(actions) <= 100:
+    if not isinstance(actions, list) or not (0 if load_mode else 1) <= len(actions) <= 100:
         raise ValueError('actions는 1~100개')
     for action in actions:
         if not isinstance(action, dict):
@@ -111,6 +128,10 @@ class RunState:
         self.current_phase = 'setup'
         self.phases = []
         self.load_lags = {'warmup': [], 'measure': []}
+        self.capacity_stages = []
+        self.server_observation = {}
+        self.settlement = None
+        self.observe_world = os.environ.get('WOD_LAB_HEADLESS') != '1'
 
     def phase(self, name):
         with self.lock:
@@ -134,21 +155,26 @@ class RunState:
     def peer(self, index, **fields):
         with self.lock:
             self.peers.setdefault(str(index), {'id': index}).update(fields)
-            self.world.peer(index, **fields)
+            if self.observe_world:
+                self.world.peer(index, **fields)
 
     def snapshot(self, full=False):
         with self.lock:
             result = {'run_id': self.run_id, 'name': self.scenario['name'], 'status': self.status, 'seed': self.seed,
-                      'started_ms': self.started_ms, 'clients': self.clients, 'error': self.error, 'counters': dict(self.counters),
+                      'started_ms': self.started_ms, 'clients': self.clients, 'error': self.error, 'counters': dict(self.counters), 'world_observation': self.observe_world,
                       'latency_ms': {'p50': percentile(self.latencies, .5), 'p95': percentile(self.latencies, .95), 'p99': percentile(self.latencies, .99), 'samples': len(self.latencies)},
                       'peers': [dict(value) for value in self.peers.values()], 'events': list(self.events)[-100:]}
-            result.update(phase=self.current_phase, phases=list(self.phases),
+            result.update(phase=self.current_phase, phases=list(self.phases), settlement=copy.deepcopy(self.settlement),
+                          capacity_stages=[dict(stage) for stage in self.capacity_stages],
                           generator_lag_ms={phase: {'samples': len(values), 'p50': percentile(values, .5), 'p95': percentile(values, .95), 'p99': percentile(values, .99), 'max': max(values, default=None)} for phase, values in self.load_lags.items()})
             if full:
                 result.update(schema_version=1, scenario=self.scenario, abi_sha256=hashlib.sha256(ABI_PATH.read_bytes()).hexdigest(),
                               assertions=list(self.assertions), finished_ms=time.time_ns() // 1_000_000,
                               scope='LOCAL_TEST; 수신된 플레이어/NPC 상태; 운영 DB/전체 월드/전체 전투 검증 제외')
                 result['world'] = self.world.snapshot(self.status)
+                result['world']['enabled'] = self.observe_world
+                if not self.observe_world:
+                    result['scope'] += '; headless: NPC/월드 시각 관측·NPC 좌표 유효성 검사 제외, 프레임 길이·플레이어 이동 검증 유지'
             return result
 
     def cancel(self):
@@ -209,9 +235,15 @@ class Peer:
                 self.state.count('received_packets')
                 self.state.count('received_bytes', size)
                 if kind in NPC_PACKETS:
-                    self.state.world.npc_packet(self.index, kind, body)
+                    if self.state.observe_world:
+                        self.state.world.npc_packet(self.index, kind, body)
+                    elif len(body) + 2 != TYPES[NPC_PACKETS[kind] + '_PACKET']['size']:
+                        raise ValueError('NPC 프레임 길이 불일치')
                 if kind in PLAYER_OBSERVATIONS:
-                    self.state.world.player_packet(self.index, PLAYER_OBSERVATIONS[kind], body)
+                    if self.state.observe_world:
+                        self.state.world.player_packet(self.index, PLAYER_OBSERVATIONS[kind], body)
+                    elif len(body) + 2 != TYPES[PLAYER_OBSERVATIONS[kind] + '_PACKET']['size']:
+                        raise ValueError('플레이어 관측 프레임 길이 불일치')
                 if kind == CONSTANTS['SC_MOVE_PLAYER']:
                     player, x, y, z, direction, _ = unpack('SC_MOVE_PLAYER', body)
                     if not all(math.isfinite(value) for value in (x, y, z)):
@@ -232,6 +264,10 @@ class Peer:
                         self.evicted[evicted_kind] = seq
                     self.history.append((self.sequence, kind, body))
                 self.changed.set()
+                # readexactly can complete without suspension while its buffer is full.
+                # Bound one receiver's work so sends, login timers and cancellation run.
+                if self.sequence % 32 == 0:
+                    await asyncio.sleep(0)
         except asyncio.CancelledError:
             raise
         except Exception as error:
@@ -446,8 +482,11 @@ async def run(state):
         for index in range(state.clients):
             name = (state.run_id[:5] + f'{index:03x}').encode().ljust(10, b'\0')
             all_peers.append(Peer(state, index, name, state.scenario.get('timeout_s', 15)))
-        if 'performance' in state.scenario:
-            from performance import exercise
+        if 'performance' in state.scenario or 'capacity' in state.scenario:
+            if 'capacity' in state.scenario:
+                from capacity import exercise
+            else:
+                from performance import exercise
             await exercise(state, all_peers, setup_match)
             with state.lock:
                 state.status = 'passed'

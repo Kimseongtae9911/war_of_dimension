@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "로비 단일 채널 지형 검색 개선", "quality_profile": "showcase"},
+  "lanes": [{"id": "logic", "label": "단일 로직 스레드"}, {"id": "terrain", "label": "읽기 전용 지형"}],
+  "mainPath": ["queue", "move", "cell", "ray", "view"],
+  "nodes": [
+    {"id": "queue", "lane": "logic", "col": 0, "type": "messagebus", "label": "유저 작업 실행", "sublabel": "FIFO·기존 budget 유지", "width": 180},
+    {"id": "move", "lane": "logic", "col": 1, "type": "backend", "label": "이동량 계산", "sublabel": "기존 이동 주기 유지", "width": 180},
+    {"id": "cell", "lane": "terrain", "col": 1, "type": "database", "label": "XZ 셀 후보 조회", "sublabel": "초기 로드 시 인덱스 구성", "width": 180},
+    {"id": "ray", "lane": "terrain", "col": 2, "type": "backend", "label": "기존 충돌 판정", "sublabel": "원래 순서·첫 교차 보존", "width": 180},
+    {"id": "view", "lane": "logic", "col": 2, "type": "backend", "label": "좌표·시야 전송", "sublabel": "패킷·공유 상태 경계 유지", "width": 180}
+  ],
+  "edges": [
+    {"id": "run-move", "from": "queue", "to": "move"},
+    {"id": "lookup-cell", "from": "move", "to": "cell", "label": "이동할 XZ"},
+    {"id": "test-ray", "from": "cell", "to": "ray", "label": "셀·전역 후보"},
+    {"id": "commit-position", "from": "ray", "to": "view", "label": "통과 여부·높이"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "개선 후보 검증", "items": ["전체 지형 순회를 셀 후보 검사로 축소", "인덱스 실패·비수직 ray는 전체 순회로 복귀"]},
+    {"dot": "rose", "title": "유지하는 계약", "items": ["단일 채널·단일 로직 스레드", "첫 교차 순서와 float 높이 결과 등가 검사", "기능·입력 처리율·대기·CPU를 함께 비교"]}
+  ]
+}
