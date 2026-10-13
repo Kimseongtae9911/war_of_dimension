@@ -247,6 +247,7 @@ namespace wod_server {
         {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
             uint64_t visited = 0;
+            const auto prepared = _index ? _index->Prepared(_triangles.size()) : std::span<const TerrainSpatialIndex::TriangleData>{};
             for (size_t id : Candidates(_triangles.size(), _index))
             {
                 const Triangle& triangle = _triangles[id];
@@ -255,7 +256,8 @@ namespace wod_server {
                 {
                     continue;
                 }
-                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                const auto* cached = prepared.empty() ? nullptr : &prepared[id];
+                Vector3 normal = cached ? Vector3{cached->m_normal[0], cached->m_normal[1], cached->m_normal[2]} : Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
                 // Calculate the distance from the ray origin to the plane of the triangle
                 float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
@@ -267,15 +269,15 @@ namespace wod_server {
                     Vector3 point = m_origin + m_direction * d;
 
                     // Check if the point of intersection is inside the triangle
-                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 edge1 = cached ? Vector3{cached->m_edge1[0], cached->m_edge1[1], cached->m_edge1[2]} : triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = cached ? Vector3{cached->m_edge2[0], cached->m_edge2[1], cached->m_edge2[2]} : triangle.m_v3 - triangle.m_v1;
                     Vector3 pointToV1 = point - triangle.m_v1;
-                    float dot11 = edge1.Dot(edge1);
-                    float dot12 = edge1.Dot(edge2);
-                    float dot22 = edge2.Dot(edge2);
+                    float dot11 = cached ? cached->m_dot11 : edge1.Dot(edge1);
+                    float dot12 = cached ? cached->m_dot12 : edge1.Dot(edge2);
+                    float dot22 = cached ? cached->m_dot22 : edge2.Dot(edge2);
                     float dotP1 = pointToV1.Dot(edge1);
                     float dotP2 = pointToV1.Dot(edge2);
-                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float invDenom = cached ? cached->m_inverseDenominator : 1.0f / (dot11 * dot22 - dot12 * dot12);
                     float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
                     float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
@@ -307,6 +309,7 @@ namespace wod_server {
         {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::HeightRay);
             uint64_t visited = 0;
+            const auto prepared = _index ? _index->Prepared(_triangles.size()) : std::span<const TerrainSpatialIndex::TriangleData>{};
             for (size_t id : Candidates(_triangles.size(), _index))
             {
                 const Triangle& triangle = _triangles[id];
@@ -315,7 +318,8 @@ namespace wod_server {
                 {
                     continue;
                 }
-                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                const auto* cached = prepared.empty() ? nullptr : &prepared[id];
+                Vector3 normal = cached ? Vector3{cached->m_normal[0], cached->m_normal[1], cached->m_normal[2]} : Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
                 // Calculate the distance from the ray origin to the plane of the triangle
                 float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
@@ -327,15 +331,15 @@ namespace wod_server {
                     Vector3 point = m_origin + m_direction * d;
 
                     // Check if the point of intersection is inside the triangle
-                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 edge1 = cached ? Vector3{cached->m_edge1[0], cached->m_edge1[1], cached->m_edge1[2]} : triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = cached ? Vector3{cached->m_edge2[0], cached->m_edge2[1], cached->m_edge2[2]} : triangle.m_v3 - triangle.m_v1;
                     Vector3 pointToV1 = point - triangle.m_v1;
-                    float dot11 = edge1.Dot(edge1);
-                    float dot12 = edge1.Dot(edge2);
-                    float dot22 = edge2.Dot(edge2);
+                    float dot11 = cached ? cached->m_dot11 : edge1.Dot(edge1);
+                    float dot12 = cached ? cached->m_dot12 : edge1.Dot(edge2);
+                    float dot22 = cached ? cached->m_dot22 : edge2.Dot(edge2);
                     float dotP1 = pointToV1.Dot(edge1);
                     float dotP2 = pointToV1.Dot(edge2);
-                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float invDenom = cached ? cached->m_inverseDenominator : 1.0f / (dot11 * dot22 - dot12 * dot12);
                     float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
                     float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
@@ -360,6 +364,7 @@ namespace wod_server {
         {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
             uint64_t visited = 0;
+            const auto prepared = _index ? _index->Prepared(_nodes.size()) : std::span<const TerrainSpatialIndex::TriangleData>{};
             for (size_t id : Candidates(_nodes.size(), _index))
             {
                 const Node *node = _nodes[id];
@@ -369,7 +374,8 @@ namespace wod_server {
                 {
                     continue;
                 }
-                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                const auto* cached = prepared.empty() ? nullptr : &prepared[id];
+                Vector3 normal = cached ? Vector3{cached->m_normal[0], cached->m_normal[1], cached->m_normal[2]} : Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
                 // Calculate the distance from the ray origin to the plane of the triangle
                 float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
@@ -381,15 +387,15 @@ namespace wod_server {
                     Vector3 point = m_origin + m_direction * d;
 
                     // Check if the point of intersection is inside the triangle
-                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 edge1 = cached ? Vector3{cached->m_edge1[0], cached->m_edge1[1], cached->m_edge1[2]} : triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = cached ? Vector3{cached->m_edge2[0], cached->m_edge2[1], cached->m_edge2[2]} : triangle.m_v3 - triangle.m_v1;
                     Vector3 pointToV1 = point - triangle.m_v1;
-                    float dot11 = edge1.Dot(edge1);
-                    float dot12 = edge1.Dot(edge2);
-                    float dot22 = edge2.Dot(edge2);
+                    float dot11 = cached ? cached->m_dot11 : edge1.Dot(edge1);
+                    float dot12 = cached ? cached->m_dot12 : edge1.Dot(edge2);
+                    float dot22 = cached ? cached->m_dot22 : edge2.Dot(edge2);
                     float dotP1 = pointToV1.Dot(edge1);
                     float dotP2 = pointToV1.Dot(edge2);
-                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float invDenom = cached ? cached->m_inverseDenominator : 1.0f / (dot11 * dot22 - dot12 * dot12);
                     float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
                     float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 
@@ -421,6 +427,7 @@ namespace wod_server {
         {
             wod::core::TickProfile::Scope profile(wod::core::TickProfile::Stage::NavRay);
             uint64_t visited = 0;
+            const auto prepared = _index ? _index->Prepared(_nodes.size()) : std::span<const TerrainSpatialIndex::TriangleData>{};
             for (size_t id : Candidates(_nodes.size(), _index))
             {
                 const Node *node = _nodes[id];
@@ -430,7 +437,8 @@ namespace wod_server {
                 {
                     continue;
                 }
-                Vector3 normal = Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
+                const auto* cached = prepared.empty() ? nullptr : &prepared[id];
+                Vector3 normal = cached ? Vector3{cached->m_normal[0], cached->m_normal[1], cached->m_normal[2]} : Vector3::Normalize((triangle.m_v2 - triangle.m_v1).Cross(triangle.m_v3 - triangle.m_v1));
 
                 // Calculate the distance from the ray origin to the plane of the triangle
                 float d = (triangle.m_v1 - m_origin).Dot(normal) / m_direction.Dot(normal);
@@ -442,15 +450,15 @@ namespace wod_server {
                     Vector3 point = m_origin + m_direction * d;
 
                     // Check if the point of intersection is inside the triangle
-                    Vector3 edge1 = triangle.m_v2 - triangle.m_v1;
-                    Vector3 edge2 = triangle.m_v3 - triangle.m_v1;
+                    Vector3 edge1 = cached ? Vector3{cached->m_edge1[0], cached->m_edge1[1], cached->m_edge1[2]} : triangle.m_v2 - triangle.m_v1;
+                    Vector3 edge2 = cached ? Vector3{cached->m_edge2[0], cached->m_edge2[1], cached->m_edge2[2]} : triangle.m_v3 - triangle.m_v1;
                     Vector3 pointToV1 = point - triangle.m_v1;
-                    float dot11 = edge1.Dot(edge1);
-                    float dot12 = edge1.Dot(edge2);
-                    float dot22 = edge2.Dot(edge2);
+                    float dot11 = cached ? cached->m_dot11 : edge1.Dot(edge1);
+                    float dot12 = cached ? cached->m_dot12 : edge1.Dot(edge2);
+                    float dot22 = cached ? cached->m_dot22 : edge2.Dot(edge2);
                     float dotP1 = pointToV1.Dot(edge1);
                     float dotP2 = pointToV1.Dot(edge2);
-                    float invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);
+                    float invDenom = cached ? cached->m_inverseDenominator : 1.0f / (dot11 * dot22 - dot12 * dot12);
                     float u = (dot22 * dotP1 - dot12 * dotP2) * invDenom;
                     float v = (dot11 * dotP2 - dot12 * dotP1) * invDenom;
 

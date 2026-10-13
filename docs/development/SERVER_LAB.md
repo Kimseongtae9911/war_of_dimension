@@ -318,6 +318,8 @@ Peer 수신 오류는 port/phase/시각/closing과 함께 남는다. 정상 EOF/
 
 `schema_version=1`이며 `nav`/`height`에 `ready`(구축 성공), `triangles`(원본 면 수), `cell_size`(월드 단위), `cells`, `references`(셀별 중복 ID 포함), `global_candidates`(모든 위치에서 순서 병합할 면 수), `bytes`(인덱스 vector capacity 합)가 있다. 마지막 값은 구축 임시 메모리나 전체 프로세스 사용량이 아니다. worker 시작 전 만든 복사본이며 실행 중 갱신하지 않는다. 이전 실행 파일에 없으면 누락 상태로 남기고, `ready=false`일 때는 기존 전체 검색을 사용한다.
 
+정적 삼각형 계산 캐시에는 `prepared_triangles`(유효 캐시 개수), `prepared_bytes`(캐시 vector capacity bytes)가 추가된다. 기존 `bytes`에는 이 캐시를 포함하지 않는다. 법선·변·내적·분모 역수를 초기 로드에 계산하며, 캐시가 없거나 원본 개수가 맞지 않으면 기존 계산을 사용한다. 관측값은 API와 저장 결과에서 같은 이름으로 조회한다.
+
 ```powershell
 $state = Invoke-RestMethod http://127.0.0.1:8790/api/state
 ($state.servers | Where-Object role -eq GameServer).terrain_index | ConvertTo-Json -Depth 4
@@ -329,3 +331,13 @@ python tools/server_lab/terrain_compare.py --baseline artifacts/logs/game-tick-p
 `Test-ServerTerrain`은 Core/ABI와 실제 메시의 기존 참조 Ray 대비 bit 단위 높이/노드/첫 hit 비교를 실행한다. `terrain_compare.py`는 기준 측정의 frozen 게임 실행 파일·현재 게임 실행 파일을 교차 배치해 같은 perf-match seed를 실행하고 종료 후 개선 파일을 복원한다. 기본은 4/16/64명·조건별5쌍·양쪽 계측 켬·입장 소프트 제한 해제다. 기존 서버가 실행 중이면 거부하며 실행 중 소스/데이터/실행 파일을 변경하지 않는다. 기준 데이터/시나리오 hash·종료 자원·실행 파일 복원/fingerprint·누락 profile을 검사하고 실패도 저장한다. 기준/개선 파일·소스 snapshot·원시 결과·분석은 출력 경로에 남는다.
 
 `tick_profile`의 Ray `work`는 실제 방문한 후보 삼각형 수다. 일반 수직 하향 Ray를 가속하며 비수직/비정상/극단 Y·무효 인덱스는 선형 fallback한다. 원본 면 순서·높이 필터/보정·스킬 의미를 유지하며 품질 기준의 변경은 후속 작업이다. [전후 보고서](TERRAIN_SPATIAL_INDEX.html)·[계약/검증](TERRAIN_SPATIAL_INDEX.md)을 참조한다.
+
+### 지형 메시 품질 진단
+
+`terrain_audit.py`는 원본 OBJ를 수정하지 않고 SHA-256, 최장변/면적/XZ 면적 분포, 중복 좌표 면·퇴화·수직·가늘기와 `o`/`g` 출처별 개수를 JSON으로 저장한다. face는 현재 서버가 읽는 양수 정점 번호 3개 형식만 허용하며 잘못된 입력을 조용히 제외하지 않는다.
+
+```powershell
+python tools/server_lab/terrain_audit.py Server/Game_Server/Resource/NavMeshData3.obj Server/Game_Server/Resource/HeightMesh.obj --output artifacts/logs/terrain-quality.json
+```
+
+분류는 겹칠 수 있고 double 기하 진단이므로 서버 float 전역 후보와 개수가 다를 수 있다. 크기가 다르거나 수직이라는 이유만으로 불필요한 면으로 판정하지 않는다. 기존 OBJ에는 원본 오브젝트 이름이 없지만, 원본 Unity 프로젝트 없이도 연결 영역을 직접 검토하여 제외 대상을 지정할 수 있다. [캐시 실측·품질 진단](TERRAIN_CACHE.md)을 참조한다.

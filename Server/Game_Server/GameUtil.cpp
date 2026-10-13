@@ -200,7 +200,8 @@ namespace wod_server {
     {
         auto describe = [](const TerrainSpatialIndex& _index, size_t _triangles) {
             return "{\"ready\":" + std::string(_index.Ready() ? "true" : "false") + ",\"triangles\":" + std::to_string(_triangles) + ",\"cell_size\":4,\"cells\":" + std::to_string(_index.Cells()) +
-                   ",\"references\":" + std::to_string(_index.References()) + ",\"global_candidates\":" + std::to_string(_index.GlobalCandidates()) + ",\"bytes\":" + std::to_string(_index.Bytes()) + "}";
+                   ",\"references\":" + std::to_string(_index.References()) + ",\"global_candidates\":" + std::to_string(_index.GlobalCandidates()) + ",\"bytes\":" + std::to_string(_index.Bytes()) + ",\"prepared_bytes\":" +
+                   std::to_string(_index.PreparedBytes()) + ",\"prepared_triangles\":" + std::to_string(_index.Prepared(_triangles).size()) + "}";
         };
 
         return "{\"schema_version\":1,\"nav\":" + describe(m_naviIndex, m_naviMesh.size()) + ",\"height\":" + describe(m_heightIndex, m_heightMesh.size()) + "}";

@@ -18,6 +18,7 @@
 | IOCP Poll 책임 분리·m_deferred·배치/개별 완료 | [코드 근거와 흐름도](diagrams/iocp-completion-only/README.md) |
 | 게임 tick 로직·이동/지형/NPC/송신의 wall·CPU cycle 분석 | [HTML 분석 보고서](development/GAME_TICK_PROFILE.html), [실제 측정 근거](development/GAME_TICK_PROFILE.md), [계측 계약/도구](development/SERVER_LAB.md#게임-tick-구간별-비용-분석), [계측 흐름도](diagrams/game-tick-profile/README.md) |
 | NavMesh·HeightMesh 공간 검색·판정 호환성과 전후 성능 | [HTML 개선 보고서](development/TERRAIN_SPATIAL_INDEX.html), [실측·검증 근거](development/TERRAIN_SPATIAL_INDEX.md), [공간 검색 흐름도](diagrams/terrain-spatial-index/README.md) |
+| 지형 정적 계산 캐시·Unity 메시 품질 진단 | [HTML 보고서](development/TERRAIN_CACHE.html), [실측·품질 근거](development/TERRAIN_CACHE.md), [캐시 흐름도](diagrams/terrain-cache/README.md) |
 | 에이전트와 코드 탐색 | [에이전트 환경](development/AGENTS.md) |
 | 프로젝트별 Serena 서버 재사용 | [HTTP 실행·복구](development/AGENTS.md#프로젝트별-codex-serena-http-서버), [연결 구조도](diagrams/serena-http/README.md) |
 | VS2026 이전 | [마이그레이션 기록](development/VS2026.md) |

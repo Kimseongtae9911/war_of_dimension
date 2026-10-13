@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {"title": "지형 삼각형 정적 계산 재사용", "quality_profile": "showcase"},
+  "lanes": [{"id": "prepare", "label": "서버 초기 로드"}, {"id": "trace", "label": "이동·높이 판정"}],
+  "mainPath": ["source", "coefficients", "lookup", "cached", "intersection"],
+  "nodes": [
+    {"id": "source", "lane": "prepare", "col": 0, "type": "database", "label": "원본 삼각형", "sublabel": "최종 배열 순서", "width": 160},
+    {"id": "coefficients", "lane": "prepare", "col": 1, "type": "backend", "label": "계수 사전 계산", "sublabel": "법선·변·내적·역수", "width": 160},
+    {"id": "lookup", "lane": "trace", "col": 1, "type": "security", "label": "후보·캐시 확인", "sublabel": "유효 상태·원본 개수", "width": 160},
+    {"id": "cached", "lane": "trace", "col": 2, "type": "backend", "label": "계수 읽기", "sublabel": "동일 삼각형 ID", "width": 160},
+    {"id": "intersection", "lane": "trace", "col": 3, "type": "backend", "label": "Ray 교차 계산", "sublabel": "기존 첫 hit 반환", "width": 160},
+    {"id": "uncached", "lane": "trace", "col": 0, "type": "backend", "label": "기존 Ray 교차", "sublabel": "계수 계산·첫 hit 반환", "width": 160}
+  ],
+  "edges": [
+    {"id": "source-coefficients", "from": "source", "to": "coefficients"},
+    {"id": "coefficients-lookup", "from": "coefficients", "to": "lookup", "label": "읽기 전용 공유"},
+    {"id": "lookup-cached", "from": "lookup", "to": "cached", "label": "캐시 유효"},
+    {"id": "cached-intersection", "from": "cached", "to": "intersection"},
+    {"id": "lookup-uncached", "from": "lookup", "to": "uncached", "label": "그 외", "role": "branch"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "기존 공간 후보 유지", "items": ["셀 후보와 전역 후보의 순서 유지", "삼각형별 float 불변 계산을 재사용"]},
+    {"dot": "rose", "title": "품질 개선은 별도 검증", "items": ["원본 메시 삭제·높이 규칙 변경 없음", "출처·크기·수직·가늘기 진단 제공"]}
+  ]
+}

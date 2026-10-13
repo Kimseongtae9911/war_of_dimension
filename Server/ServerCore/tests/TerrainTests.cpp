@@ -106,6 +106,9 @@ Mesh Load(const char *_path, bool _sort)
         });
 
     mesh.Build();
+    Require(mesh.m_index.Prepared(mesh.m_triangles.size()).size() == mesh.m_triangles.size(), "prepared geometry count");
+    Require(mesh.m_index.Prepared(mesh.m_triangles.size() + 1).empty(), "mismatched cache must not be used");
+    Require(mesh.m_index.PreparedBytes() >= mesh.m_triangles.size() * sizeof(TerrainSpatialIndex::TriangleData), "prepared memory accounting");
 
     return mesh;
 }
@@ -132,6 +135,7 @@ int RunTerrainTests()
 
     // Invalid, reset and source-size mismatch fall back without dropping candidates.
     mesh.m_index.Reset();
+    Require(mesh.m_index.Prepared(mesh.m_triangles.size()).empty() && mesh.m_index.PreparedBytes() == 0, "reset releases prepared geometry");
     Require(mesh.m_index.Query(0, 0, mesh.m_triangles.size()).Size() == mesh.m_triangles.size(), "reset fallback");
     Equivalent(mesh.m_triangles, mesh.m_nodes, mesh.m_index, {0, 9, 0});
     Require(!mesh.m_index.Build(
@@ -149,6 +153,15 @@ int RunTerrainTests()
                 0.000001f),
             "unbounded cell allocation accepted");
     mesh.Build();
+    Require(mesh.m_index.Build(
+                mesh.m_triangles.size(),
+                [&](size_t _id) -> const Triangle& {
+                    return mesh.m_triangles[_id];
+                },
+                4, false),
+            "uncached index build");
+    Require(mesh.m_index.Prepared(mesh.m_triangles.size()).empty(), "uncached index must not retain prepared geometry");
+    Equivalent(mesh.m_triangles, mesh.m_nodes, mesh.m_index, {0, 9, 0});
     Require(mesh.m_index.Query(0, 0, mesh.m_triangles.size() + 1).Size() == mesh.m_triangles.size() + 1, "size mismatch fallback");
     const size_t oldCells = mesh.m_index.Cells();
     Require(mesh.m_index.Build(0,
@@ -210,7 +223,7 @@ int RunTerrainAssetChecks()
         if (comma)
             std::cout << ',';
         std::cout << "{\"name\":\"" << (height ? "height" : "nav") << "\",\"triangles\":" << mesh.m_triangles.size() << ",\"checks\":" << checks << ",\"cells\":" << mesh.m_index.Cells() << ",\"references\":" << mesh.m_index.References()
-                  << ",\"global\":" << mesh.m_index.GlobalCandidates() << ",\"bytes\":" << mesh.m_index.Bytes() << ",\"candidates_per_query\":" << double(candidates) / queries << '}';
+                  << ",\"global\":" << mesh.m_index.GlobalCandidates() << ",\"bytes\":" << mesh.m_index.Bytes() << ",\"prepared_bytes\":" << mesh.m_index.PreparedBytes() << ",\"candidates_per_query\":" << double(candidates) / queries << '}';
         comma = true;
     }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -13,6 +14,13 @@ namespace wod_server
 class TerrainSpatialIndex
 {
   public:
+    // Float operations and order match the original RayCast narrow phase.
+    struct TriangleData
+    {
+        std::array<float, 3> m_normal, m_edge1, m_edge2;
+        float m_dot11, m_dot12, m_dot22, m_inverseDenominator;
+    };
+
     class Indices
     {
       public:
@@ -101,7 +109,7 @@ class TerrainSpatialIndex
         *this = TerrainSpatialIndex();
     }
 
-    template <class GetTriangle> bool Build(size_t _count, GetTriangle _triangle, float _cellSize = 4.0f)
+    template <class GetTriangle> bool Build(size_t _count, GetTriangle _triangle, float _cellSize = 4.0f, bool _cacheGeometry = true)
     {
         Reset();
         if (!std::isfinite(_cellSize) || _cellSize <= 0 || _count > MaxReferences)
@@ -116,6 +124,9 @@ class TerrainSpatialIndex
 
         std::vector<Bounds> bounds;
         bounds.reserve(_count);
+        if (_cacheGeometry)
+            m_prepared.reserve(_count);
+
         double minX = 0, minZ = 0, maxX = 0, maxZ = 0;
         bool first = true;
         for (size_t id = 0; id < _count; ++id)
@@ -130,15 +141,21 @@ class TerrainSpatialIndex
             // The original height filter rejects these. A vertical ray cannot hit
             // a face with exactly zero normal.y (d becomes NaN/Inf and barycentrics reject).
             const auto normal = std::remove_cvref_t<decltype(a)>::Normalize((b - a).Cross(c - a));
+            const auto e1 = b - a;
+            const auto e2 = c - a;
+            const float floatDot11 = e1.Dot(e1), floatDot12 = e1.Dot(e2), floatDot22 = e2.Dot(e2);
+            if (_cacheGeometry)
+            {
+                m_prepared.push_back({{normal.m_x, normal.m_y, normal.m_z}, {e1.m_x, e1.m_y, e1.m_z}, {e2.m_x, e2.m_y, e2.m_z}, floatDot11, floatDot12, floatDot22, 1.0f / (floatDot11 * floatDot22 - floatDot12 * floatDot12)});
+            }
+
             if (a.m_y < 1.5f || b.m_y < 1.5f || c.m_y < 1.5f || normal.m_y == 0)
             {
                 bounds.push_back({0, 0, 0, 0, false, true});
                 continue;
             }
 
-            const auto e1 = b - a;
-            const auto e2 = c - a;
-            const double dot11 = e1.Dot(e1), dot12 = e1.Dot(e2), dot22 = e2.Dot(e2);
+            const double dot11 = floatDot11, dot12 = floatDot12, dot22 = floatDot22;
             const double determinant = dot11 * dot22 - dot12 * dot12;
             const double condition = determinant > 0 ? dot11 * dot22 / determinant : std::numeric_limits<double>::infinity();
             const double scale = (std::max)({1.0, std::abs(double(a.m_x)), std::abs(double(a.m_z)), std::abs(double(b.m_x)), std::abs(double(b.m_z)), std::abs(double(c.m_x)), std::abs(double(c.m_z)), std::sqrt(dot11), std::sqrt(dot22)});
@@ -236,6 +253,19 @@ class TerrainSpatialIndex
         return m_ready;
     }
 
+    std::span<const TriangleData> Prepared(size_t _sourceCount) const
+    {
+        if (!m_ready || m_sourceCount != _sourceCount)
+            return {};
+
+        return m_prepared;
+    }
+
+    size_t PreparedBytes() const
+    {
+        return m_prepared.capacity() * sizeof(TriangleData);
+    }
+
     size_t Cells() const
     {
         return m_columns * m_rows;
@@ -267,6 +297,7 @@ class TerrainSpatialIndex
     double m_minX = 0, m_minZ = 0, m_cellSize = 4;
     size_t m_columns = 0, m_rows = 0, m_sourceCount = 0;
     std::vector<size_t> m_offsets, m_indices, m_global;
+    std::vector<TriangleData> m_prepared;
     bool m_ready = false;
 };
 }
