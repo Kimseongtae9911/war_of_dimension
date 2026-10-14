@@ -215,6 +215,31 @@ monitor는 서버 내부 match ID를 runner 그룹 번호로 간주하지 않는
 
 ## 관측 지표와 저장
 
+### 로비 이동 예약 (2026-10-13)
+
+로비는 유저별 타이머 예약/갱신 대기 하나를 유지하고, 실행 완료 후 15ms 뒤 다음 작업을 예약한다.
+타이머는 기존 유저 FIFO에만 작업을 추가하며 단일 로직 worker와 패킷 순서를 유지한다.
+`SC_MOVE_PLAYER`의 필드·크기는 유지한다. 본인에게 입력 처리 시 좌표/새 방향을 보내고, 정지 방향0도 보낸다.
+주변 유저에게는 예약 갱신에서 최신 상태만 전달한다. 과부하에서 실제 갱신이 늦어지며 66.7Hz를 보장하지 않는다.
+초기 입력부터 방향을 정규화한 목표 속도(현재 최대10 units/s)를 사용한다. 이전 갱신당 속도 누적과 감속은 로비에서 제거했다.
+클라이언트 예측/보간 전체 개편·이동 입력 sequence ACK·timestamp 검증·연속 충돌 개선은 후속 범위다.
+
+`GET /api/state`의 로비 `admission`에 `movement_interval_us=15000`, `movement_single_pending=true`가 추가된다.
+로비의 기존 `tick_timer_lateness_us`는 예약 기한→타이머 dispatch, `tick_dispatch_wait_us`는 dispatch→generation이 유효한 로직 갱신 시작까지다.
+모두 steady_clock microseconds 누적 histogram이고 기존 reporter→API→저장 결과 경로를 따른다.
+`lobby_movement_gap_us`는 broadcast Move 직전의 적분 시각 차이며 입력 처리의 중간 적분 뒤에는 짧아질 수 있다.
+`tick_delay_us`는 그 차이에서 현재15ms를 뺀 0 이상 값이다. 이전1ms 목표의 값과 직접 비교하지 않는다.
+실제 송신/화면 갱신 간격·본인 정지 응답 시간과 구분한다. 상세 구현·측정은 [이동 보고서](LOBBY_MOVEMENT.md)를 참조한다.
+
+실제 로컬 소켓 회귀:
+
+```powershell
+python tools/server_lab/tests/lobby_movement.py --output artifacts/logs/lobby-movement-functional.json
+```
+
+서버 시작/중지는 기존 PowerShell 스크립트가 소유한다. 검사는 분할 이동·본인/근처 유저의 최종 방향0·200개 입력 응답 순서·정지 뒤 갱신 중단·재시작·이동 중 재접속10회를 확인한다.
+`--legacy`는 이전 실행 파일의 이동 거리/갱신 수 비교용이며 명시적 정지 응답 검사를 생략한다.
+
 두 서버의 `CServer::Run()`은 `WOD_METRICS_DIRECTORY`가 있을 때만 `TelemetryReporter`를 활성화한다.
 별도 스레드가 약 1초마다 프로세스 자원·Core 네트워크·JobQueue 누적 카운터를 읽어
 `<directory>/LobbyServer.json`·`GameServer.json`을 임시 파일에서 원자적으로 교체한다.

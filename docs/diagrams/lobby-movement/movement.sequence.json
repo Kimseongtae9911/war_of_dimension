@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "로비 이동 · 유저당 하나의 갱신 예약",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [1080, 980]
+  },
+  "participants": [
+    {"id": "client", "type": "frontend", "label": "클라이언트", "sublabel": "기존 패킷 유지"},
+    {"id": "queue", "type": "messagebus", "label": "유저 FIFO", "sublabel": "패킷 · 갱신 함께 직렬화"},
+    {"id": "logic", "type": "backend", "label": "로직 worker", "sublabel": "좌표 · 방향 소유"},
+    {"id": "timer", "type": "backend", "label": "타이머", "sublabel": "steady_clock · blocking wait"}
+  ],
+  "messages": [
+    {"from": "client", "to": "queue", "y": 185, "label": "CS_MOVE · 이동 입력"},
+    {"from": "queue", "to": "logic", "y": 245, "label": "순서대로 입력 적용"},
+    {"from": "logic", "to": "client", "y": 305, "label": "본인 좌표 · 방향 응답", "variant": "return"},
+    {"from": "logic", "to": "timer", "y": 365, "label": "15ms 뒤 한 번 예약", "variant": "emphasis"},
+    {"from": "timer", "to": "queue", "y": 425, "label": "기한 도래 · 갱신 작업 추가"},
+    {"from": "queue", "to": "logic", "y": 485, "label": "generation 확인 · 이동 · 주변 전송"},
+    {"from": "logic", "to": "timer", "y": 545, "label": "실행 완료 뒤 다음 한 번", "variant": "emphasis"},
+    {"from": "client", "to": "queue", "y": 625, "label": "CS_MOVE · 방향 0"},
+    {"from": "queue", "to": "logic", "y": 685, "label": "지난 이동 적분 · 속도 0"},
+    {"from": "logic", "to": "client", "y": 745, "label": "즉시 최종 정지 좌표", "variant": "return"},
+    {"from": "timer", "to": "queue", "y": 805, "label": "남아 있는 갱신 한 번"},
+    {"from": "queue", "to": "logic", "y": 865, "label": "주변에 최신 정지 전달 · 예약 종료"}
+  ]
+}
