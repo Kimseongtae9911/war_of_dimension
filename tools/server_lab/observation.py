@@ -51,6 +51,9 @@ class WorldObservation:
         if not isinstance(content, dict) or content.get('schema_version') != 1 or not isinstance(content.get('matches'), list):
             return
         updates = {}
+        with self.lock:
+            groups = {index // 4 for index, peer in self.players.items() if peer.get('port') == 8911}
+        expected_groups = {frozenset((self.run_id[:5] + f'{index:03x}').encode().hex() for index in range(group * 4, group * 4 + 4)): group for group in groups}
         for sample in content['matches']:
             if not isinstance(sample, dict):
                 continue
@@ -67,12 +70,10 @@ class WorldObservation:
             if len({spawn['id'] for spawn in spawns}) != len(spawns):
                 continue
             # 게임 match ID와 runner 그룹 번호는 다르다. 로그인 이름 byte 4개의 정확한 집합으로 연결한다.
-            for group in range(8):
-                expected = {(self.run_id[:5] + f'{index:03x}').encode().hex() for index in range(group * 4, group * 4 + 4)}
-                if set(members) == expected and len(set(members)) == 4:
-                    updates[group] = {**{field: sample[field] for field in ('match_id', 'timestamp_ms', 'game_ms', 'next_wave_ms', 'fence_at_game_ms', 'active_minions', 'fence', 'finished')},
-                                      'group': group, 'spawns': [dict(spawn) for spawn in spawns], 'instance': instance, 'stopped': stopped}
-                    break
+            group = expected_groups.get(frozenset(members))
+            if group is not None and len(set(members)) == 4:
+                updates[group] = {**{field: sample[field] for field in ('match_id', 'timestamp_ms', 'game_ms', 'next_wave_ms', 'fence_at_game_ms', 'active_minions', 'fence', 'finished')},
+                                  'group': group, 'spawns': [dict(spawn) for spawn in spawns], 'instance': instance, 'stopped': stopped}
         with self.lock:
             if self.ended_ms is None:
                 self.timelines = {group: sample for group, sample in self.timelines.items() if sample['instance'] == instance}
@@ -107,7 +108,8 @@ class WorldObservation:
             entity['updated_ms'] = stamp
 
     def source(self, group):
-        candidates = [index for index, entity in self.players.items() if index // 4 == group and entity.get('port') == 8911 and entity['connected']]
+        candidates = [index for index in range(group * 4, group * 4 + 4)
+                      if (entity := self.players.get(index)) and entity.get('port') == 8911 and entity['connected']]
         return min(candidates) if candidates else None
 
     def event(self, group, npc_id, action, stamp):

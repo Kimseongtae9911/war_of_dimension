@@ -1,5 +1,14 @@
 # 파일 정리 기록
 
+## 미사용 지형 실험 문서 정리 (2026-10-18)
+
+사용자 요청으로 로비 개선 브랜치의 main 병합 전에 남아 있던 지형 실험 문서를 제거했다. 삭제 대상의 참조는 해당 문서와 INDEX/todo 추가분 및 SERVER_LAB의 안내 문단에 한정됨을 확인했다.
+
+- 미추적 파일 `docs/development/TERRAIN_REWORK.html`, `TERRAIN_REWORK.md`와 `docs/diagrams/terrain-rework/`의 README·JSON·HTML, 총5파일을 삭제했다.
+- INDEX·CLEANUP·TERRAIN_CACHE·todo의 해당 미커밋 변경을 `4d869d98` 상태로 복원하고, SERVER_LAB의 삭제 문서 연결 문단도 제거했다.
+- 삭제/복원 전9파일과 미커밋 patch를 Git 제외 `artifacts/rollback/obj-doc-removal-20261018/`에 보존하고 manifest의 SHA-256 일치를 확인했다. 복구는 manifest의 원래 상대 경로를 따른다.
+- 현재 대체 경로는 Resource 원본 OBJ 로딩과 기존 공간 인덱스·정적 계산 캐시다. 원본 OBJ와 해당 캐시 구현의 hash는 보존 대상으로 별도 기록했다.
+
 ## JobQueue 추가 실험 종료 (2026-10-12)
 
 사용자 요청으로 main `3e34e71a` 기반 `codex/game-tick-profiling`을 생성하고 같은 commit의 로컬 `codex/jobqueue-throughput-optimization`을 삭제했다. 두 큐/atomic 카운터 후보와 해당 테스트, 후보를 현재 구현으로 설명한 문서는 main 상태로 복원했다. 새 브랜치에는 조사/실측 보고서와 연결된 다이어그램을 과거 근거로 보존한다.

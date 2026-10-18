@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <ServerCore/Session.h>
 #include <ServerCore/Telemetry.h>
+#include <ServerCore/TickProfile.h>
 #include "CServer.h"
 #include "CNetworkMgr.h"
 #include "CMatchMgr.h"
@@ -72,9 +73,15 @@ namespace wod_server {
 
 	void CServer::Run()
 	{
+        wchar_t profileFlag[2]{};
+        wod::core::TickProfile::Enable(GetEnvironmentVariableW(L"WOD_TICK_PROFILE", profileFlag, 2) == 1 && profileFlag[0] == L'1');
         wod::core::ProcessStopSignal signal;
-        wod::core::TelemetryReporter telemetry("LobbyServer", [] { return Resource::m_overExPool.Leased(); }, [] {
-            return std::string("{\"channel_capacity\":") + std::to_string(LOBBY_CHANNEL_CAPACITY) + ",\"storage_capacity\":" + std::to_string(MAX_CLIENT) + '}';
+        const std::string terrainStats = GameUtil::TerrainIndexJson();
+        wod::core::TelemetryReporter telemetry("LobbyServer", [] { return Resource::m_overExPool.Leased(); }, [terrainStats] {
+            return std::string("{\"channel_capacity\":") + std::to_string(LOBBY_CHANNEL_CAPACITY)
+                + ",\"storage_capacity\":" + std::to_string(MAX_CLIENT)
+                + ",\"movement_interval_us\":" + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(CClient::m_movementInterval).count())
+                + ",\"movement_single_pending\":true,\"terrain_index\":" + terrainStats + '}';
         });
         const unsigned int count = 4u;
         const auto failure = [](std::exception_ptr _error) {

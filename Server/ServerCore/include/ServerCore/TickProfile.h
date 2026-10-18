@@ -38,12 +38,16 @@ class TickProfile
         PlayerHeight,
         MinionHeight,
         MonsterHeight,
+        LobbyNav,
+        LobbyHeight,
+        LobbyView,
         Count
     };
     inline static constexpr size_t m_stageCount = static_cast<size_t>(Stage::Count);
     inline static constexpr std::array<const char *, m_stageCount> m_names = {"total",       "game_clock",  "jobs",          "player_update",     "player_send",       "minion_update",     "monster_update", "periodic",
                                                                               "observation", "player_move", "map_collision", "nav_ray",           "height_ray",        "client_collision",  "npc_collision",  "astar",
-                                                                              "send_lock",   "send_body",   "native_send",   "height_ray_player", "height_ray_minion", "height_ray_monster"};
+                                                                              "send_lock",   "send_body",   "native_send",   "height_ray_player", "height_ray_minion", "height_ray_monster",
+                                                                              "lobby_nav", "lobby_height", "lobby_view"};
 
     struct Value
     {

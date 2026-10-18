@@ -105,21 +105,8 @@ namespace wod_server {
 	{
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(_packet);
 
-		char befDir = _client->GetTransform()->GetDir();
-		_client->GetTransform()->SetDir(p->direction);
         wod::core::JobMetrics::Move(p->direction == 0);
-
-		if (p->direction == 0) {
-			_client->GetPhysics()->SetVelocity(vec3(0, 0, 0));
-		}
-
-		// dir이 0라면 Update수행 안하는 것으로 간주
-		if (befDir == 0)
-		{
-			_client->SetUpdateTime();
-			_client->GetJobQueue()->PushJob([_client]() {	_client->ProcessUpdate(); });
-			GPacketJobQueue->AddSessionQueue(_client);
-		}
+		_client->ApplyMovementInput(p->direction);
 	}
 
 	void CPacketMgr::MatchPacket(BASE_PACKET* _packet, CClient* _client)

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "동접 한계 · 게임 매치 누적",
+  "description": "기존 연결과 이동 부하를 유지하며 4인 매치를 추가합니다. 단계별 3초 워밍업·20초 측정·이동/정지 검증. 기능 실패 또는 더미 포화에서 중단하며 clients는 탐색 상한입니다.",
+  "setup": "match",
+  "clients": 256,
+  "boss_job": 4,
+  "timeout_s": 10,
+  "capacity": {"steps": [4, 16, 32, 64, 128, 256, 512, 1000], "warmup_s": 3, "duration_s": 20, "interval_s": 0.25}
+}

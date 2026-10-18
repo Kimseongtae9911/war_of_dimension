@@ -14,6 +14,5 @@ class CPhysic : public wod::core::ObjectMotion<vec3>
     }
 
     const vec3& CalculateMoveShift(char _dir, const vec3& _look, const vec3& _right);
-    void Deceleration(float _elapsedTime);
 };
 }

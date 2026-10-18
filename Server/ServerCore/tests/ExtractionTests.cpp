@@ -157,7 +157,11 @@ void ContextAndDisconnect()
     context.SetSocketID(42);
     context.SetInfo(3);
     context.SetSessionGeneration(7);
+    context.m_dueEpochUs = 100;
+    context.m_postedSteadyUs = 200;
+    context.m_timerLatenessUs = 30;
     context.Reset();
+    Check(context.m_dueEpochUs == 0 && context.m_postedSteadyUs == 0 && context.m_timerLatenessUs == 0, "reused IOCP context clears timer measurement ownership");
     Check(context.GetSocketID() == 42 && context.GetInfo() == 3 && !context.HasSessionGeneration(), "reset preserves accept cookie and clears generation presence");
     IocpService service;
     ObjectPool<Context> pool;

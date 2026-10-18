@@ -9,5 +9,5 @@ if (-not $process.WaitForExit(300000)) { Stop-Process -Id $process.Id; throw '�
 $process.Refresh()
 if ($process.ExitCode -ne 0) { throw "지형 등가 검사 실패: $logs" }
 $result = Get-Content (Join-Path $logs 'assets.json') -Raw | ConvertFrom-Json
-if (-not $result.ok -or $result.meshes.Count -ne 2 -or $result.checks -le 0) { throw '지형 검사 결과 누락' }
+if (-not $result.ok -or $result.meshes.Count -ne 4 -or $result.checks -le 0) { throw '지형 검사 결과 누락' }
 Write-Host "실제 NavMesh·HeightMesh first-hit/높이/node 등가 검사: PASS ($Configuration, $($result.checks)비교)"
