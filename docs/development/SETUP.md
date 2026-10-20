@@ -75,7 +75,7 @@ Visual Studio의 다중 프로젝트 실행은 프로세스 시작 순서를 지
 
 확정된 이름 규칙은 [공통 작업 지침](../../AGENTS.md)을 따른다.
 클래스 멤버는 `m_count`, 함수 인자는 `_count`처럼 구분한다.
-참조 기호는 `SocketResource& _other`·`Func&& _func`처럼 타입에 붙이며 `.clang-format`의 `ReferenceAlignment: Left`로 유지한다.
+포인터·참조 기호는 `SocketResource* _resource`·`SocketResource& _other`·`Func&& _func`처럼 타입에 붙인다. `.clang-format`의 `PointerAlignment: Left`·`ReferenceAlignment: Left`로 유지하고 `DerivePointerAlignment: false`로 기존 파일의 배치를 따라가지 않게 한다. 역참조·곱셈·주소 연산 등의 연산자에는 이 선언 규칙을 적용하지 않는다.
 함수 인자에 `_` 접두어를 사용할 때는 첫 글자를 소문자로 쓰고 `__`를 포함하지 않는다.
 예약 식별자의 범위는 [C++ 표준 초안](https://eel.is/c++draft/lex.name#4)을 참조한다.
 

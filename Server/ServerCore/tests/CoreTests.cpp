@@ -11,26 +11,27 @@
 #include <Protocol/Validation.h>
 
 void DumpAbi();
-int RunJobQueueBenchmark(int _argc, char **_argv);
+int RunJobQueueBenchmark(int _argc, char** _argv);
 int RunExtractionTests();
 int RunResourceTests();
 int RunGameObjectTests();
 int RunTerrainTests();
 int RunTerrainAssetChecks();
+int RunLobbyDispatcherTests();
 using namespace wod::core;
 
 namespace
 {
 int checks = 0;
 
-void Check(bool _value, const char *_name)
+void Check(bool _value, const char* _name)
 {
     ++checks;
     if (!_value)
         throw std::runtime_error(_name);
 }
 
-template <class F> void ExpectThrow(F _f, const char *_name)
+template <class F> void ExpectThrow(F _f, const char* _name)
 {
     bool threw = false;
     try
@@ -145,8 +146,8 @@ void Jobs()
 void Pool()
 {
     ObjectPool<IoContext> pool;
-    auto *first = pool.Acquire();
-    auto *second = pool.Acquire();
+    auto* first = pool.Acquire();
+    auto* second = pool.Acquire();
     Check(pool.Size() == 2 && pool.Leased() == 2, "pool growth");
     ExpectThrow(
         [&] {
@@ -167,7 +168,7 @@ void Pool()
             pool.push(first);
         },
         "double return");
-    auto *same = pool.Acquire();
+    auto* same = pool.Acquire();
     Check(same == first, "pool reuse");
     pool.push(second);
     pool.push(same);
@@ -192,10 +193,10 @@ void Pool()
 
 void SendFailureAndPartial()
 {
-    IocpService *owner = nullptr;
+    IocpService* owner = nullptr;
     int calls = 0;
     std::vector<char> submitted;
-    IocpService service([&](SOCKET, WSABUF *_data, OVERLAPPED *_over) {
+    IocpService service([&](SOCKET, WSABUF* _data, OVERLAPPED* _over) {
         const ULONG completed = (std::min)(_data->len, ULONG{1});
         submitted.insert(submitted.end(), _data->buf, _data->buf + completed);
         ++calls;
@@ -222,7 +223,7 @@ void SendFailureAndPartial()
     service.Drain();
     service.Finish();
     Check(service.Stats().m_pending == 0 && service.Stats().m_sockets == 0, "partial stop cleanup");
-    IocpService failed([](SOCKET, WSABUF *, OVERLAPPED *) {
+    IocpService failed([](SOCKET, WSABUF*, OVERLAPPED*) {
         WSASetLastError(WSAECONNRESET);
 
         return SOCKET_ERROR;
@@ -247,7 +248,7 @@ void Loopback()
     service.Listen(listener, 4);
     sockaddr_in address{};
     int length = sizeof(address);
-    if (getsockname(listener, reinterpret_cast<sockaddr *>(&address), &length))
+    if (getsockname(listener, reinterpret_cast<sockaddr*>(&address), &length))
         throw SocketError("getsockname", WSAGetLastError());
 
     const SOCKET accepted = service.CreateSocket();
@@ -338,10 +339,10 @@ void BatchedSends()
 {
     for (int mode = 0; mode < 3; ++mode)
     {
-        IocpService *owner = nullptr;
+        IocpService* owner = nullptr;
         int calls = 0;
         std::vector<char> wire;
-        IocpService service([&](SOCKET, WSABUF *_data, OVERLAPPED *_over) {
+        IocpService service([&](SOCKET, WSABUF* _data, OVERLAPPED* _over) {
             ++calls;
             if (mode == 1 && calls > 1)
             {
@@ -421,8 +422,8 @@ void AppEventCompletions()
 
 void CallbackSerialization()
 {
-    IocpService *owner = nullptr;
-    IocpService service([&](SOCKET, WSABUF *_data, OVERLAPPED *_over) {
+    IocpService* owner = nullptr;
+    IocpService service([&](SOCKET, WSABUF* _data, OVERLAPPED* _over) {
         PostQueuedCompletionStatus(owner->Handle(), _data->len, 5, _over);
         WSASetLastError(WSA_IO_PENDING);
 
@@ -475,8 +476,8 @@ void CallbackSerialization()
 
 void CanceledQueue()
 {
-    IocpService *owner = nullptr;
-    IocpService service([&](SOCKET, WSABUF *, OVERLAPPED *_over) {
+    IocpService* owner = nullptr;
+    IocpService service([&](SOCKET, WSABUF*, OVERLAPPED* _over) {
         PostQueuedCompletionStatus(owner->Handle(), 1, 6, _over);
         WSASetLastError(WSA_IO_PENDING);
 
@@ -521,7 +522,7 @@ void GenerationAndValidation()
         [] {
             return new SessionContext;
         },
-        [](auto *_p) {
+        [](auto* _p) {
             delete _p;
         });
     int calls = 0;
@@ -543,7 +544,7 @@ void GenerationAndValidation()
     ready.type = CS_READY;
     ready.id = 3;
     ready.ready = true;
-    const auto bytes = std::span(reinterpret_cast<const char *>(&ready), sizeof(ready));
+    const auto bytes = std::span(reinterpret_cast<const char*>(&ready), sizeof(ready));
     Check(wod::protocol::Validate(bytes, wod::protocol::Endpoint::GameClient), "game endpoint frame");
     Check(!wod::protocol::Validate(bytes, wod::protocol::Endpoint::LobbyClient), "wrong endpoint rejected");
     Check(!wod::protocol::Validate(bytes.first(2), wod::protocol::Endpoint::GameClient), "struct size rejected");
@@ -556,22 +557,22 @@ void GenerationAndValidation()
     skill.type = CS_SKILL_SELECT;
     skill.id = 0;
     skill.storage = MAX_SKILL;
-    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char *>(&skill), sizeof(skill)), wod::protocol::Endpoint::GameClient), "skill storage bounds");
+    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char*>(&skill), sizeof(skill)), wod::protocol::Endpoint::GameClient), "skill storage bounds");
     CS_LOGIN_PACKET login{};
     login.size = sizeof(login);
     login.type = CS_LOGIN;
     std::memset(login.name, 'x', sizeof(login.name));
-    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char *>(&login), sizeof(login)), wod::protocol::Endpoint::LobbyClient), "unterminated name rejected");
+    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char*>(&login), sizeof(login)), wod::protocol::Endpoint::LobbyClient), "unterminated name rejected");
     LG_MATCH_START_PACKET start{};
     start.size = sizeof(start);
     start.type = LG_MATCH_START;
     start.match_num = -1;
-    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char *>(&start), sizeof(start)), wod::protocol::Endpoint::LobbyToGame), "server match bounds");
+    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char*>(&start), sizeof(start)), wod::protocol::Endpoint::LobbyToGame), "server match bounds");
     LG_MATCH_PACKET player{};
     player.size = sizeof(player);
     player.type = LG_MATCH_PLAYER;
     player.id = 4;
-    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char *>(&player), sizeof(player)), wod::protocol::Endpoint::LobbyToGame), "server player bounds");
+    Check(!wod::protocol::Validate(std::span(reinterpret_cast<const char*>(&player), sizeof(player)), wod::protocol::Endpoint::LobbyToGame), "server player bounds");
     const auto socket = service.CreateSocket();
     ExpectThrow(
         [&] {
@@ -593,7 +594,7 @@ void MultiWorkerDisconnect()
     service.Listen(listener, 4);
     sockaddr_in address{};
     int length = sizeof(address);
-    getsockname(listener, reinterpret_cast<sockaddr *>(&address), &length);
+    getsockname(listener, reinterpret_cast<sockaddr*>(&address), &length);
     const auto accepted = service.CreateSocket();
     service.Attach(accepted, 2);
     IoContext accept;
@@ -692,7 +693,7 @@ void Observations()
 }
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     ConfigureProcessDiagnostics();
     if (argc > 1 && std::string(argv[1]) == "--jobqueue-benchmark")
@@ -733,6 +734,7 @@ int main(int argc, char **argv)
         checks += RunResourceTests();
         checks += RunGameObjectTests();
         checks += RunTerrainTests();
+        checks += RunLobbyDispatcherTests();
         Observations();
         for (int i = 0; i < 5; ++i)
             Loopback();

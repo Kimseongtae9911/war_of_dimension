@@ -70,7 +70,7 @@ Core와 테스트의 `.filters`에서 소스·헤더·개발 설정을 구분한
 로비 작업 큐는 최대 5개, 게임 큐는 실행 시작 시 크기만큼 처리한다.
 2026-10-11 공정성 개선에서 작업과 ready 대상을 FIFO로 바꿨다.
 큐 mutex에서 확정한 게시 순서를 따르며 예약 시간순 실행은 보장하지 않는다.
-로비 content worker는 조건 변수로 대기하고 남은 작업을 다시 예약한다.
+로비 content worker는 조건 변수로 대기하고 남은 작업을 다시 예약한다. 2026-10-18부터 로비의 소비 단위는 [채널별 target과 전역 target](../development/LOBBY_CHANNEL_PARALLELISM.md)이며 공통 worker pool을 사용한다. Core `JobQueue`/`JobScheduler` 알고리즘은 유지한다.
 
 ## 서버에 남은 공통 기반의 추가 추출 (2026-10-10)
 
@@ -355,7 +355,7 @@ DB 없는 `LOCAL_TEST`만 사용한다.
 `IocpService::Stats()`는 프로세스 내부 관측값을 제공한다.
 선택 활성화 `JobMetrics`·`TelemetryReporter`와 새 시나리오 더미·로컬 웹 관측의 [첫 구현](../development/SERVER_LAB.md)을 추가했다.
 `WOD_METRICS_DIRECTORY`가 있는 서버 실행만 계측하며 기존 게임 wire는 유지한다.
-로비 disconnect 정리는 content worker에 예약하고, Core는 재사용 초기화 전까지 중복 정리 callback을 막는다.
+로비 disconnect 정리는 현재 유저 SessionWorkQueue의 전역 배타 작업으로 예약하고, 원자 플래그로 중복 예약을 막는다. 기존 Core target의 disconnect callback을 사용하는 게임/공통 경로는 재사용 초기화 전까지 중복 정리 callback을 막는다.
 기준 관측 도구를 추가한 시점에는 JobQueue 자료구조·budget·잠금을 유지했다. [큐 단위 기준 측정](../development/JOBQUEUE_BASELINE.md)과 [실제 서버 기준](../development/SERVER_BASELINE.md)을 보존한다.
 후속 [FIFO·전송 배치 개선](../development/JOBQUEUE_IMPROVEMENT.md)은 두 기준과 구분한다.
 원격 관측 API·전체 월드 렌더링은 아직 구현하지 않았다.

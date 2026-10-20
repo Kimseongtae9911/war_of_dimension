@@ -2,6 +2,7 @@ import asyncio
 import copy
 import http.client
 import json
+import struct
 import sys
 import tempfile
 import threading
@@ -68,6 +69,17 @@ class Wire(unittest.IsolatedAsyncioTestCase):
             finally:
                 await peer.close()
                 self.assertEqual(self.state.counters['connected'], 0)
+
+    async def test_channel_assignment_preserved_on_failed_change(self):
+        async def responder(_reader, writer):
+            for failed, channel in ((False, 7), (True, 9)):
+                writer.write(bytes([7, protocol.CONSTANTS['SC_CHANGE_CHANNEL']]) + struct.pack('<?i', failed, channel))
+            writer.write(protocol.packet('SC_LOGIN_INFO', 1, 1, 2, 3, bytes(56)))
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+        await self.exchange(responder)
+        self.assertEqual(self.state.snapshot()['peers'][0]['lobby_channel'], 7)
 
     async def test_split_and_batch(self):
         async def responder(_reader, writer):

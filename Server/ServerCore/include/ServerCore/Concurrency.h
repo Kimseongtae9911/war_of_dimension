@@ -218,7 +218,7 @@ class JobTarget
 
     virtual ~JobTarget() = default;
 
-    JobQueue *GetJobQueue()
+    JobQueue* GetJobQueue()
     {
         return &m_jobQueue;
     }
@@ -275,7 +275,7 @@ class JobTarget
 class JobScheduler
 {
   public:
-    void AddSessionQueue(JobTarget *_target)
+    void AddSessionQueue(JobTarget* _target)
     {
         std::lock_guard lock(m_mutex);
         if (!m_stopping && _target->TryMarkInQueue())
@@ -296,7 +296,7 @@ class JobScheduler
     {
         for (;;)
         {
-            JobTarget *target;
+            JobTarget* target;
             {
                 std::unique_lock lock(m_mutex);
                 m_ready.wait(lock, [this] {
@@ -335,27 +335,27 @@ class JobScheduler
     std::mutex m_mutex;
     std::condition_variable m_ready;
     // 한 budget 뒤 남은 대상은 뒤에 등록해 주소에 따른 기아를 막는다.
-    std::queue<JobTarget *> m_queue;
+    std::queue<JobTarget*> m_queue;
     bool m_stopping = false;
 };
 
 template <class T> class ObjectPool
 {
   public:
-    T *Acquire()
+    T* Acquire()
     {
         std::lock_guard lock(m_mutex);
         if (m_available.empty())
         {
             auto value = std::make_unique<T>();
-            auto *ptr = value.get();
+            auto* ptr = value.get();
             m_owned.emplace(ptr, std::move(value));
             ++m_leased;
 
             return ptr;
         }
 
-        T *ptr = m_available.top();
+        T* ptr = m_available.top();
         m_available.pop();
         m_free.erase(ptr);
         ++m_leased;
@@ -363,7 +363,7 @@ template <class T> class ObjectPool
         return ptr;
     }
 
-    bool try_pop(T *& _ptr)
+    bool try_pop(T*& _ptr)
     {
         std::lock_guard lock(m_mutex);
         if (m_available.empty())
@@ -377,7 +377,7 @@ template <class T> class ObjectPool
         return true;
     }
 
-    void push(T *_ptr)
+    void push(T* _ptr)
     {
         if (!_ptr)
             return;
@@ -430,9 +430,9 @@ template <class T> class ObjectPool
 
   private:
     mutable std::mutex m_mutex;
-    std::priority_queue<T *> m_available;
-    std::unordered_map<T *, std::unique_ptr<T>> m_owned;
-    std::unordered_map<T *, bool> m_free;
+    std::priority_queue<T*> m_available;
+    std::unordered_map<T*, std::unique_ptr<T>> m_owned;
+    std::unordered_map<T*, bool> m_free;
     size_t m_leased = 0;
 };
 }

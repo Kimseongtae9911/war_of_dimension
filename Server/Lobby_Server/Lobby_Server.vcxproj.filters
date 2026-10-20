@@ -139,6 +139,7 @@
     <ClInclude Include="CViewList.h">
       <Filter>Client\ViewList</Filter>
     </ClInclude>
+    <ClInclude Include="LobbyDispatcher.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="Global.h">
       <Filter>Global</Filter>
     </ClInclude>

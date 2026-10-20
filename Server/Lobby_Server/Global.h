@@ -1,5 +1,7 @@
 #pragma once
+#include "LobbyDispatcher.h"
 
-namespace wod_server {
-extern PacketJobQueue* GPacketJobQueue;
+namespace wod_server
+{
+extern LobbyDispatcher* GLobbyDispatcher;
 }

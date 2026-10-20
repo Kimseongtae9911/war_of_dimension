@@ -1,5 +1,118 @@
 # 개발 환경 정비 작업
 
+## 107. 로비 채널 병렬 처리 변경의 커밋·푸시 준비 (2026-10-20)
+
+- [x] 현재 브랜치·전체 변경·새 파일과 기존 검증 근거 검토
+- [x] Core/ABI·Python 회귀 재확인과 원격 조회
+- [x] 구조도 원본 바이트 보존·명시적 스테이징·승인용 메시지/snapshot 준비
+
+현재 브랜치 `codex/lobby-channel-parallelism`의 로비 결함 수정·채널 직렬 큐/공통 worker pool·SessionWorkQueue·부하 도구/실패 보고서·설계 이유/Archify 규칙·포인터 정렬 변경을 함께 준비한다. 최신 서버 빌드 후15개 포맷 파일 hash가 유지됨을 확인했고 Core1,686검사·Protocol110종/106상수 ABI·Python50검사를 재실행해 통과했다. 밀집 측정에서 발생한 CPU/송신 적체·정지/정상 종료 실패는 보고서에 보존하며 성공처럼 설명하지 않는다. 운영 DB·전체 GUI·실제 브라우저 배치는 미검증 범위를 유지한다.
+
+커밋 검토 중 Git 줄바꿈 변환으로 구조도 receipt의 hash가 달라질 수 있어 기존 다른 구조도와 같은 `-text whitespace=cr-at-eol` 규칙을 해당 JSON/HTML에 추가했다. 원본/HTML4개의 stage blob과 working file hash, 최신 구현/이전 제안 receipt를 대조한다. 소스 로직과 측정 수치는 바꾸지 않았다. 원격 fetch에 성공했고 현재 브랜치의 원격 head는 없어 승인 후 첫 push에서 upstream을 지정한다. commit 스킬의 정확한 메시지·stage fingerprint 미리보기에 대한 승인 후 커밋·푸시하며, 이 항목은 승인 전 준비 기록이다.
+
+## 106. 현재 서버 작업의 포인터 선언 정렬 (2026-10-19)
+
+- [x] PointerAlignment Left·자동 유추 해제와 공통 지침/설정 문서 반영
+- [x] 현재 수정 중인 서버 C++ 파일·관련 Core 큐 선언의 포인터 공백만 정리
+- [x] clang-format 선언 판정·코드 token 동일성·설정 재현·Release 서버 빌드 확인
+
+사용자는 포인터를 변수 쪽이 아닌 타입 옆에 붙이도록 요청했다. Microsoft 기본 스타일에서 PointerAlignment를 명시하지 않아 오른쪽 정렬되던 설정을 고친다. 현재 작업 파일과 관련 공통 큐 선언을 정리하고 곱셈/역참조·본문 포맷·기존 인코딩/개행·제어문 빈 줄은 유지한다. 외부 코드·클라이언트 전체·게임 서버 전체를 일괄 재포맷하지 않는다. 선언 공백만 바뀌므로 구조도/성능 보고서는 재생성하지 않으며 새 성능 측정·커밋/push는 하지 않는다.
+
+완료: `.clang-format`에 `PointerAlignment: Left`, `DerivePointerAlignment: false`를 명시하고 기존 `ReferenceAlignment: Left`를 유지했다. AGENTS와 개발 환경 문서에도 `SocketResource* _resource` 규칙을 추가했다. 현재 서버 작업18파일을 검사해15파일의 포인터 공백528개 편집을 적용했다. 전체 재포맷 대신 clang-format의 Left/Right 차이 중 포인터 인접 공백만 반영해 기존 분기/함수 빈 줄·곱셈/역참조·문자열을 유지했다.
+
+검증: clang-format22.1.3 설정 dump와 포인터/이중 포인터/참조·곱셈/역참조 예제 재현, 남은 해당 포인터 정렬 수정0건,15파일의 코드 token·LF/CRLF 수 불변, UTF-8·diff 검사, Release 서버 빌드를 확인했다. 실제 서버 실행·부하/게임 플레이 검사는 새로 하지 않았다. 적용 전후 소스·preview/applied/verification은 Git 제외 `artifacts/logs/pointer-alignment-20261019/`, 빌드 로그는 `artifacts/logs/pointer-alignment-build-20261019.log`에 보존한다.
+
+## 105. Inbox를 SessionWorkQueue로 명명 정리 (2026-10-19)
+
+- [x] 클래스·멤버·인자·정리 함수와 기존 동시성 검사의 이름 변경
+- [x] 현재 문서·보고서 생성 원본·Archify JSON/HTML 이름 일치
+- [x] 이름 변경 전후 동작 코드 대조·Release 서버 빌드·기존 Core/ABI 검사
+
+앞서 제안한 `Inbox→SessionWorkQueue`, `m_inbox→m_workQueue` 정리를 사용자가 승인했다. `ClearInbox/ClearInboxes`도 `ClearWorkQueue/ClearWorkQueues`로 맞춘다. 잠금·FIFO·소유권·스케줄링은 바꾸지 않는다. 기존 관측/저장 결과 계약인 `inbox_pending` 키는 유지하고 문서에 호환 이름임을 밝힌다. 과거 로그·측정 source-snapshot·작업 이력·미구현 제안도는 소급 수정하지 않는다. 현재 구조도와 보고서는 명칭을 재생성하며 성능을 재측정했다고 주장하지 않는다. Serena 도구는 현재 세션에 제공되지 않아 rg와 파일 탐색을 사용한다. 커밋/push는 요청받지 않았다.
+
+완료: 런타임5파일·기존 동시성 검사1파일의 타입/멤버/인자/지역 변수/정리 함수명을 통일했다. 수정 전 snapshot에 예정된 이름 치환을 적용한 코드와 현재 코드의 token을 대조해 주석·공백 외 동작 코드 동일성을 확인했다. 기존 `inbox_pending` 문자열은 유지한다. 상세 설계·현재 Core 설명·보고서 생성 원본/HTML·구현 JSON/HTML·README·인덱스를 갱신했다. 과거 측정 근거22개 hash와 이전 제안도는 보존했다.
+
+검증: Release 서버 빌드, Core1,686검사·Protocol110종/106상수 ABI 동일, Archify architecture showcase9/9·오류/경고0, 문서178링크·UTF-8·Python AST·JSON/HTML hash·표시 이름·diff 확인. 구조도 JSON3438bytes·HTML706492bytes이며 hash/receipt는 [README](../docs/diagrams/lobby-channel-parallelism/README.md)에 기록했다. 근거는 Git 제외 `artifacts/logs/lobby-work-queue-name-{build,core}-20261019.log`, `lobby-work-queue-name-{validation,delivery,verification}-20261019.json`, 수정 전 snapshot `lobby-work-queue-name-before-20261019/`에 남겼다. 브라우저 시각 검사는 기존 접근 제한으로 미수행이고 실제 게임 플레이·성능 부하는 새로 실행하지 않았다.
+
+## 104. Archify 구현 의도·설계 선택 이유 문서화 (2026-10-19)
+
+- [x] 프로젝트 Archify 스킬에 문제→선택→이유→비용과 코드 근거 문서화 규칙 추가
+- [x] 로비 구현 JSON의 설명 카드와 상세 설계 이유/대안/불변 조건 보완
+- [x] showcase validate/deliver·스킬 검증·문서 링크/UTF-8·동기화 확인
+
+사용자는 흐름도 외에 설계 이유가 빠졌다고 지적하고 Archify 사용 시 구현 의도를 함께 작성하도록 요청했다. 프로젝트 스킬·연결된 작업 지침을 보완하고 현재 로비 구조도의 설명 카드와 상세 근거를 갱신한다. 서버 로직·측정 결과·이전 제안도는 변경하지 않는다. 이전 로컬 파일 접근 제한을 우회하는 브라우저/CLI 시각 검사는 하지 않고 해당 미검증을 유지한다. 커밋/push는 요청받지 않았다.
+
+완료: [프로젝트 스킬](../.agents/skills/archify/SKILL.md)의 구현 의도 규칙과 [작업 지침](../docs/guides/archify.md)을 연결했다. [설계 선택 이유](../docs/development/LOBBY_CHANNEL_PARALLELISM.md#설계-선택-이유)에6개 선택의 문제·대안의 한계·계약·비용/근거, 큐 간 순서 실패 예시, Inbox mutex와 실행 잠금의 차이, FIFO의 실제 등록 순서 범위, deque가 필수 조건이 아님을 기록했다. [구조도](../docs/diagrams/lobby-channel-parallelism/implementation.html)의2개 카드6항목에도 이유/비용을 표시하고 README·인덱스를 갱신했다.
+
+검증: skill-creator quick_validate 통과, Archify architecture showcase9/9·오류/경고0으로 validate/deliver 통과 후 JSON 고정. JSON3410bytes·HTML706477bytes이며 hash/receipt는 [README](../docs/diagrams/lobby-channel-parallelism/README.md)에 기록했다. 문서153개 로컬 링크·UTF-8·설명 카드 일치·현재73개 실행/소스/도구 fingerprint 불변·이전 제안도 불변·diff 검사를 확인했다. report용 venv에 PyYAML이 없어 스킬 기본 검증은 기존 bundled Python으로 수행했으며 설치를 추가하지 않았다. 근거는 Git 제외 `artifacts/logs/lobby-channel-intent-{validation,delivery,verification}-20261019.json`과 스킬 검증 log에 보존한다. 실제 브라우저 배치/시각 검사와 visual-check는 기존 접근 제한으로 미수행이다. 이번 작업에서 서버 빌드·부하 재측정·커밋/push는 하지 않았다.
+
+## 103. 로비 채널당 인원 증가 재측정 (2026-10-18)
+
+- [x] 기존 조건/도구·Release 실행 파일과 소스 일치·전용 실행 상태 확인
+- [x] 4채널×32/64명 및 1채널×128명 각3회 비교, 4채널×128명은3/6회에서 실패로 중단
+- [x] 실제 입장 분포·이동/정지·발행 lag/생성기 CPU·대기/처리율/CPU·종료 자원 대조
+- [x] 실패/증원 중단 조건을 포함한 원시 근거 보존과 기존 HTML/상세 보고서 갱신
+
+기존 32채널×4명과 다른 밀집 조건을 요청받았다. 동일 조건 안에서 worker 수만 바꾸고 매회 서버 재시작, 같은 perf-lobby(5초 워밍업/20초 측정/250ms 입력), Release LOCAL_TEST·DB 없음·계측 ON·headless를 유지한다. 탐색 비교는 기존 보고서와 같은 각3회(기본 목표5회의 예외)로 수행하고 반복 범위를 명시한다. 기능 실패·발행 p99>250ms·생성기0.9코어 이상이면 후속 증원은 중단하며 실패도 보존한다. 런타임 최적화·커밋/push는 수행하지 않는다.
+
+결과: [HTML 보고서](../docs/development/LOBBY_CHANNEL_PARALLELISM.html#density)·[상세 근거](../docs/development/LOBBY_CHANNEL_PARALLELISM.md#채널당-인원-증가-재측정). 21회 중20회 검증 통과·1회 실패이며,32/64명·채널 및 단일128명은 각worker3회 통과했다.32명/채널의 대기 p99 상한은131.072/131.072ms·CPU8.80/14.23%,64명/채널은524.288/524.288ms·CPU11.82/22.82%였다.64명/채널·worker4는 송신 대기가 최고1,261,391건으로 늘었다.512명·worker4의2번째 실행에서120명 최종 정지 timeout·송신 대기5,540,022건·private bytes3.16GB·로비 정상 종료15초 초과가 발생해 나머지3회와 추가 증원은 중단했다. 이후128명 단일 채널 대조만 수행했으며 최대 동시 채널 callback은worker1/4 모두1이었다. 실패를 숨기거나 timeout을 완화하지 않았다.
+
+Release 서버 빌드와 도구 Python50검사를 통과했다. 더미의 성공한 채널 배정 응답 저장·실제 분포 대조·생성기 한계 종료코드2·환경/도구 source snapshot을 보완했다. 네 묶음의 동일73개 fingerprint, 모든21회의 배정 분포·소유권 위반0건을 확인했다. 생성기 발행p99≤140ms·CPU<0.9코어였으나 동일PC 수신 영향은 미분리다. 실패 실행도 stop 잔여0 로그가 있지만 정상 종료 판정은 실패로 보존했다. 현재 검사 프로세스는 정리됐다. 로직 최적화·커밋/push는 하지 않았다. 원본은 Git 제외 `artifacts/logs/lobby-density-{c4-p32,c4-p64,c4-p128,c1-p128}-20261018/`에 보존한다.
+
+후검증: 원본21회의 실제 이동/위치 변화·입장 분포·최종 연결0·소유권·histogram overflow·샘플80개 발행 지연·정상 종료 분모와 실패120개를 대조했다. 현재73개 fingerprint 불변, 보고서 근거22개 hash·HTML5개 절/15링크/PNG2개·AST/UTF-8·문서 링크·diff 검사에 통과했다. 그래프 실제 이미지는 확인했고 전체 브라우저 배치는 기존 접근 제한으로 미검증이다. 검증 근거는 Git 제외 `artifacts/logs/lobby-channel-density-verification-20261018.json`, 그래프/요약은 `lobby-channel-density-{report-20261018.png,analysis-20261018.json}`에 남겼다. 서버 포트8790/8910/8911의 listener와 실행 기록이 남지 않은 것도 확인했다.
+
+## 102. 로비 채널 병렬화 수정 전후 HTML 보고서 (2026-10-18)
+
+- [x] 기존 원본/수정 후 제거 패킷 재현과 worker1/4의 반복·최종·계측OFF 원본 대조
+- [x] 결과→원인→해결→실측→추가 대응 순서의 핵심 HTML 보고서·재생성 스크립트 작성
+- [x] 그래프 실제 이미지·수치/비교 범위·HTML 구조·링크/UTF-8·인덱스 확인
+
+write-engineering-report 스킬을 적용한다. 이번 요청은 보고서 작성이며 새 서버 수정·부하 검사·커밋/push는 하지 않는다. 기능의 수정 전후는 main@54af931c 대비 재현 근거를 사용하고, 성능은 개선 코드 안의 worker1/4 대조임을 첫 화면에 밝힌다. 원본 main의 동일32채널 부하 성능은 미측정이므로 수정 전 성능처럼 대체하지 않는다. 기존 구현 구조도는 동작 변경 없이 링크로 재사용한다. 브라우저 실제 배치는 기존 로컬 파일 접근 제한을 우회하지 않고 미검증으로 구분한다.
+
+완료: [수정 전후 HTML 보고서](../docs/development/LOBBY_CHANNEL_PARALLELISM.html)와 [재생성 스크립트](../scripts/Build-LobbyChannelReport.py)를 작성했다. 실제 제거 패킷 전후, 개선 코드 worker1/4의 반복 중앙값·최종 각1회·계측OFF를 구분해 대기 감소와 CPU 증가를 함께 표시했다. PNG 1860×573 실제 이미지 확인, HTML 5개 절 순서·태그 닫힘·로컬 링크10개·UTF-8·생성기 AST·근거9개 SHA-256·기존 구조도 불변·git diff --check를 확인했다. 결과는 Git 제외 `artifacts/logs/lobby-channel-report-verification-20261018.json`에 남겼다. 기존 구현/검증 파일은 보존했으며 이번 보고서 작업에서 새 서버 빌드·부하 실행은 하지 않았다.
+
+## 101. 기존 로비 결함 수정·채널 직렬 큐와 공통 worker pool (2026-10-18)
+
+- [x] 종료/채널 이동의 시야 제거 ID·수신자, 음수/가득 찬 채널·등록 실패, 매칭 취소/중복 항목 수정
+- [x] 채널 직렬 실행·유저 입력 FIFO·가입/종료/타이머 전달과 제한된 worker pool 구현
+- [x] 전역 기능 직렬 조정·채널 이동 경계·세션 재사용 보호, 안전한 병렬 계측/설정 추가
+- [x] Release/Debug 빌드·실제 네트워크/매칭/이동/종료·제어 동시성 검사와 동일 분포 worker 비교
+- [x] 구현 구조도·사용 계약·실제 결과/제한 기록
+
+사용자는 100번 검토에서 발견한 기존 결함 수정 후 채널별 직렬 큐와 공통 worker pool 방식으로 병렬화하도록 요청했다. 기존 검토 파일은 보존한다. 전역 기능은 초기 구현에서 공용 실행 barrier의 배타 구간으로 보호하고, 일반 채널 작업은 공유 구간에서 채널별로 병렬 실행한다. 사용자별 inbox는 한 번에 하나의 작업만 실행 대상으로 발행하여 채널 이동 전후의 입력 순서를 보존한다. 비동기 전역 서비스별 세분화는 별도 후속이며 이번 구현을 완전 무잠금/전역 정지 없음으로 설명하지 않는다. 커밋·push는 요청받지 않았다.
+
+완료: [구현·실측/제한](../docs/development/LOBBY_CHANNEL_PARALLELISM.md)·[구현 구조도](../docs/diagrams/lobby-channel-parallelism/implementation.html). 기존 제거2결함은 단일 worker 전후 TCP재현으로 수정 확인했다. 채널별 target과 bounded 공통 worker4개, 유저당 선두1작업 발행 Inbox, generation 검사, 전역 배타 조정을 도입했다. 별도 routeEpoch 대신 이동 완료 뒤 다음 작업의 소유 큐를 결정한다. 매칭 취소/중복/이전 세대 정리, 입장 실패·채널 범위·클라이언트 제거 ID 방어, DB없는 요청·채팅 수신자/문자열 검사도 보완했다. 기존 Core 큐 알고리즘/게임 실행 정책은 유지한다.
+
+검증: Release 전체·Debug 서버 빌드, Core 각1,686·ABI110종/106상수·Python49, 기존 Release 네트워크12종/보스4·5/초기화실패4종 통합 통과. 최종 Release/Debug 신규 채널9항목, 기존 이동3항목(재접속10회), 정원1·채널1의 실패/슬롯 반환을 확인했다. 제어 C++ 검사는 두 채널 동시·동일 채널/전역 배제·200작업 이동FIFO·종료 후 거부/캡처 반환을 포함한다. 기존 형변환·미사용 경고와 운영 DB/블록체인·전체 GUI·race detector·최대 동접 미검증 범위는 유지한다.
+
+128명·32채널×4명·250ms 입력·5초 warmup/20초 측정: worker1/4 각3회에서 패킷 대기p99 bucket상한65.536→16.384ms, CPU5.23→7.32%, PPS513.46→507.46. 마지막 legacy dummy 채널이동 호환1행 수정 뒤 최종 각1회는 p99동일·CPU5.24→7.04%·PPS506.76→514.28이다. 두 실행 파일 결과는 합산하지 않는다. 고정입력에서 최대처리량 증가를 주장하지 않으며 CPU증가와 같은 이동gap p99버킷(65.536ms)을 함께 보고한다. 계측OFF각1회 CPU5.14→8.06%, 원인비용분해/worker2튜닝은 후속이다. ON6+OFF2+최종2회 모두 통과·각묶음hash안정·양쪽정상종료 pending/sockets/leased=0. 원본은 artifacts/logs/lobby-channel-final-{comparison,metrics-off,verification}-20261018/에 보존했다.
+
+최종 UTF-8·Python AST·프로젝트 XML·문서35링크·JSON/HTML receipt/hash·최종 binary hash·diff 검사 PASS. Core 런타임 알고리즘 변경0, 구현/제안 Archify 각각showcase9/9·오류/경고0. 종합확인은 artifacts/logs/lobby-channel-implementation-verification-20261018.json이며 실제브라우저배치는 기존접근제한으로미검증이다. 측정 뒤 CPacketMgr/LobbyDispatcher의 분기 뒤 빈 줄은 측정 snapshot과 공백 외 내용동일, 마지막 C++검사파일 포맷은 token동일성을 확인했다. 이 공백 정리 뒤 빌드/부하를 다시 수행하지 않았다. 커밋/push는 하지 않았다.
+
+후속:
+- [ ] 전역 DB/I/O를 개별 서비스 메시지로 분리하여 전역 정지 구간 축소
+- [ ] 공용 송신 잠금·worker별 CPU/깨움 비용 분해와 worker2·채널 집중 부하/장시간 비교
+- [ ] Inbox 상한/backpressure·채널 occupancy, 운영 DB/전체 GUI/동적 race 검증
+
+## 100. 로비 채널 병렬화 전 공유 데이터·동시성 검토 (2026-10-18)
+
+- [x] main `54af931c`에서 `codex/lobby-channel-parallelism` 브랜치 생성
+- [x] IOCP·타이머·로직·서버 간 통신·선택 DB 경로의 실행/소유 경계 확인
+- [x] 채널/사용자/시야/섹션·전역 매칭/부가 기능·Core 큐/세션/풀의 공유 상태와 경쟁 경로 조사
+- [x] 채널 이동·초기화/종료·재접속·타이머 전달의 순서/수명 계약과 우선 수정 항목 정리
+- [x] 현재 구현과 미구현 병렬화 제안을 구분한 검토 문서·Archify 및 검증 계획 작성
+
+사용자는 새 브랜치에서 채널별 로직 병렬화 개선을 시작하되 공유 데이터와 동시성 문제부터 검토하도록 요청했다. 이번 단계는 코드 근거 조사와 설계/검증 조건 정리이며 worker 수·실행 정책은 아직 변경하지 않는다. 성능 향상·race 재현·전체 플레이 검증을 정적 검토만으로 주장하지 않는다. 커밋·push는 요청받지 않았다.
+
+결과: [동시성 검토](../docs/development/LOBBY_CHANNEL_CONCURRENCY.md)·[미구현 소유권 제안도](../docs/diagrams/lobby-channel-parallelism/README.md). 현재 유저별 큐의 m_execute 보호는 있으나 채널 전체를 보호하지 않는다. IOCP 등록/로직 종료의 슬롯 잠금 불일치, 채널 이동의 generation 한계, 전역 매칭/공유 RNG/채널 간 판매자 갱신 등을 확인했다. bounded worker pool 위 채널 직렬 큐와 전역 조정자 메시지를 권장한다. 기존 uncapped 설정은 채널을 1개로 만들므로 다중 채널 비교를 위한 설정 분리도 필요하다.
+
+Release LOCAL_TEST 기본 정원4·단일 worker에서 TCP2클라이언트로 기존 종료 REMOVE.id=-1, 채널 이동 REMOVE 수신자 오류를 실제 재현했다. GUI 충돌·동적 data race 재현을 주장하지 않는다. Build.ps1 -Module Servers -Configuration Release 성공, 실행 후 양쪽 서버 pending=0 sockets=0 leased=0으로 중지. probe/결과/EXE·원인 소스 hash는 Git 제외 .runtime/review_lobby_channels.py와 artifacts/logs/lobby-channel-review-probes-20261018.json에 보존했다. UTF-8·문서21링크·런타임 변경0·원본/산출물 및 재현hash·diff 검사 PASS, 확인 결과는 artifacts/logs/lobby-channel-review-verification-20261018.json이다. Archify showcase9/9·오류/경고0; 실제 브라우저 레이아웃은 기존 접근 제한 때문에 미검증이다. 런타임 소스 변경·다중 worker 부하·새 성능 측정·WITH_DATABASE·운영 DB/블록체인·전체 GUI는 이번 범위 밖이다.
+
+후속 구현(101번 적용 상태):
+- [x] 기존 종료/이동 제거 결함·채널 번호/등록 실패 검증과 회귀를 먼저 보완
+- [x] 채널 큐·타이머/가입/정리 소유권 전달, 전역 매칭 직렬화 도입(routeEpoch 대신 선두1작업 발행과 전역 배타 이동)
+- [ ] 채널별 계측·독립 정원 설정과 worker1/4 비교 완료, worker2 비교는101번 후속
+
 ## 99. 로비 개선 main 병합·미사용 지형 문서 정리 (2026-10-18)
 
 - [x] 원격 main과 로컬 main의 동일성, 로비 개선2커밋 및 머지 충돌 없음 확인

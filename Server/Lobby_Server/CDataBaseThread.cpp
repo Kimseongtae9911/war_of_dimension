@@ -29,6 +29,7 @@ namespace wod_server {
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 					continue;
 				}
+                auto global = GLobbyDispatcher->LockGlobal();
 				switch (ev.m_eventID) {
 				case DB_EVENT_TYPE::EV_SAVE_INFO:
 					if (m_dataBase->SavePlayerInfo(ev.m_id, ev.m_playerInfo)) {

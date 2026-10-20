@@ -13,7 +13,7 @@ namespace wod_server
 struct PlayerInfo
 {
     ModelCustomize m_model;
-    int m_tokenNum;
+    int m_tokenNum = 0;
 
     void Reset()
     {
@@ -22,7 +22,7 @@ struct PlayerInfo
     }
 };
 
-class CClient : public std::enable_shared_from_this<CClient>, public wod::core::SessionHandler<Session>, public wod::core::JobTarget
+class CClient : public std::enable_shared_from_this<CClient>, public wod::core::SessionHandler<Session>
 {
   public:
     static constexpr auto m_movementInterval = std::chrono::milliseconds(15);
@@ -30,13 +30,24 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
     ~CClient();
 
     void Initialize(const SOCKET& _socket);
+    void QueueDisconnect();
+
+    bool IsDisconnected() const
+    {
+        return m_disconnected.load();
+    }
+
+    void ClearWorkQueue()
+    {
+        m_workQueue.Clear();
+    }
 
     void Move(bool _broadcast = true);
     void ApplyMovementInput(char _direction);
     bool Reset();
 
   public:
-    CPacketSender *GetPacketSender() const
+    CPacketSender* GetPacketSender() const
     {
         return m_packetSender.get();
     }
@@ -76,7 +87,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
         return m_id;
     }
 
-    const char *GetName() const
+    const char* GetName() const
     {
         return m_name;
     }
@@ -86,17 +97,17 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
         return m_channel;
     }
 
-    CTransform *GetTransform()
+    CTransform* GetTransform()
     {
         return m_transform;
     }
 
-    CPhysic *GetPhysics()
+    CPhysic* GetPhysics()
     {
         return m_physics;
     }
 
-    CViewList *GetViewList()
+    CViewList* GetViewList()
     {
         return m_viewList;
     }
@@ -139,6 +150,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
     void SetChannel(int _channel)
     {
         m_channel = _channel;
+        m_workQueue.SetChannel(_channel);
     }
 
     void SetSection(int _x, int _z)
@@ -152,7 +164,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
         m_id = _id;
     }
 
-    void SetName(const char *_name)
+    void SetName(const char* _name)
     {
         memcpy_s(m_name, NAME_SIZE, _name, NAME_SIZE);
     }
@@ -165,8 +177,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
     SessionRef GetTransportSession() const override;
     bool ValidateFrame(std::span<const char> _frame) const override;
     bool DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation) override;
-    void OnReceiveComplete(size_t _frames) override;
-    void OnJobQueueDisconnected() override;
+    void CleanupDisconnected();
     void PublishMovement();
     void ScheduleMovementUpdate();
     void EnqueueMovementUpdate(const SessionRef& _session, uint64_t _generation, std::chrono::steady_clock::time_point _deadline);
@@ -175,10 +186,13 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     std::unique_ptr<CPacketSender> m_packetSender;
 
-    CL_STATE m_state;
+    CL_STATE m_state = CL_STATE::ST_FREE;
 
     std::chrono::steady_clock::time_point m_updateTime = {};
-    // 단일 content worker에서만 변경한다. 타이머는 유저 큐에 작업만 추가한다.
+    // 소유 채널 또는 전역 배타 작업에서만 변경한다. 타이머는 작업 큐에 전달한다.
+    LobbyDispatcher::SessionWorkQueue m_workQueue;
+    std::atomic_bool m_disconnected = true;
+    std::atomic_bool m_cleanupScheduled = false;
     bool m_updateScheduled = false;
     bool m_movementDirty = false;
     bool m_isDummy = false;
@@ -193,9 +207,9 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
     int m_sectionX = -1;
     int m_sectionZ = -1;
 
-    CTransform *m_transform;
-    CPhysic *m_physics;
-    CViewList *m_viewList;
+    CTransform* m_transform;
+    CPhysic* m_physics;
+    CViewList* m_viewList;
 
     //P2P
     std::string m_ipAddress;

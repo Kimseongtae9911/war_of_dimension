@@ -128,3 +128,6 @@ docs/diagrams/jobqueue-baseline/jobqueue.architecture.json -text whitespace=cr-a
 docs/diagrams/jobqueue-baseline/jobqueue.architecture.html -text whitespace=cr-at-eol
 docs/diagrams/server-baseline/server-baseline.architecture.json -text whitespace=cr-at-eol
 docs/diagrams/server-baseline/server-baseline.architecture.html -text whitespace=cr-at-eol
+
+docs/diagrams/lobby-channel-parallelism/*.json -text whitespace=cr-at-eol
+docs/diagrams/lobby-channel-parallelism/*.html -text whitespace=cr-at-eol

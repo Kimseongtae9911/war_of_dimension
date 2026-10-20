@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "NetworkManager.h"
 #include "OverlapEx.h"
 #include "SocketUtil.h"
@@ -772,6 +772,9 @@ void NetworkManager::RemovePlayerPacket(int id, BASE_PACKET* packet)
 {
     SC_REMOVE_PLAYER_PACKET* p = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(packet);
     cout << "Remove Player " << p->id << endl;
+
+    if (p->id < 0 || p->id >= LOBBY_MAX_CLIENT)
+        return;
 
     otherClientsInfo[p->id].show = false;
 }

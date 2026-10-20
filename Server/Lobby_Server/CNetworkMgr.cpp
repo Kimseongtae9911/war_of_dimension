@@ -23,19 +23,19 @@ bool CNetworkMgr::Initialize()
     m_handle = std::make_shared<TCPSocket>();
     m_gameServer = std::make_shared<Session>(true);
 
-    m_iocpfunc.insert({OP_TYPE::OP_SERVER_CONNECT, [this](int _id, int _bytes, OverlapEx *_over_ex) {
+    m_iocpfunc.insert({OP_TYPE::OP_SERVER_CONNECT, [this](int _id, int _bytes, OverlapEx* _over_ex) {
                            ServerConnect(_id, _bytes, _over_ex);
                        }});
-    m_iocpfunc.insert({OP_TYPE::OP_ACCEPT, [this](int _id, int _bytes, OverlapEx *_over_ex) {
+    m_iocpfunc.insert({OP_TYPE::OP_ACCEPT, [this](int _id, int _bytes, OverlapEx* _over_ex) {
                            CNetworkMgr::Accept(_id, _bytes, _over_ex);
                        }});
-    m_iocpfunc.insert({OP_TYPE::OP_RECV, [this](int _id, int _bytes, OverlapEx *_over_ex) {
+    m_iocpfunc.insert({OP_TYPE::OP_RECV, [this](int _id, int _bytes, OverlapEx* _over_ex) {
                            CNetworkMgr::Recv(_id, _bytes, _over_ex);
                        }});
-    m_iocpfunc.insert({OP_TYPE::OP_SEND, [this](int _id, int _bytes, OverlapEx *_over_ex) {
+    m_iocpfunc.insert({OP_TYPE::OP_SEND, [this](int _id, int _bytes, OverlapEx* _over_ex) {
                            CNetworkMgr::Send(_id, _bytes, _over_ex);
                        }});
-    m_iocpfunc.insert({OP_TYPE::OP_DISCONNECT, [this](int _id, int _bytes, OverlapEx *_over_ex) {
+    m_iocpfunc.insert({OP_TYPE::OP_DISCONNECT, [this](int _id, int _bytes, OverlapEx* _over_ex) {
                            CNetworkMgr::Disconnect(_id, _bytes, _over_ex);
                        }});
     ;
@@ -54,7 +54,7 @@ bool CNetworkMgr::Initialize()
 
     for (int i = 0; i < MAX_OVEREX_OBJECT; ++i)
     {
-        OverlapEx *overEx = new OverlapEx;
+        OverlapEx* overEx = new OverlapEx;
         Resource::m_overExPool.push(overEx);
     }
 
@@ -82,7 +82,7 @@ bool CNetworkMgr::Release()
     {
         auto op = completion.m_context->m_operation;
         if (op == wod::core::IoOperation::Send || op == wod::core::IoOperation::Disconnect || op == wod::core::IoOperation::AppEvent)
-            Resource::m_overExPool.push(static_cast<OverlapEx *>(completion.m_context));
+            Resource::m_overExPool.push(static_cast<OverlapEx*>(completion.m_context));
     }
     NetworkRuntime::Get().Finish();
     LogPrinter::PrintMsg("ServerCore stop pending=0 sockets=0 leased=" + std::to_string(Resource::m_overExPool.Leased()));
@@ -110,7 +110,7 @@ void CNetworkMgr::IOCPFunc()
         wod::core::Completion completion;
         while (NetworkRuntime::Get().Poll(completion))
         {
-            auto *over = static_cast<OverlapEx *>(completion.m_context);
+            auto* over = static_cast<OverlapEx*>(completion.m_context);
             const auto operation = over->m_operation;
             if (m_stopping.load() || NetworkRuntime::Get().IsStopping())
             {
@@ -243,7 +243,7 @@ const HANDLE& CNetworkMgr::GetHandle() const
     return m_handle->GetHandle();
 }
 
-void CNetworkMgr::ServerConnect(int _id, int _bytes, OverlapEx *_over_ex)
+void CNetworkMgr::ServerConnect(int _id, int _bytes, OverlapEx* _over_ex)
 {
     m_gameServer->SetRemainData(0);
     m_gameServer->SetSocket(m_handle->GetClientSocket());
@@ -257,48 +257,55 @@ void CNetworkMgr::ServerConnect(int _id, int _bytes, OverlapEx *_over_ex)
     m_handle->Accept(socketResource.m_socket);
 }
 
-void CNetworkMgr::Accept(int _id, int _bytes, OverlapEx *_over_ex)
+void CNetworkMgr::Accept(int _id, int _bytes, OverlapEx* _over_ex)
 {
-    if (m_clientNum >= MAX_CLIENT)
-    {
-        LogPrinter::PrintMsg("Max user exceeded");
-    }
-    else
-    {
-        LogPrinter::PrintMsg("Accept");
 
-        CUserMgr::GetInstance()->InitializeClient(static_cast<int>(m_handle->GetClientSocket()));
-
-        SOCKADDR_IN clientAddress;
-        int clientAddressLength = sizeof(clientAddress);
-        getpeername(m_handle->GetClientSocket(), reinterpret_cast<SOCKADDR *>(&clientAddress), &clientAddressLength);
-
-        char clientIPAddress[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &(clientAddress.sin_addr), clientIPAddress, INET_ADDRSTRLEN);
-
-        m_p2pNetwork->RegisterPeer(static_cast<int>(m_handle->GetClientSocket()), std::string(clientIPAddress));
-
-        ++m_clientNum;
-    }
+    const auto socket = m_handle->GetClientSocket();
+    const int index = static_cast<int>(socket);
+    SOCKADDR_IN address{};
+    int length = sizeof(address);
+    getpeername(socket, reinterpret_cast<SOCKADDR*>(&address), &length);
+    char text[INET_ADDRSTRLEN]{};
+    inet_ntop(AF_INET, &address.sin_addr, text, INET_ADDRSTRLEN);
+    const bool admitted = m_clientNum.fetch_add(1) < MAX_CLIENT;
+    GLobbyDispatcher->PostGlobal([index, ip = std::string(text), admitted] {
+        if (admitted)
+        {
+            CUserMgr::GetInstance()->InitializeClient(index, ip);
+        }
+        else
+        {
+            auto* client = CUserMgr::GetInstance()->GetClient(index);
+            client->Initialize(index);
+            client->Disconnect();
+        }
+    });
     m_handle->GetOverEx().ResetOver();
 
     SocketResource socketResource;
     if (Resource::m_socketpool.try_pop(socketResource))
+    {
         m_handle->Accept(socketResource.m_socket);
+    }
     else
     {
         SOCKET s = NetworkRuntime::Get().CreateSocket();
         NetworkRuntime::Get().Attach(s, static_cast<int>(s));
+        CUserMgr::GetInstance()->MakeClientObject(static_cast<int>(s));
         m_handle->Accept(s);
     }
 }
 
-void CNetworkMgr::Recv(int _id, int _bytes, OverlapEx *_overEx)
+void CNetworkMgr::Recv(int _id, int _bytes, OverlapEx* _overEx)
 {
 
     if (_id != m_gameServer->GetSocket())
     {
-        CUserMgr::GetInstance()->GetClient(_id)->Receive(_bytes, _overEx);
+        auto* client = CUserMgr::GetInstance()->GetClient(_id);
+        const auto session = client->GetPacketSender()->GetSession();
+        session->WithGeneration(session->Generation(), [&] {
+            client->Receive(_bytes, _overEx);
+        });
         return;
     }
     std::vector<wod::core::FrameDecoder::Frame> frames;
@@ -316,28 +323,22 @@ void CNetworkMgr::Recv(int _id, int _bytes, OverlapEx *_overEx)
             NetworkRuntime::Get().Close(m_gameServer->GetSocket());
             return;
         }
-        PacketExec(reinterpret_cast<BASE_PACKET *>(frame.data()));
+        GLobbyDispatcher->PostGlobal([this, frame = std::move(frame)]() mutable {
+            PacketExec(reinterpret_cast<BASE_PACKET*>(frame.data()));
+        });
     }
     m_gameServer->Recv();
 }
 
-void CNetworkMgr::Send(int _id, int _bytes, OverlapEx *_overEx)
+void CNetworkMgr::Send(int _id, int _bytes, OverlapEx* _overEx)
 {
     Resource::m_overExPool.push(_overEx);
 }
 
-void CNetworkMgr::Disconnect(int _id, int _bytes, OverlapEx *_overEx)
+void CNetworkMgr::Disconnect(int _id, int _bytes, OverlapEx* _overEx)
 {
-    CClient *client = CUserMgr::GetInstance()->GetClient(_id);
-    client->SetDisconnected();
-#ifdef WITH_DATABASE
-    if (strstr(client->GetName(), "Dummy") == nullptr)
-    {
-        m_dataBaseThread->RegisterDBEvent(DB_EVENT(client->GetName(), client->GetPlayerInfo(), std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_INFO));
-    }
-#endif
-    // 사용자 정리는 content worker 한 곳에서 실행한다. IOCP와 동시 reset을 하지 않는다.
-    GPacketJobQueue->AddSessionQueue(client);
+    CClient* client = CUserMgr::GetInstance()->GetClient(_id);
+    client->QueueDisconnect();
 
     _overEx->Reset();
     Resource::m_overExPool.push(_overEx);
@@ -345,13 +346,13 @@ void CNetworkMgr::Disconnect(int _id, int _bytes, OverlapEx *_overEx)
     --m_clientNum;
 }
 
-void CNetworkMgr::PacketExec(BASE_PACKET *_packet)
+void CNetworkMgr::PacketExec(BASE_PACKET* _packet)
 {
     //Game Server Packet Execution
     switch (_packet->type)
     {
     case GL_TRANSACTIONS: {
-        GL_TRANSACTIONS_PACKET *p = reinterpret_cast<GL_TRANSACTIONS_PACKET *>(_packet);
+        GL_TRANSACTIONS_PACKET* p = reinterpret_cast<GL_TRANSACTIONS_PACKET*>(_packet);
 #ifdef WITH_DATABASE
         m_dataBaseThread->RegisterDBEvent(DB_EVENT(std::string(p->name), p->token, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
 #endif

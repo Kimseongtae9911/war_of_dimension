@@ -1,36 +1,27 @@
 #pragma once
 
-struct MatchInfo {
-    int m_id;
-    unsigned int m_register_time;
+namespace wod_server
+{
+// 전역 조정 큐의 배타 구간에서만 접근한다.
+class CMatchMgr : public TSingleton<CMatchMgr>
+{
+  public:
+    bool Initialize() override;
+    bool Release() override;
+    void RegisterToQue(int _id, char _character, unsigned int _time);
+    void Cancel(int _id);
+    bool TryMakeMatch(std::array<int, 4>& _players);
 
-    constexpr bool operator < (const MatchInfo& _l) const
+  private:
+    struct Entry
     {
-        return (m_register_time > _l.m_register_time);
-    }
-};
-
-namespace wod_server {
-
-    class CMatchMgr : public TSingleton<CMatchMgr>
-    {
-    public:
-        bool Initialize() override;
-        bool Release() override;
-
-        void IncreaseMatchPlayers(char _character) { m_players[_character]++; }
-        void DecreaseMatchPlayers(char _character) { m_players[_character]--; }
-
-        void RegisterToQue(int _id, char _character, unsigned int _time);
-
-        const bool GetMatch() const;
-        const int GetMatchPlayer();
-        const int GetMatchBoss();
-
-    private:
-        std::array<int, 2> m_players = {};
-        std::array<std::priority_queue<MatchInfo>, 2> m_matchque = {};
+        int m_id;
+        unsigned int m_time;
+        uint64_t m_generation;
     };
 
+    std::array<std::vector<Entry>, 2> m_waiting;
+};
 }
+
 using match = wod_server::CMatchMgr;

@@ -1,20 +1,11 @@
 #include "pch.h"
 
-
-namespace wod_server {
-PacketJobQueue* GPacketJobQueue = nullptr;
-
-class Global
+namespace wod_server
 {
-public:
-	Global()
-	{
-		GPacketJobQueue = new PacketJobQueue();
-	}
+namespace
+{
+LobbyDispatcher dispatcher(CHANNEL_NUM);
+}
 
-	~Global()
-	{
-		delete GPacketJobQueue;
-	}
-} Global;
+LobbyDispatcher* GLobbyDispatcher = &dispatcher;
 }

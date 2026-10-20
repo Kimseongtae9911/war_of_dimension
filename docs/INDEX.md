@@ -13,6 +13,8 @@
 | 캐시 적용 후 동접 증가·게임 tick/로비 패킷 병목·반복 경계 | [HTML 측정 보고서](development/SERVER_CAPACITY.html), [수치·원인·재현 근거](development/SERVER_CAPACITY.md), [동접 탐색 흐름도](diagrams/server-capacity/README.md) |
 | 로비 단일 채널·지형 검색 비용·처리량 전후 비교 | [HTML 보고서](development/LOBBY_THROUGHPUT.html), [실측·검증 근거](development/LOBBY_THROUGHPUT.md), [검색 흐름도](diagrams/lobby-throughput/README.md) |
 | 로비 이동 단일 예약·최종 정지·타이머 대기·전후 부하 | [HTML 보고서](development/LOBBY_MOVEMENT.html), [실측·검증 근거](development/LOBBY_MOVEMENT.md), [예약 흐름도](diagrams/lobby-movement/README.md) |
+| 로비 채널 병렬화 전 공유 데이터·수명·기존 제거 결함 | [동시성 검토·검증 계획](development/LOBBY_CHANNEL_CONCURRENCY.md), [미구현 소유권 제안도](diagrams/lobby-channel-parallelism/README.md) |
+| 로비 세션 작업 큐·채널 직렬 큐·공통 worker·전역 barrier·밀집 재측정 | [수정 전후 보고서](development/LOBBY_CHANNEL_PARALLELISM.html), [설계 선택 이유](development/LOBBY_CHANNEL_PARALLELISM.md#설계-선택-이유), [구현·계측·검증](development/LOBBY_CHANNEL_PARALLELISM.md), [구현 구조도](diagrams/lobby-channel-parallelism/implementation.html) |
 | JobQueue 개선 전 처리량·공정성·개선 방향 | [기준 측정/검토](development/JOBQUEUE_BASELINE.md), [측정 구조도](diagrams/jobqueue-baseline/README.md) |
 | 실제 서버 이동/정지·다중 매치 기준 성능·입장 설정·tick/대기 계측 | [실제 서버 기준 측정](development/SERVER_BASELINE.md), [관측 구조도](diagrams/server-baseline/README.md) |
 | 로비 패킷 기아·게임 응답 적체 원인·FIFO/전송 배치·전후 성능 | [HTML 요약 보고서](development/JOBQUEUE_IMPROVEMENT.html), [상세 실측·검증 근거](development/JOBQUEUE_IMPROVEMENT.md), [개선 흐름도](diagrams/jobqueue-improvement/README.md) |

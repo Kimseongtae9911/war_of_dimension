@@ -1,101 +1,143 @@
 #include "pch.h"
 #include "CUserMgr.h"
+#include "CMatchMgr.h"
+#include "CNetworkMgr.h"
 
-namespace wod_server {
-	std::unique_ptr<CUserMgr> CUserMgr::m_instance;
+namespace wod_server
+{
+std::unique_ptr<CUserMgr> CUserMgr::m_instance;
 
-	bool CUserMgr::Initialize()
-	{
-		return true;
-	}
+bool CUserMgr::Initialize()
+{
+    return true;
+}
 
-	bool CUserMgr::Release()
-	{
-		try {
-			for (auto& iter : m_clients) {
-				delete iter.second;
-			}
+bool CUserMgr::Release()
+{
+    for (auto& entry : m_clients)
+        delete entry.second;
 
-            m_clients.clear();
-			return true;
-		}
-		catch (std::exception ex) {
-			LogPrinter::PrintMsg("Err(UserMgr Release): " + std::string(ex.what()));
-			return false;
-		}
-	}
+    m_clients.clear();
 
-	void CUserMgr::InitializeClient(int _index)
-	{
-		m_clients[_index]->Initialize(_index);
+    return true;
+}
 
-		RegisterClientToChannel(m_clients[_index]);
-		m_clients[_index]->GetPacketSender()->GetSession()->Recv();
-		m_clients[_index]->GetPacketSender()->SendRTTPacket();
-	}
+void CUserMgr::InitializeClient(int _index, const std::string& _ip)
+{
+    auto* client = GetClient(_index);
+    client->Initialize(_index);
+    network::GetInstance()->GetP2PNetwork()->RegisterPeer(_index, _ip);
+    if (!RegisterClientToChannel(client))
+    {
+        client->Disconnect();
+        return;
+    }
 
-	void CUserMgr::DisconnectClient(int _key)
-	{
-        m_clients.at(_key)->Disconnect();
-	}
+    client->GetPacketSender()->GetSession()->Recv();
+    client->GetPacketSender()->SendRTTPacket();
+}
 
-	void CUserMgr::ClientReset(int _index)
-	{
-		LogPrinter::PrintMsg(std::string(m_clients[_index]->GetName()) + " Disconnect");
-		m_channelClient[m_clients[_index]->GetChannel()][m_clients[_index]->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
+void CUserMgr::DisconnectClient(int _key)
+{
+    GetClient(_key)->Disconnect();
+}
 
-		if (!m_clients[_index]->Reset()) {
-			LogPrinter::PrintMsg("Client Reset Fail");
-		}
-	}
+void CUserMgr::RemoveFromViews(CClient* _client)
+{
+    const int id = _client->GetID();
+    const int socket = _client->GetSocketID();
+    for (int observerSocket : _client->GetViewList()->GetView())
+    {
+        auto* observer = GetClient(observerSocket);
+        observer->GetViewList()->DeleteFromView(id, socket, observer->GetPacketSender());
+    }
 
-	void CUserMgr::RegisterClientToChannel(CClient* _client)
-	{
-		for (int i = 0; i < CHANNEL_NUM; ++i) {
-			for (int j = 0; j < LOBBY_CHANNEL_CAPACITY; ++j) {
-				m_channelLock.lock();
-				if (m_channelClient[i][j] == nullptr) {
-					_client->SetChannel(i);
-					_client->SetID(i * LOBBY_CHANNEL_CAPACITY + j);
-					m_channelClient[i][j] = _client;
-					m_channelLock.unlock();
-					_client->GetPacketSender()->SendChangeChannelPacket(false, i);
-					return;
-				}
-				else {
-					m_channelLock.unlock();
-				}
-			}
-		}
-	}
+    _client->GetViewList()->ClearViewList();
+}
 
-	bool CUserMgr::ChangeChannel(int _curChannel, int _changeChannel, CClient* _client)
-	{
-		if (_changeChannel >= CHANNEL_NUM)
-			return false;
+void CUserMgr::ClientReset(int _index)
+{
+    auto* client = GetClient(_index);
+    LogPrinter::PrintMsg(std::string(client->GetName()) + " Disconnect");
+    RemoveFromViews(client);
+    CMatchMgr::GetInstance()->Cancel(_index);
+    {
+        std::lock_guard lock(m_channelLock);
+        const int channel = client->GetChannel();
+        if (channel >= 0 && channel < CHANNEL_NUM && client->GetID() >= 0)
+            m_channelClient[channel][client->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
+    }
 
-		for (int i = 0; i < LOBBY_CHANNEL_CAPACITY; ++i) {
-			m_channelLock.lock();
-			if (!m_channelClient[_changeChannel][i]) {
-				for (int id : _client->GetViewList()->GetView()) {
-					CUserMgr::GetInstance()->GetClient(id)->GetViewList()->DeleteFromView(_client->GetID(), static_cast<int>(_client->GetPacketSender()->GetSession()->GetSocket()), _client->GetPacketSender());
-				}
-				_client->GetViewList()->ClearViewList();
+    if (!client->Reset())
+        throw std::runtime_error("Client reset failed");
+}
 
-				m_channelClient[_curChannel][_client->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
-				int prevID = _client->GetID();
-				_client->SetID(_changeChannel * LOBBY_CHANNEL_CAPACITY + i);
-				_client->SetChannel(_changeChannel);
-				m_channelClient[_changeChannel][i] = _client;
-				m_channelLock.unlock();
+bool CUserMgr::RegisterClientToChannel(CClient* _client)
+{
+    int channel = -1;
+    {
+        std::lock_guard lock(m_channelLock);
+        if (_client->GetChannel() >= 0)
+            return true;
 
-				return true;
-			}
-			else {
-				m_channelLock.unlock();
-			}
-		}
+        for (int i = 0; i < CHANNEL_NUM && channel < 0; ++i)
+        {
+            for (int j = 0; j < LOBBY_CHANNEL_CAPACITY; ++j)
+            {
+                if (m_channelClient[i][j])
+                    continue;
 
-		return false;
-	}
+                _client->SetChannel(i);
+                _client->SetID(i * LOBBY_CHANNEL_CAPACITY + j);
+                m_channelClient[i][j] = _client;
+                channel = i;
+                break;
+            }
+        }
+    }
+
+    if (channel < 0)
+        return false;
+
+    _client->GetPacketSender()->SendChangeChannelPacket(false, channel);
+
+    return true;
+}
+
+bool CUserMgr::ChangeChannel(int _curChannel, int _changeChannel, CClient* _client)
+{
+    if (_curChannel < 0 || _curChannel >= CHANNEL_NUM || _changeChannel < 0 || _changeChannel >= CHANNEL_NUM || _client->GetState() == CL_STATE::ST_MATCHING)
+        return false;
+
+    if (_curChannel == _changeChannel)
+        return true;
+
+    int slot = -1;
+    {
+        std::lock_guard lock(m_channelLock);
+        for (int i = 0; i < LOBBY_CHANNEL_CAPACITY; ++i)
+        {
+            if (!m_channelClient[_changeChannel][i])
+            {
+                slot = i;
+                break;
+            }
+        }
+    }
+
+    if (slot < 0)
+        return false;
+
+    // 호출자의 전역 배타 구간에서 완료한다. 기존 ID가 유효할 때 관찰자에게 알린다.
+    RemoveFromViews(_client);
+    {
+        std::lock_guard lock(m_channelLock);
+        m_channelClient[_curChannel][_client->GetID() % LOBBY_CHANNEL_CAPACITY] = nullptr;
+        _client->SetID(_changeChannel * LOBBY_CHANNEL_CAPACITY + slot);
+        _client->SetChannel(_changeChannel);
+        m_channelClient[_changeChannel][slot] = _client;
+    }
+
+    return true;
+}
 }

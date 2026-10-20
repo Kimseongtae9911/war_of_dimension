@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "검토안 · 로비 채널별 로직 소유권 (미구현)",
+    "quality_profile": "showcase",
+    "viewBox": [1080, 760]
+  },
+  "components": [
+    {"id": "io", "type": "backend", "label": "IOCP", "sublabel": "패킷 복사 · 접속/종료 통지", "pos": [30, 270], "size": [160, 80]},
+    {"id": "timer", "type": "backend", "label": "타이머", "sublabel": "접속 세대 · 라우팅 버전", "pos": [310, 30], "size": [160, 80]},
+    {"id": "router", "type": "messagebus", "label": "메시지 라우터", "sublabel": "소유 채널 · 이전 중 보류", "pos": [310, 270], "size": [160, 80]},
+    {"id": "channels", "type": "backend", "label": "채널별 직렬 큐", "sublabel": "채널 간 병렬 · worker 수 제한", "pos": [590, 270], "size": [160, 80]},
+    {"id": "transport", "type": "backend", "label": "공유 전송 기반", "sublabel": "수신자 세대 · 송신 큐 · 풀", "pos": [870, 270], "size": [160, 80]},
+    {"id": "terrain", "type": "database", "label": "읽기 전용 지형", "sublabel": "원본 OBJ · 공간 인덱스/캐시", "pos": [310, 550], "size": [160, 80]},
+    {"id": "coordinator", "type": "backend", "label": "전역 조정기", "sublabel": "매칭 · 채널 이동 · 전역 기능", "pos": [870, 550], "size": [160, 80]}
+  ],
+  "connections": [
+    {"id": "receive", "from": "io", "to": "router", "label": "패킷·접속·종료", "variant": "emphasis"},
+    {"id": "due", "from": "timer", "to": "router", "label": "기한 도래 통지", "labelDy": 24},
+    {"id": "owned-work", "from": "router", "to": "channels", "label": "소유 채널 FIFO", "variant": "emphasis"},
+    {"id": "send", "from": "channels", "to": "transport", "label": "소유한 송신 데이터", "variant": "emphasis"},
+    {"id": "terrain-read", "from": "channels", "to": "terrain", "label": "불변 지형 조회", "variant": "dashed"},
+    {"id": "global-request", "from": "channels", "to": "coordinator", "label": "전역 요청 메시지", "variant": "dashed"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "채널의 단독 소유", "items": ["이동·시야·외형·입퇴장을 같은 큐에서 실행", "같은 채널은 한 번에 한 worker만 실행"]},
+    {"dot": "orange", "title": "전역 작업의 경계", "items": ["다른 채널 유저를 직접 변경하지 않음", "전역 결과도 라우터를 통해 소유 채널로 전달"]}
+  ]
+}

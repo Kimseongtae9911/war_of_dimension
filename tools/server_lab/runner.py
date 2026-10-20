@@ -7,6 +7,7 @@ import json
 import math
 import os
 import random
+import struct
 import threading
 import time
 import uuid
@@ -234,6 +235,10 @@ class Peer:
                 self.sequence += 1
                 self.state.count('received_packets')
                 self.state.count('received_bytes', size)
+                if kind == CONSTANTS['SC_CHANGE_CHANNEL']:
+                    failed, channel = struct.unpack('<?i', body)
+                    if not failed:
+                        self.state.peer(self.index, lobby_channel=channel)
                 if kind in NPC_PACKETS:
                     if self.state.observe_world:
                         self.state.world.npc_packet(self.index, kind, body)

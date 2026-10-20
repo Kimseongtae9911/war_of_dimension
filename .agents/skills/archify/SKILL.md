@@ -72,6 +72,14 @@ Read Mermaid for topology and meaning, then author fresh Archify JSON; do not me
 - `sequenceDiagram` → `sequence`; participants become semantic participants and arrows become messages.
 - `stateDiagram` → `lifecycle`; states and transitions retain meaning, not Mermaid style.
 
+## 구현 의도와 설계 선택 이유 · 프로젝트 규칙
+
+- 흐름도와 함께 **왜 이 경계·큐·잠금·소유권을 선택했는지** 기록한다. 동작 순서만 다시 설명하는 것으로 대체하지 않는다.
+- 중요한 선택마다 `해결할 문제 → 선택한 방식 → 단순한 대안으로 부족한 이유 → 보장하는 계약 → 비용/한계`를 짧게 연결하고 코드·검증 근거를 링크한다. 검토하지 않은 대안을 실제 비교·실험한 것처럼 쓰지 않는다.
+- HTML의 스키마가 지원하는 cards 등에는 핵심 이유와 비용만 표시한다. 상세 비교·경쟁 상황 예시는 `docs/diagrams/<주제>/README.md` 또는 연결된 설계 문서에 두고 README에서 바로 찾을 수 있게 링크한다. 긴 본문을 첫 화면에 넣어 가독성·배치 계약을 깨지 않는다.
+- 잠금·큐가 여러 계층이면 각각 보호하는 대상과 교차 경계를 구분한다. 예: 채널 직렬화와 유저별 입력 순서, 실행 배제와 큐 사이 순서 보장은 별개다. 코드상 불변 조건과 실측 성능 효과도 구분한다.
+- 전달 전에 중요한 선택의 이유와 비용을 확인한다. 순서·동시성처럼 동작 설명만으로 모호한 경계는 짧은 실패 예시를 곁들인다. 제안 의도와 현재 구현을 구분하고 JSON·HTML·설계 설명의 일치를 검사한다.
+
 ## Authoring invariants
 
 - One obvious main path; side branches leave the nearest main-path node. Remove low-value edges before adding routing controls.

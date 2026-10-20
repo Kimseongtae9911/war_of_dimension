@@ -3,6 +3,7 @@
 #include <span>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 namespace wod::protocol {
 enum class Endpoint { GameClient, LobbyClient, LobbyToGame, GameToLobby };
 inline bool ValidateShape(std::span<const char> bytes, Endpoint endpoint) {
@@ -95,6 +96,8 @@ inline bool Validate(std::span<const char> bytes, Endpoint endpoint) {
     switch(type) {
     case CS_LOGIN: { auto p=Read<CS_LOGIN_PACKET>(bytes); return Terminated(p.name) && Terminated(p.password); }
     case CS_SIGN_UP: { auto p=Read<CS_SIGN_UP_PACKET>(bytes); return Terminated(p.name) && Terminated(p.password); }
+    case CS_MATCH: { auto p=Read<CS_MATCH_PACKET>(bytes); return p.character>=0 && p.character<=1; }
+    case CS_CHAT: { auto p=Read<CS_CHAT_PACKET>(bytes); return Terminated(p.name) && std::find(std::begin(p.chat),std::end(p.chat),L'\0')!=std::end(p.chat) && p.chatType>=0 && p.chatType<=(endpoint==Endpoint::LobbyClient?2:3); }
     case CS_JOB_SELECT: { auto p=Read<CS_JOB_SELECT_PACKET>(bytes); return p.id>=0 && p.id<4 && p.job>=0 && p.job<6; }
     case CS_READY: { auto p=Read<CS_READY_PACKET>(bytes); return p.id>=0 && p.id<4; }
     case CS_LOAD_COMPLETE: { auto p=Read<CS_LOAD_COMPLETE_PACKET>(bytes); return p.id>=0 && p.id<4; }

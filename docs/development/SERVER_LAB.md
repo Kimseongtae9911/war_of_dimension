@@ -1,5 +1,9 @@
 # 시나리오 더미와 실시간 서버 관측
 
+로비의 [채널 직렬 큐·worker pool 설정과 계측](LOBBY_CHANNEL_PARALLELISM.md#설정과-에이전트-조회)을 추가했다. API/저장 samples의 `LobbyServer.admission.dispatcher`에서 채널별 작업·대기·실행 시간과 실행 소유권 위반을 조회한다. 동일 분포 worker 비교는 `scripts/Measure-LobbyChannels.py`, 실제 소켓 회귀는 `tools/server_lab/tests/lobby_channels.py`를 사용한다. 기존 uncapped 기본값은 1채널이므로 다중 채널 실험에서는 정원/채널 수를 명시한다.
+
+채널 밀집 재측정에서는 더미 `peers[].lobby_channel`에 마지막으로 성공한 `SC_CHANGE_CHANNEL` 응답의 채널 번호를 저장한다. 실패 응답은 기존 번호를 유지하며 운영 서버 전체 인원 지표는 아니다. `Measure-LobbyChannels.py`는 실제 더미 분포를 `channel_population`으로 저장하고 설정에 따른 예상 인원과 대조한다. 발행 p99가250ms를 넘거나 생성기가0.9코어 이상이면 `generator_limit=true`로 기록하고 종료코드2로 후속 증원을 중단한다. 기능 통과와 생성기 한계는 별도 판정이다.
+
 `tools/server_lab`은 실제 로컬 서버에 TCP로 연결하는 새 더미와 로컬 웹 대시보드다.
 Python 3.12 이상과 표준 라이브러리만 사용한다. 기존 `Stress_Test`·`CDummyClient`와 독립적이다.
 `LOCAL_TEST`·DB 없는 서버가 대상이며, 운영 인증·DB·블록체인을 검증하지 않는다.

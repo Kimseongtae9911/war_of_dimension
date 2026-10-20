@@ -164,6 +164,7 @@
     <ClInclude Include="CTransform.h" />
     <ClInclude Include="CViewList.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="LobbyDispatcher.h" />
     <ClInclude Include="CServer.h" />
     <ClInclude Include="CUserMgr.h" />
     <ClInclude Include="enum.h" />

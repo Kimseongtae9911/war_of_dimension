@@ -7,7 +7,7 @@
 namespace wod_server
 {
 
-CClient::CClient() : JobTarget(wod::core::JobBudget::Five)
+CClient::CClient()
 {
     m_packetSender = std::make_unique<CPacketSender>();
     m_transform = new CTransform();
@@ -27,7 +27,9 @@ CClient::~CClient()
 void CClient::Initialize(const SOCKET& _socket)
 {
     m_packetSender->Initailize(_socket);
-    ResetDisconnected();
+    m_disconnected = false;
+    m_cleanupScheduled = false;
+    m_isFullNode = false;
     m_socketID = static_cast<int>(_socket);
     SetUpdateTime();
     m_updateScheduled = false;
@@ -55,26 +57,41 @@ bool CClient::ValidateFrame(std::span<const char> _frame) const
 
 bool CClient::DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation)
 {
-    GetJobQueue()->PushJob([this, session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
+    const bool global = CPacketMgr::RequiresGlobal(reinterpret_cast<const BASE_PACKET*>(_frame.data()));
+    return GLobbyDispatcher->Post(m_workQueue, global, [this, session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
         if (pending)
             pending->Start();
 
+        if (IsDisconnected())
+            return;
+
         session->WithGeneration(generation, [&] {
-            CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET *>(frame.data()), this);
+            CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), this);
         });
     });
-
-    return true;
 }
 
-void CClient::OnReceiveComplete(size_t _frames)
+void CClient::QueueDisconnect()
 {
-    if (_frames)
-        GPacketJobQueue->AddSessionQueue(this);
+    m_disconnected = true;
+    if (m_cleanupScheduled.exchange(true))
+        return;
+
+    const auto session = GetTransportSession();
+    const auto generation = session->Generation();
+    GLobbyDispatcher->Post(m_workQueue, true, [this, session, generation] {
+        session->WithGeneration(generation, [this] {
+            CleanupDisconnected();
+        });
+    });
 }
 
-void CClient::OnJobQueueDisconnected()
+void CClient::CleanupDisconnected()
 {
+#ifdef WITH_DATABASE
+    if (strstr(GetName(), "Dummy") == nullptr)
+        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(GetName(), GetPlayerInfo(), std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_INFO));
+#endif
     CUserMgr::GetInstance()->ClientReset(GetSocketID());
 }
 
@@ -130,13 +147,17 @@ bool CClient::Reset()
 
         m_viewList->ClearViewList();
 
+        if (m_sectionX >= 0 && m_sectionX < SECTION_NUM && m_sectionZ >= 0 && m_sectionZ < SECTION_NUM)
+            GameUtil::RemoveClientFromSection(m_sectionX, m_sectionZ, m_socketID);
+
+        m_sectionX = -1;
+        m_sectionZ = -1;
         m_socketID = -1;
         m_packetSender->GetSession()->Invalidate();
-        GetJobQueue()->Clear();
         m_packetSender->Reset();
         m_transform->Reset();
         m_id = -1;
-        m_channel = -1;
+        SetChannel(-1);
         m_playerInfo.Reset();
         SetUpdateTime();
         m_updateScheduled = false;
@@ -215,10 +236,9 @@ void CClient::EnqueueMovementUpdate(const SessionRef& _session, uint64_t _genera
     if (wod::core::JobMetrics::Enabled())
         wod::core::JobMetrics::m_tickTimerLateness.Record(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(dispatched - _deadline).count()));
 
-    GetJobQueue()->PushJob([this, session = _session, generation = _generation, dispatched] {
+    GLobbyDispatcher->Post(m_workQueue, false, [this, session = _session, generation = _generation, dispatched] {
         ExecuteScheduledMovementUpdate(session, generation, dispatched);
     });
-    GPacketJobQueue->AddSessionQueue(this);
 }
 
 void CClient::ExecuteScheduledMovementUpdate(const SessionRef& _session, uint64_t _generation, std::chrono::steady_clock::time_point _dispatched)
