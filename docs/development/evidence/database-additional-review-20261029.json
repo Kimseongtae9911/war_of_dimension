@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "scope": "isolated NewWodTest LocalDB and Release LobbyServer; production code unchanged by review",
+  "reproduced": {
+    "expired_auction": {
+      "initial_owned": 1,
+      "after_registration": 0,
+      "after_expiry_cleanup": 0,
+      "remaining_listings": 0,
+      "reproduced": true
+    },
+    "duplicate_login_balance": {
+      "starting_balance": 2000,
+      "first_session_response": 1900,
+      "second_session_response": 1900,
+      "actual_db_balance": 1800,
+      "reproduced": true
+    }
+  },
+  "cleanup": {
+    "sql_expiry_probe": "outer transaction rollback",
+    "network_probe": "test account and child rows deleted; both servers stopped normally"
+  },
+  "findings": [
+    {
+      "priority": "P1",
+      "kind": "reproduced",
+      "title": "Expired auction does not restore reserved item",
+      "sources": [
+        {
+          "path": "database/local-schema.sql",
+          "line": 98
+        },
+        {
+          "path": "Server/Lobby_Server/CDataBase.cpp",
+          "line": 403
+        }
+      ]
+    },
+    {
+      "priority": "P1",
+      "kind": "reproduced",
+      "title": "Duplicate login returns stale per-session token balance",
+      "sources": [
+        {
+          "path": "Server/Lobby_Server/CPacketMgr.cpp",
+          "line": 352
+        },
+        {
+          "path": "Server/Lobby_Server/CPacketMgr.cpp",
+          "line": 644
+        }
+      ]
+    },
+    {
+      "priority": "P1",
+      "kind": "source-verified; shutdown backlog failure not injected",
+      "title": "15-second stop deadline conflicts with draining and failed game rewards have no replay",
+      "sources": [
+        {
+          "path": "scripts/Stop-Local.ps1",
+          "line": 23
+        },
+        {
+          "path": "Server/Lobby_Server/CNetworkMgr.cpp",
+          "line": 351
+        },
+        {
+          "path": "Server/ServerCore/include/ServerCore/OrderedWorkQueue.h",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "priority": "P1",
+      "kind": "source-verified; no memory load measurement",
+      "title": "DB-paused session inbox has no admission limit",
+      "sources": [
+        {
+          "path": "Server/Lobby_Server/LobbyDispatcher.h",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "priority": "P1 before non-local rollout",
+      "kind": "source-verified",
+      "title": "Local plaintext credential contract and explicit migration requirement",
+      "sources": [
+        {
+          "path": "database/local-schema.sql",
+          "line": 14
+        },
+        {
+          "path": "Server/Lobby_Server/CDataBase.cpp",
+          "line": 334
+        }
+      ]
+    },
+    {
+      "priority": "P2",
+      "kind": "source-verified; not benchmarked",
+      "title": "Schema preflight checks names only and bootstrap is split across batches",
+      "sources": [
+        {
+          "path": "Server/Lobby_Server/CDataBase.cpp",
+          "line": 556
+        },
+        {
+          "path": "scripts/Initialize-LocalDatabase.ps1",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "priority": "P2",
+      "kind": "source-verified; not benchmarked",
+      "title": "Successful login makes four DB calls; expiry cleanup is attached to page read",
+      "sources": [
+        {
+          "path": "Server/Lobby_Server/CPacketMgr.cpp",
+          "line": 655
+        },
+        {
+          "path": "Server/Lobby_Server/CDataBase.cpp",
+          "line": 390
+        }
+      ]
+    },
+    {
+      "priority": "P2",
+      "kind": "source-verified",
+      "title": "Initial auction page request 1 differs from zero-based navigation",
+      "sources": [
+        {
+          "path": "Client/WarOfDimension/Scene.cpp",
+          "line": 932
+        },
+        {
+          "path": "Client/WarOfDimension/stdafx.h",
+          "line": 351
+        }
+      ]
+    }
+  ],
+  "recommended_sequence": [
+    "atomic auction expiry and one account owner / authoritative DB balance",
+    "durable reward result and drain / inbox admission policy",
+    "versioned schema and credential migration",
+    "measure query plans and DB queue wait before adding pools or indexes"
+  ]
+}

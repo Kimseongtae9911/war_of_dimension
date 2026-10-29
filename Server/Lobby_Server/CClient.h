@@ -9,6 +9,7 @@
 
 namespace wod_server
 {
+class CDataBase;
 
 struct PlayerInfo
 {
@@ -31,6 +32,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     void Initialize(const SOCKET& _socket);
     void QueueDisconnect();
+    void RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query);
 
     bool IsDisconnected() const
     {
@@ -166,7 +168,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     void SetName(const char* _name)
     {
-        memcpy_s(m_name, NAME_SIZE, _name, NAME_SIZE);
+        strncpy_s(m_name, NAME_SIZE, _name, _TRUNCATE);
     }
 
     void ProcessUpdate(bool _isDummy = false);

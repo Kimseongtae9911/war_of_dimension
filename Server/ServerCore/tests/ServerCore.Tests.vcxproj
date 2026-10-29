@@ -46,6 +46,7 @@
     <ClCompile Include="ExtractionTests.cpp" />
     <ClCompile Include="TerrainTests.cpp" />
     <ClCompile Include="LobbyDispatcherTests.cpp" />
+    <ClCompile Include="DatabaseQueueTests.cpp" />
     <ClCompile Include="CoreTests.cpp" />
     <ClCompile Include="ProtocolAbi.cpp" />
   </ItemGroup>

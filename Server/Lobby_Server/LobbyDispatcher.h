@@ -40,6 +40,7 @@ class LobbyDispatcher
         std::deque<Work> m_work;
         int m_channel = -1;
         bool m_scheduled = false;
+        bool m_paused = false;
     };
 
     explicit LobbyDispatcher(size_t _channels)
@@ -56,6 +57,28 @@ class LobbyDispatcher
 
         _workQueue.m_work.push_back({_global, std::move(_work), Timestamp()});
         ++m_pending;
+        if (!_workQueue.m_scheduled && !_workQueue.m_paused)
+            ScheduleLocked(_workQueue);
+
+        return true;
+    }
+
+    // 현재 세션 작업 안에서 호출한다. SQL 대기 동안 worker와 world lock은 반환한다.
+    void Suspend(SessionWorkQueue& _workQueue)
+    {
+        std::lock_guard lock(_workQueue.m_mutex);
+        _workQueue.m_paused = true;
+    }
+
+    bool Resume(SessionWorkQueue& _workQueue, std::function<void()> _completion)
+    {
+        std::lock_guard lock(_workQueue.m_mutex);
+        if (m_stopping.load())
+            return false;
+
+        _workQueue.m_work.push_front({true, std::move(_completion), Timestamp()});
+        ++m_pending;
+        _workQueue.m_paused = false;
         if (!_workQueue.m_scheduled)
             ScheduleLocked(_workQueue);
 
@@ -250,7 +273,7 @@ class LobbyDispatcher
 
         std::lock_guard lock(_workQueue.m_mutex);
         _workQueue.m_scheduled = false;
-        if (!_workQueue.m_work.empty() && !m_stopping.load())
+        if (!_workQueue.m_work.empty() && !_workQueue.m_paused && !m_stopping.load())
             ScheduleLocked(_workQueue);
     }
 

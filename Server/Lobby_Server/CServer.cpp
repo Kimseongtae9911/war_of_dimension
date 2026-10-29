@@ -98,7 +98,7 @@ void CServer::Run()
         [terrainStats] {
             return std::string("{\"channel_capacity\":") + std::to_string(LOBBY_CHANNEL_CAPACITY) + ",\"storage_capacity\":" + std::to_string(MAX_CLIENT) +
                    ",\"movement_interval_us\":" + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(CClient::m_movementInterval).count()) + ",\"movement_single_pending\":true,\"logic_workers\":" + std::to_string(LOBBY_WORKERS) +
-                   ",\"dispatcher\":" + GLobbyDispatcher->SnapshotJson() + ",\"terrain_index\":" + terrainStats + '}';
+                   ",\"database\":" + network::GetInstance()->GetDataBaseThread()->SnapshotJson() + ",\"dispatcher\":" + GLobbyDispatcher->SnapshotJson() + ",\"terrain_index\":" + terrainStats + '}';
         });
     const unsigned int count = 4u;
     const auto failure = [](std::exception_ptr _error) {
@@ -139,14 +139,10 @@ void CServer::Run()
         producers.Launch([] {
             GLobbyDispatcher->ProcessJob();
         });
-#ifdef WITH_DATABASE
-    producers.Launch([] {
-        network::GetInstance()->DataBaseFunc();
-    });
-#endif
     signal.Wait();
     producers.StopAndJoin();
     iocp.StopAndJoin();
+    network::GetInstance()->DataBaseFunc(); // producer join 후 수락 작업 drain, 객체 해제 전 완료
     GLobbyDispatcher->Clear();
     CUserMgr::GetInstance()->ClearWorkQueues();
     if (producers.Failed() || iocp.Failed() || network::GetInstance()->WorkerFailed())

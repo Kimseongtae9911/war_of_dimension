@@ -1,0 +1,574 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-10-29T03:13:00.481099+00:00",
+  "base_commit": "54bc0a3202d2120e9ee70cd6dc5aaa9265b660ca",
+  "branch": "codex/db-setup-async",
+  "preserved_stash": "012034e978eb94333c4e84be57baae6b5d532194",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD Ryzen 5 7500F",
+    "logical_cpus": 12,
+    "python": "3.12.14",
+    "compiler": "MSVC v145 x64 C++20",
+    "database": "SQL Server 2025 Express LocalDB; ODBC Driver 17"
+  },
+  "controlled_boundary": {
+    "description": "old locking boundary replay versus current production OrderedWorkQueue/LobbyDispatcher; requested sleep 10ms x8, observed full duration retained; one warmup pair then five alternating pairs; no SQL engine throughput claim",
+    "raw": {
+      "schema_version": 1,
+      "kind": "controlled DB wait boundary",
+      "jobs": 8,
+      "injected_delay_ms": 10,
+      "runs": [
+        {
+          "run": 0,
+          "async": false,
+          "caller_block_ms": 125.51,
+          "other_session_ms": 125.517,
+          "total_ms": 125.823
+        },
+        {
+          "run": 0,
+          "async": true,
+          "caller_block_ms": 0.0038,
+          "other_session_ms": 0.0183,
+          "total_ms": 125.361
+        },
+        {
+          "run": 1,
+          "async": true,
+          "caller_block_ms": 0.0012,
+          "other_session_ms": 0.0196,
+          "total_ms": 124.283
+        },
+        {
+          "run": 1,
+          "async": false,
+          "caller_block_ms": 126.792,
+          "other_session_ms": 126.802,
+          "total_ms": 127.098
+        },
+        {
+          "run": 2,
+          "async": false,
+          "caller_block_ms": 126.426,
+          "other_session_ms": 126.44,
+          "total_ms": 126.731
+        },
+        {
+          "run": 2,
+          "async": true,
+          "caller_block_ms": 0.0033,
+          "other_session_ms": 0.0079,
+          "total_ms": 126.311
+        },
+        {
+          "run": 3,
+          "async": true,
+          "caller_block_ms": 0.0032,
+          "other_session_ms": 0.0171,
+          "total_ms": 125.678
+        },
+        {
+          "run": 3,
+          "async": false,
+          "caller_block_ms": 124.803,
+          "other_session_ms": 124.817,
+          "total_ms": 125.111
+        },
+        {
+          "run": 4,
+          "async": false,
+          "caller_block_ms": 125.044,
+          "other_session_ms": 125.054,
+          "total_ms": 125.365
+        },
+        {
+          "run": 4,
+          "async": true,
+          "caller_block_ms": 0.0031,
+          "other_session_ms": 0.0189,
+          "total_ms": 124.819
+        }
+      ]
+    },
+    "summary": {
+      "caller_block_ms": {
+        "before": {
+          "median": 125.51,
+          "min": 124.803,
+          "max": 126.792,
+          "n": 5
+        },
+        "after": {
+          "median": 0.0032,
+          "min": 0.0012,
+          "max": 0.0038,
+          "n": 5
+        }
+      },
+      "other_session_ms": {
+        "before": {
+          "median": 125.517,
+          "min": 124.817,
+          "max": 126.802,
+          "n": 5
+        },
+        "after": {
+          "median": 0.0183,
+          "min": 0.0079,
+          "max": 0.0196,
+          "n": 5
+        }
+      },
+      "total_ms": {
+        "before": {
+          "median": 125.823,
+          "min": 125.111,
+          "max": 127.098,
+          "n": 5
+        },
+        "after": {
+          "median": 125.361,
+          "min": 124.283,
+          "max": 126.311,
+          "n": 5
+        }
+      }
+    }
+  },
+  "real_database": {
+    "Debug": {
+      "ok": true,
+      "cases": [
+        {
+          "case": "signup and DB-backed login",
+          "passed": true
+        },
+        {
+          "case": "duplicate signup",
+          "passed": true
+        },
+        {
+          "case": "wrong password",
+          "passed": true
+        },
+        {
+          "case": "pipelined write/write/read FIFO",
+          "passed": true
+        },
+        {
+          "case": "appearance persisted without token overwrite",
+          "passed": true
+        },
+        {
+          "case": "staking success",
+          "passed": true
+        },
+        {
+          "case": "staking persistence",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 0",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 1",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 2",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 3",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 4",
+          "passed": true
+        },
+        {
+          "case": "failed write rolls back item grant",
+          "passed": true
+        },
+        {
+          "case": "worker survives SQL failure",
+          "passed": true
+        },
+        {
+          "case": "registration uses authenticated name",
+          "passed": true
+        },
+        {
+          "case": "auction first page query contract",
+          "passed": true
+        },
+        {
+          "case": "unsigned price and atomic purchase",
+          "passed": true
+        },
+        {
+          "case": "disconnect during pending DB and reconnect",
+          "passed": true
+        },
+        {
+          "case": "query timeout and fail closed",
+          "passed": true,
+          "elapsed_seconds": 5.013201400000071
+        },
+        {
+          "case": "queue progresses after timeout",
+          "passed": true
+        }
+      ],
+      "real_sql_lock_runs": [
+        {
+          "run": 0,
+          "sql_blocked_session_ms": 250.62109999998938,
+          "unrelated_session_ms": 0.25340000001961016
+        },
+        {
+          "run": 1,
+          "sql_blocked_session_ms": 250.8576999998695,
+          "unrelated_session_ms": 0.12349999997240957
+        },
+        {
+          "run": 2,
+          "sql_blocked_session_ms": 250.4613999999492,
+          "unrelated_session_ms": 0.11489999997138511
+        },
+        {
+          "run": 3,
+          "sql_blocked_session_ms": 250.7847000001675,
+          "unrelated_session_ms": 0.16860000005181064
+        },
+        {
+          "run": 4,
+          "sql_blocked_session_ms": 250.89379999963057,
+          "unrelated_session_ms": 0.1554000000396627
+        }
+      ],
+      "scope": "real LobbyServer TCP + ODBC Driver + isolated LocalDB; no production DB or blockchain"
+    },
+    "Release": {
+      "ok": true,
+      "cases": [
+        {
+          "case": "signup and DB-backed login",
+          "passed": true
+        },
+        {
+          "case": "duplicate signup",
+          "passed": true
+        },
+        {
+          "case": "wrong password",
+          "passed": true
+        },
+        {
+          "case": "pipelined write/write/read FIFO",
+          "passed": true
+        },
+        {
+          "case": "appearance persisted without token overwrite",
+          "passed": true
+        },
+        {
+          "case": "staking success",
+          "passed": true
+        },
+        {
+          "case": "staking persistence",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 0",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 1",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 2",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 3",
+          "passed": true
+        },
+        {
+          "case": "real SQL lock isolation and session order 4",
+          "passed": true
+        },
+        {
+          "case": "failed write rolls back item grant",
+          "passed": true
+        },
+        {
+          "case": "worker survives SQL failure",
+          "passed": true
+        },
+        {
+          "case": "registration uses authenticated name",
+          "passed": true
+        },
+        {
+          "case": "auction first page query contract",
+          "passed": true
+        },
+        {
+          "case": "unsigned price and atomic purchase",
+          "passed": true
+        },
+        {
+          "case": "disconnect during pending DB and reconnect",
+          "passed": true
+        },
+        {
+          "case": "query timeout and fail closed",
+          "passed": true,
+          "elapsed_seconds": 5.0145910000001095
+        },
+        {
+          "case": "queue progresses after timeout",
+          "passed": true
+        }
+      ],
+      "real_sql_lock_runs": [
+        {
+          "run": 0,
+          "sql_blocked_session_ms": 250.8643999999549,
+          "unrelated_session_ms": 0.15079999957379187
+        },
+        {
+          "run": 1,
+          "sql_blocked_session_ms": 250.98590000015975,
+          "unrelated_session_ms": 0.18700000009630457
+        },
+        {
+          "run": 2,
+          "sql_blocked_session_ms": 250.67129999979443,
+          "unrelated_session_ms": 0.12799999967683107
+        },
+        {
+          "run": 3,
+          "sql_blocked_session_ms": 250.55470000006608,
+          "unrelated_session_ms": 0.11300000005576294
+        },
+        {
+          "run": 4,
+          "sql_blocked_session_ms": 250.49710000030245,
+          "unrelated_session_ms": 0.08609999986219918
+        }
+      ],
+      "scope": "real LobbyServer TCP + ODBC Driver + isolated LocalDB; no production DB or blockchain"
+    }
+  },
+  "real_release_medians": {
+    "sql_blocked_session_ms": 250.67129999979443,
+    "unrelated_session_ms": 0.12799999967683107
+  },
+  "startup_failure_tests": {
+    "Debug": {
+      "ok": true,
+      "cases": [
+        {
+          "pending": 0,
+          "sockets": 0,
+          "case": "invalid-mode",
+          "leased": 0,
+          "exit_code": 1,
+          "passed": true
+        },
+        {
+          "pending": 0,
+          "sockets": 0,
+          "case": "missing-connection",
+          "leased": 0,
+          "exit_code": 1,
+          "passed": true
+        },
+        {
+          "pending": 0,
+          "sockets": 0,
+          "case": "missing-driver",
+          "leased": 0,
+          "exit_code": 1,
+          "passed": true
+        }
+      ]
+    },
+    "Release": {
+      "cases": [
+        {
+          "pending": 0,
+          "exit_code": 1,
+          "passed": true,
+          "case": "invalid-mode",
+          "leased": 0,
+          "sockets": 0
+        },
+        {
+          "pending": 0,
+          "exit_code": 1,
+          "passed": true,
+          "case": "missing-connection",
+          "leased": 0,
+          "sockets": 0
+        },
+        {
+          "pending": 0,
+          "exit_code": 1,
+          "passed": true,
+          "case": "missing-driver",
+          "leased": 0,
+          "sockets": 0
+        }
+      ],
+      "ok": true
+    }
+  },
+  "core_tests": {
+    "Debug": {
+      "ok": true,
+      "checks": 1690
+    },
+    "Release": {
+      "ok": true,
+      "checks": 1690
+    }
+  },
+  "protocol_abi": {
+    "types": 110,
+    "constants": 106,
+    "changed": false
+  },
+  "network_regression": {
+    "Ok": true,
+    "Configuration": "Release",
+    "Cases": [
+      {
+        "Pending": 0,
+        "Case": "network",
+        "Passed": true,
+        "Leased": 0,
+        "NormalStop": true,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "boss4",
+        "Passed": true,
+        "Leased": 0,
+        "NormalStop": true,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "boss5",
+        "Passed": true,
+        "Leased": 0,
+        "NormalStop": true,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "LobbyServer-missing-resource",
+        "Passed": true,
+        "ExpectedExitCode": 1,
+        "Leased": 0,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "GameServer-missing-resource",
+        "Passed": true,
+        "ExpectedExitCode": 1,
+        "Leased": 0,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "GameServer-lobby-offline",
+        "Passed": true,
+        "ExpectedExitCode": 1,
+        "Leased": 0,
+        "Sockets": 0
+      },
+      {
+        "Pending": 0,
+        "Case": "LobbyServer-bind-conflict",
+        "Passed": true,
+        "ExpectedExitCode": 1,
+        "Leased": 0,
+        "Sockets": 0
+      }
+    ],
+    "Database": false,
+    "LocalTest": true
+  },
+  "shutdown_drains": {
+    "Debug": {
+      "enabled": true,
+      "accepted": 27,
+      "completed": 27,
+      "rejected": 0,
+      "failed": 2
+    },
+    "Release": {
+      "enabled": true,
+      "accepted": 27,
+      "completed": 27,
+      "rejected": 0,
+      "failed": 2
+    }
+  },
+  "source_sha256": {
+    "Server/ServerCore/include/ServerCore/OrderedWorkQueue.h": "2484add16f6c3c55b88771adb39c305b1b4d07845c207c29e9b4b53cbbe46206",
+    "Server/ServerCore/tests/DatabaseQueueTests.cpp": "743aaac7e21ce35ff5338d6fbef4285278e23922b983927c879a1c089ebce821",
+    "Server/Lobby_Server/LobbyDispatcher.h": "0926b96df770f232cd4cef29d8a4800b3021a999795a078b5236987ae85d2955",
+    "Server/Lobby_Server/CClient.h": "0374d3517d83727a5e0010293383d487f343a120cf6715fb45c6d637d43e877a",
+    "Server/Lobby_Server/CClient.cpp": "c77d9e56bb0611e5f66407d482f328a3f160f6f0b89f514df6af1baddd451232",
+    "Server/Lobby_Server/CDataBase.h": "78debacb2ff43f2a259e08933f6fdcdbdd8799fbe9a1f33b6bfdb82403dfa647",
+    "Server/Lobby_Server/CDataBase.cpp": "d0a7ee1a8a6d72cea32024f06604778649ba4bd073e715563e45d5917a420369",
+    "Server/Lobby_Server/CDataBaseThread.h": "9a5dd77f37eec5fc373efa5da6bc981184c83da1629adfade813a2d06200fb60",
+    "Server/Lobby_Server/CDataBaseThread.cpp": "04694961b28efe64bf641f0ddce0f655e2eee5d3e93cbfb1e95c9e9f8f3d5312",
+    "Server/Lobby_Server/CPacketMgr.h": "6b8dd7aab6a7b13971ade5f5bcac96e8379e2272b96355353b329a2c0f0ae0ae",
+    "Server/Lobby_Server/CPacketMgr.cpp": "3a4e5682886ae1258b4d60ed6232d41bfa89e6169a226fdb30b5f530c0c3095e",
+    "Server/Lobby_Server/CNetworkMgr.cpp": "484a3c937f1cd68e3bb3c61eba4ea40b37084974a10bfe1a0a668efb29382155",
+    "Server/Lobby_Server/CServer.cpp": "d7ae82ef0a847904ded4908d1a18e05ac8f1c8f2079b5da758404f04eccca76a",
+    "Server/Lobby_Server/CP2PNetwork.cpp": "19d77583cf505adea41e6068bbe86ede6da970df1121526ff94dfd0d104c89b2",
+    "database/local-schema.sql": "b90f5b95846debdb9a31c071270da5bcfedb75dff697d7321e4513a7cc6bf6e3",
+    "scripts/Start-Local.ps1": "828863cfa1073bd9e5b9c200c34a94c1a7811ee0ad25b17a2b69fe9175de8160",
+    "scripts/Initialize-LocalDatabase.ps1": "9793b3facc0ba16e8db6ded3261522dda3c61ee5cca711094cc501b80f17db40",
+    "scripts/Test-Database.ps1": "19a5435257c3fde27fd3f6447bac6aa1259830e66756a8400c493a565cbbe68d",
+    "scripts/Test-DatabaseStartup.ps1": "dd55d0c5a0e6ee9a08c62234c025164ac29bb9762cf4f9ad46299bcec9a8dc43",
+    "scripts/Measure-Database.ps1": "73d82ff44688104949501a6b82d1000f228956ce8937833992e47a4b642dde98",
+    "tools/server_lab/tests/database.py": "1ec94cbfbc812087146e75cdab24046c1fffc03894db73fbbd63977b0f89343a"
+  },
+  "binary_sha256": {
+    "artifacts/bin/Debug/LobbyServer/Lobby_Server.exe": "10f88043e10df71bc65bb94bb3214d887307e0974a3b0500fa253a4538b3f17d",
+    "artifacts/bin/Debug/GameServer/Game_Server.exe": "6f7aee1e5de38cb8533ef9399e5883438df3306364842a5e38c4ed165d8e01ce",
+    "artifacts/bin/Debug/ServerCore.Tests/ServerCore.Tests.exe": "ea03b7df10878091c15abc422ac7eb23016a91a874c499aea210142c11785e03",
+    "artifacts/bin/Release/LobbyServer/Lobby_Server.exe": "7fab6e2832fadfd4e2f88663a4ba407a62dc5ba9e643b654cddb0eb10483eed7",
+    "artifacts/bin/Release/GameServer/Game_Server.exe": "e1e613bcc1db9f57bd629b17b9b74ae8da8bd8ba6bc01854e0dc07588be874ad",
+    "artifacts/bin/Release/ServerCore.Tests/ServerCore.Tests.exe": "dc717d6f435c09506857774f8d580f2d24bcb3650917dbb5317b7d8cd1074d66"
+  },
+  "source_set_sha256": "ac4272e0dda80099280ef829c9ddd999b1257873ca9b812320a905a5d6a5b786",
+  "latest_incremental_build_warning_codes": [],
+  "initial_validation_failures": [
+    "test codec used SC_CUSTOMIZE instead of SC_MODEL_CUSTOMIZE; corrected",
+    "checked direct DELETE returned SQL_NO_DATA for zero rows; accepted as normal and regression added"
+  ],
+  "limits": [
+    "production DB and migrations not tested",
+    "blockchain and full GUI gameplay not tested",
+    "same-account multi-login cache synchronization not solved",
+    "one DB worker, no durable queue or automatic retries",
+    "expired listing item restoration still requires policy",
+    "client initial auction page 1 differs from zero-based paging buttons"
+  ]
+}

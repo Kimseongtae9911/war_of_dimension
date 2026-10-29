@@ -385,3 +385,11 @@ Close/Disconnect는 active 배치를 취소 완료까지 보존하며 아직 발
 JobQueue는 main의 FIFO/Five/Snapshot 구현을 유지한다. `TickProfile`은 `WOD_TICK_PROFILE=1`인 게임 서버의 MatchUpdate frame 안에서 큰 구간과 이동/지형/NPC/송신 세부 구간의 wall·worker CPU cycle을 수집한다. worker별 frame 로컬 값만 쓰고 종료 때 고정 수의 atomic 카운터에 합산한다. reporter는 이 통계의 JSON만 읽으며 게임 상태를 추가 순회하지 않는다.
 
 Core Send는 기존 mutex 획득 대기와 획득 후 body를 구분해 측정하며 기존 잠금 범위·발행·완료·회수 계약을 유지한다. 비동기 완료 경로처럼 tick frame 밖의 작업은 이 진단에 포함하지 않는다. 기본은 꺼짐이며 계측 켬/끔 비용 대조와 포함 관계/미수집 계약은 [Server Lab](../development/SERVER_LAB.md#게임-tick-구간별-비용-분석), 흐름은 [계측 구조도](../diagrams/game-tick-profile/README.md)를 따른다.
+
+## DB 전용 FIFO 실행 경계 (2026-10-29)
+
+`OrderedWorkQueue`는 단일 consumer용 제한 큐다. mutex 아래 수락한 순서대로 작업을 실행하고 조건변수로 대기한다. 상한 4096건은 실행 중인 작업까지 포함하며 포화·중지 후 제출을 즉시 거부한다. `StopAccepting` 이후 수락된 작업은 drain하고 예외는 실패 계수에 기록한 뒤 다음 작업을 실행한다. 영속 저장·재시도·다중 consumer는 제공하지 않는다.
+
+로비의 `CDataBaseThread`는 이 큐를 사용해 하나의 worker 안에서 ODBC 연결을 생성·사용·파괴한다. `CClient::RunDatabase`는 요청 snapshot을 제출하고 세션 큐를 일시 정지한다. 완료는 기존 dispatcher의 전역 소유 구간에서 generation을 확인하고 같은 세션의 다음 요청보다 먼저 적용한다. SQL 중에는 로비 잠금을 잡지 않는다. 서버 종료는 producer와 IOCP join → DB drain → 큐 정리 → 객체 해제 순서다.
+
+순서·소유권·실패·종료의 선택 근거는 [구조도 README](../diagrams/database-async/README.md), 수치와 실제 DB 검증은 [DB 개선 보고서](../development/DATABASE_IMPROVEMENT.md)에 있다. DB 없는 기존 Core 회귀와 별도로 격리 LocalDB의 Debug/Release TCP→ODBC 통합 20개를 검사했다. 운영 DB와 블록체인까지 검증했다는 뜻은 아니다.

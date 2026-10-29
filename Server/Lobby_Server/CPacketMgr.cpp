@@ -118,9 +118,7 @@ bool CPacketMgr::RequiresGlobal(const BASE_PACKET* _packet)
 {
     switch (_packet->type)
     {
-#ifndef WITH_DATABASE
     case CS_LOGIN:
-#endif
     case CS_MOVE:
     case CS_ROTATE:
     case CS_CUSTOMIZE:
@@ -140,25 +138,26 @@ void CPacketMgr::Packet_Exec(BASE_PACKET* _packet, CClient* _client)
         _client->GetState() != CL_STATE::ST_MATCHING)
         return;
 
-#ifndef WITH_DATABASE
-    switch (_packet->type)
+    if (!network::GetInstance()->GetDataBaseThread()->IsEnabled())
     {
-    case CS_SIGN_UP:
-        _client->GetPacketSender()->SendLoginFailPacket(3);
-        return;
-    case CS_SHOP:
-    case CS_CHANGE_NODE:
-    case CS_STAKE_TOKEN:
-    case CS_CREATE_TRANSACTION:
-    case CS_OPEN_AUCTION:
-    case CS_OPEN_BLOCKCHAIN:
-    case CS_OPEN_CUSTOMIZE:
-    case CS_GET_AUCTION_INFO:
-    case CS_REGISTER_AUCTION:
-    case CS_BUY_AUCTION:
-        return;
+        switch (_packet->type)
+        {
+        case CS_SIGN_UP:
+            _client->GetPacketSender()->SendLoginFailPacket(3);
+            return;
+        case CS_SHOP:
+        case CS_CHANGE_NODE:
+        case CS_STAKE_TOKEN:
+        case CS_CREATE_TRANSACTION:
+        case CS_OPEN_AUCTION:
+        case CS_OPEN_BLOCKCHAIN:
+        case CS_OPEN_CUSTOMIZE:
+        case CS_GET_AUCTION_INFO:
+        case CS_REGISTER_AUCTION:
+        case CS_BUY_AUCTION:
+            return;
+        }
     }
-#endif
 
     const auto handler = std::as_const(m_packetfunc).find(_packet->type);
     if (handler != m_packetfunc.cend())
@@ -174,33 +173,19 @@ void CPacketMgr::Packet_Exec(BASE_PACKET* _packet, CClient* _client)
 
 void CPacketMgr::LoginPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(_packet);
-
     if (_client->GetState() != CL_STATE::ST_ALLOC)
         return;
 
-    if (!GetPlayerInfo(p->name, p->password, _client))
-        return;
-
-    _client->m_stateLock.lock();
-    _client->SetState(CL_STATE::ST_LOBBY);
-    _client->m_stateLock.unlock();
-
-    _client->SetName(p->name);
-    _client->GetPacketSender()->SendLoginInfoPacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetModelCustomize());
-
-    //Initialize client position
-    _client->ProcessUpdate();
-    _client->GetPacketSender()->SendMovePacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetTransform()->GetDir());
-
-    for (CClient* otherClient : CUserMgr::GetInstance()->GetChannelClients(_client->GetChannel()))
+    if (network::GetInstance()->GetDataBaseThread()->IsEnabled())
     {
-        if (otherClient == nullptr)
-            continue;
-        if (otherClient->GetID() == _client->GetID())
-            continue;
-        _client->GetPacketSender()->SendModelCustomizePacket(otherClient->GetID(), otherClient->GetModelCustomize());
+        Authenticate(_packet, _client, false);
+        return;
     }
+
+    const auto* request = reinterpret_cast<const CS_LOGIN_PACKET*>(_packet);
+    _client->SetName(request->name);
+    _client->GetPacketSender()->SendTokenNumPacket(2000);
+    CompleteLogin(_client);
 }
 
 void CPacketMgr::MovePacket(BASE_PACKET* _packet, CClient* _client)
@@ -316,6 +301,23 @@ void CPacketMgr::CustomizePacket(BASE_PACKET* _packet, CClient* _client)
 {
     CS_CUSTOMIZE_PACKET* p = reinterpret_cast<CS_CUSTOMIZE_PACKET*>(_packet);
 
+    if (network::GetInstance()->GetDataBaseThread()->IsEnabled())
+    {
+        const auto model = p->model;
+        const std::string name(_client->GetName());
+        _client->RunDatabase([name, model](CDataBase& _database) {
+            _database.SaveAppearance(name, model);
+
+            return [model](CClient* _client) {
+                _client->SetModelCustomize(model);
+                _client->GetPacketSender()->SendModelCustomizePacket(_client->GetID(), model);
+                for (int id : _client->GetViewList()->GetView())
+                    CUserMgr::GetInstance()->GetClient(id)->GetPacketSender()->SendModelCustomizePacket(_client->GetID(), model);
+            };
+        });
+        return;
+    }
+
     _client->SetModelCustomize(p->model);
     _client->GetPacketSender()->SendModelCustomizePacket(_client->GetID(), _client->GetModelCustomize());
 
@@ -327,118 +329,69 @@ void CPacketMgr::CustomizePacket(BASE_PACKET* _packet, CClient* _client)
 
 void CPacketMgr::ShopPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    const auto* request = reinterpret_cast<const CS_SHOP_PACKET*>(_packet);
-    if (request->shopType < 0 || request->shopType >= static_cast<int>(m_shopMaxNums.size()))
+    const auto request = *reinterpret_cast<const CS_SHOP_PACKET*>(_packet);
+    if (request.shopType < 0 || request.shopType >= static_cast<int>(m_shopMaxNums.size()))
         return;
 
-    const int part = request->shopType;
-
-    PlayerInfo playerInfo = _client->GetPlayerInfo();
-
-    if (playerInfo.m_tokenNum < SHOP_BUY_TOKEN_NUM)
+    if (_client->GetPlayerInfo().m_tokenNum < SHOP_BUY_TOKEN_NUM)
     {
         _client->GetPacketSender()->SendShopPacket(-1, -1);
+        return;
     }
-    else
-    {
-        std::uniform_int_distribution<> uid(0, m_shopMaxNums[part]);
 
-        int num = uid(m_randomEngine);
-        _client->GetPacketSender()->SendShopPacket(part, num);
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(_client->GetName(), std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SHOP_BUY, part, num));
+    const int part = request.shopType;
+    const int num = std::uniform_int_distribution<>(0, m_shopMaxNums[part])(m_randomEngine);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, part, num](CDataBase& _database) {
+        _database.Transaction([&] {
+            if (!_database.SaveShopBuyInfo(name, part, num) || !_database.SaveToken(name, -SHOP_BUY_TOKEN_NUM))
+                throw std::runtime_error("shop persistence failed");
+        });
 
-        playerInfo.m_tokenNum -= SHOP_BUY_TOKEN_NUM;
-        _client->SetPlayerInfo(playerInfo);
-        _client->GetPacketSender()->SendTokenNumPacket(playerInfo.m_tokenNum);
-
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(_client->GetName()), -SHOP_BUY_TOKEN_NUM, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
-
-        //Add BlockChain Code
-        std::time_t t = std::time(nullptr);
-        std::tm time;
-        gmtime_s(&time, &t);
-        char buffer[TIME_SIZE + 5];
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &time);
-
-        TransactionData transaction;
-        memcpy_s(transaction.name, NAME_SIZE, _client->GetName(), NAME_SIZE);
-        transaction.token = -SHOP_BUY_TOKEN_NUM;
-        memcpy_s(transaction.time, NAME_SIZE, buffer, NAME_SIZE);
-
-        network::GetInstance()->GetP2PNetwork()->InsertTransaction(transaction);
-    }
+        return [part, num](CClient* _client) {
+            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - SHOP_BUY_TOKEN_NUM);
+            _client->GetPacketSender()->SendShopPacket(part, num);
+            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+            CPacketMgr::GetInstance()->RecordTransaction(_client, -SHOP_BUY_TOKEN_NUM);
+        };
+    });
 }
 
 void CPacketMgr::SignUpPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_SIGN_UP_PACKET* p = reinterpret_cast<CS_SIGN_UP_PACKET*>(_packet);
-    if (!network::GetInstance()->GetDataBaseThread()->GetDataBase()->CheckIdExists(p->name))
-    {
-        if (network::GetInstance()->GetDataBaseThread()->GetDataBase()->SignUp(p->name, p->password))
-        {
-            PlayerInfo info = _client->GetPlayerInfo();
-            if (!network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetPlayerInfo(p->name, p->password, info))
-            {
-                //Server Error
-                _client->GetPacketSender()->SendLoginFailPacket(3);
-                return;
-            }
-            else
-            {
-                //Sign Up Complete
-                _client->SetName(p->name);
-                _client->SetPlayerInfo(info);
-                _client->GetPacketSender()->SendTokenNumPacket(info.m_tokenNum);
-            }
-        }
-        else
-        {
-            //Server Err
-            _client->GetPacketSender()->SendLoginFailPacket(3);
-            return;
-        }
-    }
-    else
-    {
-        //ID Exists
-        _client->GetPacketSender()->SendLoginFailPacket(2);
-        return;
-    }
-
-    _client->m_stateLock.lock();
-    _client->SetState(CL_STATE::ST_LOBBY);
-    _client->m_stateLock.unlock();
-
-    //Initialize client position
-    _client->Move();
-    _client->GetPacketSender()->SendMovePacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetTransform()->GetDir());
-
-    // accept 단계에서 이미 채널 슬롯을 배정했다.
-    _client->GetPacketSender()->SendLoginInfoPacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetModelCustomize());
-
-    for (CClient* otherClient : CUserMgr::GetInstance()->GetChannelClients(_client->GetChannel()))
-    {
-        if (otherClient == nullptr)
-            continue;
-        if (otherClient->GetID() == _client->GetID())
-            continue;
-        _client->GetPacketSender()->SendModelCustomizePacket(otherClient->GetID(), otherClient->GetModelCustomize());
-    }
-
-    _client->ProcessUpdate();
+    if (_client->GetState() == CL_STATE::ST_ALLOC)
+        Authenticate(_packet, _client, true);
 }
 
 void CPacketMgr::RegisterAuctionPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_REGISTER_AUCTION_PACKET* p = reinterpret_cast<CS_REGISTER_AUCTION_PACKET*>(_packet);
-    network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(p->name), std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_REGISTER_AUCTION, p->customizeType, p->customizeNum, p->buyPrice));
+    const auto request = *reinterpret_cast<const CS_REGISTER_AUCTION_PACKET*>(_packet);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, request](CDataBase& _database) {
+        const auto future = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() + std::chrono::hours(24));
+        std::tm local{};
+        localtime_s(&local, &future);
+        std::ostringstream deadline;
+        deadline << std::put_time(&local, "%Y-%m-%d %H:%M:%S");
+        if (!_database.RegisterAuction(name, request.customizeType, request.customizeNum, request.buyPrice, deadline.str()))
+            throw std::runtime_error("auction registration failed");
+
+        return [](CClient*) {
+        };
+    });
 }
 
 void CPacketMgr::GetAuctionInfoPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_GET_AUCTION_INFO_PACKET* p = reinterpret_cast<CS_GET_AUCTION_INFO_PACKET*>(_packet);
-    std::vector<AuctionInfo> auctionInfos = network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetAuctionInfo(p->pageNum);
-    _client->GetPacketSender()->SendAuctionInfoPacket(auctionInfos);
+    const int page = reinterpret_cast<const CS_GET_AUCTION_INFO_PACKET*>(_packet)->pageNum;
+    _client->RunDatabase([page](CDataBase& _database) {
+        auto rows = _database.GetAuctionInfo(page);
+        _database.ThrowIfFailed();
+
+        return [rows = std::move(rows)](CClient* _client) {
+            _client->GetPacketSender()->SendAuctionInfoPacket(rows);
+        };
+    });
 }
 
 void CPacketMgr::ChangeChannelPacket(BASE_PACKET* _packet, CClient* _client)
@@ -492,73 +445,50 @@ void CPacketMgr::PortNumPacket(BASE_PACKET* _packet, CClient* _client)
 
 void CPacketMgr::StakeTokenPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_STAKE_TOKEN_PACKET* p = reinterpret_cast<CS_STAKE_TOKEN_PACKET*>(_packet);
-
-    if (p->stakeDays < MIN_STAKE_DAYS)
+    const auto request = *reinterpret_cast<const CS_STAKE_TOKEN_PACKET*>(_packet);
+    if (request.stakeDays < MIN_STAKE_DAYS || request.stakeNum < MIN_STAKE_TOKEN || request.stakeNum > _client->GetPlayerInfo().m_tokenNum)
     {
-        _client->GetPacketSender()->SendStakeTokenPacket(true, 0);
-        return;
-    }
-    else if (p->stakeNum < MIN_STAKE_TOKEN)
-    {
-        _client->GetPacketSender()->SendStakeTokenPacket(true, 1);
+        _client->GetPacketSender()->SendStakeTokenPacket(true, request.stakeDays < MIN_STAKE_DAYS ? 0 : 1);
         return;
     }
 
-    if (network::GetInstance()->GetDataBaseThread()->GetDataBase()->StakeTokens(_client->GetName(), p->stakeNum, p->stakeDays))
-    {
-        _client->GetPacketSender()->SendStakeTokenPacket(false, 0); //Success
-        PlayerInfo playerInfo = _client->GetPlayerInfo();
-        playerInfo.m_tokenNum -= p->stakeNum;
-        _client->SetPlayerInfo(playerInfo);
-        _client->GetPacketSender()->SendTokenNumPacket(playerInfo.m_tokenNum);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, request](CDataBase& _database) {
+        int token = 0, days = 0, count = 0;
+        _database.Transaction([&] {
+            if (!_database.StakeTokens(name, request.stakeNum, request.stakeDays) || !_database.GetStakedTokenData(name, token, days, count))
+                throw std::runtime_error("staking failed");
+        });
 
-        //Add BlockChain Code
-        std::time_t t = std::time(nullptr);
-        std::tm time;
-        gmtime_s(&time, &t);
-        char buffer[TIME_SIZE + 5];
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &time);
-
-        TransactionData transaction;
-        memcpy_s(transaction.name, NAME_SIZE, _client->GetName(), NAME_SIZE);
-        transaction.token = -p->stakeNum;
-        memcpy_s(transaction.time, NAME_SIZE, buffer, NAME_SIZE);
-
-        network::GetInstance()->GetP2PNetwork()->InsertTransaction(transaction);
-
-        //Send StakeTokenInfo
-        int stakedToken = 0;
-        int stakedDays = 0;
-        int dayCount = 0;
-        network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetStakedTokenData(std::string(_client->GetName()), stakedToken, stakedDays, dayCount);
-
-        if (stakedToken != 0)
-            _client->GetPacketSender()->SendStakedTokenInfoPacket(stakedToken, stakedDays - dayCount);
-    }
-    else
-    {
-        _client->GetPacketSender()->SendStakeTokenPacket(true, 2); //Server Error
-    }
+        return [request, token, days, count](CClient* _client) {
+            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - request.stakeNum);
+            _client->GetPacketSender()->SendStakeTokenPacket(false, 0);
+            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+            _client->GetPacketSender()->SendStakedTokenInfoPacket(token, days - count);
+            CPacketMgr::GetInstance()->RecordTransaction(_client, -request.stakeNum);
+        };
+    });
 }
 
 void CPacketMgr::ChangeNodePacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_CHANGE_NODE_PACKET* p = reinterpret_cast<CS_CHANGE_NODE_PACKET*>(_packet);
-
+    const bool full = reinterpret_cast<const CS_CHANGE_NODE_PACKET*>(_packet)->fullNode;
     if (_client->GetPlayerInfo().m_tokenNum < MIN_STAKE_TOKEN * 100)
     {
-        _client->GetPacketSender()->SendChangeNodePacket(true, 0); //Not Enough Token
+        _client->GetPacketSender()->SendChangeNodePacket(true, 0);
+        return;
     }
 
-    if (!network::GetInstance()->GetDataBaseThread()->GetDataBase()->ChangeNodeType(_client->GetName(), p->fullNode))
-    {
-        _client->GetPacketSender()->SendChangeNodePacket(true, 1); //Server Error
-    }
-    else
-    {
-        _client->GetPacketSender()->SendChangeNodePacket(false, 0);
-    }
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, full](CDataBase& _database) {
+        if (!_database.ChangeNodeType(name, full))
+            throw std::runtime_error("node persistence failed");
+
+        return [full](CClient* _client) {
+            _client->SetFullNode(full);
+            _client->GetPacketSender()->SendChangeNodePacket(false, 0);
+        };
+    });
 }
 
 void CPacketMgr::DummyClientPacket(BASE_PACKET* _packet, CClient* _client)
@@ -582,123 +512,101 @@ void CPacketMgr::DummyClientPacket(BASE_PACKET* _packet, CClient* _client)
 
 void CPacketMgr::CreateTransactionPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_CREATE_TRANSACTION_PACKET* p = reinterpret_cast<CS_CREATE_TRANSACTION_PACKET*>(_packet);
+    const int token = GenerateRandomNumber(100, 1000);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, token](CDataBase& _database) {
+        if (!_database.SaveToken(name, token))
+            throw std::runtime_error("token persistence failed");
 
-    std::time_t t = std::time(nullptr);
-    std::tm time;
-    gmtime_s(&time, &t);
-    char buffer[TIME_SIZE + 5];
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &time);
-    int tokenNum = GenerateRandomNumber(100, 1000);
-
-    TransactionData transaction;
-    memcpy_s(transaction.name, NAME_SIZE, _client->GetName(), NAME_SIZE);
-    transaction.token = tokenNum;
-    memcpy_s(transaction.time, NAME_SIZE, buffer, NAME_SIZE);
-
-    int playerToken = _client->GetPlayerInfo().m_tokenNum + tokenNum;
-    _client->SetTokenNum(playerToken);
-    _client->GetPacketSender()->SendTokenNumPacket(playerToken);
-    network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(_client->GetName()), tokenNum, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
-
-    network::GetInstance()->GetP2PNetwork()->InsertTransaction(transaction);
+        return [token](CClient* _client) {
+            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum + token);
+            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+            CPacketMgr::GetInstance()->RecordTransaction(_client, token);
+        };
+    });
 }
 
 void CPacketMgr::OpenCustomizePacket(BASE_PACKET* _packet, CClient* _client)
 {
-    std::vector<std::tuple<short, short, short>> customizeParts;
-    network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetPlayerCustomizeParts(std::string(_client->GetName()), customizeParts);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name](CDataBase& _database) {
+        std::vector<std::tuple<short, short, short>> rows;
+        if (!_database.GetPlayerCustomizeParts(name, rows))
+            throw std::runtime_error("customization query failed");
 
-    short partTypes[CUSTOMIZE_PART_NUM_FROM_SERVER];
-    short customizeNum[CUSTOMIZE_PART_NUM_FROM_SERVER];
-    short counts[CUSTOMIZE_PART_NUM_FROM_SERVER];
+        _database.ThrowIfFailed();
 
-    for (int i = 0; i < CUSTOMIZE_PART_NUM_FROM_SERVER; ++i)
-    {
-        if (i < customizeParts.size())
-        {
-            partTypes[i] = std::get<0>(customizeParts[i]);
-            customizeNum[i] = std::get<1>(customizeParts[i]);
-            counts[i] = std::get<2>(customizeParts[i]);
-        }
-        else
-        {
-            partTypes[i] = 200;
-            customizeNum[i] = 200;
-            counts[i] = 200;
-        }
-    }
-    _client->GetPacketSender()->SendCustomizePartsPacket(partTypes, customizeNum, counts);
+        return [rows = std::move(rows)](CClient* _client) {
+            short types[CUSTOMIZE_PART_NUM_FROM_SERVER], nums[CUSTOMIZE_PART_NUM_FROM_SERVER], counts[CUSTOMIZE_PART_NUM_FROM_SERVER];
+            for (size_t i = 0; i < CUSTOMIZE_PART_NUM_FROM_SERVER; ++i)
+            {
+                types[i] = i < rows.size() ? std::get<0>(rows[i]) : 200;
+                nums[i] = i < rows.size() ? std::get<1>(rows[i]) : 200;
+                counts[i] = i < rows.size() ? std::get<2>(rows[i]) : 200;
+            }
+
+            _client->GetPacketSender()->SendCustomizePartsPacket(types, nums, counts);
+        };
+    });
 }
 
 void CPacketMgr::OpenAuctionPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    int num = network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetAuctionPartsNum();
-    _client->GetPacketSender()->SendAuctionPartsNumPacket(num);
+    _client->RunDatabase([](CDataBase& _database) {
+        const int count = _database.GetAuctionPartsNum();
+        if (count < 0)
+            throw std::runtime_error("auction count failed");
+
+        return [count](CClient* _client) {
+            _client->GetPacketSender()->SendAuctionPartsNumPacket(count);
+        };
+    });
 }
 
 void CPacketMgr::OpenBlockChainPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    int stakedToken = 0;
-    int stakedDays = 0;
-    int dayCount = 0;
-    network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetStakedTokenData(std::string(_client->GetName()), stakedToken, stakedDays, dayCount);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name](CDataBase& _database) {
+        int token = 0, days = 0, count = 0;
+        if (!_database.GetStakedTokenData(name, token, days, count))
+            throw std::runtime_error("staking query failed");
 
-    _client->GetPacketSender()->SendStakedTokenInfoPacket(stakedToken, stakedDays - dayCount);
+        return [token, days, count](CClient* _client) {
+            _client->GetPacketSender()->SendStakedTokenInfoPacket(token, days - count);
+        };
+    });
 }
 
 void CPacketMgr::BuyAuctionPacket(BASE_PACKET* _packet, CClient* _client)
 {
-    CS_BUY_AUCTION_PACKET* p = reinterpret_cast<CS_BUY_AUCTION_PACKET*>(_packet);
+    const auto request = *reinterpret_cast<const CS_BUY_AUCTION_PACKET*>(_packet);
+    if (!request.buyPrice || _client->GetPlayerInfo().m_tokenNum < request.buyPrice)
+        return;
 
-    int tokenNum = _client->GetPlayerInfo().m_tokenNum;
-    if (tokenNum >= p->buyPrice)
-    {
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(
-            DB_EVENT(std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_BUY_AUCTION, std::string(p->sellerName), std::string(_client->GetName()), p->customizeType, p->customizeNum, p->buyPrice));
-        _client->SetTokenNum(tokenNum - p->buyPrice);
-        _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+    const std::string name(_client->GetName());
+    _client->RunDatabase([name, request](CDataBase& _database) {
+        _database.Transaction([&] {
+            if (!_database.BuyAuction(request.sellerName, name, request.customizeType, request.customizeNum, request.buyPrice) || !_database.SaveToken(name, -static_cast<int>(request.buyPrice)) ||
+                !_database.SaveToken(request.sellerName, request.buyPrice))
+                throw std::runtime_error("auction purchase failed");
+        });
 
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(_client->GetName()), -p->buyPrice, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
-
-        //If seller is online, send token change
-        for (int i = 0; i < MAX_CLIENT / LOBBY_CHANNEL_CAPACITY; ++i)
-        {
-            for (CClient* cl : CUserMgr::GetInstance()->GetChannelClients(i))
+        return [request](CClient* _client) {
+            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - request.buyPrice);
+            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+            for (const auto& entry : CUserMgr::GetInstance()->GetAllClient())
             {
-                if (cl == nullptr)
-                    continue;
-                cl->m_stateLock.lock_shared();
-                if (cl->GetState() != CL_STATE::ST_LOBBY)
+                auto* seller = entry.second;
+                if (!seller->IsDisconnected() && std::strcmp(seller->GetName(), request.sellerName) == 0)
                 {
-                    cl->m_stateLock.unlock_shared();
-                    continue;
-                }
-                cl->m_stateLock.unlock_shared();
-                if (!strcmp(cl->GetName(), p->sellerName))
-                {
-                    cl->SetTokenNum(cl->GetPlayerInfo().m_tokenNum + p->buyPrice);
-                    cl->GetPacketSender()->SendTokenNumPacket(cl->GetPlayerInfo().m_tokenNum);
-                    break;
+                    seller->SetTokenNum(seller->GetPlayerInfo().m_tokenNum + request.buyPrice);
+                    seller->GetPacketSender()->SendTokenNumPacket(seller->GetPlayerInfo().m_tokenNum);
                 }
             }
-        }
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(std::string(p->sellerName), p->buyPrice, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
 
-        //Add BlockChain Code
-        std::time_t t = std::time(nullptr);
-        std::tm time;
-        gmtime_s(&time, &t);
-        char buffer[TIME_SIZE + 5];
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &time);
-
-        TransactionData transaction;
-        memcpy_s(transaction.name, NAME_SIZE, _client->GetName(), NAME_SIZE);
-        transaction.token = -p->buyPrice;
-        memcpy_s(transaction.time, NAME_SIZE, buffer, NAME_SIZE);
-
-        network::GetInstance()->GetP2PNetwork()->InsertTransaction(transaction);
-    }
+            CPacketMgr::GetInstance()->RecordTransaction(_client, -static_cast<int>(request.buyPrice));
+        };
+    });
 }
 
 void CPacketMgr::LoginCompletePacket(BASE_PACKET* _packet, CClient* _client)
@@ -733,45 +641,97 @@ void CPacketMgr::ChangeServerPacket(BASE_PACKET* _packet, CClient* _client)
     _client->Disconnect();
 }
 
-bool CPacketMgr::GetPlayerInfo(char _name[NAME_SIZE], char _password[NAME_SIZE], CClient* _client)
+void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _signUp)
+{
+    const auto* login = reinterpret_cast<const CS_LOGIN_PACKET*>(_packet);
+    const auto* signup = reinterpret_cast<const CS_SIGN_UP_PACKET*>(_packet);
+    const std::string name(_signUp ? signup->name : login->name);
+    const std::string password(_signUp ? signup->password : login->password);
+    const auto initial = _client->GetPlayerInfo();
+    _client->RunDatabase([name, password, initial, signUp = _signUp](CDataBase& _database) {
+        auto info = initial;
+        bool full = false;
+        int error = -1;
+        const bool exists = _database.CheckIdExists(name);
+        _database.ThrowIfFailed();
+        if (signUp && exists)
+        {
+            error = 2;
+        }
+        else if (!signUp && !exists)
+        {
+            error = 0;
+        }
+        else if (signUp && !_database.SignUp(name, password))
+        {
+            error = 3;
+        }
+        else if (!signUp && !_database.CheckPassword(name, password))
+        {
+            error = 1;
+        }
+        else if (!_database.GetPlayerInfo(name, password, info) || !_database.GetFullNodeInfo(name, full))
+        {
+            error = 3;
+        }
+
+        _database.ThrowIfFailed();
+
+        return [name, info, full, error](CClient* _client) {
+            if (_client->IsDisconnected())
+                return;
+
+            if (error >= 0)
+            {
+                _client->GetPacketSender()->SendLoginFailPacket(error);
+                return;
+            }
+
+            _client->SetName(name.c_str());
+            _client->SetPlayerInfo(info);
+            _client->SetFullNode(full);
+            _client->GetPacketSender()->SendTokenNumPacket(info.m_tokenNum);
+            _client->GetPacketSender()->SendFullNodePacket(full);
+            CPacketMgr::GetInstance()->CompleteLogin(_client);
+        };
+    });
+}
+
+void CPacketMgr::CompleteLogin(CClient* _client)
+{
+    _client->m_stateLock.lock();
+    _client->SetState(CL_STATE::ST_LOBBY);
+    _client->m_stateLock.unlock();
+
+    _client->GetPacketSender()->SendLoginInfoPacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetModelCustomize());
+
+    //Initialize client position
+    _client->ProcessUpdate();
+    _client->GetPacketSender()->SendMovePacket(_client->GetID(), _client->GetTransform()->GetPos(), _client->GetTransform()->GetDir());
+
+    for (CClient* otherClient : CUserMgr::GetInstance()->GetChannelClients(_client->GetChannel()))
+    {
+        if (otherClient == nullptr)
+            continue;
+        if (otherClient->GetID() == _client->GetID())
+            continue;
+        _client->GetPacketSender()->SendModelCustomizePacket(otherClient->GetID(), otherClient->GetModelCustomize());
+    }
+}
+
+void CPacketMgr::RecordTransaction(CClient* _client, int _token)
 {
 #ifdef WITH_DATABASE
-    CDataBase* database = network::GetInstance()->GetDataBaseThread()->GetDataBase();
-    if (!database->CheckIdExists(_name))
-    {
-        _client->GetPacketSender()->SendLoginFailPacket(0);
-        return false;
-    }
-    else if (!database->CheckPassword(_name, _password))
-    {
-        _client->GetPacketSender()->SendLoginFailPacket(1);
-        return false;
-    }
-    else
-    {
-        PlayerInfo info = _client->GetPlayerInfo();
-        if (!database->GetPlayerInfo(_name, _password, info))
-        {
-            LogPrinter::PrintMsg("Failed To Get Info From Database");
-            return false;
-        }
-        _client->SetPlayerInfo(info);
-        _client->GetPacketSender()->SendTokenNumPacket(info.m_tokenNum);
-    }
-    bool isFullNode = false;
-    if (!database->GetFullNodeInfo(_name, isFullNode))
-    {
-        LogPrinter::PrintMsg("Failed To Get Info From Database");
-        return false;
-    }
-    _client->SetFullNode(isFullNode);
-    _client->GetPacketSender()->SendFullNodePacket(isFullNode);
-#else
-    _client->GetPacketSender()->SendTokenNumPacket(2000);
-
+    // 기존 블록체인 명시 활성화 경계. DB 연결 자체는 블록체인을 활성화하지 않는다.
+    TransactionData transaction{};
+    std::memcpy(transaction.name, _client->GetName(), NAME_SIZE);
+    transaction.token = _token;
+    const auto now = std::time(nullptr);
+    std::tm time{};
+    gmtime_s(&time, &now);
+    strftime(transaction.time, sizeof(transaction.time), "%Y-%m-%d %H:%M:%S", &time);
+    network::GetInstance()->GetP2PNetwork()->InsertTransaction(transaction);
 #endif
-
-    return true;
 }
 
-}
+} // namespace wod_server

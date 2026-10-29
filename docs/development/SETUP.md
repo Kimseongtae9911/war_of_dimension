@@ -49,6 +49,22 @@ ServerCore 검사는 다음 순서로 실행한다. Python 3.12 이상의 실행
 
 Release도 같은 순서로 검사한다. 통합 검사는 8910/8911 포트를 사용하므로 동시에 실행하지 않는다. 네트워크 참가자 4개의 매칭·로딩 전환을 검사하며 게임 창 4개를 렌더링하는 검사는 아니다. Core·테스트는 실행 프로필의 서버가 아니다.
 
+## 선택적 로컬 DB
+
+DB 없는 `LOCAL_TEST`가 기본이다. SQL Server Express LocalDB와 Microsoft ODBC Driver 17/18 x64가 설치돼 있으면 한 번의 준비 명령으로 로컬 스키마·저장 프로시저 16개·개인 연결 설정을 만든다. ODBC DSN GUI 등록이나 소스 매크로 편집은 필요 없다.
+
+```powershell
+./scripts/Initialize-LocalDatabase.ps1
+./scripts/Start-Local.ps1 -Configuration Debug -ServersOnly -Database
+./scripts/Stop-Local.ps1
+```
+
+준비 명령은 전용 `NewWodLocal`만 사용하고 기존 데이터는 유지한다. 연결 파일은 Git 제외 `.runtime/database.connection.txt`에 둔다. `-CheckOnly`는 연결·프로시저 수를 검사한다. 설치 도구 자체는 자동 다운로드하지 않으며, LocalDB가 지원하지 않는 암호화 옵션은 로컬 Windows 사용자 연결에 한해 `Encrypt=No`로 설정한다. 외부 서버 연결 문자열의 보안 옵션은 별도로 설정한다.
+
+실행 서버는 `WOD_DB_MODE=disabled|odbc`, `WOD_DB_CONNECTION` 또는 `WOD_DB_CONFIG`를 지원한다. `odbc`일 때 연결 문자열 환경변수가 파일보다 우선한다. `Start-Local.ps1`은 기본 실행에서 `disabled`, `-Database`에서 `odbc`를 자식 로비 프로세스에 지정한 뒤 부모 환경을 복원한다. Visual Studio에서 DB 모드를 사용하려면 로비 디버거 환경에 `WOD_DB_MODE=odbc`와 연결 설정을 지정한다. 잘못된 설정·연결·필수 프로시저 누락 시 listener를 열기 전에 실패한다. 블록체인은 DB 모드와 별개이며 활성화하지 않는다.
+
+쓰기·조회는 전용 FIFO worker가 실행하고 같은 세션의 다음 요청은 DB 결과 적용까지 기다린다. 상세 계약·검사 의존성·재현 명령은 [DB 개선 보고서](DATABASE_IMPROVEMENT.md), 측정 수치는 [HTML 보고서](DATABASE_IMPROVEMENT.html)를 따른다. 로컬 스키마는 운영 마이그레이션이 아니다.
+
 ## Visual Studio 통합 개발
 
 `NewWod.slnx`의 Servers 폴더에는 로비·게임 서버, Client 폴더에는 클라이언트, Development 폴더에는 실행·검증 스크립트를 배치했다. XML 형식으로 변환했고 프로젝트·x64 Debug/Release 설정은 유지한다. 기존 루트 `.sln`은 제거했다. 원본 프로젝트와 에셋의 디스크 위치는 유지한다. 개별 모듈 솔루션도 호환을 위해 남겨 두었다.

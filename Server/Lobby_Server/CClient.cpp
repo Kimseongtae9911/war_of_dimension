@@ -86,12 +86,42 @@ void CClient::QueueDisconnect()
     });
 }
 
+void CClient::RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query)
+{
+    const auto session = GetTransportSession();
+    const auto generation = session->Generation();
+    GLobbyDispatcher->Suspend(m_workQueue);
+    const auto deliver = [this, session, generation](std::function<void(CClient*)> _completion) {
+        GLobbyDispatcher->Resume(m_workQueue, [this, session, generation, completion = std::move(_completion)] {
+            session->WithGeneration(generation, [this, &completion] {
+                completion(this);
+            });
+        });
+    };
+    const bool accepted = network::GetInstance()->GetDataBaseThread()->Submit([query = std::move(_query), deliver](CDataBase& _database) {
+        try
+        {
+            auto completion = query(_database);
+            _database.ThrowIfFailed();
+            deliver(std::move(completion));
+        }
+        catch (...)
+        {
+            deliver([](CClient* _client) {
+                _client->Disconnect();
+            });
+            throw;
+        }
+    });
+    if (!accepted)
+        deliver([](CClient* _client) {
+            _client->Disconnect();
+        });
+}
+
 void CClient::CleanupDisconnected()
 {
-#ifdef WITH_DATABASE
-    if (strstr(GetName(), "Dummy") == nullptr)
-        network::GetInstance()->GetDataBaseThread()->RegisterDBEvent(DB_EVENT(GetName(), GetPlayerInfo(), std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_INFO));
-#endif
+    // DB 변경은 각 요청에서 확정한다. 종료 시 오래된 token snapshot을 덮어쓰지 않는다.
     CUserMgr::GetInstance()->ClientReset(GetSocketID());
 }
 

@@ -17,7 +17,7 @@
 - 클라이언트는 로비에 TCP 8910으로 연결한다. DirectX 12·Direct2D로 화면과 UI를 그리며 FMOD로 음원을 재생한다.
 - 게임 서버도 로비에 연결하고 TCP 8911 listener를 준비한다.
 - 매칭 후 클라이언트는 전달받은 게임 서버 주소로 전환한다. listener·서버 연결·로그인 화면 시작과 DB 없는 Title 영웅 테스트의 8910→8911 전환 및 실제 인게임 렌더링을 확인했다. 멀티플레이 전투 전체는 검증하지 않았다.
-- 로비는 매칭·사용자·거래·DB 관련 코드를 포함한다. 현재 개발 모드는 DB 없이 실행한다.
+- 로비는 매칭·사용자·거래·DB 관련 코드를 포함한다. 기본은 DB 없이 실행하고 `Start-Local.ps1 -Database`로 런타임 DB를 활성화한다. [전용 DB FIFO와 세션 완료 경계](../diagrams/database-async/README.md)는 SQL을 로비 잠금 밖에서 실행하고 완료 적용 이후 같은 세션의 다음 요청을 처리한다. [로컬 스키마·실제 DB 검증](../development/DATABASE_IMPROVEMENT.md)은 운영 DB·블록체인 검증과 구분한다.
 - 로비 로직은 [채널별 직렬 큐와 공통 worker pool](../development/LOBBY_CHANNEL_PARALLELISM.md)에서 실행한다. 같은 채널은 직렬·서로 다른 채널은 병렬이며, 기존 전역 기능과 채널 이동은 공용 실행 barrier의 배타 구간으로 보호한다.
 - 공유 wire format은 `Shared/Protocol/protocol.h`에 있다. 두 서버와 클라이언트가 공통 헤더를 참조하며 이전 서버 경로에는 forwarding header를 둔다. x64 MSVC ABI와 상수를 유지했다.
 - 실행 리소스는 각 모듈 폴더의 상대 경로로 읽는다. 빌드 결과와 에이전트 캐시는 소스와 분리한다.

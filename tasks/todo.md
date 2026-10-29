@@ -1796,3 +1796,44 @@ JobQueue 대기/공정성·tick 지연·실제 수용 부하·부하 생성기 �
 동일 입력/계측·워밍업/측정/정리 구간·반복·실패율/꼬리 지연·계측 비용·원시 결과를 기록하며 기능 회귀를 벤치마크로 해석하지 않는다.
 이번 작업은 문서 지침 추가다. 새 계측/시나리오 구현·성능 측정·게임 실행·빌드/회귀 재실행·커밋/push는 수행하지 않았다.
 기존 Serena HTTP 관련 미커밋 변경은 보존했다. 구조/실행 흐름을 변경하지 않아 다이어그램은 갱신하지 않았다.
+
+## 70. DB 설정 단순화·비동기 FIFO 실행 (2026-10-29)
+
+- [x] 기존 codex/lobby-movement-load 추적/미추적 변경 stash 보관: 012034e978eb94333c4e84be57baae6b5d532194
+- [x] 현재 HEAD에서 codex/db-setup-async 분기 (기존 미커밋 변경 제외)
+- [x] 실행 전 설정 및 전체 DB 호출·순서·종료·세션 수명 조사
+- [x] 런타임 DB 설정/사전 점검과 DSN 없는 연결 적용
+- [x] DB 전용 FIFO worker·비동기 결과 적용·세션 순서/실패/종료 계약 구현
+- [x] 같은 조건 반복 측정 및 순서/경합/종료/회귀 검증
+- [x] HTML 보고서·원시 수치 근거·Archify JSON/HTML/설계 이유 작성 및 시각 검증
+
+계획: DB 없는 LOCAL_TEST 기본을 유지하고 DB 모드는 명시적으로 활성화한다. SQL I/O 동안 로비 잠금을 보유하지 않는다.
+로그인/조회/쓰기 전 경로를 동일한 FIFO 수락 순서로 통합하고, 연결 종료와 작업 큐 포화/SQL 실패를 검사한다.
+실제 SQL 서비스/드라이버 설치 여부를 먼저 확인한다. 가짜 지연을 사용한 경계 성능 측정과 실제 DB 기능 검증을 분리한다.
+커밋/push는 하지 않는다. 원시 실행 로그·개인 연결 설정은 Git 제외 경로에 둔다.
+
+실제 결과: Initialize-LocalDatabase.ps1로 LocalDB·ODBC Driver 17 연결과 저장 프로시저 16개 준비를 확인했다. GUI DSN 등록과 소스 매크로 편집 없이 Start-Local.ps1 -Database로 활성화한다.
+CDataBaseThread의 단독 연결·조건변수 FIFO(상한4096)로 전체 SQL 호출을 옮겼다. 세션 Suspend/Resume·완료 우선 적용·generation 확인·쓰기 트랜잭션 확정 후 응답·실패 시 rollback/연결 종료를 구현했다. 오래된 disconnect snapshot 저장은 제거하고 외형 저장은 최신 DB 잔액을 보존한다.
+Debug/Release 서버 빌드 PASS. Core 각각1690 checks·ABI110종/106상수 PASS. 실제 TCP→ODBC→격리 NewWodTest 각각20/20 PASS, 설정 실패3종/구성 PASS. Release 기존 네트워크12검사·4인 입장2종·초기화 실패4종 PASS. DB 없는 Debug/Release smoke PASS. 양쪽 서버 pending/sockets/leased=0, DB 수락27/실행완료27(예상 SQL실패2 포함), 거부0.
+경계 제어 실험: x64 Release, sleep_for(10ms)8회, 워밍업1쌍 뒤 순서를 바꾼5쌍. 로비 점유 중앙값125.5100→0.0032ms(99.997% 감소), 다른 세션125.5170→0.0183ms. 전체 완료125.8230→125.3610ms로 대기 자체는 유지한다. 이전 잠금 경계 재현이며 과거 서버 바이너리/SQL 엔진 전후 실측이 아니다.
+실제 SQL 배타 잠금250ms를5회 재현한 Release 검사: DB 대기 세션250.6713ms, 다른 세션0.1280ms 중앙값. 같은 세션 후속 응답은 DB 응답 이후 도착했다. rollback·약5초 timeout·실패 뒤 큐 진행·disconnect/reconnect 확인.
+초기 검사 codec의 SC_CUSTOMIZE 이름 오류와 0건 DELETE의 SQL_NO_DATA 오류 처리 실패를 수정하고 Debug/Release20개 전체를 재검증했다.
+HTML 보고서: docs/development/DATABASE_IMPROVEMENT.html, source/binary hash·표본·판정: docs/development/evidence/database-improvement-20261029.json. Chromium1440/1920/390px 가로 넘침·JS오류0, 실제 desktop/mobile PNG 확인. Archify9/9 showcase·네 desktop containment·light/dark 실제 PNG 확인, JSON/HTML/README 보존.
+남은 범위: 단일worker 처리량, 동일계정 복수로그인 cache동기화, 강제종료/내구성큐/재시도, 기존 평문인증·경매만료 재고반환·클라이언트 최초페이지1 불일치. backlog drain은 기존15초 stop deadline을 넘을 수 있다. 운영DB·블록체인·GUI전투·장시간/최대부하는 미검증이다. 최신 증분 빌드 무경고를 기존 전체 경고 해소로 해석하지 않는다.
+기존 stash012034e978eb94333c4e84be57baae6b5d532194는 유지하고 커밋/push하지 않았다. 검증 프로세스는 모두 정상 종료했다.
+
+## 71. DB 개선 커밋·push·main 병합 준비와 추가 검토 (2026-10-29)
+
+- [x] origin fetch 및 기본 브랜치 main 확인: HEAD와 origin/main은 54bc0a3202d2120e9ee70cd6dc5aaa9265b660ca로 동일
+- [x] 이전 로비 변경 stash 012034e978eb94333c4e84be57baae6b5d532194 보존 확인
+- [x] Release Core1690·ABI110종/106상수 재검증, 저장된 source/binary SHA·UTF-8·문서 링크 확인
+- [x] 추가 검토: 만료 경매 재고1→0→0·경매0, 중복 로그인 구매 응답1900/DB1800을 격리 LocalDB와 실제 TCP에서 재현
+- [x] 보상 실패 내구성·15초 종료 제한·paused 세션 inbox 무제한·인증/스키마/쿼리 개선 우선순위를 문서/evidence에 기록
+- [x] DB 관련 39개 파일만 stage하고 정확한 한글 메시지·staged fingerprint 미리보기 준비
+- [ ] 공통 commit 스킬의 미리보기 승인 후 commit → 브랜치 push → main fast-forward 병합 → main push → 원격 동기화 검증
+
+추가 검토는 구현을 변경하지 않았다. SQL 검토는 rollback, 네트워크 검토는 테스트 계정/재고만 정리하고 서버를 정상 종료했다.
+위 후속 정합성/운영 준비 개선은 미구현 상태로 명시했다. 현재 병합 대상은 기본 DB disabled를 유지하는 로컬 준비·비동기 FIFO 개선이다.
+공통 commit 스킬은 "Treat invocation as a request to prepare a preview, not as approval to execute git commit."을 요구한다. 정확한 snapshot 미리보기 후 확인을 기다리며, 사용자 요청의 push/main 병합은 해당 승인 이후 계속 진행할 범위다.
+
+커밋 전 index 전체 검사에서 새 HTML에 포함된 Matplotlib SVG의 줄 끝 공백을 발견했다. 생성기에서 공백을 정리하고 HTML을 재생성해 cached diff 검사·1440/1920/390px Chromium 가로 넘침/JS오류 검사를 다시 통과했다. runtime C++·SQL은 추가 검토에서 변경하지 않았다.

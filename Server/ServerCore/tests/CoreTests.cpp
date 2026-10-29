@@ -18,6 +18,8 @@ int RunGameObjectTests();
 int RunTerrainTests();
 int RunTerrainAssetChecks();
 int RunLobbyDispatcherTests();
+int RunDatabaseQueueTests();
+int RunDatabaseBenchmark();
 using namespace wod::core;
 
 namespace
@@ -696,6 +698,8 @@ void Observations()
 int main(int argc, char** argv)
 {
     ConfigureProcessDiagnostics();
+    if (argc > 1 && std::string(argv[1]) == "--db-benchmark")
+        return RunDatabaseBenchmark();
     if (argc > 1 && std::string(argv[1]) == "--jobqueue-benchmark")
     {
         return RunJobQueueBenchmark(argc, argv);
@@ -735,6 +739,7 @@ int main(int argc, char** argv)
         checks += RunGameObjectTests();
         checks += RunTerrainTests();
         checks += RunLobbyDispatcherTests();
+        checks += RunDatabaseQueueTests();
         Observations();
         for (int i = 0; i < 5; ++i)
             Loopback();

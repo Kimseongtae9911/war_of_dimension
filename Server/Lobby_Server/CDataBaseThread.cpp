@@ -1,79 +1,123 @@
 #include "pch.h"
 #include "CDataBaseThread.h"
-#include "CNetworkMgr.h"
+#include <filesystem>
+#include <future>
 
-namespace wod_server {
-	CDataBaseThread::CDataBaseThread()
-	{
-		m_dataBase = new CDataBase();
-		if (m_dataBase->Connect(L"WOD_ODBC")) {
-			LogPrinter::PrintMsg("Database Connected");
-		}
-		else {
-			LogPrinter::PrintMsg("Database Connect Failed");
-		}
-	}
+namespace wod_server
+{
+namespace
+{
+std::wstring ReadConnection()
+{
+    const DWORD size = GetEnvironmentVariableW(L"WOD_DB_CONNECTION", nullptr, 0);
+    if (size)
+    {
+        std::wstring value(size, L'\0');
+        GetEnvironmentVariableW(L"WOD_DB_CONNECTION", value.data(), size);
+        value.resize(size - 1);
 
-	CDataBaseThread::~CDataBaseThread()
-	{
-	}
+        return value;
+    }
 
-	void CDataBaseThread::ThreadFunction()
-	{
-		while (!network::GetInstance()->IsStopping()) {
-			DB_EVENT ev;
-			auto current_time = std::chrono::system_clock::now();
-			if (m_timerQueue.try_pop(ev)) {
-				if (ev.m_wakeUpTime > current_time) {
-					m_timerQueue.push(ev);
-					std::this_thread::sleep_for(std::chrono::milliseconds(1));
-					continue;
-				}
-                auto global = GLobbyDispatcher->LockGlobal();
-				switch (ev.m_eventID) {
-				case DB_EVENT_TYPE::EV_SAVE_INFO:
-					if (m_dataBase->SavePlayerInfo(ev.m_id, ev.m_playerInfo)) {
-						LogPrinter::PrintMsg("Saved Player Info");
-					}
-					break;
-				case DB_EVENT_TYPE::EV_SHOP_BUY:
-					if (m_dataBase->SaveShopBuyInfo(ev.m_id, ev.m_shopType, ev.m_shopNum)) {
-						LogPrinter::PrintMsg("Saved Shop Buy Info");
-					}
-					break;
-				case DB_EVENT_TYPE::EV_REGISTER_AUCTION: {
-					std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-					std::time_t futureTime = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::seconds>(now + std::chrono::hours(24)));
+    wchar_t file[32768]{};
+    if (!GetEnvironmentVariableW(L"WOD_DB_CONFIG", file, static_cast<DWORD>(std::size(file))))
+        throw std::runtime_error("DB mode requires WOD_DB_CONNECTION or WOD_DB_CONFIG; run scripts/Initialize-LocalDatabase.ps1");
 
-					std::ostringstream deadLine;
-					std::tm localTime;
-					localtime_s(&localTime, &futureTime);
-					deadLine << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+    std::wifstream input{std::filesystem::path(file)};
+    std::wstring value;
+    if (!std::getline(input, value) || value.empty())
+        throw std::runtime_error("Cannot read DB connection configuration");
 
-					if (m_dataBase->RegisterAuction(ev.m_id, ev.m_shopType, ev.m_shopNum, ev.m_buyPrice, deadLine.str())) {
-						LogPrinter::PrintMsg("Register Auction");
-					}
-					break;
-				}
-				case DB_EVENT_TYPE::EV_SAVE_TOKEN: {
-					if (m_dataBase->SaveToken(ev.m_id, ev.m_buyPrice)) {
-						LogPrinter::PrintMsg("Saved Token");
-					}
-					break;
-				}
-				case DB_EVENT_TYPE::EV_BUY_AUCTION: {
-					if (m_dataBase->BuyAuction(ev.m_sellerID, ev.m_id, ev.m_shopType, ev.m_shopNum, ev.m_buyPrice)) {
-						LogPrinter::PrintMsg("Buy Auction");
-					}
-					break;
-				}
+    return value;
+}
+}
 
-				}
+CDataBaseThread::CDataBaseThread()
+{
+    wchar_t mode[32]{};
+    const auto size = GetEnvironmentVariableW(L"WOD_DB_MODE", mode, static_cast<DWORD>(std::size(mode)));
+    if (!size || std::wstring_view(mode) == L"disabled")
+        return;
 
+    if (size >= std::size(mode) || std::wstring_view(mode) != L"odbc")
+        throw std::runtime_error("WOD_DB_MODE must be disabled or odbc");
 
-				continue;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
-	}
+    const auto connection = ReadConnection();
+    std::promise<void> ready;
+    auto result = ready.get_future();
+    m_worker = std::thread([this, connection, &ready] {
+        CDataBase database;
+        try
+        {
+            if (!database.Connect(connection))
+                throw std::runtime_error("DB connection failed; check driver, server and database configuration");
+
+            database.ValidateSchema();
+            m_database = &database;
+            ready.set_value();
+        }
+        catch (...)
+        {
+            ready.set_exception(std::current_exception());
+
+            return;
+        }
+
+        m_queue.Run();
+        m_database = nullptr;
+    });
+    try
+    {
+        result.get();
+        m_enabled = true;
+    }
+    catch (...)
+    {
+        m_worker.join();
+        throw;
+    }
+}
+
+CDataBaseThread::~CDataBaseThread()
+{
+    Stop();
+}
+
+bool CDataBaseThread::Submit(std::function<void(CDataBase&)> _work)
+{
+    if (!m_enabled)
+        return false;
+
+    return m_queue.Submit([this, work = std::move(_work)] {
+        m_database->ResetRequest();
+        try
+        {
+            work(*m_database);
+            m_database->ThrowIfFailed();
+        }
+        catch (...)
+        {
+            m_database->ResetRequest();
+            throw;
+        }
+
+        m_database->ResetRequest();
+    });
+}
+
+void CDataBaseThread::Stop()
+{
+    m_queue.StopAccepting();
+    if (m_worker.joinable())
+    {
+        m_worker.join();
+        LogPrinter::PrintMsg("Database drain " + SnapshotJson());
+    }
+}
+
+std::string CDataBaseThread::SnapshotJson() const
+{
+    return std::string("{\"enabled\":") + (m_enabled ? "true" : "false") + ",\"accepted\":" + std::to_string(m_queue.Accepted()) + ",\"completed\":" + std::to_string(m_queue.Completed()) + ",\"rejected\":" + std::to_string(m_queue.Rejected()) +
+           ",\"failed\":" + std::to_string(m_queue.Failed()) + '}';
+}
 }

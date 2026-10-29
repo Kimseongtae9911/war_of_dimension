@@ -81,7 +81,18 @@ namespace wod_server {
 
 	int CP2PNetwork::SelectValidator()
 	{
-		SetValidatorIDs(network::GetInstance()->GetDataBaseThread()->GetDataBase()->GetValidatorIDs());
+        // 미사용 validator 선택 경로도 ODBC 연결에 직접 접근하지 않는다.
+        if (network::GetInstance()->GetDataBaseThread()->IsEnabled())
+        {
+            network::GetInstance()->GetDataBaseThread()->Submit([this](CDataBase& _database) {
+                auto ids = _database.GetValidatorIDs();
+                _database.ThrowIfFailed();
+                GLobbyDispatcher->PostGlobal([this, ids = std::move(ids)]() mutable {
+                    SetValidatorIDs(std::move(ids));
+                });
+            });
+        }
+
 
 		std::unordered_map<int, std::pair<std::string, int>> onlineValidators;
 		int totalStakedTokens = 0;

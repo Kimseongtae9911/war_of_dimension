@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DB 전용 실행과 로비 결과 적용",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 3,
+    "cellW": 190,
+    "cellH": 80,
+    "gapX": 100,
+    "gapY": 90
+  },
+  "components": [
+    {
+      "id": "session",
+      "type": "frontend",
+      "label": "세션 작업",
+      "sublabel": "요청 복사 후 일시 정지",
+      "row": 0,
+      "col": 0
+    },
+    {
+      "id": "fifo",
+      "type": "messagebus",
+      "label": "DB FIFO",
+      "sublabel": "수락 순서 · 용량 제한",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "sql",
+      "type": "database",
+      "label": "전용 DB worker",
+      "sublabel": "ODBC 연결 단독 소유",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "apply",
+      "type": "backend",
+      "label": "로비 결과 적용",
+      "sublabel": "세대 확인 · 세션 재개",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "next",
+      "type": "frontend",
+      "label": "다음 요청",
+      "sublabel": "같은 세션 순서 유지",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "others",
+      "type": "backend",
+      "label": "다른 세션",
+      "sublabel": "SQL 대기 중 계속 실행",
+      "row": 1,
+      "col": 0
+    }
+  ],
+  "connections": [
+    {
+      "from": "session",
+      "to": "fifo",
+      "label": "제출"
+    },
+    {
+      "from": "fifo",
+      "to": "sql",
+      "label": "직렬 실행"
+    },
+    {
+      "from": "sql",
+      "to": "apply",
+      "label": "완료값",
+      "labelDy": 24
+    },
+    {
+      "from": "apply",
+      "to": "next",
+      "label": "재개"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "잠금 경계",
+      "items": [
+        "SQL I/O는 로비 잠금 밖에서 실행",
+        "결과 적용만 기존 소유 경계 사용"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "순서 계약",
+      "items": [
+        "성공적으로 수락한 작업은 FIFO",
+        "세션 후속 요청은 결과 적용 뒤 실행"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "비용과 한계",
+      "items": [
+        "단일 DB worker의 처리량 한계",
+        "재시도 없이 실패를 관측하고 종료 시 drain"
+      ]
+    }
+  ]
+}

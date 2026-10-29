@@ -40,7 +40,9 @@ class CPacketMgr : public TSingleton<CPacketMgr>
     // For Test
     void ChangeServerPacket(BASE_PACKET* _packet, CClient* _client);
 
-    bool GetPlayerInfo(char _name[NAME_SIZE], char _password[NAME_SIZE], CClient* _client);
+    void Authenticate(BASE_PACKET* _packet, CClient* _client, bool _signUp);
+    void CompleteLogin(CClient* _client);
+    void RecordTransaction(CClient* _client, int _token);
 
   private:
     std::unordered_map<char, std::function<void(BASE_PACKET*, CClient*)>> m_packetfunc;

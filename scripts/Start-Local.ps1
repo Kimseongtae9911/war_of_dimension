@@ -1,6 +1,7 @@
 param(
     [ValidateSet('Debug', 'Release')][string] $Configuration = 'Debug',
-    [switch] $ServersOnly
+    [switch] $ServersOnly,
+    [switch] $Database
 )
 . "$PSScriptRoot/Development.ps1"
 $runtimeRoot = Join-Path $script:RepoRoot '.runtime'
@@ -24,7 +25,21 @@ try {
             $launch.RedirectStandardOutput = Join-Path $script:RepoRoot "artifacts/logs/run-$($entry.Name).out.log"
             $launch.RedirectStandardError = Join-Path $script:RepoRoot "artifacts/logs/run-$($entry.Name).err.log"
         }
-        $process = Start-Process @launch
+        $oldMode = $env:WOD_DB_MODE
+        $oldConfig = $env:WOD_DB_CONFIG
+        try {
+            if ($entry.Name -eq 'LobbyServer') {
+                $env:WOD_DB_MODE = if ($Database) { 'odbc' } else { 'disabled' }
+                if ($Database -and -not $env:WOD_DB_CONNECTION -and -not $env:WOD_DB_CONFIG) {
+                    $env:WOD_DB_CONFIG = Join-Path $script:RepoRoot '.runtime/database.connection.txt'
+                    if (-not (Test-Path -LiteralPath $env:WOD_DB_CONFIG)) { throw '먼저 scripts/Initialize-LocalDatabase.ps1을 실행하세요.' }
+                }
+            }
+            $process = Start-Process @launch
+        } finally {
+            $env:WOD_DB_MODE = $oldMode
+            $env:WOD_DB_CONFIG = $oldConfig
+        }
         $started.Add(@{ Module = $entry.Name; ProcessId = $process.Id; Executable = $executable; StartTimeUtc = $process.StartTime.ToUniversalTime().ToString('O') })
         if ($entry.Name -eq 'LobbyServer') { Wait-WodListener $process 8910 }
         if ($entry.Name -eq 'GameServer') { Wait-WodListener $process 8911 }

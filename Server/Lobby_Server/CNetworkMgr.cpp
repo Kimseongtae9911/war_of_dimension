@@ -12,14 +12,12 @@ bool CNetworkMgr::Initialize()
 {
 #ifndef LOCAL_TEST
     std::cout << "Input Game Server IP: ";
-    std::cin >> gameIP;
+    std::cin >> m_gameIP;
 #else
     m_gameIP = "127.0.0.1";
 #endif
 
-#ifdef WITH_DATABASE
     m_dataBaseThread = new CDataBaseThread();
-#endif
     m_handle = std::make_shared<TCPSocket>();
     m_gameServer = std::make_shared<Session>(true);
 
@@ -93,10 +91,8 @@ bool CNetworkMgr::Release()
     }
     delete m_p2pNetwork;
     m_p2pNetwork = nullptr;
-#ifdef WITH_DATABASE
     delete m_dataBaseThread;
     m_dataBaseThread = nullptr;
-#endif
     m_gameServer.reset();
     m_handle.reset();
     return true;
@@ -235,7 +231,8 @@ bool CNetworkMgr::RegisterEvent(TIMER_EVENT _event)
 
 void CNetworkMgr::DataBaseFunc()
 {
-    m_dataBaseThread->ThreadFunction();
+    if (m_dataBaseThread)
+        m_dataBaseThread->Stop();
 }
 
 const HANDLE& CNetworkMgr::GetHandle() const
@@ -353,9 +350,16 @@ void CNetworkMgr::PacketExec(BASE_PACKET* _packet)
     {
     case GL_TRANSACTIONS: {
         GL_TRANSACTIONS_PACKET* p = reinterpret_cast<GL_TRANSACTIONS_PACKET*>(_packet);
-#ifdef WITH_DATABASE
-        m_dataBaseThread->RegisterDBEvent(DB_EVENT(std::string(p->name), p->token, std::chrono::system_clock::now(), DB_EVENT_TYPE::EV_SAVE_TOKEN));
-#endif
+        if (m_dataBaseThread->IsEnabled())
+        {
+            const std::string name(p->name);
+            const int token = p->token;
+            if (!m_dataBaseThread->Submit([name, token](CDataBase& _database) {
+                    if (!_database.SaveToken(name, token))
+                        throw std::runtime_error("game reward persistence failed");
+                }))
+                throw std::runtime_error("DB reward queue rejected");
+        }
 
 #ifdef WITH_DATABASE
         TransactionData transaction;
