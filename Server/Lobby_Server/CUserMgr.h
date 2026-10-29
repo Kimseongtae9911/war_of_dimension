@@ -1,4 +1,5 @@
 #pragma once
+#include "AccountOwners.h"
 
 namespace wod_server
 {
@@ -17,6 +18,9 @@ class CUserMgr : public TSingleton<CUserMgr>
     void InitializeClient(int _index, const std::string& _ip);
     void DisconnectClient(int _key);
     void ClientReset(int _index);
+    bool ClaimAccount(const std::string& _name, CClient* _client);
+    void ReleaseAccount(CClient* _client);
+    void PublishBalance(const std::string& _name, const PlayerInfo& _balance);
 
     bool RegisterClientToChannel(CClient* _client);
     bool ChangeChannel(int _curChannel, int _changeChannel, CClient* _client);
@@ -46,6 +50,7 @@ class CUserMgr : public TSingleton<CUserMgr>
 
   private:
     void RemoveFromViews(CClient* _client);
+    AccountOwners m_accountOwners;
     concurrency::concurrent_unordered_map<int, CClient*> m_clients;
 
     std::mutex m_channelLock;

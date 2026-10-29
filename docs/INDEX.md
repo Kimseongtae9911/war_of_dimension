@@ -9,6 +9,7 @@
 | 작업별 필수 지침 | [작업 지침 인덱스](guides/INDEX.md) |
 | 빌드·실행·중지 | [개발 환경](development/SETUP.md) |
 | DB 준비 자동화·전용 FIFO·세션 결과 순서·실제 SQL 검증·추가 정합성 검토 | [HTML 개선 보고서](development/DATABASE_IMPROVEMENT.html), [측정·재현·추가 개선 검토](development/DATABASE_IMPROVEMENT.md), [소유권·설계 이유](diagrams/database-async/README.md) |
+| DB 정합성 후속 수정·보상 복구·비밀번호 이전·실제 재시작 검증 | [최신 HTML 보고서](development/DATABASE_CONSISTENCY.html), [재현·남은 개선](development/DATABASE_CONSISTENCY.md), [복구 경계·선택 이유](diagrams/database-consistency/README.md) |
 | 시나리오 더미·실시간 로컬 웹 관측·지형/NPC/게임 일정 | [Server Lab 사용·계약](development/SERVER_LAB.md), [구현 구조도](diagrams/server-lab/README.md) |
 | 서버 성능 검사·에이전트 조회·계측/시나리오 확장 | [성능 검사 지침](guides/SERVER_PERFORMANCE.md) |
 | 캐시 적용 후 동접 증가·게임 tick/로비 패킷 병목·반복 경계 | [HTML 측정 보고서](development/SERVER_CAPACITY.html), [수치·원인·재현 근거](development/SERVER_CAPACITY.md), [동접 탐색 흐름도](diagrams/server-capacity/README.md) |

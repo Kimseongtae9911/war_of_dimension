@@ -393,3 +393,5 @@ Core Send는 기존 mutex 획득 대기와 획득 후 body를 구분해 측정�
 로비의 `CDataBaseThread`는 이 큐를 사용해 하나의 worker 안에서 ODBC 연결을 생성·사용·파괴한다. `CClient::RunDatabase`는 요청 snapshot을 제출하고 세션 큐를 일시 정지한다. 완료는 기존 dispatcher의 전역 소유 구간에서 generation을 확인하고 같은 세션의 다음 요청보다 먼저 적용한다. SQL 중에는 로비 잠금을 잡지 않는다. 서버 종료는 producer와 IOCP join → DB drain → 큐 정리 → 객체 해제 순서다.
 
 순서·소유권·실패·종료의 선택 근거는 [구조도 README](../diagrams/database-async/README.md), 수치와 실제 DB 검증은 [DB 개선 보고서](../development/DATABASE_IMPROVEMENT.md)에 있다. DB 없는 기존 Core 회귀와 별도로 격리 LocalDB의 Debug/Release TCP→ODBC 통합 20개를 검사했다. 운영 DB와 블록체인까지 검증했다는 뜻은 아니다.
+
+후속 [정합성 수정](../development/DATABASE_CONSISTENCY.md)은 Core각1694검사·DB각25개·추가정합성각26개로 확장했다. inbox256건/65536bytes와 cleanup/Resume 우회, 계정 예약·rowversion 잔액, 디스크 writer→SQL 원장 복구를 검사한다. writer를 먼저 drain한 뒤 SQL 큐를 drain하며 `Stop-Local.ps1`은 timeout에서 자동 강제 종료하지 않는다. 개별 보상의 SQL 큐 수락은 디스크 확정 이후이며 producer 간 수신 시각 전체를 정렬하지 않는다. 구조와 비용은 [복구 구조도](../diagrams/database-consistency/README.md)를 참조한다.

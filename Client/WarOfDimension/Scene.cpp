@@ -929,7 +929,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		CTextureShader::GetInstance()->AuctionSwitch();
 		if (CTextureShader::GetInstance()->IsAuction()) {
 			NetworkManager::GetInstance()->SendOpenAuctionPacket();
-			NetworkManager::GetInstance()->SendGetAuctionInfoPacket(1);
+			NetworkManager::GetInstance()->SendGetAuctionInfoPacket(0);
 			SoundManager::GetInstance()->Stop_Sound(CHANNELID::NPC);
 			SoundManager::GetInstance()->Play_Sound(L"AuctionNpc.mp3", CHANNELID::NPC, 1.2f);
 		}

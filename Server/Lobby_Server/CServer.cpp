@@ -143,6 +143,7 @@ void CServer::Run()
     producers.StopAndJoin();
     iocp.StopAndJoin();
     network::GetInstance()->DataBaseFunc(); // producer join 후 수락 작업 drain, 객체 해제 전 완료
+    LogPrinter::PrintMsg("Lobby dispatcher stop " + GLobbyDispatcher->SnapshotJson());
     GLobbyDispatcher->Clear();
     CUserMgr::GetInstance()->ClearWorkQueues();
     if (producers.Failed() || iocp.Failed() || network::GetInstance()->WorkerFailed())

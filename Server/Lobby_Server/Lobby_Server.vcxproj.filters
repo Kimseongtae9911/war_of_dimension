@@ -103,6 +103,15 @@
     <ClInclude Include="CDataBase.h">
       <Filter>Database</Filter>
     </ClInclude>
+    <ClInclude Include="RewardJournal.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="PasswordHash.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="AccountOwners.h">
+      <Filter>Manager\User</Filter>
+    </ClInclude>
     <ClInclude Include="CDataBaseThread.h">
       <Filter>Database</Filter>
     </ClInclude>

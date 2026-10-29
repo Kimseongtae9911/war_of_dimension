@@ -58,17 +58,21 @@ bool CClient::ValidateFrame(std::span<const char> _frame) const
 bool CClient::DispatchFrame(Frame _frame, const SessionRef& _session, uint64_t _generation)
 {
     const bool global = CPacketMgr::RequiresGlobal(reinterpret_cast<const BASE_PACKET*>(_frame.data()));
-    return GLobbyDispatcher->Post(m_workQueue, global, [this, session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
-        if (pending)
-            pending->Start();
+    const size_t bytes = _frame.size();
+    return GLobbyDispatcher->Post(
+        m_workQueue, global,
+        [this, session = _session, generation = _generation, frame = std::move(_frame), pending = wod::core::JobMetrics::TrackPacket()]() mutable {
+            if (pending)
+                pending->Start();
 
-        if (IsDisconnected())
-            return;
+            if (IsDisconnected())
+                return;
 
-        session->WithGeneration(generation, [&] {
-            CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), this);
-        });
-    });
+            session->WithGeneration(generation, [&] {
+                CPacketMgr::GetInstance()->Packet_Exec(reinterpret_cast<BASE_PACKET*>(frame.data()), this);
+            });
+        },
+        bytes);
 }
 
 void CClient::QueueDisconnect()
@@ -79,7 +83,7 @@ void CClient::QueueDisconnect()
 
     const auto session = GetTransportSession();
     const auto generation = session->Generation();
-    GLobbyDispatcher->Post(m_workQueue, true, [this, session, generation] {
+    GLobbyDispatcher->PostCleanup(m_workQueue, [this, session, generation] {
         session->WithGeneration(generation, [this] {
             CleanupDisconnected();
         });

@@ -1,5 +1,5 @@
--- 로컬 개발 전용 계약 v1. 기존 운영 DB에는 적용하지 않는다.
--- 기존 인증 프로토콜과 맞춘 비밀번호 열이다. 운영 암호 저장 정책은 별도 마이그레이션 대상이다.
+-- 로컬 개발 전용 계약 v3. 기존 운영 DB에는 적용하지 않는다.
+-- 기존 wire 길이는 유지하되 DB에는 PBKDF2-HMAC-SHA256 salt/hash만 저장한다.
 SET XACT_ABORT ON;
 IF OBJECT_ID('dbo.WodLocalSchema','U') IS NULL
 BEGIN
@@ -7,11 +7,11 @@ BEGIN
     CREATE TABLE dbo.WodLocalSchema(Version int NOT NULL PRIMARY KEY);
     INSERT dbo.WodLocalSchema VALUES(1);
 END;
-IF NOT EXISTS(SELECT 1 FROM dbo.WodLocalSchema WHERE Version=1) THROW 50000,'Unsupported local schema',1;
+IF NOT EXISTS(SELECT 1 FROM dbo.WodLocalSchema WHERE Version IN (1,2,3)) THROW 50000,'Unsupported local schema',1;
 IF OBJECT_ID('dbo.user_data','U') IS NULL
 CREATE TABLE dbo.user_data(
     Player_ID varchar(10) NOT NULL PRIMARY KEY,
-    Player_Password varchar(10) NOT NULL,
+    Player_Password varchar(256) NOT NULL,
     Token int NOT NULL DEFAULT 2000 CHECK(Token>=0),
     FullNode bit NOT NULL DEFAULT 0,
     StakedToken int NOT NULL DEFAULT 0,
@@ -50,19 +50,25 @@ IF OBJECT_ID('dbo.customize_data','U') IS NULL
 CREATE TABLE dbo.customize_data(Player_ID varchar(10) NOT NULL REFERENCES dbo.user_data(Player_ID),ShopType smallint NOT NULL,ShopNum smallint NOT NULL,PartCount smallint NOT NULL CHECK(PartCount>=0),PRIMARY KEY(Player_ID,ShopType,ShopNum));
 IF OBJECT_ID('dbo.auction_data','U') IS NULL
 CREATE TABLE dbo.auction_data(Player_ID varchar(10) NOT NULL REFERENCES dbo.user_data(Player_ID),ShopType smallint NOT NULL,ShopNum smallint NOT NULL,BuyPrice int NOT NULL CHECK(BuyPrice BETWEEN 1 AND 65535),Deadline datetime2 NOT NULL,PRIMARY KEY(Player_ID,ShopType,ShopNum));
+ALTER TABLE dbo.user_data ALTER COLUMN Player_Password varchar(256) NOT NULL;
+IF COL_LENGTH('dbo.user_data','BalanceVersion') IS NULL
+ALTER TABLE dbo.user_data ADD BalanceVersion rowversion;
+IF OBJECT_ID('dbo.reward_applied','U') IS NULL
+CREATE TABLE dbo.reward_applied(Operation_ID varchar(32) NOT NULL PRIMARY KEY, Player_ID varchar(10) NOT NULL REFERENCES dbo.user_data(Player_ID),TokenDelta int NOT NULL,AppliedAt datetime2 NOT NULL DEFAULT SYSDATETIME());
 GO
-CREATE OR ALTER PROCEDURE dbo.SignUp @id varchar(10), @password varchar(10) AS
+CREATE OR ALTER PROCEDURE dbo.SignUp @id varchar(10), @password varchar(256) AS
 BEGIN
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
+IF DATALENGTH(@password)<>118 OR LEFT(@password,21) COLLATE Latin1_General_100_BIN2 <> 'pbkdf2-sha256$600000$' OR SUBSTRING(@password,54,1)<>'$' OR SUBSTRING(@password,22,32) COLLATE Latin1_General_100_BIN2 LIKE '%[^0-9a-f]%' OR SUBSTRING(@password,55,64) COLLATE Latin1_General_100_BIN2 LIKE '%[^0-9a-f]%' THROW 50022,'Hashed credential required',1;
 INSERT dbo.user_data(Player_ID,Player_Password) VALUES(@id,@password);
 END;
 GO
-CREATE OR ALTER PROCEDURE dbo.GetPlayerInfo @id varchar(10), @password varchar(10) AS
+CREATE OR ALTER PROCEDURE dbo.GetPlayerInfo @id varchar(10), @password varchar(256) AS
 BEGIN
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
-SELECT Token,Chr_Sex,Chr_HeadCoverings_Base_Hair,Chr_HeadCoverings_No_FacialHair,Chr_HeadCoverings_No_Hair,Chr_Hair,Chr_HelmetAttachment,Chr_BackAttachment,Chr_ShoulderAttachRight,Chr_ShoulderAttachLeft,Chr_ElbowAttachRight,Chr_ElbowAttachLeft,Chr_HipsAttachment,Chr_KneeAttachRight,Chr_KneeAttachLeft,Chr_Ear_Ear,Chr_Head,Chr_Head_No_Elements,Chr_Eyebrow,Chr_Torso,Chr_ArmUpperRight,Chr_ArmUpperLeft,Chr_ArmLowerRight,Chr_ArmLowerLeft,Chr_HandRight,Chr_HandLeft,Chr_Hips,Chr_LegRight,Chr_LegLeft FROM dbo.user_data WHERE Player_ID=@id AND Player_Password=@password;
+SELECT Token,Chr_Sex,Chr_HeadCoverings_Base_Hair,Chr_HeadCoverings_No_FacialHair,Chr_HeadCoverings_No_Hair,Chr_Hair,Chr_HelmetAttachment,Chr_BackAttachment,Chr_ShoulderAttachRight,Chr_ShoulderAttachLeft,Chr_ElbowAttachRight,Chr_ElbowAttachLeft,Chr_HipsAttachment,Chr_KneeAttachRight,Chr_KneeAttachLeft,Chr_Ear_Ear,Chr_Head,Chr_Head_No_Elements,Chr_Eyebrow,Chr_Torso,Chr_ArmUpperRight,Chr_ArmUpperLeft,Chr_ArmLowerRight,Chr_ArmLowerLeft,Chr_HandRight,Chr_HandLeft,Chr_Hips,Chr_LegRight,Chr_LegLeft,CONVERT(bigint,BalanceVersion) FROM dbo.user_data WHERE Player_ID=@id AND Player_Password=@password;
 END;
 GO
 CREATE OR ALTER PROCEDURE dbo.SavePlayerInfo @id varchar(10), @token int, @p0 smallint, @p1 smallint, @p2 smallint, @p3 smallint, @p4 smallint, @p5 smallint, @p6 smallint, @p7 smallint, @p8 smallint, @p9 smallint, @p10 smallint, @p11 smallint, @p12 smallint, @p13 smallint, @p14 smallint, @p15 smallint, @p16 smallint, @p17 smallint, @p18 smallint, @p19 smallint, @p20 smallint, @p21 smallint, @p22 smallint, @p23 smallint, @p24 smallint, @p25 smallint, @p26 smallint, @p27 smallint AS
@@ -114,11 +120,26 @@ IF @@ROWCOUNT<>1 THROW 50017,'Listing unavailable',1;
 EXEC dbo.SaveShopBuyInfo @buyer,@type,@num;
 END;
 GO
+CREATE OR ALTER PROCEDURE dbo.SettleExpiredAuctions AS
+BEGIN
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+BEGIN TRY
+BEGIN TRAN;
+DECLARE @expired TABLE(Player_ID varchar(10),ShopType smallint,ShopNum smallint);
+DELETE dbo.auction_data OUTPUT deleted.Player_ID,deleted.ShopType,deleted.ShopNum INTO @expired WHERE Deadline<=SYSDATETIME();
+UPDATE owned SET PartCount=owned.PartCount+1 FROM dbo.customize_data owned JOIN @expired expired ON owned.Player_ID=expired.Player_ID AND owned.ShopType=expired.ShopType AND owned.ShopNum=expired.ShopNum;
+INSERT dbo.customize_data SELECT expired.Player_ID,expired.ShopType,expired.ShopNum,1 FROM @expired expired WHERE NOT EXISTS(SELECT 1 FROM dbo.customize_data WITH(UPDLOCK,HOLDLOCK) WHERE Player_ID=expired.Player_ID AND ShopType=expired.ShopType AND ShopNum=expired.ShopNum);
+COMMIT;
+END TRY BEGIN CATCH IF @@TRANCOUNT>0 ROLLBACK; THROW; END CATCH;
+END;
+GO
 CREATE OR ALTER PROCEDURE dbo.GetAuctionInfo @page int AS
 BEGIN
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 IF @page<0 THROW 50018,'Invalid page',1;
+EXEC dbo.SettleExpiredAuctions;
 SELECT Player_ID,ShopType,ShopNum,BuyPrice,Deadline FROM dbo.auction_data ORDER BY Deadline,Player_ID,ShopType,ShopNum OFFSET (CONVERT(bigint,@page)*7) ROWS FETCH NEXT 7 ROWS ONLY;
 END;
 GO
@@ -126,6 +147,7 @@ CREATE OR ALTER PROCEDURE dbo.GetAuctionPartsNum AS
 BEGIN
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
+EXEC dbo.SettleExpiredAuctions;
 SELECT COUNT(*) FROM dbo.auction_data;
 END;
 GO
@@ -179,3 +201,23 @@ SET XACT_ABORT ON;
 SELECT Player_ID,StakedToken FROM dbo.user_data WHERE FullNode=1 AND StakedToken>0;
 END;
 GO
+CREATE OR ALTER PROCEDURE dbo.ApplyReward @operation varchar(32),@id varchar(10),@delta int AS
+BEGIN
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+BEGIN TRY
+BEGIN TRAN;
+IF EXISTS(SELECT 1 FROM dbo.reward_applied WITH(UPDLOCK,HOLDLOCK) WHERE Operation_ID=@operation)
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM dbo.reward_applied WHERE Operation_ID=@operation AND Player_ID=@id AND TokenDelta=@delta) THROW 50021,'Conflicting reward operation',1;
+END
+ELSE
+BEGIN
+    EXEC dbo.SaveToken @id,@delta;
+    INSERT dbo.reward_applied(Operation_ID,Player_ID,TokenDelta) VALUES(@operation,@id,@delta);
+END;
+COMMIT;
+END TRY BEGIN CATCH IF @@TRANCOUNT>0 ROLLBACK; THROW; END CATCH;
+END;
+GO
+-- Version 3 is committed by Initialize-LocalDatabase.ps1 after credential migration.

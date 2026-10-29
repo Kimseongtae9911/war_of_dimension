@@ -37,7 +37,7 @@ UI 압축 검사는 `./scripts/Capture-UiTextures.ps1 -Configuration Release -Ro
 
 점검 스크립트는 자신이 시작한 프로세스를 종료하고 JSON 결과를 남긴다. 확인 범위는 서버 listener, 서버 간 TCP 연결, 클라이언트 게임 창 시작이다. 스크립트 결과만으로 UI 렌더링·로그인·전투 전체를 검증했다고 간주하지 않는다. 로그인 화면 렌더링은 별도 화면 점검으로 확인했다.
 
-`Stop-Local.ps1`은 `.runtime/processes.json`의 실행 파일 경로와 시작 시간이 일치하는 PID만 중지한다. 서버는 named event로 종료를 요청하고 15초 이내 종료 코드 0을 확인한다. 시간 초과 시 해당 프로세스를 정리하고 실패로 보고한다. 클라이언트는 기존 프로세스 종료 방식을 유지한다. 서버 종료·실패 회수의 구현과 범위는 [ServerCore](../architecture/SERVER_CORE.md)에 있다.
+`Stop-Local.ps1`은 `.runtime/processes.json`의 실행 파일 경로와 시작 시간이 일치하는 PID만 중지한다. 서버는 named event로 종료를 요청하고 기본15초 이내 종료 코드0을 확인한다. 시간 초과 시 **프로세스와 실행 기록을 유지**하고 실패로 보고한다. DB drain을 더 기다리려면 `-TimeoutSeconds 60` 등으로 다시 실행한다. `-Force`를 명시한 경우만 강제 종료하므로 미완료 일반 요청이 손실될 수 있다. 클라이언트는 기존 종료 방식을 유지한다. [ServerCore](../architecture/SERVER_CORE.md)를 참조한다.
 
 ServerCore 검사는 다음 순서로 실행한다. Python 3.12 이상의 실행 경로를 지정한다.
 
@@ -51,7 +51,7 @@ Release도 같은 순서로 검사한다. 통합 검사는 8910/8911 포트를 �
 
 ## 선택적 로컬 DB
 
-DB 없는 `LOCAL_TEST`가 기본이다. SQL Server Express LocalDB와 Microsoft ODBC Driver 17/18 x64가 설치돼 있으면 한 번의 준비 명령으로 로컬 스키마·저장 프로시저 16개·개인 연결 설정을 만든다. ODBC DSN GUI 등록이나 소스 매크로 편집은 필요 없다.
+DB 없는 `LOCAL_TEST`가 기본이다. SQL Server Express LocalDB와 Microsoft ODBC Driver17/18 x64가 설치돼 있으면 한 번의 준비 명령으로 로컬 스키마v3·저장 프로시저18개·개인 연결 설정을 만든다. ODBC DSN GUI 등록이나 소스 매크로 편집은 필요 없다.
 
 ```powershell
 ./scripts/Initialize-LocalDatabase.ps1
@@ -59,11 +59,13 @@ DB 없는 `LOCAL_TEST`가 기본이다. SQL Server Express LocalDB와 Microsoft 
 ./scripts/Stop-Local.ps1
 ```
 
-준비 명령은 전용 `NewWodLocal`만 사용하고 기존 데이터는 유지한다. 연결 파일은 Git 제외 `.runtime/database.connection.txt`에 둔다. `-CheckOnly`는 연결·프로시저 수를 검사한다. 설치 도구 자체는 자동 다운로드하지 않으며, LocalDB가 지원하지 않는 암호화 옵션은 로컬 Windows 사용자 연결에 한해 `Encrypt=No`로 설정한다. 외부 서버 연결 문자열의 보안 옵션은 별도로 설정한다.
+준비 명령은 기본 `NewWodLocal`만 사용하며 검사에서는 명시적인 `NewWodTest*` DB를 사용한다. 기존 서버를 종료한 뒤 준비한다. 기존 v1/v2 DB는 DDL·ASCII 평문 비밀번호의 PBKDF2 변환·버전 갱신을 한 트랜잭션으로 이전한다. 잘못된 자격 증명 형식이나 비ASCII 평문은 rollback하고 별도 이전을 요구한다. 데이터 행을 삭제하지 않는다. 연결 파일은 Git 제외 `.runtime/database.connection.txt`에 둔다. `-CheckOnly`는 연결·프로시저 수·버전·자격 증명 형식을 검사한다. 설치 도구는 자동 다운로드하지 않으며 LocalDB의 Windows 사용자 연결은 `Encrypt=No`를 사용한다. 외부 서버의 보안 옵션은 별도 설정한다.
 
 실행 서버는 `WOD_DB_MODE=disabled|odbc`, `WOD_DB_CONNECTION` 또는 `WOD_DB_CONFIG`를 지원한다. `odbc`일 때 연결 문자열 환경변수가 파일보다 우선한다. `Start-Local.ps1`은 기본 실행에서 `disabled`, `-Database`에서 `odbc`를 자식 로비 프로세스에 지정한 뒤 부모 환경을 복원한다. Visual Studio에서 DB 모드를 사용하려면 로비 디버거 환경에 `WOD_DB_MODE=odbc`와 연결 설정을 지정한다. 잘못된 설정·연결·필수 프로시저 누락 시 listener를 열기 전에 실패한다. 블록체인은 DB 모드와 별개이며 활성화하지 않는다.
 
-쓰기·조회는 전용 FIFO worker가 실행하고 같은 세션의 다음 요청은 DB 결과 적용까지 기다린다. 상세 계약·검사 의존성·재현 명령은 [DB 개선 보고서](DATABASE_IMPROVEMENT.md), 측정 수치는 [HTML 보고서](DATABASE_IMPROVEMENT.html)를 따른다. 로컬 스키마는 운영 마이그레이션이 아니다.
+쓰기·조회는 전용 FIFO worker가 실행하고 같은 세션의 다음 요청은 DB 결과 적용까지 기다린다. 보상은 별도 기록 worker가 디스크에 확정한 뒤 SQL에 제출한다. 기본 기록 경로는 저장소 artifact 배치 기준 `.runtime/database-rewards/<DB identity hash>`이며 다른 실행 배치는 `WOD_DB_REWARD_DIRECTORY`로 보존할 절대 경로를 지정한다. pending/writing 파일은 복구 근거이므로 임의 삭제하지 않는다. 실패 SQL은 다음 실행에서 재생하고 손상 파일은 보존한 채 시작을 차단한다. 같은 DB 기록 디렉터리는 한 프로세스만 소유한다.
+
+상세 계약·검사 의존성·재현 명령은 [초기 개선](DATABASE_IMPROVEMENT.md)과 [최신 정합성/복구 보고서](DATABASE_CONSISTENCY.md)를 따른다. `Test-DatabaseConsistency.ps1 -Configuration Debug|Release`는 격리 DB의 만료/구매 경합·인증 이전·보상 재시작·입력 상한·종료 timeout을 검사한다. 로컬 스키마는 운영 마이그레이션이 아니다.
 
 ## Visual Studio 통합 개발
 
@@ -188,7 +190,7 @@ finally { ./scripts/Stop-Local.ps1 }
 
 새 로컬 서버에서 `Test-ParticleSelectionNetwork.py --boss-job 4|5 --output <결과.json>`를 실행하면 네 TCP 참가자의 로비 매칭, 수동·자동 선택, 분할 READY header와 게임 시작 전 16개 스킬 수신을 검사한다. 각 보스·구성은 새 서버로 실행하고 Python 종료 코드 0을 확인한다. 명령·실측·한계는 [선택 스킬 파티클 문서](../portfolio/PARTICLE_SELECTED_SKILLS.md)를 참조한다.
 
-원본 `protocol.h`의 `LOCAL_TEST`가 켜져 있고 `WITH_DATABASE`는 꺼져 있다. 루프백 주소와 로비 8910, 게임 8911 포트를 사용한다. DB 없는 기존 개발 모드를 재현한다. 실제 ODBC DSN과 저장 프로시저, DB 인증·거래 동작은 검증하지 않았다.
+`LOCAL_TEST`는 기본이며 DB는 `WOD_DB_MODE`로 선택한다. 루프백 주소와 로비8910·게임8911을 사용한다. DB 없는 개발 모드와 격리 LocalDB의 TCP→ODBC 인증·거래 검증을 구분한다. 운영 DB·블록체인은 검증하지 않았다.
 
 필수 `Server/Game_Server/Resource/HeightMesh.obj`는 원본에서 Git ignore로 빠져 있었다. 원본 `Resource.zip`의 비어 있지 않은 파일을 복원했다. 원본 로컬 폴더의 같은 이름 파일은 0바이트라서 사용하지 않았다. 리소스 폴더의 `.obj`는 데이터이므로 Git ignore 예외로 관리한다.
 

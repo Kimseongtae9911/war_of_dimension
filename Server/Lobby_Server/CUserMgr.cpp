@@ -42,6 +42,33 @@ void CUserMgr::DisconnectClient(int _key)
     GetClient(_key)->Disconnect();
 }
 
+bool CUserMgr::ClaimAccount(const std::string& _name, CClient* _client)
+{
+    if (!m_accountOwners.Claim(_name, _client))
+        return false;
+
+    _client->SetAccountName(_name);
+
+    return true;
+}
+
+void CUserMgr::ReleaseAccount(CClient* _client)
+{
+    m_accountOwners.Release(_client->GetAccountName(), _client);
+    _client->SetAccountName({});
+}
+
+void CUserMgr::PublishBalance(const std::string& _name, const PlayerInfo& _balance)
+{
+    auto* owner = static_cast<CClient*>(m_accountOwners.Find(_name));
+    if (owner && !owner->IsDisconnected() && owner->ApplyBalance(_balance))
+    {
+        const auto state = owner->GetState();
+        if (state == CL_STATE::ST_LOBBY || state == CL_STATE::ST_MATCHING)
+            owner->GetPacketSender()->SendTokenNumPacket(owner->GetPlayerInfo().m_tokenNum);
+    }
+}
+
 void CUserMgr::RemoveFromViews(CClient* _client)
 {
     const int id = _client->GetID();
@@ -59,6 +86,7 @@ void CUserMgr::ClientReset(int _index)
 {
     auto* client = GetClient(_index);
     LogPrinter::PrintMsg(std::string(client->GetName()) + " Disconnect");
+    ReleaseAccount(client);
     RemoveFromViews(client);
     CMatchMgr::GetInstance()->Cancel(_index);
     {

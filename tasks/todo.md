@@ -1830,10 +1830,31 @@ HTML 보고서: docs/development/DATABASE_IMPROVEMENT.html, source/binary hash·
 - [x] 추가 검토: 만료 경매 재고1→0→0·경매0, 중복 로그인 구매 응답1900/DB1800을 격리 LocalDB와 실제 TCP에서 재현
 - [x] 보상 실패 내구성·15초 종료 제한·paused 세션 inbox 무제한·인증/스키마/쿼리 개선 우선순위를 문서/evidence에 기록
 - [x] DB 관련 39개 파일만 stage하고 정확한 한글 메시지·staged fingerprint 미리보기 준비
-- [ ] 공통 commit 스킬의 미리보기 승인 후 commit → 브랜치 push → main fast-forward 병합 → main push → 원격 동기화 검증
+- [x] 공통 commit 스킬의 미리보기 승인 후 commit → 브랜치 push → main fast-forward 병합 → main push → 원격 동기화 검증: 88d310a5189324bd23a99357fd0c0e7b5c3260e3
 
 추가 검토는 구현을 변경하지 않았다. SQL 검토는 rollback, 네트워크 검토는 테스트 계정/재고만 정리하고 서버를 정상 종료했다.
 위 후속 정합성/운영 준비 개선은 미구현 상태로 명시했다. 현재 병합 대상은 기본 DB disabled를 유지하는 로컬 준비·비동기 FIFO 개선이다.
 공통 commit 스킬은 "Treat invocation as a request to prepare a preview, not as approval to execute git commit."을 요구한다. 정확한 snapshot 미리보기 후 확인을 기다리며, 사용자 요청의 push/main 병합은 해당 승인 이후 계속 진행할 범위다.
 
 커밋 전 index 전체 검사에서 새 HTML에 포함된 Matplotlib SVG의 줄 끝 공백을 발견했다. 생성기에서 공백을 정리하고 HTML을 재생성해 cached diff 검사·1440/1920/390px Chromium 가로 넘침/JS오류 검사를 다시 통과했다. runtime C++·SQL은 추가 검토에서 변경하지 않았다.
+
+## 72. DB 정합성 버그 수정 (2026-10-29)
+
+- [x] 승인 snapshot43f5404ea7e2e1c79a74ba806102af2ab175fe24를 88d310a5189324bd23a99357fd0c0e7b5c3260e3로 commit, DB 브랜치와 main push·원격 일치 검증 완료
+- [x] 기존 작업 stash 보존, main에서 codex/db-consistency-fixes 분기
+- [x] 만료 경매의 재고 반환·정산/구매 경합을 원자적으로 수정하고 반복 검사
+- [x] 계정 소유 세션 예약·해제와 DB 확정 잔액 적용으로 중복 로그인 불일치 수정
+- [x] paused 세션 inbox 건수/바이트 제한·포화 시 cleanup 보장과 종료 drain 정책 수정
+- [x] 실패 보상의 식별·보존·재처리와 중복 반영 방지를 구현·검사
+- [x] 평문 비밀번호를 PBKDF2 verifier로 저장, 로컬 schema v3 원자적 이전·오류 rollback 검사
+- [x] 최초 경매 페이지 0기반 통일, 실제 클라이언트 빌드 검사
+- [x] Debug/Release 빌드·DB/네트워크 회귀·실패/재시작 검증, HTML/Archify와 검증 근거 갱신
+
+추가 성능 제안과 실제 결함을 구분한다. 기존 wire field/packing을 유지하고, 보상은 현재 프로토콜이 제공하는 식별·확인 경계와 한계를 명시한다.
+새 버그 수정은 이전 승인 snapshot에 포함하지 않았으며 후속 커밋은 별도 미리보기 대상으로 둔다.
+
+결과: Debug/Release 서버·클라이언트 빌드 PASS, Core각1694·ABI110종/106상수 동일. 기존 DB각25/25·추가정합성각26/26·설정실패각3/3 PASS. Release 기존 네트워크12개·4인전환2종·초기화실패4종의7그룹, 양 구성 DB없는 smoke PASS. 추가 검사각3회 서버 정상종료·pending/sockets/leased=0.
+만료 정산2개 동시×5회/구성 재고1개 반환, 구매/만료4회/구성에서 아이템1·합계4000Token 보존. DB2100→구매100 응답/DB2000, 400건입력 포화 후 cleanup/재접속 확인. 보상23Token 실패 기록→재시작복구→확정기록재생에서 원장1·잔액2023 유지. StopLocal1초한도에서 프로세스/state 유지 후 정상drain 확인.
+비밀번호는 salt16bytes·hash32bytes·PBKDF2-HMAC-SHA256600000회, 독립 KAT·salt차이·대소문자·평문 거부와 잘못된hex 이전 rollback을 확인했다. 신규 schema v3·18프로시저 및 NewWodLocal 반복 준비/CheckOnly PASS. 기존 비ASCII 평문은 추측변환하지 않는다.
+보고서 docs/development/DATABASE_CONSISTENCY.html, 원시근거 evidence/database-consistency-20261029.json. Chromium1440/1920/390px overflow/JS오류0와 실제PNG 확인. Archify9/9showcase·4개desktop containment·light/dark 실제PNG, 선택이유 README와 JSON/HTML 관리.
+로컬복구는 디스크확정 이후 동일작업 재생을 보호한다. 기존wire의 원본eventID/ACK·서버상호인증·시험용랜덤거래·TLS/길이/시도제한·분산계정소유·단일SQLworker/실데이터쿼리계획은 후속과제다. 운영DB·블록체인·정전/디스크장애·최대부하·GUI전투는 미검증이며 기존전체빌드경고 해소를 주장하지 않는다.

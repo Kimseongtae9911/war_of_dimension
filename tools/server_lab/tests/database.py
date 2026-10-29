@@ -7,6 +7,8 @@ import sys
 import threading
 import time
 import uuid
+import hashlib
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -16,6 +18,12 @@ import pyodbc
 ABI = json.loads((ROOT / 'Shared/Protocol/tests/abi-x64-msvc.json').read_text(encoding='utf-8-sig'))
 C = dict(ABI['constants'])
 T = {item['name']: item for item in ABI['types']}
+
+
+def password_hash(password=b'testpass'):
+    salt = os.urandom(16)
+    value = hashlib.pbkdf2_hmac('sha256', password, salt, 600000)
+    return 'pbkdf2-sha256$600000$' + salt.hex() + '$' + value.hex()
 
 
 def packet(name, fmt='', *values):
@@ -69,7 +77,7 @@ def main():
     assert 'Server=(localdb)\\MSSQLLocalDB;' in connection and 'Database=NewWodTest;' in connection
     db = pyodbc.connect(connection, autocommit=True)
     prefix = 'Q' + uuid.uuid4().hex[:6]
-    buyer, seller = prefix + 'a', prefix + 'b'
+    buyer, seller, offline = prefix + 'a', prefix + 'b', prefix + 'c'
     peers, cases, samples = [], [], []
 
     def peer():
@@ -111,13 +119,26 @@ def main():
         a.auth(buyer, True)
         b.auth(seller, True)
         check('signup and DB-backed login', scalar('SELECT Token FROM dbo.user_data WHERE Player_ID=?', buyer) == 2000)
+        stored_a = scalar('SELECT Player_Password FROM dbo.user_data WHERE Player_ID=?', buyer)
+        stored_b = scalar('SELECT Player_Password FROM dbo.user_data WHERE Player_ID=?', seller)
+        check('password stored as PBKDF2 verifier', stored_a.startswith('pbkdf2-sha256$600000$') and len(stored_a) == 118 and stored_a != 'testpass')
+        check('same password has independent salts', stored_a != stored_b)
+        duplicate = peer()
+        duplicate.send('CS_LOGIN', '10s10s', buyer.encode(), b'testpass')
+        check('duplicate account login rejected', duplicate.until('SC_LOGIN_FAIL') == b'\x03')
+        duplicate.close()
         failed = peer()
         failed.send('CS_SIGN_UP', '10s10s', buyer.encode(), b'testpass')
         check('duplicate signup', failed.until('SC_LOGIN_FAIL') == b'\x02')
         failed.close()
         wrong = peer()
-        wrong.send('CS_LOGIN', '10s10s', buyer.encode(), b'wrong')
+        db.execute('EXEC dbo.SignUp ?,?', offline, password_hash())
+        wrong.send('CS_LOGIN', '10s10s', offline.encode(), b'wrong')
         check('wrong password', wrong.until('SC_LOGIN_FAIL') == b'\x01')
+        wrong.send('CS_LOGIN', '10s10s', offline.encode(), b'Testpass')
+        check('password case mismatch rejected', wrong.until('SC_LOGIN_FAIL') == b'\x01')
+        wrong.auth(offline)
+        check('failed authentication releases owner reservation')
         wrong.close()
         # 동일 TCP batch 안의 DB 쓰기 3건 뒤 조회: 순서와 실제 반영 확인.
         a.sock.sendall(packet('CS_SHOP', 'i', 0) * 3 + packet('CS_OPEN_CUSTOMIZE'))
@@ -176,6 +197,8 @@ def main():
         a.until('SC_TOKEN_NUM')
         check('unsigned price and atomic purchase', scalar('SELECT Token FROM dbo.user_data WHERE Player_ID=?', buyer) == 60000 and scalar('SELECT Token FROM dbo.user_data WHERE Player_ID=?', seller) == 42000 and scalar('SELECT COUNT(*) FROM dbo.auction_data WHERE Player_ID=?', seller) == 0)
         # 소켓 종료 직후 같은 계정 재접속: 오래된 결과가 새 세션을 오염시키지 않는다.
+        a.close()
+        time.sleep(.05)
         transient = peer()
         transient.auth(buyer)
         thread, start, errors = locked_query(transient)
@@ -184,6 +207,8 @@ def main():
         recovered = peer()
         recovered.auth(buyer)
         check('disconnect during pending DB and reconnect', not errors)
+        recovered.close()
+        time.sleep(.05)
         # 5초 query timeout은 로비 worker를 점유하지 않으며 이후 큐도 진행한다.
         timeout_peer = peer()
         timeout_peer.auth(buyer)
@@ -193,8 +218,11 @@ def main():
             raise AssertionError('query timeout did not fail')
         except (EOFError, ConnectionResetError):
             elapsed = time.perf_counter() - start
+            timeout_peer.close()
         thread.join()
         check('query timeout and fail closed', not errors and 4 <= elapsed <= 7, elapsed_seconds=elapsed)
+        recovered = peer()
+        recovered.auth(buyer)
         recovered.send('CS_OPEN_AUCTION')
         recovered.until('SC_AUCTION_PARTS_NUM')
         check('queue progresses after timeout')
@@ -203,8 +231,8 @@ def main():
         for item in peers:
             item.close()
         # 테스트가 만든 두 계정만 정리한다. 저장소/사용자 DB는 삭제하지 않는다.
-        for table in ['auction_data', 'customize_data', 'user_data']:
-            db.execute(f'DELETE dbo.{table} WHERE Player_ID IN (?,?)', buyer, seller)
+        for table in ['reward_applied', 'auction_data', 'customize_data', 'user_data']:
+            db.execute(f'DELETE dbo.{table} WHERE Player_ID IN (?,?,?)', buyer, seller, offline)
         db.close()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

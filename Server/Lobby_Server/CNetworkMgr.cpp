@@ -354,11 +354,7 @@ void CNetworkMgr::PacketExec(BASE_PACKET* _packet)
         {
             const std::string name(p->name);
             const int token = p->token;
-            if (!m_dataBaseThread->Submit([name, token](CDataBase& _database) {
-                    if (!_database.SaveToken(name, token))
-                        throw std::runtime_error("game reward persistence failed");
-                }))
-                throw std::runtime_error("DB reward queue rejected");
+            m_dataBaseThread->SubmitReward(name, token);
         }
 
 #ifdef WITH_DATABASE

@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DB 정합성과 실패 복구 경계",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 4,
+    "cellW": 150,
+    "cellH": 70,
+    "gapX": 75,
+    "gapY": 100
+  },
+  "components": [
+    {
+      "id": "login",
+      "type": "frontend",
+      "label": "로그인 요청",
+      "sublabel": "인증·소유 예약",
+      "row": 0,
+      "col": 0
+    },
+    {
+      "id": "owner",
+      "type": "security",
+      "label": "단일 소유 세션",
+      "sublabel": "중복 접속 거부",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "bounded",
+      "type": "messagebus",
+      "label": "세션 입력 상한",
+      "sublabel": "완료·정리는 별도 통과",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "atomic",
+      "type": "database",
+      "label": "DB 트랜잭션",
+      "sublabel": "잔액·재고·만료 정산",
+      "row": 0,
+      "col": 3
+    },
+    {
+      "id": "reward",
+      "type": "external",
+      "label": "게임 보상 수신",
+      "sublabel": "기존 wire 유지",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "journal",
+      "type": "messagebus",
+      "label": "전용 기록 worker",
+      "sublabel": "디스크 확정 후 SQL 제출",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "보상 적용 원장",
+      "sublabel": "같은 작업 재시도는 1회",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "finish",
+      "type": "backend",
+      "label": "완료·정상 종료",
+      "sublabel": "미완료 보존·다음 실행 복구",
+      "row": 1,
+      "col": 3
+    }
+  ],
+  "connections": [
+    {
+      "from": "login",
+      "to": "owner"
+    },
+    {
+      "from": "owner",
+      "to": "bounded"
+    },
+    {
+      "from": "bounded",
+      "to": "atomic"
+    },
+    {
+      "from": "reward",
+      "to": "journal"
+    },
+    {
+      "from": "journal",
+      "to": "ledger"
+    },
+    {
+      "from": "ledger",
+      "to": "finish"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "계정·세션",
+      "items": [
+        "로그인 완료는 전역 소유 경계에서 판정",
+        "입력 포화가 완료·cleanup을 막지 않음"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "데이터 정합성",
+      "items": [
+        "만료 삭제와 재고 반환을 원자적으로 실행",
+        "보상 재처리는 원장으로 중복 반영 방지"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "비용과 한계",
+      "items": [
+        "기록 worker를 종료한 뒤 DB 큐 drain",
+        "디스크 확정 이전·legacy 중복 패킷은 별도 계약"
+      ]
+    }
+  ]
+}

@@ -31,6 +31,9 @@ class CDataBase
 
     bool SavePlayerInfo(const std::string& _id, const PlayerInfo& _playerInfo);
     bool SaveToken(const std::string& _id, int _token);
+    PlayerInfo ReadBalance(const std::string& _id);
+    void ApplyReward(const std::string& _operation, const std::string& _id, int _token);
+    std::wstring JournalNamespace();
     bool SaveShopBuyInfo(const std::string& _id, const int _shopType, const int _shopNum);
     bool RegisterAuction(const std::string& _id, const int _shopType, const int _shopNum, const int _buyPrice, const std::string& _deadline);
     bool BuyAuction(const std::string& _seller, const std::string& _myID, short _type, short _num, unsigned short _price);
@@ -49,6 +52,7 @@ class CDataBase
     bool FetchRow(SQLHSTMT _hstmt);
     void CheckResult(SQLRETURN _result, SQLHSTMT _hstmt);
     void ExecuteDirect(const std::wstring& _sql);
+    bool VerifyCredential(const std::string& _id, const std::string& _password, std::string& _encoded);
 
     template <typename T> bool BindParameter(SQLHSTMT _hstmt, int _index, const T& _value);
 

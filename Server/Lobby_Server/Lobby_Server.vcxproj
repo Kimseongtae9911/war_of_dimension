@@ -153,6 +153,9 @@
     <ClInclude Include="CBlock.h" />
     <ClInclude Include="CClient.h" />
     <ClInclude Include="CDataBase.h" />
+    <ClInclude Include="RewardJournal.h" />
+    <ClInclude Include="AccountOwners.h" />
+    <ClInclude Include="PasswordHash.h" />
     <ClInclude Include="CDataBaseThread.h" />
     <ClInclude Include="CDummyClient.h" />
     <ClInclude Include="CMatchMgr.h" />

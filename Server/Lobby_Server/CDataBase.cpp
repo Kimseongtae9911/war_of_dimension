@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CDataBase.h"
+#include "PasswordHash.h"
 
 namespace wod_server
 {
@@ -92,11 +93,15 @@ void CDataBase::Disconnect()
 
 bool CDataBase::GetPlayerInfo(const std::string& _id, const std::string& _password, PlayerInfo& _playerInfo)
 {
+    std::string encoded;
+    if (!VerifyCredential(_id, _password, encoded))
+        return false;
+
     SQLHSTMT hstmt;
     if (!AllocStatementHandle(hstmt))
         return false;
 
-    if (!ExecuteSP(hstmt, STORED_PROCEDURE::GET_PLAYER_INFO, _id, _password))
+    if (!ExecuteSP(hstmt, STORED_PROCEDURE::GET_PLAYER_INFO, _id, encoded))
     {
         FreeStatementHandle(hstmt);
         return false;
@@ -133,6 +138,8 @@ bool CDataBase::GetPlayerInfo(const std::string& _id, const std::string& _passwo
     CheckResult(SQLBindCol(hstmt, 28, SQL_C_SHORT, &_playerInfo.m_model.Chr_LegRight, sizeof(short), &indicator), hstmt);
     CheckResult(SQLBindCol(hstmt, 29, SQL_C_SHORT, &_playerInfo.m_model.Chr_LegLeft, sizeof(short), &indicator), hstmt);
 
+    CheckResult(SQLBindCol(hstmt, 30, SQL_C_UBIGINT, &_playerInfo.m_balanceVersion, sizeof(_playerInfo.m_balanceVersion), &indicator), hstmt);
+
     SQLRETURN ret = FetchRow(hstmt) ? SQL_SUCCESS : SQL_NO_DATA;
     if (!SQL_SUCCEEDED(ret))
     {
@@ -159,6 +166,73 @@ bool CDataBase::SavePlayerInfo(const std::string& _id, const PlayerInfo& _info)
 bool CDataBase::SaveToken(const std::string& _id, int _token)
 {
     return ExecuteSP(STORED_PROCEDURE::SAVE_TOKEN, _id, _token);
+}
+
+PlayerInfo CDataBase::ReadBalance(const std::string& _id)
+{
+    SQLHSTMT statement = nullptr;
+    if (!AllocStatementHandle(statement))
+        throw std::runtime_error("balance allocation failed");
+
+    const wchar_t* sql = L"SELECT Token,CONVERT(bigint,BalanceVersion) FROM dbo.user_data WHERE Player_ID=?";
+    CheckResult(SQLPrepareW(statement, reinterpret_cast<SQLWCHAR*>(const_cast<wchar_t*>(sql)), SQL_NTS), statement);
+    if (!BindParameter(statement, 1, _id))
+        throw std::runtime_error("balance parameter binding failed");
+
+    CheckResult(SQLExecute(statement), statement);
+    PlayerInfo balance{};
+    CheckResult(SQLBindCol(statement, 1, SQL_C_LONG, &balance.m_tokenNum, sizeof(balance.m_tokenNum), nullptr), statement);
+    CheckResult(SQLBindCol(statement, 2, SQL_C_UBIGINT, &balance.m_balanceVersion, sizeof(balance.m_balanceVersion), nullptr), statement);
+    const bool found = FetchRow(statement);
+    FreeStatementHandle(statement);
+    ThrowIfFailed();
+    if (!found)
+        throw std::runtime_error("balance account missing");
+
+    return balance;
+}
+
+void CDataBase::ApplyReward(const std::string& _operation, const std::string& _id, int _token)
+{
+    SQLHSTMT statement = nullptr;
+    if (!AllocStatementHandle(statement))
+        throw std::runtime_error("reward allocation failed");
+
+    const wchar_t* sql = L"EXEC dbo.ApplyReward ?,?,?";
+    CheckResult(SQLPrepareW(statement, reinterpret_cast<SQLWCHAR*>(const_cast<wchar_t*>(sql)), SQL_NTS), statement);
+    if (!BindParameters(statement, 1, _operation, _id, _token))
+        throw std::runtime_error("reward parameter binding failed");
+
+    auto result = SQLExecute(statement);
+    while (SQL_SUCCEEDED(result))
+        result = SQLMoreResults(statement);
+
+    if (result != SQL_NO_DATA)
+        CheckResult(result, statement);
+
+    FreeStatementHandle(statement);
+    ThrowIfFailed();
+}
+
+std::wstring CDataBase::JournalNamespace()
+{
+    SQLHSTMT statement = nullptr;
+    if (!AllocStatementHandle(statement))
+        throw std::runtime_error("reward namespace allocation failed");
+
+    const wchar_t* sql = L"SELECT CONVERT(nvarchar(36),service_broker_guid)+N'|'+name FROM sys.databases WHERE database_id=DB_ID()";
+    CheckResult(SQLExecDirectW(statement, reinterpret_cast<SQLWCHAR*>(const_cast<wchar_t*>(sql)), SQL_NTS), statement);
+    if (!FetchRow(statement))
+        throw std::runtime_error("Cannot determine reward database namespace");
+
+    SQLWCHAR identity[256]{};
+    SQLLEN bytes = 0;
+    CheckResult(SQLGetData(statement, 1, SQL_C_WCHAR, identity, sizeof(identity), &bytes), statement);
+    FreeStatementHandle(statement);
+    if (bytes <= 0 || bytes >= sizeof(identity))
+        throw std::runtime_error("Invalid reward database namespace");
+
+    return std::wstring(reinterpret_cast<wchar_t*>(identity));
 }
 
 bool CDataBase::RegisterAuction(const std::string& _id, const int _shopType, const int _shopNum, const int _buyPrice, const std::string& _deadLine)
@@ -326,65 +400,46 @@ bool CDataBase::CheckIdExists(const std::string& _id)
 
 bool CDataBase::CheckPassword(const std::string& _id, const std::string& _password)
 {
-    SQLHSTMT hstmt;
-    if (!AllocStatementHandle(hstmt))
+    std::string encoded;
+
+    return VerifyCredential(_id, _password, encoded);
+}
+
+bool CDataBase::VerifyCredential(const std::string& _id, const std::string& _password, std::string& _encoded)
+{
+    SQLHSTMT statement = nullptr;
+    if (!AllocStatementHandle(statement))
         return false;
 
-    std::string query = "SELECT COUNT(*) FROM dbo.user_data WHERE Player_ID = ? AND Player_Password = ?";
+    const wchar_t* sql = L"SELECT Player_Password FROM dbo.user_data WHERE Player_ID=?";
+    CheckResult(SQLPrepareW(statement, reinterpret_cast<SQLWCHAR*>(const_cast<wchar_t*>(sql)), SQL_NTS), statement);
+    if (!BindParameter(statement, 1, _id))
+        throw std::runtime_error("credential parameter binding failed");
 
-    SQLRETURN ret = SQLPrepareA(hstmt, (SQLCHAR*)query.c_str(), SQL_NTS);
-    if (ret != SQL_SUCCESS)
+    CheckResult(SQLExecute(statement), statement);
+    if (!FetchRow(statement))
     {
-        if (ret != SQL_NO_DATA)
-            Show_Error(hstmt, SQL_HANDLE_STMT, ret);
+        FreeStatementHandle(statement);
+        ThrowIfFailed();
 
-        FreeStatementHandle(hstmt);
         return false;
     }
 
-    if (!BindParameter(hstmt, 1, _id))
-    {
-        Show_Error(hstmt, SQL_HANDLE_STMT, SQL_ERROR);
-        FreeStatementHandle(hstmt);
+    char encoded[257]{};
+    SQLLEN length = 0;
+    CheckResult(SQLGetData(statement, 1, SQL_C_CHAR, encoded, sizeof(encoded), &length), statement);
+    FreeStatementHandle(statement);
+    if (length <= 0 || length >= sizeof(encoded))
         return false;
-    }
-    if (!BindParameter(hstmt, 2, _password))
-    {
-        Show_Error(hstmt, SQL_HANDLE_STMT, SQL_ERROR);
-        FreeStatementHandle(hstmt);
-        return false;
-    }
 
-    ret = SQLExecute(hstmt);
-    if (ret != SQL_SUCCESS)
-    {
-        if (ret != SQL_NO_DATA)
-            Show_Error(hstmt, SQL_HANDLE_STMT, ret);
+    _encoded.assign(encoded, static_cast<size_t>(length));
 
-        FreeStatementHandle(hstmt);
-        return false;
-    }
-
-    SQLINTEGER result = 0;
-    CheckResult(SQLBindCol(hstmt, 1, SQL_C_LONG, &result, sizeof(result), NULL), hstmt);
-
-    ret = FetchRow(hstmt) ? SQL_SUCCESS : SQL_NO_DATA;
-    if (ret != SQL_SUCCESS)
-    {
-        if (ret != SQL_NO_DATA)
-            Show_Error(hstmt, SQL_HANDLE_STMT, ret);
-
-        FreeStatementHandle(hstmt);
-        return false;
-    }
-
-    FreeStatementHandle(hstmt);
-    return result > 0;
+    return PasswordHash::Verify(_password, _encoded);
 }
 
 bool CDataBase::SignUp(const std::string& _id, const std::string& _password)
 {
-    return ExecuteSP(STORED_PROCEDURE::SIGN_UP, _id, _password);
+    return ExecuteSP(STORED_PROCEDURE::SIGN_UP, _id, PasswordHash::Encode(_password));
 }
 
 std::vector<AuctionInfo> CDataBase::GetAuctionInfo(int _pageNum)
@@ -392,23 +447,6 @@ std::vector<AuctionInfo> CDataBase::GetAuctionInfo(int _pageNum)
     SQLHSTMT hstmt;
     if (!AllocStatementHandle(hstmt))
         return {};
-
-    // You might want to create a separate SP for deleting expired auctions
-    // For now, keeping the direct delete query
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()));
-    std::ostringstream deadLine;
-    std::tm localTime;
-    localtime_s(&localTime, &currentTime);
-    deadLine << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
-    std::string deleteQuery = "DELETE FROM auction_data WHERE DeadLine <= '" + deadLine.str() + "'";
-    const auto deleted = SQLExecDirectA(hstmt, (SQLCHAR*)deleteQuery.c_str(), SQL_NTS);
-    if (!SQL_SUCCEEDED(deleted) && deleted != SQL_NO_DATA)
-    {
-        Show_Error(hstmt, SQL_HANDLE_STMT, deleted);
-        FreeStatementHandle(hstmt);
-        return {};
-    }
-    SQLCloseCursor(hstmt);
 
     if (!ExecuteSP(hstmt, STORED_PROCEDURE::GET_AUCTION_INFO, _pageNum))
     {
@@ -559,6 +597,10 @@ void CDataBase::ValidateSchema()
     std::wstring sql = L"IF OBJECT_ID('dbo.user_data','U') IS NULL OR OBJECT_ID('dbo.auction_data','U') IS NULL THROW 50001, 'Missing DB tables', 1; ";
     for (const auto& entry : m_spMap)
         sql += L"IF OBJECT_ID('dbo." + entry.second + L"','P') IS NULL THROW 50002, 'Missing DB procedure', 1; ";
+
+    sql += L"IF OBJECT_ID('dbo.SettleExpiredAuctions','P') IS NULL OR OBJECT_ID('dbo.ApplyReward','P') IS NULL OR ISNULL(COL_LENGTH('dbo.user_data','BalanceVersion'),0) <> 8 "
+           L"OR OBJECT_ID('dbo.reward_applied','U') IS NULL OR ISNULL(COL_LENGTH('dbo.user_data','Player_Password'),0)<118 THROW 50003,'Missing DB consistency migration',1; "
+           L"IF OBJECT_ID('dbo.WodLocalSchema','U') IS NOT NULL AND NOT EXISTS(SELECT 1 FROM dbo.WodLocalSchema WHERE Version=3) THROW 50004,'Unsupported DB schema version',1;";
 
     ExecuteDirect(sql);
 }

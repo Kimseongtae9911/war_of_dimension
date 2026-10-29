@@ -16,6 +16,7 @@ class LobbyDispatcher
         bool m_global;
         std::function<void()> m_execute;
         uint64_t m_enqueuedUs;
+        size_t m_bytes = 0;
     };
 
     // 세션 작업의 순서를 유지하고 현재 소유 채널 또는 전역 큐로 전달한다.
@@ -32,6 +33,7 @@ class LobbyDispatcher
         {
             std::lock_guard lock(m_mutex);
             m_work.clear();
+            m_bytes = 0;
         }
 
       private:
@@ -41,21 +43,48 @@ class LobbyDispatcher
         int m_channel = -1;
         bool m_scheduled = false;
         bool m_paused = false;
+        size_t m_bytes = 0;
     };
 
-    explicit LobbyDispatcher(size_t _channels)
+    explicit LobbyDispatcher(size_t _channels, size_t _inboxJobs = 256, size_t _inboxBytes = 65536) : m_inboxJobs(_inboxJobs), m_inboxBytes(_inboxBytes)
     {
+        if (!_inboxJobs || !_inboxBytes)
+            throw std::invalid_argument("session inbox limits must be positive");
+
         for (size_t i = 0; i < _channels; ++i)
             m_channels.push_back(std::make_unique<Target>());
     }
 
-    bool Post(SessionWorkQueue& _workQueue, bool _global, std::function<void()> _work)
+    bool Post(SessionWorkQueue& _workQueue, bool _global, std::function<void()> _work, size_t _bytes = 0)
     {
         std::lock_guard lock(_workQueue.m_mutex);
         if (m_stopping.load())
             return false;
 
-        _workQueue.m_work.push_back({_global, std::move(_work), Timestamp()});
+        if (_workQueue.m_work.size() >= m_inboxJobs || _bytes > m_inboxBytes || _workQueue.m_bytes > m_inboxBytes - _bytes)
+        {
+            ++m_rejected;
+
+            return false;
+        }
+
+        _workQueue.m_work.push_back({_global, std::move(_work), Timestamp(), _bytes});
+        _workQueue.m_bytes += _bytes;
+        ++m_pending;
+        if (!_workQueue.m_scheduled && !_workQueue.m_paused)
+            ScheduleLocked(_workQueue);
+
+        return true;
+    }
+
+    // 세션마다 1회 예약하는 cleanup 전용이다. 입력 포화로 정리가 거부되면 안 된다.
+    bool PostCleanup(SessionWorkQueue& _workQueue, std::function<void()> _work)
+    {
+        std::lock_guard lock(_workQueue.m_mutex);
+        if (m_stopping.load())
+            return false;
+
+        _workQueue.m_work.push_back({true, std::move(_work), Timestamp()});
         ++m_pending;
         if (!_workQueue.m_scheduled && !_workQueue.m_paused)
             ScheduleLocked(_workQueue);
@@ -144,7 +173,8 @@ class LobbyDispatcher
         std::ostringstream out;
         out << "{\"schema_version\":1,\"timing_enabled\":" << (wod::core::JobMetrics::Enabled() ? "true" : "false") << ",\"channel_count\":" << m_channels.size() << ",\"max_parallel\":" << m_maxParallel.load()
             << ",\"owner_violations\":" << m_violations.load() << ",\"inbox_pending\":" << m_pending.load() << ",\"global_jobs\":" << m_globalJobs.load() << ",\"global_pending\":" << m_global.m_pending.load()
-            << ",\"global_wait_us\":" << m_global.m_waitUs.load() << ",\"global_busy_us\":" << m_global.m_busyUs.load() << ",\"channels\":[";
+            << ",\"global_wait_us\":" << m_global.m_waitUs.load() << ",\"global_busy_us\":" << m_global.m_busyUs.load() << ",\"inbox_rejected\":" << m_rejected.load() << ",\"inbox_limit_jobs\":" << m_inboxJobs
+            << ",\"inbox_limit_bytes\":" << m_inboxBytes << ",\"channels\":[";
         bool comma = false;
         for (size_t i = 0; i < m_channels.size(); ++i)
         {
@@ -217,6 +247,7 @@ class LobbyDispatcher
             std::lock_guard lock(_workQueue.m_mutex);
             work = std::move(_workQueue.m_work.front());
             _workQueue.m_work.pop_front();
+            _workQueue.m_bytes -= work.m_bytes;
             --m_pending;
             --_target.m_pending;
         }
@@ -278,6 +309,9 @@ class LobbyDispatcher
     }
 
     wod::core::JobScheduler m_scheduler;
+    const size_t m_inboxJobs;
+    const size_t m_inboxBytes;
+    std::atomic_uint64_t m_rejected = 0;
     Target m_global;
     std::vector<std::unique_ptr<Target>> m_channels;
     std::shared_mutex m_world;

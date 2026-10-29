@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DB 정합성 수정과 복구 검증</title>
+<style>
+:root{--ink:#152b3d;--muted:#4d6170;--paper:#f3f5f4;--line:#d6dfdd;--green:#08745f}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'Malgun Gothic',sans-serif}main{max-width:1140px;margin:auto;padding:48px 30px 70px}h1{font-size:38px;line-height:1.2;margin:10px 0 20px}h2{font-size:25px;margin:0 0 16px}h3{font-size:19px;margin:0 0 8px}p{margin:8px 0 16px}a{color:#006856}small,.muted{color:var(--muted)}.eyebrow{font-size:13px;letter-spacing:.1em;color:var(--green);font-weight:bold}.lead{font-size:20px}section{margin:36px 0}.cards,.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card,figure,.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:22px}.value{display:block;font-size:32px;font-weight:bold;line-height:1.3;color:var(--green)}figure{margin:18px 0}figure svg{display:block;width:100%;height:auto}figcaption{font-size:14px;color:var(--muted);margin-top:8px}.flow{padding:20px;background:#123744;color:white;border-radius:14px;font-size:18px;line-height:2}table{width:100%;border-collapse:collapse;background:white;font-size:15px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:12px;overflow-wrap:anywhere}th{background:#e6eeeb}code{font-size:14px;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#123744;color:white;padding:18px;border-radius:12px;font-size:14px}.note{border-left:4px solid #d3a342;padding:10px 18px;background:#fff8e8}@media(max-width:700px){main{padding:28px 16px}h1{font-size:29px}.cards,.grid{grid-template-columns:1fr}th,td{padding:9px;font-size:13px}.card{padding:18px}}
+</style><main>
+<div class="eyebrow">WAR OF DIMENSION · 2026.10.29 · LOCAL DB</div>
+<h1>데이터 손실을 막고<br>실패한 보상을 복구한다</h1>
+<p class="lead">경매 만료·중복 로그인·잔액 적용·입력 적체·종료·보상 복구·비밀번호 저장 결함을 수정하고, 두 빌드 구성의 실제 TCP→ODBC 경로로 검증했다.</p>
+<div class="cards"><div class="card"><span class="value">0 → 1개</span>만료 경매 아이템 보존<br><small>2개 정산 요청 동시 실행 × 5회/구성</small></div><div class="card"><span class="value">100 → 0 Token</span>구매 응답과 DB의 차이<br><small>수정 전 재현과 수정 후 기능 시나리오</small></div><div class="card"><span class="value">26 / 26</span>추가 정합성 검사 통과<br><small>Debug·Release 각각, 기존 DB 25개 별도</small></div></div>
+<p class="note">보상 기록을 디스크에 확정한 이후의 재처리를 보호한다. 수신 원본의 고유 ID·ACK가 없는 기존 프로토콜, 디스크 확정 전 강제 종료, 운영 DB·블록체인·GUI 조작은 이번 보장 범위에 포함되지 않는다. PBKDF2와 기록 flush의 추가 비용은 존재하며 최대 처리량은 미측정이다.</p>
+<section id="causes"><h2>분석한 원인</h2><div class="grid">
+<article class="panel"><h3>삭제와 반환이 분리됨</h3><p>등록 때 재고를 차감한 뒤, 만료 조회에서 경매 행만 삭제했다. 아이템은 어느 소유자에게도 돌아가지 않았다.</p><code>RegisterAuction: 재고 −1<br>GetAuctionInfo: DELETE 만료 행</code></article>
+<article class="panel"><h3>메모리 잔액을 다시 계산</h3><p>같은 계정의 여러 연결이 서로 다른 캐시를 가지고 구매 차액을 적용했다. 외부 갱신·보상과 비동기 완료가 교차하면 최신 잔액도 덮일 수 있었다.</p><code>cachedToken − price</code></article>
+<article class="panel"><h3>실패·정체의 보존 경계 부재</h3><p>보상은 메모리에만 있었고 paused 세션 입력에는 상한이 없었다. 종료 도구가 15초 후 서버를 강제 종료할 수 있었으며 비밀번호는 평문이었다.</p></article></div></section>
+<section id="solution"><h2>해결 방식</h2><div class="flow">세션 예약 → 입력 상한 → SQL 전용 FIFO → DB 확정 잔액·rowversion → 세션 완료<br>보상 수신 → 전용 기록 worker → flush·작업 ID → SQL 원장 트랜잭션 → 기록 삭제</div>
+<p>만료 삭제와 재고 반환은 한 트랜잭션으로 묶었다. 계정당 소유 연결을 하나로 제한하고 <code>BalanceVersion</code>이 오래된 결과는 적용하지 않는다. 세션 입력은 256건·65,536 bytes로 제한하며 완료와 cleanup은 별도로 통과한다.</p>
+<p>기록 worker가 디스크 I/O를 담당하므로 로비 잠금에서 파일 flush를 기다리지 않는다. 종료는 기록 worker join → DB drain 순서다. SQL 실패 기록은 다음 시작에 재생하고 <code>reward_applied.Operation_ID</code>로 같은 기록의 재적용을 막는다. 비밀번호는 salt 16 bytes·hash 32 bytes의 PBKDF2-HMAC-SHA256 600,000회로 저장하며 계산은 DB worker에서 실행한다.</p>
+<pre>// 현재 보상 처리의 핵심 순서 (설명용 축약)
+record = journal.Append(account, delta); // write + flush + promote
+database.ApplyReward(record);           // ledger + token transaction
+balance = database.ReadBalance(account);
+journal.Complete(record);               // 확정 이후만 파일 제거</pre>
+<p><a href="../diagrams/database-consistency/implementation.html">구조도</a> · <a href="../diagrams/database-consistency/README.md">선택 이유·경합·비용</a></p></section>
+<section id="measurements"><h2>실제 측정한 내용</h2>
+<p>Windows x64 / MSVC v145 / LocalDB / ODBC Driver 17. 격리 DB와 합성 계정만 사용했다. 아래 전후 그래프는 결함 재현과 수정 후 기능 검증이며 처리량 벤치마크가 아니다.</p>
+<figure><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="690.733281pt" height="200.588313pt" viewBox="0 0 690.733281 200.588313" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-29T13:25:14.169754</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 200.588313
+L 690.733281 200.588313
+L 690.733281 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 35.85543 174.791477
+L 328.773281 174.791477
+L 328.773281 24.473625
+L 35.85543 24.473625
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 49.169877 174.791477
+L 140.268731 174.791477
+L 140.268731 174.791477
+L 49.169877 174.791477
+z
+" clip-path="url(#pe8ecd644ef)" style="fill: #da654f"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 224.35998 174.791477
+L 315.458833 174.791477
+L 315.458833 59.16236
+L 224.35998 59.16236
+z
+" clip-path="url(#pe8ecd644ef)" style="fill: #17846e"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m29e743495d" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m29e743495d" x="94.719304" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="94.719304" y="191.186164" transform="rotate(-0 94.719304 191.186164)">수정 전 재현</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m29e743495d" x="269.909407" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="269.909407" y="191.186164" transform="rotate(-0 269.909407 191.186164)">수정 후 검증</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_3">
+      <defs>
+       <path id="m8a903fa32e" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m8a903fa32e" x="35.85543" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="28.85543" y="179.190402" transform="rotate(-0 28.85543 179.190402)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m8a903fa32e" x="35.85543" y="59.16236" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="28.85543" y="63.561286" transform="rotate(-0 28.85543 63.561286)">1</text>
+     </g>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="16.594688" y="99.632551" transform="rotate(-90 16.594688 99.632551)">개 (높을수록 보존)</text>
+    </g>
+   </g>
+   <g id="patch_5">
+    <path d="M 35.85543 174.791477
+L 35.85543 24.473625
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 35.85543 174.791477
+L 328.773281 174.791477
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="94.719304" y="169.530352" transform="rotate(-0 94.719304 169.530352)">0</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="269.909407" y="53.901235" transform="rotate(-0 269.909407 53.901235)">1</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 13.2px; font-family: 'Malgun Gothic'; text-anchor: middle" x="182.314355" y="18.473625" transform="rotate(-0 182.314355 18.473625)">만료 정산 후 보유 아이템</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_7">
+    <path d="M 390.61543 174.791477
+L 683.533281 174.791477
+L 683.533281 24.473625
+L 390.61543 24.473625
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 403.929877 174.791477
+L 495.028731 174.791477
+L 495.028731 54.537195
+L 403.929877 54.537195
+z
+" clip-path="url(#p14916b83eb)" style="fill: #da654f"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 579.11998 174.791477
+L 670.218833 174.791477
+L 670.218833 174.791477
+L 579.11998 174.791477
+z
+" clip-path="url(#p14916b83eb)" style="fill: #17846e"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m29e743495d" x="449.479304" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="449.479304" y="191.186164" transform="rotate(-0 449.479304 191.186164)">수정 전 재현</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m29e743495d" x="624.669407" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="624.669407" y="191.186164" transform="rotate(-0 624.669407 191.186164)">수정 후 검증</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_3">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m8a903fa32e" x="390.61543" y="174.791477" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="383.61543" y="179.190402" transform="rotate(-0 383.61543 179.190402)">0</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m8a903fa32e" x="390.61543" y="114.664336" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="383.61543" y="119.063262" transform="rotate(-0 383.61543 119.063262)">50</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m8a903fa32e" x="390.61543" y="54.537195" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="383.61543" y="58.936121" transform="rotate(-0 383.61543 58.936121)">100</text>
+     </g>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="359.2375" y="99.632551" transform="rotate(-90 359.2375 99.632551)">Token (낮을수록 일치)</text>
+    </g>
+   </g>
+   <g id="patch_10">
+    <path d="M 390.61543 174.791477
+L 390.61543 24.473625
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 390.61543 174.791477
+L 683.533281 174.791477
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="449.479304" y="49.276071" transform="rotate(-0 449.479304 49.276071)">100</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="624.669407" y="169.530352" transform="rotate(-0 624.669407 169.530352)">0</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 13.2px; font-family: 'Malgun Gothic'; text-anchor: middle" x="537.074355" y="18.473625" transform="rotate(-0 537.074355 18.473625)">구매 응답과 DB 잔액의 차이</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pe8ecd644ef">
+   <rect x="35.85543" y="24.473625" width="292.917852" height="150.317852"/>
+  </clipPath>
+  <clipPath id="p14916b83eb">
+   <rect x="390.61543" y="24.473625" width="292.917852" height="150.317852"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption>수정 전: 경매 1개 등록·만료 뒤 보유 0개, 중복 로그인 연속 구매 응답1900/DB1800. 수정 후: 만료 반환 1개, 단일 소유·DB 잔액 적용. 수정 후 잔액 검사는 외부 갱신2100 뒤 구매100으로 응답/DB2000을 대조했다. 입력 시나리오가 달라 성능 전후 비교로 해석하지 않는다.</figcaption></figure>
+<figure><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="647.407024pt" height="182.770773pt" viewBox="0 0 647.407024 182.770773" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-29T13:25:14.195826</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 182.770773
+L 647.407024 182.770773
+L 647.407024 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 37.676832 156.888
+L 595.676832 156.888
+L 595.676832 7.2
+L 37.676832 7.2
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="mf970182e26" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mf970182e26" x="63.040469" y="156.888" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="63.040469" y="173.282688" transform="rotate(-0 63.040469 173.282688)">SQL 실패 → 파일 보존</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#mf970182e26" x="316.676832" y="156.888" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="316.676832" y="173.282688" transform="rotate(-0 316.676832 173.282688)">재시작 → 보상 적용</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#mf970182e26" x="570.313196" y="156.888" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="570.313196" y="173.368625" transform="rotate(-0 570.313196 173.368625)">확정 기록 재생 → 중복 방지</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_4">
+      <path d="M 37.676832 156.888
+L 595.676832 156.888
+" clip-path="url(#p4a881aa781)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_5">
+      <defs>
+       <path id="m2fc6153d3a" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m2fc6153d3a" x="37.676832" y="156.888" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="30.676832" y="161.286926" transform="rotate(-0 30.676832 161.286926)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_6">
+      <path d="M 37.676832 88.848
+L 595.676832 88.848
+" clip-path="url(#p4a881aa781)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m2fc6153d3a" x="37.676832" y="88.848" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="30.676832" y="93.246926" transform="rotate(-0 30.676832 93.246926)">1</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_8">
+      <path d="M 37.676832 20.808
+L 595.676832 20.808
+" clip-path="url(#p4a881aa781)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m2fc6153d3a" x="37.676832" y="20.808" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: end" x="30.676832" y="25.206926" transform="rotate(-0 30.676832 25.206926)">2</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="18.41609" y="82.044" transform="rotate(-90 18.41609 82.044)">동일 보상 적용 횟수</text>
+    </g>
+   </g>
+   <g id="line2d_10">
+    <path d="M 63.040469 156.888
+L 316.676832 88.848
+L 570.313196 88.848
+" clip-path="url(#p4a881aa781)" style="fill: none; stroke: #17846e; stroke-width: 3; stroke-linecap: square"/>
+    <defs>
+     <path id="mad05268705" d="M 0 3
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132
+C 2.683901 1.55874 3 0.795609 3 0
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132
+C 1.55874 -2.683901 0.795609 -3 0 -3
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132
+C -2.683901 -1.55874 -3 -0.795609 -3 0
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132
+C -1.55874 2.683901 -0.795609 3 0 3
+z
+" style="stroke: #17846e"/>
+    </defs>
+    <g clip-path="url(#p4a881aa781)">
+     <use xlink:href="#mad05268705" x="63.040469" y="156.888" style="fill: #17846e; stroke: #17846e"/>
+     <use xlink:href="#mad05268705" x="316.676832" y="88.848" style="fill: #17846e; stroke: #17846e"/>
+     <use xlink:href="#mad05268705" x="570.313196" y="88.848" style="fill: #17846e; stroke: #17846e"/>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 37.676832 156.888
+L 37.676832 7.2
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 37.676832 156.888
+L 595.676832 156.888
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="63.040469" y="148.7232" transform="rotate(-0 63.040469 148.7232)">0</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="316.676832" y="80.6832" transform="rotate(-0 316.676832 80.6832)">1</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'Malgun Gothic'; text-anchor: middle" x="570.313196" y="80.6832" transform="rotate(-0 570.313196 80.6832)">1</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p4a881aa781">
+   <rect x="37.676832" y="7.2" width="558" height="149.688"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption>각 구성에서 독립 서버 3회 실행. 없는 계정에 대한 SQL 실패 기록을 보존하고, 계정 생성 뒤 재시작하여 23 Token을 지급했다. 확정된 기록을 복원해 재시작해도 원장1건·잔액2023이 유지됐다. 실제 정전 실험은 아니다.</figcaption></figure>
+<table><thead><tr><th>검사</th><th>Debug</th><th>Release</th><th>판정 범위</th></tr></thead><tbody>
+<tr><td>Core / ABI</td><td>1694 PASS</td><td>1694 PASS</td><td>110 types / 106 constants 동일</td></tr>
+<tr><td>기존 DB TCP 통합</td><td>25/25</td><td>25/25</td><td>로그인·구매·rollback·timeout·순서</td></tr>
+<tr><td>추가 정합성</td><td>26/26</td><td>26/26</td><td>만료/구매 경합·보상 재시작·이전 rollback</td></tr>
+<tr><td>설정 실패 / DB 없는 smoke</td><td>3/3 · 연결 PASS</td><td>3/3 · 연결 PASS</td><td>서버 모드, 클라이언트 창 미검사</td></tr>
+<tr><td>서버·클라이언트 빌드</td><td>PASS</td><td>PASS</td><td>경매 최초 페이지 0기반 수정 포함, GUI 클릭 미검사</td></tr>
+<tr><td>기존 네트워크 회귀</td><td>이번 미실행</td><td>7그룹 PASS</td><td>12개 네트워크·4인 전환2종·초기화 실패4종</td></tr>
+</tbody></table>
+<p>추가 검사에서 구매/만료 경합 4회/구성 모두 아이템1개·합계4000 Token을 유지했다. 400건 입력 flood는 상한 초과 후 연결을 닫고 소유권을 해제해 재접속했다. 1초로 줄인 종료 대기 한도에서도 살아 있는 프로세스와 실행 기록을 유지했고, SQL 잠금 해제 후 정상 drain·자원0을 확인했다.</p>
+<p>보상17 Token의 수신부터 온라인 잔액 통지까지 관측값은 Debug 17.563 ms, Release 16.092 ms이다. 각1회·루프백·낮은 부하의 관측이며 p99나 서비스 처리량을 뜻하지 않는다. 기본 PBKDF2 비용을 포함한 로그인 지연의 별도 전후 측정은 하지 않았다.</p>
+<p>계정 비밀번호의 평문 이전과 잘못된 형식의 이전 실패 rollback을 검증했다. 새 스키마 v3·18개 프로시저 준비 및 반복 실행을 확인했다. 기존 전체 빌드 경고가 해소됐다고 주장하지 않는다. 새 검증의 모든 서버는 정상 종료했고 pending/sockets/leased=0이다.</p></section>
+<section id="remaining"><h2>추가 개선할 부분</h2><table><thead><tr><th>항목</th><th>영향</th><th>상태·근거</th><th>다음 대응</th></tr></thead><tbody>
+<tr><td>보상 원본 ID·ACK</td><td>디스크 확정 전 유실, 별도 수신 중복 식별 불가</td><td>기존 account/time/delta wire 유지</td><td>송신 outbox와 서버 인증, 고유 event ID·ACK 계약 추가</td></tr>
+<tr><td>프로토타입 거래·서버 인증</td><td>실서비스 재화 신뢰 경계가 부족</td><td>CreateTransactionPacket은 시험용 랜덤 지급, 첫 게임 연결은 별도 상호 인증 없음</td><td>운영 모드에서 시험 지급 금지·검증된 거래 증명·서버 인증 설계</td></tr>
+<tr><td>인증 전송·길이·시도 제한</td><td>저장 hash만으로 네트워크 인증 안전성 완성 불가</td><td>기존 TCP·password field 길이 유지, PBKDF2는 단일 DB worker 비용 추가</td><td>TLS/인증 프로토콜·길이 확장·rate limit·독립 인증 실행 경계 검토</td></tr>
+<tr><td>계정 동일성과 다중 서버</td><td>Unicode collation·다른 프로세스 사이 소유권</td><td>로컬 ASCII 대소문자·후행 공백 검사만 통과</td><td>DB canonical account ID와 분산 lease·운영 collation 검사</td></tr>
+<tr><td>SQL 처리량·검색 비용</td><td>단일 worker의 대기, OFFSET 경매·집계 비용</td><td>최대 부하·실데이터 실행 계획 미측정</td><td>큐 대기/SQL 시간 분리 계측 후 인덱스·cursor paging·계정 shard 검토</td></tr>
+<tr><td>복구 운영·마이그레이션</td><td>손상 기록은 시작 차단, 원장 장기 증가, 비ASCII 평문 이전</td><td>자동 삭제·추측 변환 없음, 운영 DB 미적용</td><td>보존/백업/알림 정책·운영 schema signature·별도 이전 절차</td></tr>
+</tbody></table></section>
+<footer><p><a href="DATABASE_CONSISTENCY.md">재현 명령·검증 범위</a> · <a href="evidence/database-consistency-20261029.json">원시 수치·소스/바이너리 SHA-256</a> · <a href="DATABASE_IMPROVEMENT.html">초기 비동기 개선 보고서 (88d310a5)</a></p><small>저장된 로컬 검증 결과로 생성했다. 초기 snapshot은 main에 반영됐으며 이 보고서는 후속 수정 브랜치의 검증을 기록한다.</small></footer>
+</main></html>

@@ -1,0 +1,1000 @@
+{
+  "generated_at_utc": "2026-10-29T04:25:13.973899+00:00",
+  "base_commit": "88d310a5189324bd23a99357fd0c0e7b5c3260e3",
+  "branch": "codex/db-consistency-fixes",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "build": "MSVC v145 x64, Windows C++20",
+    "database": "isolated LocalDB, ODBC Driver 17, local Windows authentication"
+  },
+  "configurations": {
+    "Debug": {
+      "baseline": {
+        "ok": true,
+        "cases": [
+          {
+            "case": "signup and DB-backed login",
+            "passed": true
+          },
+          {
+            "case": "password stored as PBKDF2 verifier",
+            "passed": true
+          },
+          {
+            "case": "same password has independent salts",
+            "passed": true
+          },
+          {
+            "case": "duplicate account login rejected",
+            "passed": true
+          },
+          {
+            "case": "duplicate signup",
+            "passed": true
+          },
+          {
+            "case": "wrong password",
+            "passed": true
+          },
+          {
+            "case": "password case mismatch rejected",
+            "passed": true
+          },
+          {
+            "case": "failed authentication releases owner reservation",
+            "passed": true
+          },
+          {
+            "case": "pipelined write/write/read FIFO",
+            "passed": true
+          },
+          {
+            "case": "appearance persisted without token overwrite",
+            "passed": true
+          },
+          {
+            "case": "staking success",
+            "passed": true
+          },
+          {
+            "case": "staking persistence",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 0",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 1",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 2",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 3",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 4",
+            "passed": true
+          },
+          {
+            "case": "failed write rolls back item grant",
+            "passed": true
+          },
+          {
+            "case": "worker survives SQL failure",
+            "passed": true
+          },
+          {
+            "case": "registration uses authenticated name",
+            "passed": true
+          },
+          {
+            "case": "auction first page query contract",
+            "passed": true
+          },
+          {
+            "case": "unsigned price and atomic purchase",
+            "passed": true
+          },
+          {
+            "case": "disconnect during pending DB and reconnect",
+            "passed": true
+          },
+          {
+            "case": "query timeout and fail closed",
+            "passed": true,
+            "elapsed_seconds": 5.0154833999986295
+          },
+          {
+            "case": "queue progresses after timeout",
+            "passed": true
+          }
+        ],
+        "real_sql_lock_runs": [
+          {
+            "run": 0,
+            "sql_blocked_session_ms": 255.66890000118292,
+            "unrelated_session_ms": 0.23389999842038378
+          },
+          {
+            "run": 1,
+            "sql_blocked_session_ms": 251.17079999836278,
+            "unrelated_session_ms": 0.22109999918029644
+          },
+          {
+            "run": 2,
+            "sql_blocked_session_ms": 251.0441999984323,
+            "unrelated_session_ms": 0.14820000069448724
+          },
+          {
+            "run": 3,
+            "sql_blocked_session_ms": 251.13609999971231,
+            "unrelated_session_ms": 0.15329999951063655
+          },
+          {
+            "run": 4,
+            "sql_blocked_session_ms": 250.7716000000073,
+            "unrelated_session_ms": 0.18790000103763305
+          }
+        ],
+        "scope": "real LobbyServer TCP + ODBC Driver + isolated LocalDB; no production DB or blockchain"
+      },
+      "consistency": {
+        "ok": true,
+        "configuration": "Debug",
+        "cases": [
+          {
+            "case": "concurrent expiry restores once 0",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 1",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 2",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 3",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 4",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "count query settles expiry",
+            "passed": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 0",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 1",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": false
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 2",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 3",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": false
+          },
+          {
+            "case": "invalid credential migration rolls back",
+            "passed": true
+          },
+          {
+            "case": "legacy credential migrated atomically",
+            "passed": true
+          },
+          {
+            "case": "migrated credential accepted by native CNG verifier",
+            "passed": true
+          },
+          {
+            "case": "duplicate login denied",
+            "passed": true
+          },
+          {
+            "case": "case-insensitive account alias denied",
+            "passed": true
+          },
+          {
+            "case": "purchase returns authoritative balance",
+            "passed": true,
+            "response": 2000
+          },
+          {
+            "case": "reward persisted and published",
+            "passed": true,
+            "local_end_to_end_ms": 17.5634999977774
+          },
+          {
+            "case": "owner released after disconnect",
+            "passed": true
+          },
+          {
+            "case": "overflow disconnect completes cleanup and releases owner",
+            "passed": true
+          },
+          {
+            "case": "failed reward retained for recovery",
+            "passed": true
+          },
+          {
+            "case": "default inbox limit and overflow counter observed",
+            "passed": true
+          },
+          {
+            "case": "failed reward replayed after restart",
+            "passed": true
+          },
+          {
+            "case": "committed reward replay not duplicated",
+            "passed": true
+          },
+          {
+            "case": "stop timeout preserves live process and run state",
+            "passed": true
+          },
+          {
+            "case": "drain completes after timeout and run state clears",
+            "passed": true
+          },
+          {
+            "case": "conflicting reward identity rejected",
+            "passed": true
+          }
+        ],
+        "server_runs": [
+          {
+            "run": 1,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 1,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 279,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 1,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": [
+                {
+                  "id": 0,
+                  "jobs": 6,
+                  "wait_us": 0,
+                  "max_wait_us": 0,
+                  "busy_us": 0,
+                  "pending": 0
+                }
+              ]
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 8,
+              "completed": 8,
+              "rejected": 0,
+              "failed": 1,
+              "reward_pending": 1,
+              "reward_ingress_accepted": 2,
+              "reward_ingress_completed": 2,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          },
+          {
+            "run": 2,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 0,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 1,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 0,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": []
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 1,
+              "completed": 1,
+              "rejected": 0,
+              "failed": 0,
+              "reward_pending": 0,
+              "reward_ingress_accepted": 0,
+              "reward_ingress_completed": 0,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          },
+          {
+            "run": 3,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 1,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 4,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 0,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": [
+                {
+                  "id": 0,
+                  "jobs": 1,
+                  "wait_us": 0,
+                  "max_wait_us": 0,
+                  "busy_us": 0,
+                  "pending": 0
+                }
+              ]
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 3,
+              "completed": 3,
+              "rejected": 0,
+              "failed": 0,
+              "reward_pending": 0,
+              "reward_ingress_accepted": 0,
+              "reward_ingress_completed": 0,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          }
+        ],
+        "scope": "isolated LocalDB; real LobbyServer TCP, reward disk records, SQL ledger and restart; no production or blockchain"
+      },
+      "startup": {
+        "ok": true,
+        "cases": [
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "invalid-mode",
+            "passed": true,
+            "pending": 0
+          },
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "missing-connection",
+            "passed": true,
+            "pending": 0
+          },
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "missing-driver",
+            "passed": true,
+            "pending": 0
+          }
+        ]
+      },
+      "core": {
+        "ok": true,
+        "checks": 1694
+      },
+      "smoke": {
+        "CheckedAtUtc": "2026-10-29T04:12:19.1630251Z",
+        "Configuration": "Debug",
+        "ServersConnected": true,
+        "ClientWindowChecked": false
+      }
+    },
+    "Release": {
+      "baseline": {
+        "ok": true,
+        "cases": [
+          {
+            "case": "signup and DB-backed login",
+            "passed": true
+          },
+          {
+            "case": "password stored as PBKDF2 verifier",
+            "passed": true
+          },
+          {
+            "case": "same password has independent salts",
+            "passed": true
+          },
+          {
+            "case": "duplicate account login rejected",
+            "passed": true
+          },
+          {
+            "case": "duplicate signup",
+            "passed": true
+          },
+          {
+            "case": "wrong password",
+            "passed": true
+          },
+          {
+            "case": "password case mismatch rejected",
+            "passed": true
+          },
+          {
+            "case": "failed authentication releases owner reservation",
+            "passed": true
+          },
+          {
+            "case": "pipelined write/write/read FIFO",
+            "passed": true
+          },
+          {
+            "case": "appearance persisted without token overwrite",
+            "passed": true
+          },
+          {
+            "case": "staking success",
+            "passed": true
+          },
+          {
+            "case": "staking persistence",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 0",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 1",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 2",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 3",
+            "passed": true
+          },
+          {
+            "case": "real SQL lock isolation and session order 4",
+            "passed": true
+          },
+          {
+            "case": "failed write rolls back item grant",
+            "passed": true
+          },
+          {
+            "case": "worker survives SQL failure",
+            "passed": true
+          },
+          {
+            "case": "registration uses authenticated name",
+            "passed": true
+          },
+          {
+            "case": "auction first page query contract",
+            "passed": true
+          },
+          {
+            "case": "unsigned price and atomic purchase",
+            "passed": true
+          },
+          {
+            "case": "disconnect during pending DB and reconnect",
+            "passed": true
+          },
+          {
+            "case": "query timeout and fail closed",
+            "passed": true,
+            "elapsed_seconds": 5.016973999998299
+          },
+          {
+            "case": "queue progresses after timeout",
+            "passed": true
+          }
+        ],
+        "real_sql_lock_runs": [
+          {
+            "run": 0,
+            "sql_blocked_session_ms": 255.8634000015445,
+            "unrelated_session_ms": 0.13530000069295056
+          },
+          {
+            "run": 1,
+            "sql_blocked_session_ms": 250.75199999992037,
+            "unrelated_session_ms": 0.20679999943240546
+          },
+          {
+            "run": 2,
+            "sql_blocked_session_ms": 250.8378000020457,
+            "unrelated_session_ms": 0.1286999977310188
+          },
+          {
+            "run": 3,
+            "sql_blocked_session_ms": 251.00080000265734,
+            "unrelated_session_ms": 0.09839999984251335
+          },
+          {
+            "run": 4,
+            "sql_blocked_session_ms": 251.20869999955175,
+            "unrelated_session_ms": 0.11530000119819306
+          }
+        ],
+        "scope": "real LobbyServer TCP + ODBC Driver + isolated LocalDB; no production DB or blockchain"
+      },
+      "consistency": {
+        "ok": true,
+        "configuration": "Release",
+        "cases": [
+          {
+            "case": "concurrent expiry restores once 0",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 1",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 2",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 3",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "concurrent expiry restores once 4",
+            "passed": true,
+            "owned_part_count": 1,
+            "expired_listings": 0,
+            "concurrent_settlers": 2
+          },
+          {
+            "case": "count query settles expiry",
+            "passed": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 0",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 1",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": false
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 2",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": true
+          },
+          {
+            "case": "purchase versus expiry conserves item and tokens 3",
+            "passed": true,
+            "item_count": 1,
+            "combined_tokens": 4000,
+            "purchased": false
+          },
+          {
+            "case": "invalid credential migration rolls back",
+            "passed": true
+          },
+          {
+            "case": "legacy credential migrated atomically",
+            "passed": true
+          },
+          {
+            "case": "migrated credential accepted by native CNG verifier",
+            "passed": true
+          },
+          {
+            "case": "duplicate login denied",
+            "passed": true
+          },
+          {
+            "case": "case-insensitive account alias denied",
+            "passed": true
+          },
+          {
+            "case": "purchase returns authoritative balance",
+            "passed": true,
+            "response": 2000
+          },
+          {
+            "case": "reward persisted and published",
+            "passed": true,
+            "local_end_to_end_ms": 16.09169999937876
+          },
+          {
+            "case": "owner released after disconnect",
+            "passed": true
+          },
+          {
+            "case": "overflow disconnect completes cleanup and releases owner",
+            "passed": true
+          },
+          {
+            "case": "failed reward retained for recovery",
+            "passed": true
+          },
+          {
+            "case": "default inbox limit and overflow counter observed",
+            "passed": true
+          },
+          {
+            "case": "failed reward replayed after restart",
+            "passed": true
+          },
+          {
+            "case": "committed reward replay not duplicated",
+            "passed": true
+          },
+          {
+            "case": "stop timeout preserves live process and run state",
+            "passed": true
+          },
+          {
+            "case": "drain completes after timeout and run state clears",
+            "passed": true
+          },
+          {
+            "case": "conflicting reward identity rejected",
+            "passed": true
+          }
+        ],
+        "server_runs": [
+          {
+            "run": 1,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 1,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 279,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 1,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": [
+                {
+                  "id": 0,
+                  "jobs": 6,
+                  "wait_us": 0,
+                  "max_wait_us": 0,
+                  "busy_us": 0,
+                  "pending": 0
+                }
+              ]
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 8,
+              "completed": 8,
+              "rejected": 0,
+              "failed": 1,
+              "reward_pending": 1,
+              "reward_ingress_accepted": 2,
+              "reward_ingress_completed": 2,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          },
+          {
+            "run": 2,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 0,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 1,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 0,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": []
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 1,
+              "completed": 1,
+              "rejected": 0,
+              "failed": 0,
+              "reward_pending": 0,
+              "reward_ingress_accepted": 0,
+              "reward_ingress_completed": 0,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          },
+          {
+            "run": 3,
+            "normal_exit": true,
+            "zero_resources": true,
+            "dispatcher": {
+              "schema_version": 1,
+              "timing_enabled": false,
+              "channel_count": 750,
+              "max_parallel": 1,
+              "owner_violations": 0,
+              "inbox_pending": 0,
+              "global_jobs": 4,
+              "global_pending": 0,
+              "global_wait_us": 0,
+              "global_busy_us": 0,
+              "inbox_rejected": 0,
+              "inbox_limit_jobs": 256,
+              "inbox_limit_bytes": 65536,
+              "channels": [
+                {
+                  "id": 0,
+                  "jobs": 1,
+                  "wait_us": 0,
+                  "max_wait_us": 0,
+                  "busy_us": 0,
+                  "pending": 0
+                }
+              ]
+            },
+            "database": {
+              "enabled": true,
+              "accepted": 3,
+              "completed": 3,
+              "rejected": 0,
+              "failed": 0,
+              "reward_pending": 0,
+              "reward_ingress_accepted": 0,
+              "reward_ingress_completed": 0,
+              "reward_ingress_failed": 0,
+              "reward_ingress_rejected": 0
+            }
+          }
+        ],
+        "scope": "isolated LocalDB; real LobbyServer TCP, reward disk records, SQL ledger and restart; no production or blockchain"
+      },
+      "startup": {
+        "ok": true,
+        "cases": [
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "invalid-mode",
+            "passed": true,
+            "pending": 0
+          },
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "missing-connection",
+            "passed": true,
+            "pending": 0
+          },
+          {
+            "exit_code": 1,
+            "leased": 0,
+            "sockets": 0,
+            "case": "missing-driver",
+            "passed": true,
+            "pending": 0
+          }
+        ]
+      },
+      "core": {
+        "ok": true,
+        "checks": 1694
+      },
+      "smoke": {
+        "CheckedAtUtc": "2026-10-29T04:12:22.5758208Z",
+        "Configuration": "Release",
+        "ServersConnected": true,
+        "ClientWindowChecked": false
+      }
+    }
+  },
+  "network_release": {
+    "Database": false,
+    "Ok": true,
+    "Cases": [
+      {
+        "Pending": 0,
+        "NormalStop": true,
+        "Passed": true,
+        "Sockets": 0,
+        "Case": "network",
+        "Leased": 0
+      },
+      {
+        "Pending": 0,
+        "NormalStop": true,
+        "Passed": true,
+        "Sockets": 0,
+        "Case": "boss4",
+        "Leased": 0
+      },
+      {
+        "Pending": 0,
+        "NormalStop": true,
+        "Passed": true,
+        "Sockets": 0,
+        "Case": "boss5",
+        "Leased": 0
+      },
+      {
+        "Pending": 0,
+        "Leased": 0,
+        "Passed": true,
+        "Sockets": 0,
+        "ExpectedExitCode": 1,
+        "Case": "LobbyServer-missing-resource"
+      },
+      {
+        "Pending": 0,
+        "Leased": 0,
+        "Passed": true,
+        "Sockets": 0,
+        "ExpectedExitCode": 1,
+        "Case": "GameServer-missing-resource"
+      },
+      {
+        "Pending": 0,
+        "Leased": 0,
+        "Passed": true,
+        "Sockets": 0,
+        "ExpectedExitCode": 1,
+        "Case": "GameServer-lobby-offline"
+      },
+      {
+        "Pending": 0,
+        "Leased": 0,
+        "Passed": true,
+        "Sockets": 0,
+        "ExpectedExitCode": 1,
+        "Case": "LobbyServer-bind-conflict"
+      }
+    ],
+    "LocalTest": true,
+    "Configuration": "Release"
+  },
+  "before_reproduction": {
+    "expired_auction": {
+      "initial_owned": 1,
+      "after_registration": 0,
+      "after_expiry_cleanup": 0,
+      "remaining_listings": 0,
+      "reproduced": true
+    },
+    "duplicate_login_balance": {
+      "starting_balance": 2000,
+      "first_session_response": 1900,
+      "second_session_response": 1900,
+      "actual_db_balance": 1800,
+      "reproduced": true
+    }
+  },
+  "sources_sha256": {
+    "Client/WarOfDimension/Scene.cpp": "64d144b4683d9ccd40feea755b49832197822331d04658dba8c86964f66af2bd",
+    "Server/Lobby_Server/AccountOwners.h": "e2c03fa05962946c96f62e34a9835b88cb53868ff14c51a4fc8748d80aaa2574",
+    "Server/Lobby_Server/CClient.cpp": "78b4066837352abad1172d3d3a9b73cf413952f8ad45fa95fab88c5c3c2bef14",
+    "Server/Lobby_Server/CClient.h": "c6383cb621cdf831776462f9bafc82919561fdd0304bdc0d5df46d73df695979",
+    "Server/Lobby_Server/CDataBase.cpp": "ac392e7227ba23977fac5f56a02316fdc6a211957daa00e9ed3a08dab6443029",
+    "Server/Lobby_Server/CDataBase.h": "4c7b623615022b6b5616f3625d28c10759323879451db75b3adc6d42e1741911",
+    "Server/Lobby_Server/CDataBaseThread.cpp": "89f8a1b3308cd231125ba8a2333553ae2ae1a06ecc5311f2d4d66425e32c17eb",
+    "Server/Lobby_Server/CDataBaseThread.h": "c50230d633aecb88a76af5a24a0dc0a2ef788504981d5f07416ad9fc09de0ba0",
+    "Server/Lobby_Server/CNetworkMgr.cpp": "bbe445878229ae17d192e6f5987eedc03570afd5127a651d7397c0a47b00338e",
+    "Server/Lobby_Server/CPacketMgr.cpp": "6024d21bf594704fe48be479d30a42f9d3c99a99cf87084ca619b75763bd165c",
+    "Server/Lobby_Server/CServer.cpp": "69d79eb3f2228f0752917bda8bf072e427508ec8839fba89bee750406b7c933b",
+    "Server/Lobby_Server/CUserMgr.cpp": "cc635215518b2cdad78dd5043df511b6149745e326630fea8c50a011b2a86fd2",
+    "Server/Lobby_Server/CUserMgr.h": "c93e24a021ac0407d5df16760294a1a5680b37695937fd17ad2a7364d51c0d12",
+    "Server/Lobby_Server/LobbyDispatcher.h": "ed97acbf2dd9a674d2f1983e8566f09e54f649cac3cd99726a804469b4d85df9",
+    "Server/Lobby_Server/Lobby_Server.vcxproj": "49135e4e161ee1614e26cf954fb27e672c75d75f6de69cb0948f81fe0e6eb4e8",
+    "Server/Lobby_Server/Lobby_Server.vcxproj.filters": "d40c2df51a968f4194b025ac5f53cb8fda3ed9b9566b897efc048eddc4443e17",
+    "Server/Lobby_Server/PasswordHash.h": "f3387ce64dfb727dbd369a4307274eae864039fd742cff6288dcfaf52757d612",
+    "Server/Lobby_Server/RewardJournal.h": "cfb59ca1c0ca5d970fe9eab5ac43fcc7e051677bf4815eb19a0b0a660ef35fe8",
+    "Server/ServerCore/include/ServerCore/OrderedWorkQueue.h": "8ae764cac09c206c987702a4f6464bd35ad47d00eee91b6aadcbba4f407ba069",
+    "Server/ServerCore/tests/DatabaseQueueTests.cpp": "ae530d6ceef9fc29579757f8d4987653b485c577faea3a3f21cabcc9e936e614",
+    "database/local-schema.sql": "ddeeb89c8ef1692746fbc93eaa3a4efee4c5836f5968879ad65d337bd2cb5e6a",
+    "scripts/Build-DatabaseConsistencyReport.py": "9c4953cfe6c25278f47c6a7beb08274461cfc07e3cce98fbeedd6d28cd112d60",
+    "scripts/Initialize-LocalDatabase.ps1": "d884025aff66b9abba3ca09e45ec9cdbfcae8603b774309fbfdb295dab456b81",
+    "scripts/Stop-Local.ps1": "06562a89f4c6937826a52c4931a6e1792bf0ec75f5041123b3e869ea1f84c3fe",
+    "scripts/Test-DatabaseConsistency.ps1": "ba85af16284585476431f336f6407406d2028f2dcc1d759569363e4f4da86ee9",
+    "tools/server_lab/tests/database.py": "aff39a8200f148589455f0697d3335ba3b7e178fc1290627c92ec49c7b404830",
+    "tools/server_lab/tests/database_consistency.py": "970ef3461168b8b8a9764a2b327e41809d0eb1c93b274ee7cd4204c4acecd54a"
+  },
+  "binaries_sha256": {
+    "artifacts/bin/Debug/LobbyServer/Lobby_Server.exe": "4bab99d4b980fa88e35f9fbe93add0c820158071a4e680136ae068be7fe782c9",
+    "artifacts/bin/Debug/GameServer/Game_Server.exe": "6f7aee1e5de38cb8533ef9399e5883438df3306364842a5e38c4ed165d8e01ce",
+    "artifacts/bin/Debug/Client/WarOfDimension.exe": "bf5bcba4760d4439e01f5e225b80af4260456963c2713d3b8d5af497289a41fa",
+    "artifacts/bin/Debug/ServerCore.Tests/ServerCore.Tests.exe": "6b88db39de35225cade1f4b4e71c780166267ad7c7e5ba27332f487161ae3ba2",
+    "artifacts/bin/Release/LobbyServer/Lobby_Server.exe": "3f820ef030795ab15b4bfea11120b82896ea13ce2e76efb595aa0de7b7d5a41e",
+    "artifacts/bin/Release/GameServer/Game_Server.exe": "e1e613bcc1db9f57bd629b17b9b74ae8da8bd8ba6bc01854e0dc07588be874ad",
+    "artifacts/bin/Release/Client/WarOfDimension.exe": "111482562223b6df89f66d42aba18208c8e9be489e62aa13ea549f3fa1d65deb",
+    "artifacts/bin/Release/ServerCore.Tests/ServerCore.Tests.exe": "e9f367e32f49bcdc5c510b293d62bde520dfa062a3ccd89d03f4f74b98889aad"
+  },
+  "scope": "Local correctness tests, real TCP/ODBC, restart simulation; not production, blockchain, GUI gameplay, maximum throughput, power-loss or source-to-database exactly-once proof"
+}

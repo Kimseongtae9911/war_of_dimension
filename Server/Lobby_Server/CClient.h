@@ -15,10 +15,12 @@ struct PlayerInfo
 {
     ModelCustomize m_model;
     int m_tokenNum = 0;
+    uint64_t m_balanceVersion = 0;
 
     void Reset()
     {
         m_tokenNum = 0;
+        m_balanceVersion = 0;
         memset(&m_model, 0, sizeof(m_model));
     }
 };
@@ -126,7 +128,35 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     void SetPlayerInfo(const PlayerInfo& _info)
     {
+        const int token = m_playerInfo.m_tokenNum;
+        const uint64_t version = m_playerInfo.m_balanceVersion;
         m_playerInfo = _info;
+        if (version > _info.m_balanceVersion)
+        {
+            m_playerInfo.m_tokenNum = token;
+            m_playerInfo.m_balanceVersion = version;
+        }
+    }
+
+    bool ApplyBalance(const PlayerInfo& _balance)
+    {
+        if (_balance.m_balanceVersion < m_playerInfo.m_balanceVersion)
+            return false;
+
+        m_playerInfo.m_tokenNum = _balance.m_tokenNum;
+        m_playerInfo.m_balanceVersion = _balance.m_balanceVersion;
+
+        return true;
+    }
+
+    const std::string& GetAccountName() const
+    {
+        return m_accountName;
+    }
+
+    void SetAccountName(const std::string& _name)
+    {
+        m_accountName = _name;
     }
 
     void SetTokenNum(int _num)
@@ -201,6 +231,7 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     int m_socketID = -1;
     PlayerInfo m_playerInfo;
+    std::string m_accountName;
 
     int m_id = -1;
     char m_name[NAME_SIZE] = {};

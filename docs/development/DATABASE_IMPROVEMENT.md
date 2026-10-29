@@ -1,5 +1,7 @@
 # DB 실행 준비·비동기 순서 개선
 
+이 문서와 HTML/근거 JSON은 `88d310a5` 초기 비동기 개선의 측정 기록이다. 여기서 추가 검토한 결함의 수정·재검증은 [최신 정합성 보고서](DATABASE_CONSISTENCY.html)와 [재현/범위](DATABASE_CONSISTENCY.md)를 따른다. 현재 스키마는 v3·18개 프로시저이며 이전 기록의 v1·16개/20검사 수치를 현재 상태로 해석하지 않는다.
+
 [HTML 보고서](DATABASE_IMPROVEMENT.html)에서 결과·전후 그래프를 확인한다. [실측 원본과 SHA-256](evidence/database-improvement-20261029.json), [실행 구조와 설계 이유](../diagrams/database-async/README.md)를 함께 관리한다.
 
 ## 결과와 적용 범위

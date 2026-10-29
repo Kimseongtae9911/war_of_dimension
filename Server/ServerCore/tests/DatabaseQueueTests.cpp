@@ -1,5 +1,8 @@
 #include <ServerCore/OrderedWorkQueue.h>
 #include "../../Lobby_Server/LobbyDispatcher.h"
+#include "../../Lobby_Server/AccountOwners.h"
+#include "../../Lobby_Server/RewardJournal.h"
+#include "../../Lobby_Server/PasswordHash.h"
 #include <array>
 #include <future>
 #include <iostream>
@@ -132,6 +135,159 @@ void SessionContinuation(bool _early)
     Check(started && freeWorker && held && finished && !wrongOrder, "DB completion precedes next session request; other session progresses");
 }
 
+void AccountOwnership()
+{
+    wod_server::AccountOwners owners;
+    std::array<std::thread, 4> threads;
+    std::array<int, 4> identities{};
+    std::atomic_int winner = -1;
+    std::atomic_int claimed = 0;
+    for (int i = 0; i < 4; ++i)
+        threads[i] = std::thread([&, i] {
+            if (owners.Claim(i % 2 ? "ACCOUNT " : "account", &identities[i]))
+            {
+                winner = i;
+                ++claimed;
+            }
+        });
+
+    for (auto& thread : threads)
+        thread.join();
+
+    int newcomer = 0;
+    owners.Release("account", &newcomer);
+    Check(claimed == 1 && !owners.Claim("account", &newcomer), "one account owner; wrong owner cannot release");
+    owners.Release("account", &identities[winner]);
+    Check(owners.Claim("account", &newcomer), "account released for reconnect");
+}
+
+void BoundedSessionInbox()
+{
+    LobbyDispatcher dispatcher(1, 2, 5);
+    LobbyDispatcher::SessionWorkQueue session;
+    session.SetChannel(0);
+    dispatcher.Suspend(session);
+    std::vector<int> order;
+    Check(dispatcher.Post(
+              session, false,
+              [&] {
+                  order.push_back(1);
+              },
+              3),
+          "first inbox admission");
+    Check(!dispatcher.Post(
+              session, false,
+              [] {
+              },
+              3),
+          "inbox byte limit");
+    Check(dispatcher.Post(
+              session, false,
+              [&] {
+                  order.push_back(2);
+              },
+              2),
+          "exact byte limit accepted");
+    Check(!dispatcher.Post(session, false,
+                           [] {
+                           }),
+          "inbox job limit");
+    std::promise<void> cleaned;
+    auto done = cleaned.get_future();
+    Check(dispatcher.PostCleanup(session,
+                                 [&] {
+                                     order.push_back(3);
+                                     cleaned.set_value();
+                                 }),
+          "cleanup bypasses full inbox");
+    Check(dispatcher.Resume(session,
+                            [&] {
+                                order.push_back(0);
+                            }),
+          "completion bypasses full inbox");
+    wod::core::ThreadGroup workers(
+        [&] {
+            dispatcher.Stop();
+        },
+        [](std::exception_ptr) {
+        });
+    workers.Launch([&] {
+        dispatcher.ProcessJob();
+    });
+    const bool finished = done.wait_for(2s) == std::future_status::ready;
+    workers.StopAndJoin();
+    dispatcher.Clear();
+    Check(finished && order == std::vector<int>({0, 1, 2, 3}), "full inbox drains in order and cleanup completes");
+}
+
+void RewardRecoveryRecord()
+{
+    const auto directory = std::filesystem::temp_directory_path() / ("NewWod-reward-test-" + std::to_string(GetCurrentProcessId()) + "-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    wod_server::RewardJournal::Record record;
+    {
+        wod_server::RewardJournal journal(directory);
+        Check(journal.Recover().empty(), "new reward journal empty");
+        record = journal.Append("account", 17);
+        Check(journal.Pending() == 1, "reward persisted before SQL");
+        bool excluded = false;
+        try
+        {
+            wod_server::RewardJournal duplicate(directory);
+        }
+        catch (const std::runtime_error&)
+        {
+            excluded = true;
+        }
+        Check(excluded, "only one recovery owner");
+    }
+
+    auto writing = directory / (record.m_operation + ".writing");
+    std::filesystem::rename(directory / (record.m_operation + ".pending"), writing);
+    {
+        wod_server::RewardJournal journal(directory);
+        const auto recovered = journal.Recover();
+        Check(recovered.size() == 1 && recovered[0].m_operation == record.m_operation && recovered[0].m_account == "account" && recovered[0].m_delta == 17, "flushed record promoted after restart");
+        journal.Complete(recovered[0]);
+        Check(journal.Pending() == 0 && journal.Recover().empty(), "committed record removed");
+    }
+
+    const auto corrupt = directory / (std::string(32, 'a') + ".writing");
+    {
+        std::ofstream output(corrupt);
+        output << "incomplete";
+    }
+    {
+        wod_server::RewardJournal journal(directory);
+        bool rejected = false;
+        try
+        {
+            journal.Recover();
+        }
+        catch (const std::runtime_error&)
+        {
+            rejected = true;
+        }
+        Check(rejected && std::filesystem::exists(corrupt), "corrupt record fails closed and remains for inspection");
+    }
+
+    // 이 검사에서 직접 만든 경로와 파일만 비재귀적으로 정리한다.
+    std::filesystem::remove(corrupt);
+    std::filesystem::remove(directory / "owner.lock");
+    std::filesystem::remove(directory);
+}
+
+void PasswordStorage()
+{
+    using wod_server::PasswordHash;
+    const std::string reference = "pbkdf2-sha256$600000$000102030405060708090a0b0c0d0e0f$9e5fa624ce69b150f21106af114736bbc8e76f82893c562aa0321d325dc154cc";
+    Check(PasswordHash::Verify("testpass", reference), "CNG matches independent PBKDF2 vector");
+    Check(!PasswordHash::Verify("Testpass", reference), "password comparison is case sensitive");
+    const auto a = PasswordHash::Encode("testpass");
+    const auto b = PasswordHash::Encode("testpass");
+    Check(a != b && PasswordHash::Verify("testpass", a), "independent salts and round trip");
+    Check(!PasswordHash::Verify("testpass", "testpass") && !PasswordHash::Verify("testpass", "pbkdf2-sha256$1$bad"), "plaintext and malformed stored values rejected");
+}
+
 double Ms(std::chrono::steady_clock::time_point _start)
 {
     return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - _start).count();
@@ -144,8 +300,12 @@ int RunDatabaseQueueTests()
     CapacityAndFailure();
     SessionContinuation(false);
     SessionContinuation(true);
+    AccountOwnership();
+    BoundedSessionInbox();
+    RewardRecoveryRecord();
+    PasswordStorage();
 
-    return 4;
+    return 8;
 }
 
 int RunDatabaseBenchmark()

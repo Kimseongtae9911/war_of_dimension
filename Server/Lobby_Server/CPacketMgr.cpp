@@ -343,13 +343,16 @@ void CPacketMgr::ShopPacket(BASE_PACKET* _packet, CClient* _client)
     const int num = std::uniform_int_distribution<>(0, m_shopMaxNums[part])(m_randomEngine);
     const std::string name(_client->GetName());
     _client->RunDatabase([name, part, num](CDataBase& _database) {
+        PlayerInfo balance{};
         _database.Transaction([&] {
             if (!_database.SaveShopBuyInfo(name, part, num) || !_database.SaveToken(name, -SHOP_BUY_TOKEN_NUM))
                 throw std::runtime_error("shop persistence failed");
+
+            balance = _database.ReadBalance(name);
         });
 
-        return [part, num](CClient* _client) {
-            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - SHOP_BUY_TOKEN_NUM);
+        return [part, num, balance](CClient* _client) {
+            _client->ApplyBalance(balance);
             _client->GetPacketSender()->SendShopPacket(part, num);
             _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
             CPacketMgr::GetInstance()->RecordTransaction(_client, -SHOP_BUY_TOKEN_NUM);
@@ -455,13 +458,16 @@ void CPacketMgr::StakeTokenPacket(BASE_PACKET* _packet, CClient* _client)
     const std::string name(_client->GetName());
     _client->RunDatabase([name, request](CDataBase& _database) {
         int token = 0, days = 0, count = 0;
+        PlayerInfo balance{};
         _database.Transaction([&] {
             if (!_database.StakeTokens(name, request.stakeNum, request.stakeDays) || !_database.GetStakedTokenData(name, token, days, count))
                 throw std::runtime_error("staking failed");
+
+            balance = _database.ReadBalance(name);
         });
 
-        return [request, token, days, count](CClient* _client) {
-            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - request.stakeNum);
+        return [request, token, days, count, balance](CClient* _client) {
+            _client->ApplyBalance(balance);
             _client->GetPacketSender()->SendStakeTokenPacket(false, 0);
             _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
             _client->GetPacketSender()->SendStakedTokenInfoPacket(token, days - count);
@@ -518,8 +524,10 @@ void CPacketMgr::CreateTransactionPacket(BASE_PACKET* _packet, CClient* _client)
         if (!_database.SaveToken(name, token))
             throw std::runtime_error("token persistence failed");
 
-        return [token](CClient* _client) {
-            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum + token);
+        const auto balance = _database.ReadBalance(name);
+
+        return [token, balance](CClient* _client) {
+            _client->ApplyBalance(balance);
             _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
             CPacketMgr::GetInstance()->RecordTransaction(_client, token);
         };
@@ -585,24 +593,20 @@ void CPacketMgr::BuyAuctionPacket(BASE_PACKET* _packet, CClient* _client)
 
     const std::string name(_client->GetName());
     _client->RunDatabase([name, request](CDataBase& _database) {
+        PlayerInfo buyerBalance{}, sellerBalance{};
         _database.Transaction([&] {
             if (!_database.BuyAuction(request.sellerName, name, request.customizeType, request.customizeNum, request.buyPrice) || !_database.SaveToken(name, -static_cast<int>(request.buyPrice)) ||
                 !_database.SaveToken(request.sellerName, request.buyPrice))
                 throw std::runtime_error("auction purchase failed");
+
+            buyerBalance = _database.ReadBalance(name);
+            sellerBalance = _database.ReadBalance(request.sellerName);
         });
 
-        return [request](CClient* _client) {
-            _client->SetTokenNum(_client->GetPlayerInfo().m_tokenNum - request.buyPrice);
+        return [request, buyerBalance, sellerBalance](CClient* _client) {
+            _client->ApplyBalance(buyerBalance);
             _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
-            for (const auto& entry : CUserMgr::GetInstance()->GetAllClient())
-            {
-                auto* seller = entry.second;
-                if (!seller->IsDisconnected() && std::strcmp(seller->GetName(), request.sellerName) == 0)
-                {
-                    seller->SetTokenNum(seller->GetPlayerInfo().m_tokenNum + request.buyPrice);
-                    seller->GetPacketSender()->SendTokenNumPacket(seller->GetPlayerInfo().m_tokenNum);
-                }
-            }
+            CUserMgr::GetInstance()->PublishBalance(request.sellerName, sellerBalance);
 
             CPacketMgr::GetInstance()->RecordTransaction(_client, -static_cast<int>(request.buyPrice));
         };
@@ -647,6 +651,12 @@ void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _sign
     const auto* signup = reinterpret_cast<const CS_SIGN_UP_PACKET*>(_packet);
     const std::string name(_signUp ? signup->name : login->name);
     const std::string password(_signUp ? signup->password : login->password);
+    if (!CUserMgr::GetInstance()->ClaimAccount(name, _client))
+    {
+        _client->GetPacketSender()->SendLoginFailPacket(_signUp ? 2 : 3);
+        return;
+    }
+
     const auto initial = _client->GetPlayerInfo();
     _client->RunDatabase([name, password, initial, signUp = _signUp](CDataBase& _database) {
         auto info = initial;
@@ -666,11 +676,11 @@ void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _sign
         {
             error = 3;
         }
-        else if (!signUp && !_database.CheckPassword(name, password))
+        else if (!_database.GetPlayerInfo(name, password, info))
         {
-            error = 1;
+            error = signUp ? 3 : 1;
         }
-        else if (!_database.GetPlayerInfo(name, password, info) || !_database.GetFullNodeInfo(name, full))
+        else if (!_database.GetFullNodeInfo(name, full))
         {
             error = 3;
         }
@@ -683,6 +693,7 @@ void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _sign
 
             if (error >= 0)
             {
+                CUserMgr::GetInstance()->ReleaseAccount(_client);
                 _client->GetPacketSender()->SendLoginFailPacket(error);
                 return;
             }
@@ -690,7 +701,7 @@ void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _sign
             _client->SetName(name.c_str());
             _client->SetPlayerInfo(info);
             _client->SetFullNode(full);
-            _client->GetPacketSender()->SendTokenNumPacket(info.m_tokenNum);
+            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
             _client->GetPacketSender()->SendFullNodePacket(full);
             CPacketMgr::GetInstance()->CompleteLogin(_client);
         };
