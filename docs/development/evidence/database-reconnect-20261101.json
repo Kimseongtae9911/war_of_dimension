@@ -1,0 +1,564 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "source_commit": "2ae011b170d7ca3a84e037087c27e4c5343ef39b",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "logical_cores": 12,
+    "python": "3.12.14",
+    "build": "MSVC v145 x64 C++20",
+    "database": "private SQL Server Express LocalDB / ODBC Driver 17"
+  },
+  "inputs_sha256": {
+    "Server/ServerCore/include/ServerCore/RecoveringWorkQueue.h": "102c7ee3ecc52ff60028a9a03e4f225e3bf2053432003c322bf917b651acef71",
+    "Server/ServerCore/tests/DatabaseQueueTests.cpp": "832280c97f912304d243df43e6570ced2a29a5f07c7aa0a63c75e22581a6d1fd",
+    "Server/Lobby_Server/CClient.cpp": "4ecac5816d2261a23b197fa09f3df7f9830335b26aba6cee2f88439b664960d1",
+    "Server/Lobby_Server/CClient.h": "4b7e0bcba4e0b0de00bfbfddf0e49c7b02b7c88801cfd85a99a91368aa06902a",
+    "Server/Lobby_Server/CDataBase.cpp": "f1eb99af0c01e19efea53d561035ec6874cb6bda42a8e70276cee7a629828aa8",
+    "Server/Lobby_Server/CDataBase.h": "340f8318438d1db28224cebb14ea66b7d40c8da380b14b9717cbc5e013592d15",
+    "Server/Lobby_Server/CDataBaseThread.cpp": "fa750c8950d7bbe8d4cfae18c57f1851330ee2f7fcd121021f258054befcf1f2",
+    "Server/Lobby_Server/CDataBaseThread.h": "040f396fb89b1d2f851983d3fe1e0f10ec03501b09c8c01b14f7c96aaa550444",
+    "Server/Lobby_Server/CPacketMgr.cpp": "4cb4d4314d92c4002a2c4a6c246b6f5df93c86db9a29e4e4e7ed469bb17d5b7a",
+    "Server/Lobby_Server/CP2PNetwork.cpp": "48d5c4708c9e859aaed79eaba31ccb57596a9b591dc48a9e678dea96e52a6895",
+    "scripts/Initialize-LocalDatabase.ps1": "dcff199d43993e5bafc0f2e8d35d8f64d25b8da23f3fda45287219f376738261",
+    "scripts/Test-DatabaseReconnect.ps1": "341fe5f5d83a6e07769de31aad62067a6c9a1d24647a9ccc60bce3546a8541e1",
+    "tools/server_lab/tests/database_reconnect.py": "17bf829b8f57c99fbc8f342fed8d186aacfaeda9049a9865e3b14fe0e170908f"
+  },
+  "configurations": {
+    "Debug": {
+      "reconnect": {
+        "ok": true,
+        "configuration": "Debug",
+        "cases": [
+          {
+            "case": "initial authenticated SQL connection",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 0",
+            "passed": true,
+            "response_ms": 0.3476000129012391
+          },
+          {
+            "case": "private SQL engine stopped and restarted during outage",
+            "passed": true
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 0",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 0",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 0",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 1",
+            "passed": true,
+            "response_ms": 0.5189000075915828
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 1",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 1",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 1",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 2",
+            "passed": true,
+            "response_ms": 0.29429999995045364
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 2",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 2",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 2",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 3",
+            "passed": true,
+            "response_ms": 0.29349999385885894
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 3",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 3",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 3",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 4",
+            "passed": true,
+            "response_ms": 0.3116000007139519
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 4",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 4",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 4",
+            "passed": true
+          },
+          {
+            "case": "killed SQL session reconnects without lobby restart",
+            "passed": true
+          },
+          {
+            "case": "in-flight read retried after actual SQL connection kill",
+            "passed": true
+          },
+          {
+            "case": "fixture SQL committed before response loss",
+            "passed": true
+          },
+          {
+            "case": "uncertain committed write not replayed",
+            "passed": true
+          },
+          {
+            "case": "30 second request expiry releases session with temporary notice",
+            "passed": true,
+            "elapsed_ms": 30001.250899993465
+          },
+          {
+            "case": "durable reward survives client request deadline and resumes",
+            "passed": true
+          },
+          {
+            "case": "shutdown interrupts disconnected backoff",
+            "passed": true,
+            "elapsed_ms": 109.29839999880642
+          },
+          {
+            "case": "zero leaked server resources",
+            "passed": true
+          },
+          {
+            "case": "shutdown retains durable pending reward",
+            "passed": true
+          },
+          {
+            "case": "all accepted work released",
+            "passed": true
+          },
+          {
+            "case": "failed reconnect attempts and request expiry observed",
+            "passed": true
+          }
+        ],
+        "samples": [
+          {
+            "run": 0,
+            "detected_ms": 3060.7637999928556,
+            "independent_response_ms": 0.3476000129012391,
+            "restore_to_resumed_ms": 4033.9905000000726,
+            "outage_to_resumed_ms": 10197.589000003063
+          },
+          {
+            "run": 1,
+            "detected_ms": 3066.3295999984257,
+            "independent_response_ms": 0.5189000075915828,
+            "restore_to_resumed_ms": 1482.3756999976467,
+            "outage_to_resumed_ms": 6140.4973000026075
+          },
+          {
+            "run": 2,
+            "detected_ms": 3045.142400005716,
+            "independent_response_ms": 0.29429999995045364,
+            "restore_to_resumed_ms": 1495.5786000064109,
+            "outage_to_resumed_ms": 6138.617599994177
+          },
+          {
+            "run": 3,
+            "detected_ms": 3055.601999993087,
+            "independent_response_ms": 0.29349999385885894,
+            "restore_to_resumed_ms": 1489.900000000489,
+            "outage_to_resumed_ms": 6132.831299997633
+          },
+          {
+            "run": 4,
+            "detected_ms": 3054.2808000027435,
+            "independent_response_ms": 0.3116000007139519,
+            "restore_to_resumed_ms": 1490.0602999987314,
+            "outage_to_resumed_ms": 6126.8812000053
+          }
+        ],
+        "database": {
+          "enabled": true,
+          "online": false,
+          "accepted": 20,
+          "completed": 20,
+          "rejected": 0,
+          "failed": 2,
+          "pending": 0,
+          "outages": 10,
+          "reconnect_attempts": 19,
+          "reconnects": 9,
+          "retried": 1,
+          "outcome_unknown": 1,
+          "expired": 1,
+          "cancelled": 2,
+          "last_recovery_ms": 31177,
+          "capacity": 4096,
+          "timeout_ms": 30000,
+          "reward_pending": 1,
+          "reward_ingress_accepted": 7,
+          "reward_ingress_completed": 7,
+          "reward_ingress_failed": 0,
+          "reward_ingress_rejected": 0
+        },
+        "source_commit": "2ae011b170d7ca3a84e037087c27e4c5343ef39b",
+        "binary_sha256": "1612e58901abe73cf4d7a8f8ca9e0f9912b09fe1caefe501c686e4a0e5a3eaf7",
+        "scope": "private LocalDB; real TCP/ODBC offline/online and KILL; no production DB, power loss, WAN or full GUI"
+      },
+      "summary": {
+        "detected_ms": {
+          "median": 3055.601999993087,
+          "min": 3045.142400005716,
+          "max": 3066.3295999984257
+        },
+        "independent_response_ms": {
+          "median": 0.3116000007139519,
+          "min": 0.29349999385885894,
+          "max": 0.5189000075915828
+        },
+        "restore_to_resumed_ms": {
+          "median": 1490.0602999987314,
+          "min": 1482.3756999976467,
+          "max": 4033.9905000000726
+        },
+        "outage_to_resumed_ms": {
+          "median": 6138.617599994177,
+          "min": 6126.8812000053,
+          "max": 10197.589000003063
+        }
+      },
+      "regression": {
+        "database": 25,
+        "consistency": 26,
+        "startup": 3,
+        "core": 1698,
+        "abi_types": 110,
+        "abi_constants": 106,
+        "smoke": true
+      }
+    },
+    "Release": {
+      "reconnect": {
+        "ok": true,
+        "configuration": "Release",
+        "cases": [
+          {
+            "case": "initial authenticated SQL connection",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 0",
+            "passed": true,
+            "response_ms": 0.21889999334234744
+          },
+          {
+            "case": "private SQL engine stopped and restarted during outage",
+            "passed": true
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 0",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 0",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 0",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 1",
+            "passed": true,
+            "response_ms": 0.27379998937249184
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 1",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 1",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 1",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 2",
+            "passed": true,
+            "response_ms": 0.21129999367985874
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 2",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 2",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 2",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 3",
+            "passed": true,
+            "response_ms": 0.17430000298190862
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 3",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 3",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 3",
+            "passed": true
+          },
+          {
+            "case": "other session progresses during outage 4",
+            "passed": true,
+            "response_ms": 0.13049998960923404
+          },
+          {
+            "case": "queued write executes once and resumes session FIFO 4",
+            "passed": true
+          },
+          {
+            "case": "queued reward applied once 4",
+            "passed": true
+          },
+          {
+            "case": "same server process survives reconnect 4",
+            "passed": true
+          },
+          {
+            "case": "killed SQL session reconnects without lobby restart",
+            "passed": true
+          },
+          {
+            "case": "in-flight read retried after actual SQL connection kill",
+            "passed": true
+          },
+          {
+            "case": "fixture SQL committed before response loss",
+            "passed": true
+          },
+          {
+            "case": "uncertain committed write not replayed",
+            "passed": true
+          },
+          {
+            "case": "30 second request expiry releases session with temporary notice",
+            "passed": true,
+            "elapsed_ms": 29998.723099997733
+          },
+          {
+            "case": "durable reward survives client request deadline and resumes",
+            "passed": true
+          },
+          {
+            "case": "shutdown interrupts disconnected backoff",
+            "passed": true,
+            "elapsed_ms": 77.61390000814572
+          },
+          {
+            "case": "zero leaked server resources",
+            "passed": true
+          },
+          {
+            "case": "shutdown retains durable pending reward",
+            "passed": true
+          },
+          {
+            "case": "all accepted work released",
+            "passed": true
+          },
+          {
+            "case": "failed reconnect attempts and request expiry observed",
+            "passed": true
+          }
+        ],
+        "samples": [
+          {
+            "run": 0,
+            "detected_ms": 3046.4240000001155,
+            "independent_response_ms": 0.21889999334234744,
+            "restore_to_resumed_ms": 99.04359999927692,
+            "outage_to_resumed_ms": 6151.4390999946045
+          },
+          {
+            "run": 1,
+            "detected_ms": 3049.6210000128485,
+            "independent_response_ms": 0.27379998937249184,
+            "restore_to_resumed_ms": 1489.3639000074472,
+            "outage_to_resumed_ms": 6130.250500005786
+          },
+          {
+            "run": 2,
+            "detected_ms": 3033.9009999879636,
+            "independent_response_ms": 0.21129999367985874,
+            "restore_to_resumed_ms": 1519.1896999895107,
+            "outage_to_resumed_ms": 6142.445099991164
+          },
+          {
+            "run": 3,
+            "detected_ms": 3015.6343999988167,
+            "independent_response_ms": 0.17430000298190862,
+            "restore_to_resumed_ms": 1513.6257999984082,
+            "outage_to_resumed_ms": 6126.630800004932
+          },
+          {
+            "run": 4,
+            "detected_ms": 3025.7117000001017,
+            "independent_response_ms": 0.13049998960923404,
+            "restore_to_resumed_ms": 1510.3820999938762,
+            "outage_to_resumed_ms": 6124.4700999959605
+          }
+        ],
+        "database": {
+          "enabled": true,
+          "online": false,
+          "accepted": 20,
+          "completed": 20,
+          "rejected": 0,
+          "failed": 2,
+          "pending": 0,
+          "outages": 10,
+          "reconnect_attempts": 18,
+          "reconnects": 9,
+          "retried": 1,
+          "outcome_unknown": 1,
+          "expired": 1,
+          "cancelled": 2,
+          "last_recovery_ms": 31172,
+          "capacity": 4096,
+          "timeout_ms": 30000,
+          "reward_pending": 1,
+          "reward_ingress_accepted": 7,
+          "reward_ingress_completed": 7,
+          "reward_ingress_failed": 0,
+          "reward_ingress_rejected": 0
+        },
+        "source_commit": "2ae011b170d7ca3a84e037087c27e4c5343ef39b",
+        "binary_sha256": "df70d926b9f1e78d12448057e2d29e2f731b83ead1a955fbdd5d4a01ab7c1f3b",
+        "scope": "private LocalDB; real TCP/ODBC offline/online and KILL; no production DB, power loss, WAN or full GUI"
+      },
+      "summary": {
+        "detected_ms": {
+          "median": 3033.9009999879636,
+          "min": 3015.6343999988167,
+          "max": 3049.6210000128485
+        },
+        "independent_response_ms": {
+          "median": 0.21129999367985874,
+          "min": 0.13049998960923404,
+          "max": 0.27379998937249184
+        },
+        "restore_to_resumed_ms": {
+          "median": 1510.3820999938762,
+          "min": 99.04359999927692,
+          "max": 1519.1896999895107
+        },
+        "outage_to_resumed_ms": {
+          "median": 6130.250500005786,
+          "min": 6124.4700999959605,
+          "max": 6151.4390999946045
+        }
+      },
+      "regression": {
+        "database": 25,
+        "consistency": 26,
+        "startup": 3,
+        "core": 1698,
+        "abi_types": 110,
+        "abi_constants": 106,
+        "smoke": true
+      }
+    }
+  },
+  "network_groups": 7,
+  "diagram": {
+    "schemaVersion": 1,
+    "ok": true,
+    "command": "deliver",
+    "type": "lifecycle",
+    "input": "C:\\GitFolder\\NewWod\\docs\\diagrams\\database-reconnect\\recovery.json",
+    "output": "C:\\GitFolder\\NewWod\\docs\\diagrams\\database-reconnect\\recovery.html",
+    "specification": {
+      "sha256": "90fe1910356c484535311ab60b434545a370f3bc9a655eb2d5f6ae4270aa6ace",
+      "bytes": 1816
+    },
+    "artifact": {
+      "sha256": "689b7c1700ebc7de4216690364ab56ea537caff1b20bb98f03fbc4f39f37feb7",
+      "bytes": 706051
+    },
+    "validation": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "visual": {
+    "containment": true,
+    "manual_review": "passed",
+    "note": "1440x900 light and 2048x1320 dark PNG inspected"
+  },
+  "development_failures": [
+    {
+      "case": "temporary notice exceeded CHAT_SIZE=30",
+      "status": "fixed; compile-time length assertion; actual expiry retested"
+    },
+    {
+      "case": "same-account login before peer close/disconnect cleanup",
+      "status": "fixture now closes peer and waits cleanup; duplicate disconnect generation invalidation guarded"
+    },
+    {
+      "case": "fixture database file name collision / DDL leading whitespace",
+      "status": "unique database per instance and DDL normalization"
+    }
+  ],
+  "limits": [
+    "No production DB, WAN, power loss, disk failure, maximum load, or full GUI validation",
+    "Five functional recovery samples per configuration; no p99 or throughput claim",
+    "One SELECT 1 probe per request; extra SQL round trip not benchmarked",
+    "General uncertain writes are not automatically replayed or durably reconciled; transaction operation IDs remain follow-up"
+  ]
+}

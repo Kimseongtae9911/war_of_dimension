@@ -26,6 +26,9 @@
     <ClInclude Include="include/ServerCore/OrderedWorkQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include/ServerCore/RecoveringWorkQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include/ServerCore/Telemetry.h">
       <Filter>Header Files</Filter>
     </ClInclude>

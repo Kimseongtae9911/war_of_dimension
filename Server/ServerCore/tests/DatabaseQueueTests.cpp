@@ -1,4 +1,5 @@
 #include <ServerCore/OrderedWorkQueue.h>
+#include <ServerCore/RecoveringWorkQueue.h>
 #include "../../Lobby_Server/LobbyDispatcher.h"
 #include "../../Lobby_Server/AccountOwners.h"
 #include "../../Lobby_Server/RewardJournal.h"
@@ -19,6 +20,182 @@ void Check(bool _value, const char* _message)
 {
     if (!_value)
         throw std::runtime_error(_message);
+}
+
+void RecoveryFifo()
+{
+    using Queue = wod::core::RecoveringWorkQueue;
+    Queue queue(3, 2s, 5ms, 20ms);
+    std::vector<int> order;
+    std::atomic_int attempts = 0;
+    std::atomic_bool connected = false;
+    std::promise<void> done;
+    auto completed = done.get_future();
+    for (int i = 1; i <= 3; ++i)
+        Check(queue.Submit(
+                  [&, i] {
+                      if (!connected)
+                          throw std::runtime_error("first actual query detects connection loss");
+
+                      order.push_back(i);
+                      if (i == 3)
+                          done.set_value();
+                  },
+                  {}, true),
+              "recovery queue accepts pending work");
+
+    Check(!queue.Submit([] {
+    }),
+          "recovery capacity includes waiting requests");
+    std::thread worker([&] {
+        queue.Run(
+            [&] {
+                connected = ++attempts >= 2;
+
+                return connected.load();
+            },
+            [] {
+                return true;
+            });
+    });
+    const bool finished = completed.wait_for(2s) == std::future_status::ready;
+    queue.StopAccepting();
+    worker.join();
+    Check(finished && order == std::vector<int>({1, 2, 3}) && attempts == 2, "same FIFO resumes after failed and successful reconnect");
+    Check(queue.SnapshotJson().find("\"pending\":0") != std::string::npos, "recovery FIFO fully drained");
+}
+
+void RecoveryReplayBoundary(bool _safe)
+{
+    using Queue = wod::core::RecoveringWorkQueue;
+    Queue queue(3, 1s, 5ms, 20ms);
+    bool lost = false;
+    int runs = 0, unknown = 0;
+    std::promise<void> done;
+    auto completed = done.get_future();
+    queue.Submit(
+        [&] {
+            if (++runs == 1)
+            {
+                lost = true;
+                throw std::runtime_error("connection dropped after SQL execution");
+            }
+        },
+        [&](Queue::Failure _failure) {
+            unknown += _failure == Queue::Failure::OutcomeUnknown;
+        },
+        _safe);
+    queue.Submit([&] {
+        done.set_value();
+    });
+    std::thread worker([&] {
+        queue.Run(
+            [&] {
+                lost = false;
+
+                return true;
+            },
+            [&] {
+                return lost;
+            });
+    });
+    const bool finished = completed.wait_for(2s) == std::future_status::ready;
+    queue.StopAccepting();
+    worker.join();
+    Check(finished && runs == (_safe ? 2 : 1) && unknown == (_safe ? 0 : 1), "only explicitly replay-safe requests execute twice");
+}
+
+void RecoveryExpiryAndStop()
+{
+    using Queue = wod::core::RecoveringWorkQueue;
+    Queue queue(3, 30ms, 10ms, 40ms);
+    int executed = 0;
+    std::atomic_int expired = 0;
+    std::promise<void> done;
+    auto completed = done.get_future();
+    queue.Submit(
+        [&] {
+            throw std::runtime_error("durable SQL detects disconnected connection");
+        },
+        {}, true, {}, true);
+    queue.Submit(
+        [&] {
+            ++executed;
+        },
+        [&](Queue::Failure _failure) {
+            expired += _failure == Queue::Failure::Expired;
+            done.set_value();
+        });
+    std::thread worker([&] {
+        queue.Run(
+            [] {
+                return false;
+            },
+            [] {
+                return true;
+            });
+    });
+    const bool finished = completed.wait_for(1s) == std::future_status::ready;
+    int stopped = 0;
+    queue.Submit(
+        [&] {
+            ++executed;
+        },
+        [&](Queue::Failure _failure) {
+            stopped += _failure == Queue::Failure::Stopped;
+        });
+    const auto start = std::chrono::steady_clock::now();
+    queue.StopAccepting();
+    worker.join();
+    Check(finished && expired == 1 && stopped == 1 && executed == 0 && std::chrono::steady_clock::now() - start < 200ms, "expiry and shutdown interrupt recovery backoff");
+
+    Queue cancelled;
+    int invalid = 0;
+    cancelled.Submit(
+        [&] {
+            ++executed;
+        },
+        [&](Queue::Failure _failure) {
+            invalid += _failure == Queue::Failure::Cancelled;
+        },
+        false,
+        [] {
+            return false;
+        });
+    cancelled.StopAccepting();
+    cancelled.Run(
+        [] {
+            return true;
+        },
+        [] {
+            return false;
+        });
+    Check(executed == 0 && invalid == 1, "disconnected session SQL not executed");
+}
+
+void NormalWorkSkipsConnectionDiagnosis()
+{
+    using Queue = wod::core::RecoveringWorkQueue;
+    Queue queue;
+    int executed = 0, diagnosed = 0, reconnected = 0;
+    for (int i = 0; i < 100; ++i)
+        queue.Submit([&] {
+            ++executed;
+        });
+
+    queue.StopAccepting();
+    queue.Run(
+        [&] {
+            ++reconnected;
+
+            return true;
+        },
+        [&] {
+            ++diagnosed;
+
+            return false;
+        });
+    Check(executed == 100 && diagnosed == 0 && reconnected == 0, "successful work never diagnoses or reconnects connection");
 }
 
 void FifoAndDrain()
@@ -296,6 +473,11 @@ double Ms(std::chrono::steady_clock::time_point _start)
 
 int RunDatabaseQueueTests()
 {
+    RecoveryFifo();
+    RecoveryReplayBoundary(false);
+    RecoveryReplayBoundary(true);
+    RecoveryExpiryAndStop();
+    NormalWorkSkipsConnectionDiagnosis();
     FifoAndDrain();
     CapacityAndFailure();
     SessionContinuation(false);
@@ -305,7 +487,7 @@ int RunDatabaseQueueTests()
     RewardRecoveryRecord();
     PasswordStorage();
 
-    return 8;
+    return 13;
 }
 
 int RunDatabaseBenchmark()

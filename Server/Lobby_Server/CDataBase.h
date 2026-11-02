@@ -19,6 +19,7 @@ class CDataBase
     void ThrowIfFailed();
     void ResetRequest();
     void Disconnect();
+    bool NeedsReconnect();
 
     bool GetPlayerInfo(const std::string& _id, const std::string& _password, PlayerInfo& _playerInfo);
     bool CheckIdExists(const std::string& _id);

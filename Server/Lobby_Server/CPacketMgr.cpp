@@ -537,25 +537,27 @@ void CPacketMgr::CreateTransactionPacket(BASE_PACKET* _packet, CClient* _client)
 void CPacketMgr::OpenCustomizePacket(BASE_PACKET* _packet, CClient* _client)
 {
     const std::string name(_client->GetName());
-    _client->RunDatabase([name](CDataBase& _database) {
-        std::vector<std::tuple<short, short, short>> rows;
-        if (!_database.GetPlayerCustomizeParts(name, rows))
-            throw std::runtime_error("customization query failed");
+    _client->RunDatabase(
+        [name](CDataBase& _database) {
+            std::vector<std::tuple<short, short, short>> rows;
+            if (!_database.GetPlayerCustomizeParts(name, rows))
+                throw std::runtime_error("customization query failed");
 
-        _database.ThrowIfFailed();
+            _database.ThrowIfFailed();
 
-        return [rows = std::move(rows)](CClient* _client) {
-            short types[CUSTOMIZE_PART_NUM_FROM_SERVER], nums[CUSTOMIZE_PART_NUM_FROM_SERVER], counts[CUSTOMIZE_PART_NUM_FROM_SERVER];
-            for (size_t i = 0; i < CUSTOMIZE_PART_NUM_FROM_SERVER; ++i)
-            {
-                types[i] = i < rows.size() ? std::get<0>(rows[i]) : 200;
-                nums[i] = i < rows.size() ? std::get<1>(rows[i]) : 200;
-                counts[i] = i < rows.size() ? std::get<2>(rows[i]) : 200;
-            }
+            return [rows = std::move(rows)](CClient* _client) {
+                short types[CUSTOMIZE_PART_NUM_FROM_SERVER], nums[CUSTOMIZE_PART_NUM_FROM_SERVER], counts[CUSTOMIZE_PART_NUM_FROM_SERVER];
+                for (size_t i = 0; i < CUSTOMIZE_PART_NUM_FROM_SERVER; ++i)
+                {
+                    types[i] = i < rows.size() ? std::get<0>(rows[i]) : 200;
+                    nums[i] = i < rows.size() ? std::get<1>(rows[i]) : 200;
+                    counts[i] = i < rows.size() ? std::get<2>(rows[i]) : 200;
+                }
 
-            _client->GetPacketSender()->SendCustomizePartsPacket(types, nums, counts);
-        };
-    });
+                _client->GetPacketSender()->SendCustomizePartsPacket(types, nums, counts);
+            };
+        },
+        true);
 }
 
 void CPacketMgr::OpenAuctionPacket(BASE_PACKET* _packet, CClient* _client)
@@ -574,15 +576,17 @@ void CPacketMgr::OpenAuctionPacket(BASE_PACKET* _packet, CClient* _client)
 void CPacketMgr::OpenBlockChainPacket(BASE_PACKET* _packet, CClient* _client)
 {
     const std::string name(_client->GetName());
-    _client->RunDatabase([name](CDataBase& _database) {
-        int token = 0, days = 0, count = 0;
-        if (!_database.GetStakedTokenData(name, token, days, count))
-            throw std::runtime_error("staking query failed");
+    _client->RunDatabase(
+        [name](CDataBase& _database) {
+            int token = 0, days = 0, count = 0;
+            if (!_database.GetStakedTokenData(name, token, days, count))
+                throw std::runtime_error("staking query failed");
 
-        return [token, days, count](CClient* _client) {
-            _client->GetPacketSender()->SendStakedTokenInfoPacket(token, days - count);
-        };
-    });
+            return [token, days, count](CClient* _client) {
+                _client->GetPacketSender()->SendStakedTokenInfoPacket(token, days - count);
+            };
+        },
+        true);
 }
 
 void CPacketMgr::BuyAuctionPacket(BASE_PACKET* _packet, CClient* _client)
@@ -658,54 +662,56 @@ void CPacketMgr::Authenticate(BASE_PACKET* _packet, CClient* _client, bool _sign
     }
 
     const auto initial = _client->GetPlayerInfo();
-    _client->RunDatabase([name, password, initial, signUp = _signUp](CDataBase& _database) {
-        auto info = initial;
-        bool full = false;
-        int error = -1;
-        const bool exists = _database.CheckIdExists(name);
-        _database.ThrowIfFailed();
-        if (signUp && exists)
-        {
-            error = 2;
-        }
-        else if (!signUp && !exists)
-        {
-            error = 0;
-        }
-        else if (signUp && !_database.SignUp(name, password))
-        {
-            error = 3;
-        }
-        else if (!_database.GetPlayerInfo(name, password, info))
-        {
-            error = signUp ? 3 : 1;
-        }
-        else if (!_database.GetFullNodeInfo(name, full))
-        {
-            error = 3;
-        }
-
-        _database.ThrowIfFailed();
-
-        return [name, info, full, error](CClient* _client) {
-            if (_client->IsDisconnected())
-                return;
-
-            if (error >= 0)
+    _client->RunDatabase(
+        [name, password, initial, signUp = _signUp](CDataBase& _database) {
+            auto info = initial;
+            bool full = false;
+            int error = -1;
+            const bool exists = _database.CheckIdExists(name);
+            _database.ThrowIfFailed();
+            if (signUp && exists)
             {
-                CUserMgr::GetInstance()->ReleaseAccount(_client);
-                _client->GetPacketSender()->SendLoginFailPacket(error);
-                return;
+                error = 2;
+            }
+            else if (!signUp && !exists)
+            {
+                error = 0;
+            }
+            else if (signUp && !_database.SignUp(name, password))
+            {
+                error = 3;
+            }
+            else if (!_database.GetPlayerInfo(name, password, info))
+            {
+                error = signUp ? 3 : 1;
+            }
+            else if (!_database.GetFullNodeInfo(name, full))
+            {
+                error = 3;
             }
 
-            _client->SetName(name.c_str());
-            _client->SetPlayerInfo(info);
-            _client->SetFullNode(full);
-            _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
-            _client->GetPacketSender()->SendFullNodePacket(full);
-            CPacketMgr::GetInstance()->CompleteLogin(_client);
-        };
-    });
+            _database.ThrowIfFailed();
+
+            return [name, info, full, error](CClient* _client) {
+                if (_client->IsDisconnected())
+                    return;
+
+                if (error >= 0)
+                {
+                    CUserMgr::GetInstance()->ReleaseAccount(_client);
+                    _client->GetPacketSender()->SendLoginFailPacket(error);
+                    return;
+                }
+
+                _client->SetName(name.c_str());
+                _client->SetPlayerInfo(info);
+                _client->SetFullNode(full);
+                _client->GetPacketSender()->SendTokenNumPacket(_client->GetPlayerInfo().m_tokenNum);
+                _client->GetPacketSender()->SendFullNodePacket(full);
+                CPacketMgr::GetInstance()->CompleteLogin(_client);
+            };
+        },
+        !_signUp);
 }
 
 void CPacketMgr::CompleteLogin(CClient* _client)

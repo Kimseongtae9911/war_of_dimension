@@ -1858,3 +1858,49 @@ HTML 보고서: docs/development/DATABASE_IMPROVEMENT.html, source/binary hash·
 비밀번호는 salt16bytes·hash32bytes·PBKDF2-HMAC-SHA256600000회, 독립 KAT·salt차이·대소문자·평문 거부와 잘못된hex 이전 rollback을 확인했다. 신규 schema v3·18프로시저 및 NewWodLocal 반복 준비/CheckOnly PASS. 기존 비ASCII 평문은 추측변환하지 않는다.
 보고서 docs/development/DATABASE_CONSISTENCY.html, 원시근거 evidence/database-consistency-20261029.json. Chromium1440/1920/390px overflow/JS오류0와 실제PNG 확인. Archify9/9showcase·4개desktop containment·light/dark 실제PNG, 선택이유 README와 JSON/HTML 관리.
 로컬복구는 디스크확정 이후 동일작업 재생을 보호한다. 기존wire의 원본eventID/ACK·서버상호인증·시험용랜덤거래·TLS/길이/시도제한·분산계정소유·단일SQLworker/실데이터쿼리계획은 후속과제다. 운영DB·블록체인·정전/디스크장애·최대부하·GUI전투는 미검증이며 기존전체빌드경고 해소를 주장하지 않는다.
+
+## 73. DB 연결 장애 복구 (2026-11-01)
+
+- [x] 기존 작업 보존, 전용 브랜치와 연결/완료/종료 경계 조사
+- [x] 연결 상태·지수 backoff·상한/기한 있는 FIFO 대기·안전한 재시도 구현
+- [x] 연결 단절/실제 DB 중지→재시작→동일 서버의 대기 작업 재개 검증
+- [x] 불명확한 쓰기 반복 방지·보상 중복 방지·세션 순서/만료/종료 검사
+- [x] Debug/Release 빌드·Core/ABI·기존 DB 회귀, HTML·Archify·근거 JSON
+
+계획: codex/db-connection-recovery에서 작업한다. 기존 .serena/project.yml 변경은 유지한다.
+DB 전용 worker 소유권과 세션 Suspend/Resume을 유지하고, 일반 쓰기는 실행 후 연결 장애에서 자동 재실행하지 않는다.
+큐4096건·요청 대기30초, 재접속1/2/4/8/16/30초를 기본으로 한다. DB 없는 세션의 진행, 복구 지연, 실행/재개 순서와 중복 횟수를 실제 격리 LocalDB에서 기록한다.
+운영 DB와 MSSQLLocalDB 공용 인스턴스는 중지하지 않고 검사용 별도 LocalDB 인스턴스를 생성한다. 커밋/push는 이번 요청에 포함하지 않는다.
+
+결과: Debug/Release 실제 장애 복구 각33/33(합계66) PASS. 구성별5회 DB OFFLINE→실패 재접속→ONLINE에서 같은 서버 프로세스가 구매·보상·후속 세션 작업을 순서대로 재개했다. 첫 반복의 전용 엔진 중지/재시작 PID 변경, 실제 SQL KILL, 조회 재실행, COMMIT 뒤 응답 유실 시 재차감/거짓 성공 없음, 클라이언트 소켓 종료 후 cleanup·재로그인, 30초 요청 만료와 내구성 보상 재개, 장애 중 종료와 보상 파일 보존을 확인했다.
+Release 5회 중앙값: ONLINE 명령→구매/후속 응답1510.3821ms(99.0436–1519.1897), 장애 중 다른 세션0.2113ms(0.1305–0.2738). 타이머 대기 포함 기능 복구 표본이며 과거 바이너리와의 속도 향상·p99·최대 처리량 측정이 아니다. 의도적 실행 중 단절로 DB failed=2/구성, outcome_unknown=1/구성을 보존한다.
+서버 Debug/Release 빌드, Core각1698·ABI110종/106상수, 기존 DB각25/25·정합성각26/26·설정 실패각3/3·DB없는 smoke, Release 네트워크/입장/초기화실패7그룹 PASS. 정적 에이전트 환경230개 소스 PASS. 정상 종료 pending/sockets/leased=0, 복구 큐 accepted=completed·pending=0.
+보고서 docs/development/DATABASE_RECONNECT.html·근거 evidence/database-reconnect-20261101.json. Chromium1440/1920/390px 가로 넘침·JS오류0와 실제 desktop/mobile PNG 확인. Archify lifecycle9/9·오류/경고0, 네 desktop containment·실제 light/dark PNG PASS. JSON/HTML/README와 선택 이유를 함께 관리한다.
+초기 안내문구 CHAT_SIZE 초과는 문구 축소·static_assert로 수정했다. 잠금은 recursive_mutex이므로 초기 잠금 재진입 원인 추정은 철회하고 기록을 바로잡았다. EOF 수신 후 fixture 소켓을 닫고 cleanup을 기다리며, 반복 Disconnect의 generation 무효화를 막았다. 긴 보상 앞의 일반 요청도 만료되도록 전체 큐 기한을 검사한다.
+단일 worker·요청당 probe 왕복 비용/최대 부하는 미측정이다. 일반 불명확 쓰기의 요청 원장·자동 정산과 원본 보상 ID/ACK는 후속이며 운영 DB·WAN·정전/디스크 장애·전체 GUI는 미검증이다. 기존 전체 빌드 경고가 해소됐다고 주장하지 않는다. 기존 .serena/project.yml 변경과 이전 stash는 유지하고 커밋/push는 수행하지 않았다.
+
+## 74. 정상 DB 요청의 probe SQL 제거 (2026-11-02)
+
+- [x] 기존 변경·Release 비교 바이너리·11/1 결과 보존
+- [x] 정상 경로 사전 probe 제거, 오류 후에만 연결 진단·재접속
+- [x] 실제 단절·대기 작업 재개·조회 재시도·불명확한 쓰기·만료/종료 검증
+- [x] 동일 Release 정상 요청의 전후 SQL 수·지연 측정, Core/ABI·DB 회귀
+- [x] 현재 정책·Archify·HTML 보고서와 근거 갱신
+
+계획: codex/db-connection-recovery의 기존 작업을 이어간다. before 바이너리와 소스는 .runtime/db-probe-before에 보존한다.
+정상 상태는 실제 SQL을 바로 실행한다. 접속 복구 때만 schema/DB identity를 검증한다. 첫 실패 쓰기는 자동 재실행하지 않으며, 알려진 장애 뒤 대기한 미실행 쓰기는 FIFO로 재개한다.
+기능 검증은 전용 LocalDB, 정상 비용 비교는 동일 읽기 요청/Release/순차1클라이언트/워밍업20건/200건×5회·전후 순서 교대로 수행한다. SQL 측정은 Extended Events로 probe와 실제 조회 수를 구분하고, p99·최대 처리량은 주장하지 않는다. 커밋/push는 수행하지 않는다.
+
+결과: 정상 Run 경로의 probe 콜백과 CDataBase::Probe를 제거했다. 연결 진단은 실제 SQL 예외 뒤에만 호출한다. 새 Core 검사는 성공100건에서 연결 진단/재접속0회를 확인한다.
+실제 Release 비교: 전용 DB의 CS_OPEN_CUSTOMIZE200건×5회(전후 교대, 실행마다 재시작·워밍업20)에서 실행별 중앙값의 중앙값0.3783→0.2547ms, 관측값32.6725% 감소. 이전 중앙값 범위0.35295–0.38355ms, 수정0.23765–0.26055ms다. 별도100건 XE 계측에서 probe SELECT100→0, 업무 SELECT100→100, 이벤트 누락0·잘림 없음. 지연 측정 때 XE는 껐다. 정상 실행10회 모두 SQL 실패0·정상 종료 자원0이다.
+Debug/Release 서버 빌드·Core각1699·ABI110종/106상수, 실제 장애 복구각34/34(합계68), 기존 DB각25/25·정합성각26/26·DB없는 smoke PASS. 첫 실패 요청이 일반 쓰기이면 반복/거짓 성공을 금지하는 새 경계를 검사했다. SQL 주입 실패11/구성·결과 불명확2/구성·재시도9/구성을 보존한다. 설정 실패3경로/구성·Release 네트워크7그룹은11/1 결과이며 이번에 재실행하지 않았다.
+DATABASE_RECONNECT.html과 evidence/database-reconnect-20261102.json에 전후 그래프·표·소스/실행파일 hash와 검증 한계를 기록했다. 11/1 evidence는 유지한다. Archify9/9·오류/경고0·네 desktop containment와 실제 light/dark PNG, 보고서 Chromium1440/1920/390px 가로 넘침/JS오류0·실제 desktop/mobile 화면 확인. 초기 보고서 screenshot 캡처가 Chrome protocol 오류로2회 실패했지만 후속 동일 HTML 검사는 모두 통과했다.
+일반 쓰기 원장·원본 보상 ACK·운영/WAN/최대 부하·전체 GUI는 후속/미검증이다. 기존 .serena/project.yml과 stash를 보존하고 커밋/push는 하지 않았다.
+
+## 75. DB 복구 개선 전달과 이전 서버 작업 복구 (2026-11-02)
+
+- [x] 현재 DB 작업28파일·검증 근거·원격 main 일치와 보관본/원래 브랜치 확인
+- [ ] 정확한 한글 메시지·staged fingerprint 미리보기 후 승인된 snapshot commit/push/main fast-forward
+- [ ] codex/lobby-movement-load로 돌아가 stash012034e978eb94333c4e84be57baae6b5d532194를 apply --index, 추적/미추적 내용과 index 상태 대조
+
+기존 .serena/project.yml은 커밋에서 제외하고 보존한다. 원래 브랜치 HEAD54bc0a32는 stash 기반과 같으며, 복구 보관본은 삭제하지 않는다. 실행 결과/복구 파일 manifest는 .runtime/db-recovery-delivery에 보존한다. 아직 커밋·push·병합·stash 적용은 수행하지 않았다.

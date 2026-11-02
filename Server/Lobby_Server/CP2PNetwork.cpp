@@ -90,7 +90,7 @@ namespace wod_server {
                 GLobbyDispatcher->PostGlobal([this, ids = std::move(ids)]() mutable {
                     SetValidatorIDs(std::move(ids));
                 });
-            });
+            }, {}, true);
         }
 
 

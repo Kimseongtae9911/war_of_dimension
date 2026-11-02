@@ -48,13 +48,14 @@ CDataBaseThread::CDataBaseThread()
     auto result = ready.get_future();
     m_worker = std::thread([this, connection, &ready] {
         CDataBase database;
+        std::wstring identity;
         try
         {
             if (!database.Connect(connection))
                 throw std::runtime_error("DB connection failed; check driver, server and database configuration");
 
             database.ValidateSchema();
-            const auto identity = database.JournalNamespace();
+            identity = database.JournalNamespace();
             const auto key = RewardJournal::Hash(identity.data(), identity.size() * sizeof(wchar_t));
             wchar_t custom[32768]{};
             std::filesystem::path directory;
@@ -94,7 +95,27 @@ CDataBaseThread::CDataBaseThread()
             return;
         }
 
-        m_queue.Run();
+        database.ResetRequest();
+        m_queue.Run(
+            [&] {
+                database.Disconnect();
+                if (!database.Connect(connection))
+                    return false;
+
+                database.ValidateSchema();
+                if (database.JournalNamespace() != identity)
+                    throw std::runtime_error("DB recovery identity mismatch");
+
+                database.ResetRequest();
+
+                return true;
+            },
+            [&] {
+                return database.NeedsReconnect();
+            },
+            [this](bool _online) {
+                LogPrinter::PrintMsg(std::string(_online ? "Database reconnected " : "Database disconnected ") + SnapshotJson());
+            });
         m_database = nullptr;
     });
     try
@@ -126,26 +147,28 @@ CDataBaseThread::~CDataBaseThread()
     Stop();
 }
 
-bool CDataBaseThread::Submit(std::function<void(CDataBase&)> _work)
+bool CDataBaseThread::Submit(std::function<void(CDataBase&)> _work, std::function<void(Failure)> _failure, bool _replaySafe, std::function<bool()> _valid)
 {
     if (!m_enabled)
         return false;
 
-    return m_queue.Submit([this, work = std::move(_work)] {
-        m_database->ResetRequest();
-        try
-        {
-            work(*m_database);
-            m_database->ThrowIfFailed();
-        }
-        catch (...)
-        {
+    return m_queue.Submit(
+        [this, work = std::move(_work)] {
             m_database->ResetRequest();
-            throw;
-        }
+            try
+            {
+                work(*m_database);
+                m_database->ThrowIfFailed();
+            }
+            catch (...)
+            {
+                m_database->ResetRequest();
+                throw;
+            }
 
-        m_database->ResetRequest();
-    });
+            m_database->ResetRequest();
+        },
+        std::move(_failure), _replaySafe, std::move(_valid));
 }
 
 void CDataBaseThread::SubmitReward(const std::string& _account, int _delta)
@@ -171,27 +194,32 @@ void CDataBaseThread::SubmitReward(const std::string& _account, int _delta)
 
 void CDataBaseThread::ScheduleReward(RewardJournal::Record _record)
 {
-    const bool accepted = m_queue.Submit([this, record = std::move(_record)] {
-        m_database->ResetRequest();
-        try
-        {
-            m_database->ApplyReward(record.m_operation, record.m_account, record.m_delta);
-            const auto balance = m_database->ReadBalance(record.m_account);
-            m_database->ThrowIfFailed();
-            m_rewards->Complete(record);
-            GLobbyDispatcher->PostGlobal([account = record.m_account, balance] {
-                CUserMgr::GetInstance()->PublishBalance(account, balance);
-            });
-        }
-        catch (...)
-        {
+    const bool accepted = m_queue.Submit(
+        [this, record = std::move(_record)] {
             m_database->ResetRequest();
-            LogPrinter::PrintMsg("Reward pending: recovery record retained; replay on next startup");
-            throw;
-        }
+            try
+            {
+                m_database->ApplyReward(record.m_operation, record.m_account, record.m_delta);
+                const auto balance = m_database->ReadBalance(record.m_account);
+                m_database->ThrowIfFailed();
+                m_rewards->Complete(record);
+                GLobbyDispatcher->PostGlobal([account = record.m_account, balance] {
+                    CUserMgr::GetInstance()->PublishBalance(account, balance);
+                });
+            }
+            catch (...)
+            {
+                m_database->ResetRequest();
+                LogPrinter::PrintMsg("Reward pending: recovery record retained");
+                throw;
+            }
 
-        m_database->ResetRequest();
-    });
+            m_database->ResetRequest();
+        },
+        [](Failure) {
+            LogPrinter::PrintMsg("Reward request not completed: recovery record retained for next startup");
+        },
+        true, {}, true);
     if (!accepted)
         LogPrinter::PrintMsg("Reward queue full or stopping: recovery record retained");
 }
@@ -212,8 +240,10 @@ void CDataBaseThread::Stop()
 
 std::string CDataBaseThread::SnapshotJson() const
 {
-    return std::string("{\"enabled\":") + (m_enabled ? "true" : "false") + ",\"accepted\":" + std::to_string(m_queue.Accepted()) + ",\"completed\":" + std::to_string(m_queue.Completed()) + ",\"rejected\":" + std::to_string(m_queue.Rejected()) +
-           ",\"failed\":" + std::to_string(m_queue.Failed()) + ",\"reward_pending\":" + std::to_string(m_rewards ? m_rewards->Pending() : 0) + ",\"reward_ingress_accepted\":" + std::to_string(m_rewardIngress.Accepted()) +
-           ",\"reward_ingress_completed\":" + std::to_string(m_rewardIngress.Completed()) + ",\"reward_ingress_failed\":" + std::to_string(m_rewardIngress.Failed()) + ",\"reward_ingress_rejected\":" + std::to_string(m_rewardIngress.Rejected()) + '}';
+    const auto queue = m_queue.SnapshotJson();
+
+    return std::string("{\"enabled\":") + (m_enabled ? "true" : "false") + "," + queue.substr(1, queue.size() - 2) + ",\"reward_pending\":" + std::to_string(m_rewards ? m_rewards->Pending() : 0) +
+           ",\"reward_ingress_accepted\":" + std::to_string(m_rewardIngress.Accepted()) + ",\"reward_ingress_completed\":" + std::to_string(m_rewardIngress.Completed()) + ",\"reward_ingress_failed\":" + std::to_string(m_rewardIngress.Failed()) +
+           ",\"reward_ingress_rejected\":" + std::to_string(m_rewardIngress.Rejected()) + '}';
 }
 }

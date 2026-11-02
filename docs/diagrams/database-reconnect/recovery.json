@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": { "title": "DB 장애 복구와 요청 재개", "quality_profile": "showcase", "viewBox": [1080, 640] },
+  "lanes": [{ "id": "main", "label": "요청 처리" }, { "id": "waiting", "label": "연결 복구" }, { "id": "terminal", "label": "반복 방지" }],
+  "states": [
+    { "id": "accepted", "type": "start", "label": "요청 수락", "sublabel": "4096건 상한", "lane": "main", "col": 0 },
+    { "id": "queued", "type": "active", "label": "FIFO 대기", "sublabel": "일반 요청 30초 기한", "lane": "main", "col": 1 },
+    { "id": "execute", "type": "active", "label": "실제 SQL", "sublabel": "정상 상태 바로 실행", "lane": "main", "col": 2 },
+    { "id": "apply", "type": "active", "label": "결과 반영", "sublabel": "세션 세대 확인", "lane": "main", "col": 3 },
+    { "id": "next", "type": "success", "label": "후속 작업", "sublabel": "세션 순서 유지", "lane": "main", "col": 4 },
+    { "id": "reconnect", "type": "failure", "label": "재접속 대기", "sublabel": "1→2→4→최대30초", "lane": "waiting", "col": 0 },
+    { "id": "unknown", "type": "failure", "label": "결과 불명확", "sublabel": "일반 쓰기 재실행 금지", "lane": "terminal", "col": 1 }
+  ],
+  "transitions": [
+    { "from": "execute", "to": "reconnect", "label": "연결 장애", "variant": "security", "labelAt": [395,245] },
+    { "from": "reconnect", "to": "execute", "label": "검증 후 재개", "variant": "emphasis", "fromSide": "left", "toSide": "top", "via": [[20,307],[20,80],[402,80]], "labelAt": [200,80] },
+    { "from": "execute", "to": "unknown", "label": "쓰기 중 단절", "variant": "security", "fromSide": "bottom", "toSide": "top", "via": [[402,220],[480,220],[480,400],[556,400]], "labelAt": [530,375] }
+  ]
+}

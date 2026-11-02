@@ -1,5 +1,7 @@
 # DB 정합성 수정과 실패 복구 검증
 
+실행 중 DB 연결 장애의 자동 재접속·대기 작업 재개는 [후속 장애 복구 보고서](DATABASE_RECONNECT.html)와 [현재 정책](DATABASE_RECONNECT.md)을 따른다. 이 문서는 이전 정합성 수정 당시의 검증 기록이다.
+
 [HTML 결과 보고서](DATABASE_CONSISTENCY.html) · [수치·소스/바이너리 SHA-256](evidence/database-consistency-20261029.json) · [구조와 선택 이유](../diagrams/database-consistency/README.md)
 
 초기 비동기 DB 개선은 `88d310a5189324bd23a99357fd0c0e7b5c3260e3`로 `codex/db-setup-async`와 `main`에 push·fast-forward 병합했다. 이 문서는 그 뒤 `codex/db-consistency-fixes`에서 수정한 정합성 결함을 기록한다. 초기 성능 수치는 [이전 보고서](DATABASE_IMPROVEMENT.html)의 snapshot이며 현재 결과와 혼합하지 않는다.

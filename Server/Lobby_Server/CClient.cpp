@@ -90,37 +90,76 @@ void CClient::QueueDisconnect()
     });
 }
 
-void CClient::RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query)
+void CClient::Disconnect()
+{
+    // 취소된 receive 완료와 DB 실패가 겹쳐도 세대를 한 번만 무효화한다.
+    // 반복 무효화는 이미 예약된 cleanup의 세대 검사를 실패시켜 계정 소유권을 남긴다.
+    if (m_disconnected.exchange(true))
+        return;
+
+    wod::core::SessionHandler<Session>::Disconnect();
+}
+
+void CClient::RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query, bool _replaySafe)
 {
     const auto session = GetTransportSession();
     const auto generation = session->Generation();
     GLobbyDispatcher->Suspend(m_workQueue);
-    const auto deliver = [this, session, generation](std::function<void(CClient*)> _completion) {
-        GLobbyDispatcher->Resume(m_workQueue, [this, session, generation, completion = std::move(_completion)] {
-            session->WithGeneration(generation, [this, &completion] {
+    const auto deliver = [this, session, generation](std::function<void(CClient*)> _completion, bool _disconnect = false) {
+        GLobbyDispatcher->Resume(m_workQueue, [this, session, generation, completion = std::move(_completion), disconnect = _disconnect] {
+            bool applied = false;
+            session->WithGeneration(generation, [this, &completion, &applied] {
                 completion(this);
+                applied = true;
             });
+            // Disconnect는 세대 mutex를 다시 잡는다. 결과 적용 잠금을 반환한 뒤 실행한다.
+            if (applied && disconnect)
+                Disconnect();
         });
     };
-    const bool accepted = network::GetInstance()->GetDataBaseThread()->Submit([query = std::move(_query), deliver](CDataBase& _database) {
-        try
-        {
+    const auto failed = [deliver](CDataBaseThread::Failure _failure) {
+        deliver(
+            [_failure](CClient* _client) {
+                if (_failure == CDataBaseThread::Failure::Expired || _failure == CDataBaseThread::Failure::Stopped)
+                {
+                    if (_client->GetState() == CL_STATE::ST_ALLOC)
+                    {
+                        CUserMgr::GetInstance()->ReleaseAccount(_client);
+                        _client->GetPacketSender()->SendLoginFailPacket(3);
+                    }
+                    else
+                    {
+                        SC_CHAT_PACKET packet{};
+                        packet.size = sizeof(packet);
+                        packet.type = SC_CHAT;
+                        packet.chatType = 0;
+                        strcpy_s(packet.name, "SYSTEM");
+                        constexpr wchar_t notice[] = L"DB 복구 중입니다. 잠시 후 재시도하세요.";
+                        static_assert(std::size(notice) <= CHAT_SIZE);
+                        wcscpy_s(packet.chat, notice);
+                        _client->GetPacketSender()->GetSession()->Send(&packet);
+                    }
+                }
+                else if (_failure != CDataBaseThread::Failure::Cancelled)
+                {
+                    if (_failure == CDataBaseThread::Failure::OutcomeUnknown)
+                        LogPrinter::PrintMsg("Database write outcome unknown: request not replayed; client disconnected");
+                }
+            },
+            _failure == CDataBaseThread::Failure::Execution || _failure == CDataBaseThread::Failure::OutcomeUnknown);
+    };
+    const bool accepted = network::GetInstance()->GetDataBaseThread()->Submit(
+        [query = std::move(_query), deliver](CDataBase& _database) {
             auto completion = query(_database);
             _database.ThrowIfFailed();
             deliver(std::move(completion));
-        }
-        catch (...)
-        {
-            deliver([](CClient* _client) {
-                _client->Disconnect();
-            });
-            throw;
-        }
-    });
-    if (!accepted)
-        deliver([](CClient* _client) {
-            _client->Disconnect();
+        },
+        failed, _replaySafe,
+        [this, session, generation] {
+            return !IsDisconnected() && session->Generation() == generation;
         });
+    if (!accepted)
+        failed(CDataBaseThread::Failure::Expired);
 }
 
 void CClient::CleanupDisconnected()

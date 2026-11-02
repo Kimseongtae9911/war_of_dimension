@@ -32,6 +32,8 @@ CDataBase::~CDataBase()
 
 bool CDataBase::Connect(const std::wstring& _database)
 {
+    Disconnect();
+    m_usable = true;
     SQLRETURN ret;
 
     ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
@@ -608,7 +610,10 @@ void CDataBase::ValidateSchema()
 void CDataBase::Transaction(const std::function<void()>& _work)
 {
     if (!SQL_SUCCEEDED(SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, reinterpret_cast<SQLPOINTER>(SQL_AUTOCOMMIT_OFF), 0)))
+    {
+        Show_Error(m_hdbc, SQL_HANDLE_DBC, SQL_ERROR);
         throw std::runtime_error("Cannot begin DB transaction");
+    }
 
     try
     {
@@ -698,10 +703,16 @@ void CDataBase::Show_Error(SQLHANDLE _handle, SQLSMALLINT _type, RETCODE _code)
     SQLINTEGER native = 0;
     SQLWCHAR ignored[2]{};
     SQLSMALLINT length = 0;
-    SQLGetDiagRecW(_type, _handle, 1, state, &native, ignored, 2, &length);
     std::string code;
-    for (int i = 0; i < 5 && state[i]; ++i)
-        code += static_cast<char>(state[i]);
+    for (SQLSMALLINT record = 1; SQL_SUCCEEDED(SQLGetDiagRecW(_type, _handle, record, state, &native, ignored, 2, &length)); ++record)
+    {
+        code.clear();
+        for (int i = 0; i < 5 && state[i]; ++i)
+            code += static_cast<char>(state[i]);
+
+        if (code.starts_with("08") || code.starts_with("IMC") || code == "HY117" || code == "25S01")
+            m_usable = false;
+    }
 
     LogPrinter::PrintMsg("DB error SQLSTATE=" + code + " native=" + std::to_string(native));
 }
@@ -715,12 +726,12 @@ void CDataBase::ThrowIfFailed()
 bool CDataBase::AllocStatementHandle(SQLHSTMT& _hstmt)
 {
     if (!m_usable)
-        throw std::runtime_error("DB connection state is uncertain; restart required");
+        throw std::runtime_error("DB connection requires recovery");
 
     SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &_hstmt);
     if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
     {
-        m_failed = true;
+        Show_Error(m_hdbc, SQL_HANDLE_DBC, ret);
         LogPrinter::PrintMsg("Failed To Alloc Statement Handle");
         return false;
     }
@@ -732,6 +743,15 @@ bool CDataBase::AllocStatementHandle(SQLHSTMT& _hstmt)
     }
 
     return true;
+}
+
+bool CDataBase::NeedsReconnect()
+{
+    SQLUINTEGER dead = SQL_CD_TRUE;
+    if (!m_usable || !m_hdbc || !SQL_SUCCEEDED(SQLGetConnectAttr(m_hdbc, SQL_ATTR_CONNECTION_DEAD, &dead, 0, nullptr)) || dead == SQL_CD_TRUE)
+        m_usable = false;
+
+    return !m_usable;
 }
 
 void CDataBase::FreeStatementHandle(SQLHSTMT _hstmt)

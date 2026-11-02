@@ -34,7 +34,8 @@ class CClient : public std::enable_shared_from_this<CClient>, public wod::core::
 
     void Initialize(const SOCKET& _socket);
     void QueueDisconnect();
-    void RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query);
+    void Disconnect();
+    void RunDatabase(std::function<std::function<void(CClient*)>(CDataBase&)> _query, bool _replaySafe = false);
 
     bool IsDisconnected() const
     {

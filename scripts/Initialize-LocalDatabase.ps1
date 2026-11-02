@@ -1,7 +1,8 @@
 param(
     [switch] $CheckOnly,
     [ValidatePattern('^NewWod(Local|Test[a-zA-Z0-9]*)$')][string] $Name = 'NewWodLocal',
-    [string] $ConfigPath = ''
+    [string] $ConfigPath = '',
+    [ValidatePattern('^(MSSQLLocalDB|NewWodTest[a-zA-Z0-9]+)$')][string] $Instance = 'MSSQLLocalDB'
 )
 . "$PSScriptRoot/Development.ps1"
 if (-not [Environment]::Is64BitProcess) { throw '64-bit PowerShell이 필요합니다.' }
@@ -11,9 +12,9 @@ $driver = @('ODBC Driver 18 for SQL Server', 'ODBC Driver 17 for SQL Server') | 
 if (-not $driver) { throw 'Microsoft ODBC Driver 17 또는 18 for SQL Server x64를 설치하세요.' }
 $localdb = Get-Command SqlLocalDB -ErrorAction SilentlyContinue
 if (-not $localdb) { throw 'SQL Server Express LocalDB를 설치하세요.' }
-& $localdb.Source start MSSQLLocalDB | Out-Null
+& $localdb.Source start $Instance | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'LocalDB 시작 실패' }
-$base = "Driver={$driver};Server=(localdb)\MSSQLLocalDB;Trusted_Connection=Yes;Encrypt=No;"
+$base = "Driver={$driver};Server=(localdb)\$Instance;Trusted_Connection=Yes;Encrypt=No;"
 $connection = [System.Data.Odbc.OdbcConnection]::new("${base}Database=master;")
 $migration = $null
 $invalidCredential = "DATALENGTH(Player_Password)<>118 OR LEFT(Player_Password,21) COLLATE Latin1_General_100_BIN2 <> 'pbkdf2-sha256`$600000`$' OR SUBSTRING(Player_Password,54,1)<>'`$' OR SUBSTRING(Player_Password,22,32) COLLATE Latin1_General_100_BIN2 LIKE '%[^0-9a-f]%' OR SUBSTRING(Player_Password,55,64) COLLATE Latin1_General_100_BIN2 LIKE '%[^0-9a-f]%'"
